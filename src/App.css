@@ -1,0 +1,170 @@
+
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+.logo:hover {
+  filter: drop-shadow(0 0 2em #646cffaa);
+}
+.logo.react:hover {
+  filter: drop-shadow(0 0 2em #61dafbaa);
+}
+
+@keyframes logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo {
+    animation: logo-spin infinite 20s linear;
+  }
+}
+
+.card {
+  padding: 2em;
+}
+
+.read-the-docs {
+  color: #888;
+}
+
+/* Professional hover effects */
+.hover-lift {
+  @apply transition-all duration-300 hover:shadow-lg hover:scale-[1.02] active:scale-[0.98];
+}
+
+.hover-glow {
+  @apply transition-all duration-300 hover:shadow-lg hover:shadow-primary/25;
+}
+
+.hover-slide-up {
+  @apply transition-all duration-300 hover:-translate-y-1 hover:shadow-lg;
+}
+
+.hover-shine {
+  @apply relative overflow-hidden transition-all duration-300 hover:shadow-lg;
+}
+
+.hover-shine::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+  transform: rotate(45deg);
+  transition: all 0.6s;
+  opacity: 0;
+}
+
+.hover-shine:hover::before {
+  animation: shine 0.6s ease-in-out;
+  opacity: 1;
+}
+
+@keyframes shine {
+  0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+  100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+}
+
+.hover-bounce {
+  @apply transition-all duration-300 hover:shadow-lg;
+}
+
+.hover-bounce:hover {
+  animation: bounce 0.6s ease-in-out;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+/* Gradient hover effects */
+.gradient-hover {
+  @apply relative overflow-hidden transition-all duration-300;
+  background: linear-gradient(45deg, #3b82f6, #1d4ed8);
+}
+
+.gradient-hover::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transition: left 0.5s;
+}
+
+.gradient-hover:hover::before {
+  left: 100%;
+}
+
+/* Button group hover effects */
+.btn-group button {
+  @apply transition-all duration-300;
+}
+
+.btn-group button:hover {
+  @apply transform scale-105 z-10;
+}
+
+/* Link hover effects */
+.link-underline {
+  @apply relative;
+}
+
+.link-underline::after {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 2px;
+  bottom: -4px;
+  left: 0;
+  background: currentColor;
+  transition: width 0.3s ease-in-out;
+}
+
+.link-underline:hover::after {
+  width: 100%;
+}
+
+/* Card hover effects */
+.card-hover {
+  @apply transition-all duration-300 hover:shadow-xl hover:scale-[1.02] hover:-translate-y-2;
+}
+
+.card-hover:hover {
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+}
+
+/* Search bar hover effects */
+.search-hover {
+  @apply transition-all duration-300 hover:shadow-md focus-within:shadow-lg focus-within:scale-[1.01];
+}
+
+/* Icon hover effects */
+.icon-hover {
+  @apply transition-all duration-300 hover:scale-110 hover:rotate-3;
+}
+
+/* Smooth color transitions */
+.color-transition {
+  @apply transition-colors duration-300;
+}
