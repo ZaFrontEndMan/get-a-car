@@ -1,12 +1,11 @@
+import { Booking } from "@/types/clientBookings";
 
-import { BookingWithCar } from '@/hooks/useBookings';
-
-export const getStatusCounts = (bookings: BookingWithCar[]) => {
+export const getStatusCounts = (bookings: Booking[]) => {
   const counts = bookings.reduce((acc, booking) => {
-    const status = booking.booking_status || 'pending';
+    const status = booking.bookingStatus || "pending";
     acc[status] = (acc[status] || 0) + 1;
     return acc;
   }, {} as Record<string, number>);
-  
+
   return counts;
 };

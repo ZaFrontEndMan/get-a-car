@@ -1,166 +1,122 @@
+import React from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useLanguage } from "../contexts/LanguageContext";
+import { Link, useNavigate } from "react-router-dom";
+import { toast } from "sonner";
+import Cookies from "js-cookie";
+import { authApi } from "@/api/auth/authApi";
 
-import React, { useState } from 'react';
-import { useLanguage } from '../contexts/LanguageContext';
-import { Link, useNavigate } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
-import { LanguageProvider } from '../contexts/LanguageContext';
-import Navbar from '../components/Navbar';
-import MobileNav from '../components/MobileNav';
-import AuthHeader from '../components/auth/AuthHeader';
-import AdminQuickLogin from '../components/auth/AdminQuickLogin';
-import UserTypeSwitcher from '../components/auth/UserTypeSwitcher';
-import SignInForm from '../components/auth/SignInForm';
-import { useAdminAuth } from '../hooks/useAdminAuth';
+const loginSchema = z.object({
+  username: z.string().email("Invalid username address"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+});
+
+type LoginFormData = z.infer<typeof loginSchema>;
 
 const SignIn = () => {
   const { t } = useLanguage();
   const navigate = useNavigate();
-  const [userType, setUserType] = useState<'client' | 'vendor'>('client');
-  const [isLoading, setIsLoading] = useState(false);
-  const [formData, setFormData] = useState({
-    email: '',
-    password: ''
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
   });
-  const { handleAdminLogin } = useAdminAuth();
 
-  const handleAdminQuickLogin = () => {
-    setFormData({
-      email: 'talalkhomri@gmail.com',
-      password: '786hafez786'
-    });
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-
+  const onSubmit = async (data: LoginFormData) => {
     try {
-      console.log('Starting login process for:', formData.email);
-      
-      // Regular user login
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: formData.email,
-        password: formData.password,
+      const res = await authApi.login({
+        ...(data as { username: string; password: string }),
+        isPhone: false,
       });
+      if (res.data?.isSuccess) {
+        const { token, roles } = res.data.data;
 
-      if (error) {
-        console.error('Login error:', error);
-        toast.error(error.message);
-        return;
-      }
+        Cookies.set("auth_token", token, { expires: 7 });
+        toast.success(res.data.customMessage || "Login successful");
 
-      if (data.user) {
-        console.log('User authenticated successfully:', data.user.email);
-        
-        // Get user role from profiles table
-        const { data: profile, error: profileError } = await supabase
-          .from('profiles')
-          .select('role')
-          .eq('user_id', data.user.id)
-          .maybeSingle();
-
-        if (profileError) {
-          console.error('Error fetching user profile:', profileError);
-          toast.error('Error fetching user profile');
-          return;
+        if (roles === "Client") {
+          navigate("/dashboard");
+        } else {
+          navigate("/");
         }
-
-        const userRole = profile?.role;
-        console.log('User role from profile:', userRole);
-
-        // Route based on actual user role from database
-        switch (userRole) {
-          case 'admin':
-            console.log('Redirecting admin to admin dashboard');
-            navigate('/admin');
-            toast.success('Admin login successful!');
-            break;
-          case 'vendor':
-            console.log('User is vendor, checking vendor record...');
-            // Verify vendor record exists and is accessible
-            const { data: vendorData, error: vendorError } = await supabase
-              .from('vendors')
-              .select('id, name, verified, is_active')
-              .eq('user_id', data.user.id)
-              .maybeSingle();
-
-            if (vendorError) {
-              console.error('Vendor lookup error:', vendorError);
-              toast.error('Error checking vendor account. Please contact support.');
-              await supabase.auth.signOut();
-              return;
-            }
-
-            if (!vendorData) {
-              console.error('No vendor record found for user');
-              toast.error('Vendor account not found. Please contact support.');
-              await supabase.auth.signOut();
-              return;
-            }
-
-            // Check if vendor is active
-            if (!vendorData.is_active) {
-              console.log('Vendor account is deactivated');
-              toast.error('Your vendor account has been deactivated. Please contact support.');
-              await supabase.auth.signOut();
-              return;
-            }
-
-            console.log('Vendor login successful, redirecting to vendor dashboard');
-            navigate('/vendor-dashboard');
-            toast.success(`Welcome ${vendorData.name}! Vendor login successful!`);
-            break;
-          case 'client':
-          default:
-            console.log('Client login successful, redirecting to client dashboard');
-            navigate('/dashboard');
-            toast.success('Successfully signed in!');
-            break;
-        }
+      } else {
+        toast.error(res.data?.customMessage || "Login failed");
       }
-    } catch (error) {
-      console.error('Unexpected sign in error:', error);
-      toast.error('An unexpected error occurred');
-    } finally {
-      setIsLoading(false);
+    } catch (err: any) {
+      toast.error(err?.response?.data?.customMessage || "Something went wrong");
     }
   };
 
   return (
-    <LanguageProvider>
-      <div className="min-h-screen bg-gradient-to-br from-primary to-secondary">
-        <Navbar />
-        
-        <div className="pt-20 flex items-center justify-center px-4 min-h-screen">
-          <div className="max-w-md w-full bg-white rounded-2xl shadow-2xl p-8">
-            <AuthHeader 
-              title={t('signIn')}
-              subtitle={t('signInSubtitle')}
-            />
-            <AdminQuickLogin onAdminLogin={handleAdminQuickLogin} />
-            <UserTypeSwitcher userType={userType} onUserTypeChange={setUserType} />
-            <SignInForm 
-              formData={formData}
-              onFormDataChange={setFormData}
-              onSubmit={handleSubmit}
-              isLoading={isLoading}
-            />
+    <div className="min-h-screen bg-gradient-to-br from-primary to-secondary">
+      <div className="pt-20 flex items-center justify-center px-4 min-h-screen">
+        <div className="max-w-md w-full bg-white rounded-2xl shadow-2xl p-8">
+          <h2 className="text-2xl font-bold text-center text-primary">
+            {t("signIn")}
+          </h2>
 
-            <div className="mt-6 text-center">
-              <p className="text-gray-600">
-                {t('dontHaveAccount')}{' '}
-                <Link to="/signup" className="text-primary hover:text-primary/80 font-medium">
-                  {t('signUpHere')}
-                </Link>
-              </p>
+          {/* Login Form */}
+          <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                {t("username")}
+              </label>
+              <input
+                type="username"
+                {...register("username")}
+                className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
+              />
+              {errors.username && (
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.username.message}
+                </p>
+              )}
             </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                {t("password")}
+              </label>
+              <input
+                type="password"
+                {...register("password")}
+                className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
+              />
+              {errors.password && (
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.password.message}
+                </p>
+              )}
+            </div>
+
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="w-full flex justify-center rounded-lg bg-primary px-4 py-2 text-white font-medium shadow-md hover:bg-primary/90 disabled:opacity-50"
+            >
+              {isSubmitting ? t("loading") : t("login")}
+            </button>
+          </form>
+
+          <div className="mt-6 text-center">
+            <p className="text-gray-600">
+              {t("dontHaveAccount")}{" "}
+              <Link
+                to="/signup"
+                className="text-primary hover:text-primary/80 font-medium"
+              >
+                {t("signUpHere")}
+              </Link>
+            </p>
           </div>
         </div>
-        
-        <MobileNav />
       </div>
-    </LanguageProvider>
+    </div>
   );
 };
 

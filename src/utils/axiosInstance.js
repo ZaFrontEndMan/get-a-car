@@ -1,18 +1,18 @@
-// src/api/axiosInstance.ts
 import axios from "axios";
+import Cookies from "js-cookie";
+import { toast } from "sonner";
 
 const axiosInstance = axios.create({
-    baseURL: "https://get-a-car.com/api", // change to your backend
+    baseURL: "https://test.get2cars.com/api",
     headers: {
         "Content-Type": "application/json",
     },
 });
 
-// Optionally add interceptors
+
 axiosInstance.interceptors.request.use(
     (config) => {
-        // Example: attach token if available
-        const token = localStorage.getItem("token");
+        const token = Cookies.get("auth_token");
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
         }
@@ -21,14 +21,24 @@ axiosInstance.interceptors.request.use(
     (error) => Promise.reject(error)
 );
 
+
 axiosInstance.interceptors.response.use(
     (response) => response,
     (error) => {
-        // Handle errors globally
-        if (error.response?.status === 401) {
-            console.log("Unauthorized! Redirecting to login...");
-            // redirect to login page or refresh token
+
+        if (error.response?.data?.customMessage) {
+            toast.error(error.response.data.customMessage);
+        } else if (error.message) {
+
+            toast.error(error.message);
         }
+
+        if (error.response?.status === 401) {
+            Cookies.remove("auth_token");
+            toast.error("Your session has expired. Please log in again.");
+            window.location.href = "/signin";
+        }
+
         return Promise.reject(error);
     }
 );

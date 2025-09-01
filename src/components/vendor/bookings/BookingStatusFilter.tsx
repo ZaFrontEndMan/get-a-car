@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Filter, Clock, CheckCircle, PlayCircle, PauseCircle, Car, XCircle } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 
-type BookingStatus = 'pending' | 'confirmed' | 'active' | 'in_progress' | 'return_requested' | 'completed' | 'cancelled';
+type BookingStatus = 'pending' | 'confirmed' | 'active' | 'InProgress' | 'return_requested' | 'completed' | 'cancelled';
 
 interface BookingStatusFilterProps {
   statusFilter: BookingStatus | 'all';
@@ -21,7 +21,7 @@ const BookingStatusFilter = ({ statusFilter, onFilterChange, statusCounts, total
     { key: 'pending', label: t('pending'), icon: Clock },
     { key: 'confirmed', label: t('confirmed'), icon: CheckCircle },
     { key: 'active', label: t('active'), icon: PlayCircle },
-    { key: 'in_progress', label: t('in_progress'), icon: PauseCircle },
+    { key: 'InProgress', label: t('in_progress'), icon: PauseCircle },
     { key: 'return_requested', label: t('return_requested'), icon: Car },
     { key: 'completed', label: t('completed'), icon: CheckCircle },
     { key: 'cancelled', label: t('cancelled'), icon: XCircle },

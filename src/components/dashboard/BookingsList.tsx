@@ -1,30 +1,44 @@
+import React, { useState } from "react";
+import { useBookingViewMode } from "../../hooks/useBookingViewMode";
+import { useLanguage } from "../../contexts/LanguageContext";
+import BookingsHeader from "./bookings/BookingsHeader";
+import BookingsLoadingState from "./bookings/BookingsLoadingState";
+import BookingsEmptyState from "./bookings/BookingsEmptyState";
+import BookingsFilteredEmptyState from "./bookings/BookingsFilteredEmptyState";
+import ClientBookingGridView from "./bookings/ClientBookingGridView";
+import ClientBookingListView from "./bookings/ClientBookingListView";
+import ClientBookingTableView from "./bookings/ClientBookingTableView";
+import BookingStatusFilter from "@/components/vendor/bookings/BookingStatusFilter";
+import { getStatusCounts } from "@/utils/bookingUtils";
+import { useClientBookings } from "@/hooks/client/useClientBookings";
+import { Booking } from "@/types/clientBookings";
 
-import React, { useState } from 'react';
-import { useBookings } from '../../hooks/useBookings';
-import { useBookingReturn } from '../../hooks/useBookingReturn';
-import { useBookingViewMode } from '../../hooks/useBookingViewMode';
-import { useLanguage } from '../../contexts/LanguageContext';
-import BookingsHeader from './bookings/BookingsHeader';
-import BookingsLoadingState from './bookings/BookingsLoadingState';
-import BookingsEmptyState from './bookings/BookingsEmptyState';
-import BookingsFilteredEmptyState from './bookings/BookingsFilteredEmptyState';
-import BookingGridView from './bookings/BookingGridView';
-import BookingListView from './bookings/BookingListView';
-import BookingTableView from './bookings/BookingTableView';
-import BookingStatusFilter from '@/components/vendor/bookings/BookingStatusFilter';
-import { getStatusCounts } from '@/utils/bookingUtils';
-
-type BookingStatus = 'pending' | 'confirmed' | 'active' | 'in_progress' | 'return_requested' | 'completed' | 'cancelled';
+type BookingStatus =
+  | "pending"
+  | "confirmed"
+  | "active"
+  | "InProgress"
+  | "return_requested"
+  | "completed"
+  | "cancelled";
 
 const BookingsList: React.FC = () => {
-  const { bookings, isLoading } = useBookings();
-  const { handleReturnCar, isReturning } = useBookingReturn();
   const { viewMode, setViewMode } = useBookingViewMode();
   const { language } = useLanguage();
-  const [statusFilter, setStatusFilter] = useState<BookingStatus | 'all'>('all');
+  const [statusFilter, setStatusFilter] = useState<BookingStatus | "all">(
+    "all"
+  );
 
-  const filteredBookings = bookings.filter(booking => 
-    statusFilter === 'all' || booking.booking_status === statusFilter
+  // Fetch bookings with your hook
+  const { useGetAllBookings } = useClientBookings();
+  const { data, isLoading, isError } = useGetAllBookings();
+
+  // Extract bookings from API response
+  const bookings: Booking[] = data?.data?.items || [];
+
+  const filteredBookings = bookings.filter(
+    (booking) =>
+      statusFilter === "all" || booking.bookingStatus === statusFilter
   );
 
   const statusCounts = getStatusCounts(bookings);
@@ -33,33 +47,47 @@ const BookingsList: React.FC = () => {
     return <BookingsLoadingState />;
   }
 
- 
+  if (isError) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-red-600">
+          Error loading bookings. Please try again later.
+        </p>
+      </div>
+    );
+  }
+
+  if (!bookings.length) {
+    return <BookingsEmptyState />;
+  }
+
   const renderContent = () => {
     const commonProps = {
       bookings: filteredBookings,
-      onReturnCar: handleReturnCar,
-      isReturning
+      onReturnCar: () => {
+        console.log("returning");
+      },
+      isReturning: false,
     };
 
-    // Force grid view on mobile
     const isMobile = window.innerWidth < 768;
-    const currentViewMode = isMobile ? 'grid' : viewMode;
+    const currentViewMode = isMobile ? "grid" : viewMode;
 
     switch (currentViewMode) {
-      case 'grid':
-        return <BookingGridView {...commonProps} />;
-      case 'list':
-        return <BookingListView {...commonProps} />;
-      case 'table':
-        return <BookingTableView {...commonProps} />;
+      case "grid":
+        return <ClientBookingGridView {...commonProps} />;
+      case "list":
+        return <ClientBookingListView {...commonProps} />;
+      case "table":
+        return <ClientBookingTableView {...commonProps} />;
       default:
-        return <BookingGridView {...commonProps} />;
+        return <ClientBookingGridView {...commonProps} />;
     }
   };
 
   return (
-    <div className={language === 'ar' ? 'text-right' : 'text-left'}>
-      <BookingsHeader 
+    <div className={language === "ar" ? "text-right" : "text-left"}>
+      <BookingsHeader
         bookingsCount={bookings.length}
         viewMode={viewMode}
         onViewModeChange={setViewMode}
@@ -73,10 +101,10 @@ const BookingsList: React.FC = () => {
           totalBookings={bookings.length}
         />
       </div>
-      
+
       {renderContent()}
 
-      {filteredBookings.length === 0 && statusFilter !== 'all' && (
+      {filteredBookings.length === 0 && statusFilter !== "all" && (
         <BookingsFilteredEmptyState statusFilter={statusFilter} />
       )}
     </div>

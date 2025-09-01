@@ -31,6 +31,13 @@ export const getStatusConfig = (status: string) => {
       color: 'bg-orange-100 text-orange-800 border-orange-200',
       dotColor: 'bg-orange-500'
     },
+    'InProgress': { 
+      label: 'In Progress', 
+      variant: 'default' as const, 
+      icon: PauseCircle, 
+      color: 'bg-orange-100 text-orange-800 border-orange-200',
+      dotColor: 'bg-orange-500'
+    },
     'return_requested': { 
       label: 'Return Requested', 
       variant: 'destructive' as const, 

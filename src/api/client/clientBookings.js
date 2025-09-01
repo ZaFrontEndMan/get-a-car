@@ -1,4 +1,4 @@
-import axiosInstance from "./axiosInstance";
+import axiosInstance from "../../utils/axiosInstance";
 
 
 export const createBooking = async (payload) => {
@@ -28,10 +28,10 @@ export const getBookingById = async (bookingId) => {
 };
 
 
-export const getAllBooking = async () => {
-    const { data } = await axiosInstance.get(
-        "/Client/Booking/GetAllBooking"
-    );
+export const getAllBooking = async (params) => {
+    const { data } = await axiosInstance.get("/Client/Booking/GetAllBooking", {
+        params,
+    });
     return data;
 };
 
