@@ -5,7 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { ChevronRight, ChevronLeft, ArrowLeft, Calendar, User, Clock, Share2 } from 'lucide-react';
 import { LanguageProvider } from '../contexts/LanguageContext';
 import { useLanguage } from '../contexts/LanguageContext';
-import Navbar from '../components/Navbar';
+import Navbar from '../components/layout/navbar/Navbar';
 import MobileNav from '../components/MobileNav';
 import Footer from '../components/Footer';
 import { supabase } from '@/integrations/supabase/client';

@@ -4,7 +4,7 @@ import { useParams } from 'react-router-dom';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useOfferDetails } from '../../hooks/useOfferDetails';
 import { useOfferDetailsState } from '../../hooks/useOfferDetailsState';
-import Navbar from '../Navbar';
+import Navbar from '../layout/navbar/Navbar';
 import MobileNav from '../MobileNav';
 import Footer from '../Footer';
 import SimilarCarsSlider from '../SimilarCarsSlider';

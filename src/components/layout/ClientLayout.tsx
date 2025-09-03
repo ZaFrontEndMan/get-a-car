@@ -1,9 +1,7 @@
 import React, { useState } from "react";
 import { Outlet } from "react-router-dom";
-import Navbar from "../Navbar";
-import DashboardHeader from "../dashboard/DashboardHeader";
+import Navbar from "./navbar/Navbar";
 import DashboardSidebar from "../dashboard/DashboardSidebar";
-import MobileNav from "../MobileNav";
 
 const ClientLayout: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);

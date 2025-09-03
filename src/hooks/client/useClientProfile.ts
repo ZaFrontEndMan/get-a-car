@@ -16,7 +16,6 @@ export const useEditClient = () => {
   return useMutation({
     mutationFn: editClient,
     onSuccess: () => {
-      // ✅ Refresh user info after editing
       queryClient.invalidateQueries({ queryKey: ["userInfo"] });
     },
   });

@@ -1,11 +1,9 @@
-
-import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { useLanguage } from '../contexts/LanguageContext';
-import { useFavorites } from '../contexts/FavoritesContext';
-import { useAuth } from '../contexts/AuthContext';
-import { Home, Car, Heart, Menu } from 'lucide-react';
-import { LucideIcon } from 'lucide-react';
+import React from "react";
+import { Link, useLocation } from "react-router-dom";
+import { useLanguage } from "../contexts/LanguageContext";
+import { useAuth } from "../contexts/AuthContext";
+import { Home, Car, Heart, Menu } from "lucide-react";
+import { LucideIcon } from "lucide-react";
 
 interface NavItem {
   key: string;
@@ -16,20 +14,25 @@ interface NavItem {
 
 const MobileNav = () => {
   const { t } = useLanguage();
-  const { favoritesCount } = useFavorites();
   const { user } = useAuth();
   const location = useLocation();
 
   const navItems: NavItem[] = [
-    { key: 'home', icon: Home, href: '/' },
-    { key: 'cars', icon: Car, href: '/cars' },
-    { key: 'offers', icon: ({ className }: { className?: string }) => (
-      <div className={`${className} bg-accent rounded-lg p-1 text-black font-bold text-xs flex items-center justify-center`}>
-        %
-      </div>
-    ), href: '/offers' },
-    { key: 'vendors', icon: Car, href: '/vendors' },
-    { key: 'more', icon: Menu, href: user ? '/dashboard' : '/more' }
+    { key: "home", icon: Home, href: "/" },
+    { key: "cars", icon: Car, href: "/cars" },
+    {
+      key: "offers",
+      icon: ({ className }: { className?: string }) => (
+        <div
+          className={`${className} bg-accent rounded-lg p-1 text-black font-bold text-xs flex items-center justify-center`}
+        >
+          %
+        </div>
+      ),
+      href: "/offers",
+    },
+    { key: "vendors", icon: Car, href: "/vendors" },
+    { key: "more", icon: Menu, href: user ? "/dashboard" : "/more" },
   ];
 
   return (
@@ -43,7 +46,7 @@ const MobileNav = () => {
               key={item.key}
               to={item.href}
               className={`flex flex-col items-center justify-center p-2 transition-colors duration-200 relative ${
-                isActive ? 'text-primary' : 'text-gray-600 hover:text-primary'
+                isActive ? "text-primary" : "text-gray-600 hover:text-primary"
               }`}
             >
               <div className="relative">

@@ -2,7 +2,7 @@
 import React from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useTermsConditions } from '../hooks/useTermsConditions';
-import Navbar from '../components/Navbar';
+import Navbar from '../components/layout/navbar/Navbar';
 import MobileNav from '../components/MobileNav';
 import Footer from '../components/Footer';
 import { Skeleton } from '../components/ui/skeleton';

@@ -2,7 +2,7 @@
 import React from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useFAQs } from '../hooks/useFAQs';
-import Navbar from '../components/Navbar';
+import Navbar from '../components/layout/navbar/Navbar';
 import MobileNav from '../components/MobileNav';
 import Footer from '../components/Footer';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../components/ui/accordion';

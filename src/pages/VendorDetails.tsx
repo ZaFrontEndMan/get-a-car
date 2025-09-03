@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { LanguageProvider, useLanguage } from '../contexts/LanguageContext';
 import { supabase } from '../integrations/supabase/client';
-import Navbar from '../components/Navbar';
+import Navbar from '../components/layout/navbar/Navbar';
 import MobileNav from '../components/MobileNav';
 import Footer from '../components/Footer';
 import VendorProfileHeader from '../components/VendorProfileHeader';

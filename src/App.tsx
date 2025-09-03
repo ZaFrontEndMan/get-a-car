@@ -20,7 +20,6 @@ import Blog from "./pages/Blog";
 import BlogDetails from "./pages/BlogDetails";
 import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
-import Dashboard from "./pages/Dashboard";
 import Favorites from "./pages/Favorites";
 import VendorDashboard from "./pages/VendorDashboard";
 import VendorCarDetails from "./pages/VendorCarDetails";
@@ -40,6 +39,7 @@ import PaymentsList from "./components/dashboard/PaymentsList";
 import ProfileSection from "./components/dashboard/ProfileSection";
 import SupportSection from "./components/dashboard/SupportSection";
 import ClientLayout from "./components/layout/ClientLayout";
+import PageLayout from "./components/layout/PageLayout";
 
 const queryClient = new QueryClient();
 
@@ -54,24 +54,38 @@ function App() {
             <LanguageProvider>
               <FavoritesProvider>
                 <Routes>
-                  <Route path="/" element={<Index />} />
-                  <Route path="/cars" element={<Cars />} />
-                  <Route path="/cars/:id" element={<CarDetails />} />
-                  <Route path="/vendors" element={<Vendors />} />
-                  <Route path="/vendors/:id" element={<VendorDetails />} />
-                  <Route path="/offers" element={<Offers />} />
-                  <Route path="/offers/:id" element={<OfferDetails />} />
-                  <Route path="/contact" element={<Contact />} />
-                  <Route path="/about" element={<About />} />
-                  <Route path="/blog" element={<Blog />} />
-                  <Route path="/blog/:slug" element={<BlogDetails />} />
-                  <Route path="/faq" element={<FAQ />} />
-                  <Route path="/terms" element={<Terms />} />
-                  <Route path="/privacy" element={<Privacy />} />
+                  {/* Default pages with PageLayout */}
+                  <Route
+                    element={
+                      <PageLayout>
+                        <></>
+                      </PageLayout>
+                    }
+                  >
+                    <Route path="/" element={<Index />} />
+                    <Route path="/cars" element={<Cars />} />
+                    <Route path="/cars/:id" element={<CarDetails />} />
+                    <Route path="/vendors" element={<Vendors />} />
+                    <Route path="/vendors/:id" element={<VendorDetails />} />
+                    <Route path="/offers" element={<Offers />} />
+                    <Route path="/offers/:id" element={<OfferDetails />} />
+                    <Route path="/contact" element={<Contact />} />
+                    <Route path="/about" element={<About />} />
+                    <Route path="/blog" element={<Blog />} />
+                    <Route path="/blog/:slug" element={<BlogDetails />} />
+                    <Route path="/faq" element={<FAQ />} />
+                    <Route path="/terms" element={<Terms />} />
+                    <Route path="/privacy" element={<Privacy />} />
+                    <Route path="/more" element={<More />} />
+                  </Route>
+
+                  {/* Auth pages without PageLayout */}
                   <Route path="/signin" element={<SignIn />} />
                   <Route path="/signup" element={<SignUp />} />
                   <Route path="/forgot-password" element={<ForgotPassword />} />
                   <Route path="/reset-password" element={<ResetPassword />} />
+
+                  {/* Dashboard pages (already have layouts) */}
                   <Route path="/dashboard" element={<ClientLayout />}>
                     <Route index element={<BookingsList />} />
                     <Route path="bookings" element={<BookingsList />} />
@@ -79,7 +93,8 @@ function App() {
                     <Route path="payments" element={<PaymentsList />} />
                     <Route path="profile" element={<ProfileSection />} />
                     <Route path="support" element={<SupportSection />} />
-                  </Route>{" "}
+                  </Route>
+
                   <Route path="/favorites" element={<Favorites />} />
                   <Route
                     path="/vendor-dashboard"
@@ -98,7 +113,8 @@ function App() {
                     path="/admin/clients/:id"
                     element={<AdminClientDetails />}
                   />
-                  <Route path="/more" element={<More />} />
+
+                  {/* Catch-all */}
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </FavoritesProvider>

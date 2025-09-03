@@ -7,6 +7,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import Cookies from "js-cookie";
 import { authApi } from "@/api/auth/authApi";
+import { useUserData } from "@/hooks/useUserData";
 
 const loginSchema = z.object({
   username: z.string().email("Invalid username address"),
@@ -18,6 +19,7 @@ type LoginFormData = z.infer<typeof loginSchema>;
 const SignIn = () => {
   const { t } = useLanguage();
   const navigate = useNavigate();
+  const { refetchUserData } = useUserData();
 
   const {
     register,
@@ -25,6 +27,10 @@ const SignIn = () => {
     formState: { errors, isSubmitting },
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
+    defaultValues: {
+      username: "abdokader184@gmail.com",
+      password: "LEESQgMOD4p23/7tUFsGHQ==",
+    },
   });
 
   const onSubmit = async (data: LoginFormData) => {
@@ -37,6 +43,7 @@ const SignIn = () => {
         const { token, roles } = res.data.data;
 
         Cookies.set("auth_token", token, { expires: 7 });
+        refetchUserData();
         toast.success(res.data.customMessage || "Login successful");
 
         if (roles === "Client") {
@@ -53,8 +60,23 @@ const SignIn = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary to-secondary">
-      <div className="pt-20 flex items-center justify-center px-4 min-h-screen">
+    <div className="relative min-h-screen flex items-center justify-center">
+      {/* Background Video */}
+      <video
+        autoPlay
+        muted
+        loop
+        playsInline
+        className="absolute inset-0 w-full h-full object-cover z-0"
+      >
+        <source src="/revving.mp4" type="video/mp4" />
+      </video>
+
+      {/* Gradient Overlay with 50% opacity */}
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/50 to-secondary/50 z-10"></div>
+
+      {/* Content */}
+      <div className="relative z-20 pt-20 px-4 min-h-screen flex items-center justify-center">
         <div className="max-w-md w-full bg-white rounded-2xl shadow-2xl p-8">
           <h2 className="text-2xl font-bold text-center text-primary">
             {t("signIn")}
@@ -67,7 +89,7 @@ const SignIn = () => {
                 {t("username")}
               </label>
               <input
-                type="username"
+                type="text"
                 {...register("username")}
                 className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
               />

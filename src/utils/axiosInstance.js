@@ -35,8 +35,8 @@ axiosInstance.interceptors.response.use(
 
         if (error.response?.status === 401) {
             Cookies.remove("auth_token");
-            toast.error("Your session has expired. Please log in again.");
-            window.location.href = "/signin";
+            // toast.error("Your session has expired. Please log in again.");
+            //             window.location.href = "/signin";
         }
 
         return Promise.reject(error);

@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Car } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import Navbar from '../components/Navbar';
+import Navbar from '../components/layout/navbar/Navbar';
 import Footer from '../components/Footer';
 import MobileNav from '../components/MobileNav';
 import { LanguageProvider } from '../contexts/LanguageContext';

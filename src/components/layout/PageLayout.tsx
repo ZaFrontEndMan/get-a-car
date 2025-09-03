@@ -1,19 +1,15 @@
 import React from "react";
-import { useLanguage } from "../../contexts/LanguageContext";
-import Navbar from "../Navbar";
+import Navbar from "./navbar/Navbar";
 import Footer from "../Footer";
+import { Outlet } from "react-router-dom";
 
-interface PageLayoutProps {
-  children: React.ReactNode;
-}
-
-const PageLayout: React.FC<PageLayoutProps> = ({ children }) => {
-  const { language } = useLanguage();
-
+const PageLayout: React.FC = () => {
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen flex flex-col">
       <Navbar />
-      <main className="pt-16">{children}</main>
+      <main className="flex-1">
+        <Outlet />
+      </main>
       <Footer />
     </div>
   );

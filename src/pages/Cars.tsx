@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { LanguageProvider } from '../contexts/LanguageContext';
 import { useCarsData } from '../hooks/useCarsData';
-import Navbar from '../components/Navbar';
+import Navbar from '../components/layout/navbar/Navbar';
 import MobileNav from '../components/MobileNav';
 import Filters from '../components/Filters';
 import Footer from '../components/Footer';

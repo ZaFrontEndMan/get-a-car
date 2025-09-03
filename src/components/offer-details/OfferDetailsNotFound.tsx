@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
-import Navbar from '../Navbar';
+import Navbar from '../layout/navbar/Navbar';
 
 const OfferDetailsNotFound = () => {
   const { t } = useLanguage();

@@ -3,7 +3,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../../contexts/LanguageContext';
 import DashboardLogo from '../dashboard/components/DashboardLogo';
-import LanguageSwitcher from '../LanguageSwitcher';
+import LanguageSwitcher from '../layout/navbar/LanguageSwitcher';
 
 const AuthPageHeader: React.FC = () => {
   const { t } = useLanguage();
