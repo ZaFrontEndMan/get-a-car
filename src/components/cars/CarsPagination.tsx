@@ -1,40 +1,51 @@
-
-import React from 'react';
-import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
+import React from "react";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 interface CarsPaginationProps {
   currentPage: number;
   totalPages: number;
-  onPageChange: (page: number) => void;
+  setCurrentPage: (page: number) => void;
 }
 
-const CarsPagination = ({ currentPage, totalPages, onPageChange }: CarsPaginationProps) => {
-  if (totalPages <= 1) {
-    return null;
-  }
+const CarsPagination = ({
+  currentPage,
+  totalPages,
+  setCurrentPage,
+}: CarsPaginationProps) => {
+  if (totalPages <= 1) return null;
 
   return (
     <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
       <Pagination className="w-full">
         <PaginationContent>
           <PaginationItem>
-            <PaginationPrevious 
+            <PaginationPrevious
               href="#"
               onClick={(e) => {
                 e.preventDefault();
-                if (currentPage > 1) onPageChange(currentPage - 1);
+                if (currentPage > 1) setCurrentPage(currentPage - 1);
               }}
-              className={currentPage === 1 ? 'pointer-events-none opacity-50' : ''}
+              className={
+                currentPage === 1 ? "pointer-events-none opacity-50" : ""
+              }
             />
           </PaginationItem>
-          
+
           {[...Array(totalPages)].map((_, index) => {
             const pageNum = index + 1;
             const isCurrentPage = pageNum === currentPage;
-            
+
             if (
-              pageNum === 1 || 
-              pageNum === totalPages || 
+              pageNum === 1 ||
+              pageNum === totalPages ||
               (pageNum >= currentPage - 1 && pageNum <= currentPage + 1)
             ) {
               return (
@@ -43,27 +54,40 @@ const CarsPagination = ({ currentPage, totalPages, onPageChange }: CarsPaginatio
                     href="#"
                     onClick={(e) => {
                       e.preventDefault();
-                      onPageChange(pageNum);
+                      setCurrentPage(pageNum);
                     }}
                     isActive={isCurrentPage}
-                    className={isCurrentPage ? 'bg-primary text-white' : ''}
+                    className={isCurrentPage ? "bg-primary text-white" : ""}
                   >
                     {pageNum}
                   </PaginationLink>
                 </PaginationItem>
               );
+            } else if (
+              pageNum === currentPage - 2 ||
+              pageNum === currentPage + 2
+            ) {
+              return (
+                <PaginationItem key={pageNum}>
+                  <PaginationEllipsis />
+                </PaginationItem>
+              );
             }
             return null;
           })}
-          
+
           <PaginationItem>
-            <PaginationNext 
+            <PaginationNext
               href="#"
               onClick={(e) => {
                 e.preventDefault();
-                if (currentPage < totalPages) onPageChange(currentPage + 1);
+                if (currentPage < totalPages) setCurrentPage(currentPage + 1);
               }}
-              className={currentPage === totalPages ? 'pointer-events-none opacity-50' : ''}
+              className={
+                currentPage === totalPages
+                  ? "pointer-events-none opacity-50"
+                  : ""
+              }
             />
           </PaginationItem>
         </PaginationContent>

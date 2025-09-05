@@ -2,9 +2,10 @@
 import React from 'react';
 import { Search } from 'lucide-react';
 import CarCard from '../CarCard';
+import { Car } from '../../api/website/websiteCars';
 
 interface CarsGridProps {
-  cars: any[];
+  cars: Car[];
   viewMode: 'grid' | 'list';
 }
 
@@ -27,15 +28,37 @@ const CarsGrid = ({ cars, viewMode }: CarsGridProps) => {
         ? 'grid-cols-1 md:grid-cols-2 xl:grid-cols-3' 
         : 'grid-cols-1'
     }`}>
-      {cars.map((car, index) => (
-        <div
-          key={car.id}
-          className="animate-fade-in"
-          style={{ animationDelay: `${index * 0.1}s` }}
-        >
-          <CarCard car={car} />
-        </div>
-      ))}
+      {cars.map((car, index) => {
+        // Map API car data to CarCard props format
+        const mappedCar = {
+          id: car.carID.toString(),
+          name: car.name,
+          brand: car.model,
+          image: car.image,
+          price: car.pricePerDay,
+          daily_rate: car.pricePerDay,
+          weekly_rate: car.pricePerWeek,
+          monthly_rate: car.pricePerMonth,
+          seats: parseInt(car.doors) || 4, // Using doors as seats if available
+          fuel: car.fuelType,
+          transmission: car.transmission,
+          vendor: {
+            id: car.vendorId,
+            name: car.vendorName,
+            logo_url: car.companyLogo
+          }
+        };
+        
+        return (
+          <div
+            key={car.carID}
+            className="animate-fade-in"
+            style={{ animationDelay: `${index * 0.1}s` }}
+          >
+            <CarCard car={mappedCar} />
+          </div>
+        );
+      })}
     </div>
   );
 };
