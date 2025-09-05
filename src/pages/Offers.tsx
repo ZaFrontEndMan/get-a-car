@@ -1,5 +1,4 @@
-import React, { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import React, { useState, useEffect } from "react";
 import { useLanguage } from "../contexts/LanguageContext";
 import Navbar from "../components/layout/navbar/Navbar";
 import OfferCard from "../components/OfferCard";
@@ -8,7 +7,7 @@ import OffersSearchControls from "../components/offers/OffersSearchControls";
 import OffersFilters from "../components/offers/OffersFilters";
 import OffersPagination from "../components/offers/OffersPagination";
 import { Search } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { useAllOffers } from "@/hooks/website/useWebsiteOffers";
 
 const Offers = () => {
   const { language } = useLanguage();
@@ -20,112 +19,148 @@ const Offers = () => {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const itemsPerPage = 12;
 
+  // Use the API hook for offers without filter parameters (we'll filter locally)
   const {
-    data: offers = [],
+    data: offersResponse,
     isLoading,
     error,
-  } = useQuery({
-    queryKey: ["offers"],
-    queryFn: async () => {
-      console.log("Fetching offers...");
-      const { data, error } = await supabase
-        .from("offers")
-        .select(
-          `
-          id,
-          title,
-          title_ar,
-          description,
-          description_ar,
-          discount_percentage,
-          valid_until,
-          cars (
-            id,
-            name,
-            images,
-            daily_rate
-          ),
-          vendors (
-            id,
-            name,
-            logo_url
-          )
-        `
-        )
-        .eq("status", "published")
-        .order("created_at", { ascending: false });
+    refetch,
+  } = useAllOffers(currentPage, itemsPerPage);
 
-      if (error) {
-        console.error("Error fetching offers:", error);
-        throw error;
-      }
+  // Transform API response to match the expected format for the UI
+  const offers =
+    offersResponse?.carSearchResult.map((offer) => ({
+      id: offer.id.toString(),
+      title: offer.offerTitle || "No title",
+      title_ar: "", // API doesn't provide Arabic titles yet
+      description: offer.offerDescription || "No description",
+      description_ar: "", // API doesn't provide Arabic descriptions yet
+      discount: `${Math.round(
+        ((offer.oldPricePerDay - offer.totalPrice) / offer.oldPricePerDay) * 100
+      )}%`,
+      validUntil: offer.endDate,
+      image:
+        offer.offerImage ||
+        "https://images.unsplash.com/photo-1549924231-f129b911e442",
+      price: offer.totalPrice || 0,
+      vendorName: offer.vendorName || "Unknown Vendor",
+      terms: [
+        "Valid for limited time only",
+        "Cannot be combined with other offers",
+        "Subject to availability",
+      ],
+      vendor: {
+        id: offer.carId.toString(),
+        name: offer.vendorName || "Unknown Vendor",
+        logo_url: offer.companyLogo,
+      },
+    })) || [];
+  console.log(offers);
 
-      console.log("Offers fetched successfully:", data);
-
-      return (
-        data?.map((offer) => ({
-          id: offer.id,
-          title: offer.title || "No title",
-          title_ar: offer.title_ar || "",
-          description: offer.description || "No description",
-          description_ar: offer.description_ar || "",
-          discount: `${offer.discount_percentage || 0}%`,
-          validUntil: offer.valid_until,
-          image:
-            offer.cars?.images?.[0] ||
-            "https://images.unsplash.com/photo-1549924231-f129b911e442",
-          price: offer.cars?.daily_rate || 0,
-          vendorName: offer.vendors?.name || "Unknown Vendor",
-          terms: [
-            "Valid for limited time only",
-            "Cannot be combined with other offers",
-            "Subject to availability",
-          ],
-          vendor: offer.vendors
-            ? {
-                id: offer.vendors.id,
-                name: offer.vendors.name,
-                logo_url: offer.vendors.logo_url,
-              }
-            : undefined,
-        })) || []
-      );
-    },
-  });
-
-  // Apply filters
+  // Implement local filtering
+  console.log('Filtering offers with:', { searchTerm, priceRange, selectedCategories, selectedVendors });
   const filteredOffers = offers.filter((offer) => {
-    const searchTitle =
-      language === "ar" && offer.title_ar ? offer.title_ar : offer.title;
-    const searchDescription =
-      language === "ar" && offer.description_ar
-        ? offer.description_ar
-        : offer.description;
+    // Filter by search term
+    if (
+      searchTerm &&
+      !offer.title.toLowerCase().includes(searchTerm.toLowerCase())
+    ) {
+      return false;
+    }
 
-    const matchesSearch =
-      searchTerm === "" ||
-      searchTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      searchDescription.toLowerCase().includes(searchTerm.toLowerCase());
+    // Filter by price range
+    // Add debug logging for price filtering
+    console.log(`Checking price: ${offer.price} against range: ${priceRange[0]}-${priceRange[1]}`);
+    
+    // Only filter if price range is not at default values
+    const isDefaultPriceRange = priceRange[0] === 0 && priceRange[1] === 2000;
+    if (!isDefaultPriceRange) {
+      // Make sure we're working with numbers
+      // Use the price from the transformed offer object
+      const offerPrice = offer.price;
+      const minPrice = priceRange[0];
+      const maxPrice = priceRange[1];
+      
+      console.log(`Offer ${offer.id}: Price check - Offer price: ${offerPrice}, Range: [${minPrice}, ${maxPrice}]`);
+      
+      if (isNaN(offerPrice) || offerPrice < minPrice || offerPrice > maxPrice) {
+        console.log(`Price filter rejected offer: ${offer.title} with price ${offerPrice}`);
+        return false;
+      }
+    }
 
-    const matchesPrice =
-      offer.price >= priceRange[0] && offer.price <= priceRange[1];
+    // Filter by selected vendors
+    if (
+      selectedVendors.length > 0 &&
+      !selectedVendors.includes(offer.vendor.name)
+    ) {
+      return false;
+    }
 
-    const matchesVendor =
-      selectedVendors.length === 0 ||
-      selectedVendors.some((vendorId) =>
-        offer.vendorName.toLowerCase().includes(vendorId.toLowerCase())
-      );
+    // Filter by selected categories
+    if (selectedCategories.length > 0) {
+      // For debugging
+      console.log('Selected categories:', selectedCategories);
+      
+      // We need to check the original API response fields
+      // The original offer data is in offersResponse.carSearchResult
+      // But we're working with the transformed offer object
+      
+      // Find the original offer data
+      const originalOffer = offersResponse?.carSearchResult.find(o => o.id.toString() === offer.id);
+      
+      if (!originalOffer) {
+        console.log(`Could not find original offer data for ${offer.id}`);
+        return false;
+      }
+      
+      // Check if any selected category matches this offer
+      const matchesCategory = selectedCategories.some(category => {
+        const categoryLower = category.toLowerCase();
+        
+        // Check against the actual fields in the original offer
+        const matchesFuelType = originalOffer.fuelType && 
+                               originalOffer.fuelType.toLowerCase() === categoryLower;
+        const matchesTransmission = originalOffer.transmission && 
+                                  originalOffer.transmission.toLowerCase() === categoryLower;
+        const matchesType = originalOffer.type && 
+                          originalOffer.type.toLowerCase() === categoryLower;
+        const matchesBranch = originalOffer.branch && 
+                            originalOffer.branch.toLowerCase() === categoryLower;
+        
+        // For debugging
+        console.log(`Offer ${offer.id}: Checking category: ${category}`);
+        console.log(`  - Fuel type match: ${matchesFuelType} (${originalOffer.fuelType || 'N/A'})`);
+        console.log(`  - Transmission match: ${matchesTransmission} (${originalOffer.transmission || 'N/A'})`);
+        console.log(`  - Car type match: ${matchesType} (${originalOffer.type || 'N/A'})`);
+        console.log(`  - Branch match: ${matchesBranch} (${originalOffer.branch || 'N/A'})`);
+        
+        // Check if any of the fields match
+        const isMatch = matchesFuelType || matchesTransmission || matchesType || matchesBranch;
+        console.log(`  - Overall match: ${isMatch}`);
+        
+        return isMatch;
+      });
+      
+      if (!matchesCategory) {
+        console.log(`Offer ${offer.id} (${offer.title}) filtered out by categories`);
+        return false;
+      }
+    }
 
-    return matchesSearch && matchesPrice && matchesVendor;
+    return true;
   });
 
-  // Pagination logic
-  const totalPages = Math.ceil(filteredOffers.length / itemsPerPage);
+  // Local pagination logic
+  const totalItems = filteredOffers.length;
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const paginatedOffers = filteredOffers.slice(
     startIndex,
     startIndex + itemsPerPage
   );
+  
+  console.log('Filtered offers:', filteredOffers.length, 'Paginated offers:', paginatedOffers.length);
 
   const clearAllFilters = () => {
     console.log("Clearing all filters");
@@ -135,6 +170,11 @@ const Offers = () => {
     setSearchTerm("");
     setCurrentPage(1);
   };
+
+  // Reset to first page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [priceRange, selectedCategories, selectedVendors, searchTerm]);
 
   if (error) {
     console.error("Error in offers page:", error);
@@ -149,20 +189,6 @@ const Offers = () => {
               </h3>
               <p className="text-gray-500">Please try again later</p>
             </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50">
-        <Navbar />
-        <div className="pt-20 pb-8">
-          <div className="flex items-center justify-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-            <span className="ml-2">Loading offers...</span>
           </div>
         </div>
       </div>
@@ -188,6 +214,24 @@ const Offers = () => {
                 searchTerm={searchTerm}
                 setSearchTerm={setSearchTerm}
                 onClearFilters={clearAllFilters}
+                filterData={{
+                  vendorNames: offersResponse?.carsCommonProp?.data.find(
+                    (item) => item.header === "vendorNames"
+                  )?.filterData,
+                  branches: offersResponse?.carsCommonProp?.data.find(
+                    (item) => item.header === "branches"
+                  )?.filterData,
+                  types: offersResponse?.carsCommonProp?.data.find(
+                    (item) => item.header === "types"
+                  )?.filterData,
+                  transmissions: offersResponse?.carsCommonProp?.data.find(
+                    (item) => item.header === "transmissions"
+                  )?.filterData,
+                  fuelTypes: offersResponse?.carsCommonProp?.data.find(
+                    (item) => item.header === "fuelTypes"
+                  )?.filterData,
+                  maxPrice: offersResponse?.carsCommonProp?.maxPrice,
+                }}
               />
             </div>
 

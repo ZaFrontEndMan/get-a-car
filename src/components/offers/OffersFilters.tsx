@@ -2,8 +2,6 @@
 import React from 'react';
 import { Slider } from '@/components/ui/slider';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
 
 interface OffersFiltersProps {
   priceRange: [number, number];
@@ -15,6 +13,14 @@ interface OffersFiltersProps {
   searchTerm: string;
   setSearchTerm: (term: string) => void;
   onClearFilters: () => void;
+  filterData?: {
+    vendorNames?: { name: string; quantity: number }[];
+    branches?: { name: string; quantity: number }[];
+    types?: { name: string; quantity: number }[];
+    transmissions?: { name: string; quantity: number }[];
+    fuelTypes?: { name: string; quantity: number }[];
+    maxPrice?: number;
+  };
 }
 
 const OffersFilters = ({
@@ -26,46 +32,12 @@ const OffersFilters = ({
   setSelectedVendors,
   searchTerm,
   setSearchTerm,
-  onClearFilters
+  onClearFilters,
+  onFiltersChange,
+  filterData
 }: OffersFiltersProps) => {
   const { t, language } = useLanguage();
   const isRTL = language === 'ar';
-
-  const { data: filterData, isLoading } = useQuery({
-    queryKey: ['offers-filter-data'],
-    queryFn: async () => {
-      const { data: offers, error } = await supabase
-        .from('offers')
-        .select(`
-          discount_percentage,
-          cars (
-            daily_rate,
-            type,
-            brand
-          ),
-          vendors (
-            name
-          )
-        `)
-        .eq('status', 'published');
-
-      if (error) throw error;
-
-      if (!offers) {
-        return {
-          vendors: [],
-          categories: [],
-          brands: []
-        };
-      }
-
-      const vendors = [...new Set(offers.map(offer => offer.vendors?.name).filter(Boolean))];
-      const categories = [...new Set(offers.map(offer => offer.cars?.type).filter(Boolean))];
-      const brands = [...new Set(offers.map(offer => offer.cars?.brand).filter(Boolean))];
-
-      return { vendors, categories, brands };
-    },
-  });
 
   const handleCategoryToggle = (category: string) => {
     setSelectedCategories(
@@ -91,7 +63,7 @@ const OffersFilters = ({
     );
   };
 
-  if (isLoading) {
+  if (!filterData) {
     return (
       <div className="hidden lg:block flex-shrink-0 w-52">
         <div className="sticky top-24">
@@ -145,8 +117,10 @@ const OffersFilters = ({
               </h3>
               <Slider
                 value={priceRange}
-                onValueChange={(value) => setPriceRange(value as [number, number])}
-                max={2000}
+                onValueChange={(value) => {
+                  setPriceRange(value as [number, number]);
+                }}
+                max={filterData?.maxPrice || 2000}
                 step={50}
                 className="mb-2"
               />
@@ -156,24 +130,24 @@ const OffersFilters = ({
             </div>
 
             {/* Vendors */}
-            {filterData?.vendors && filterData.vendors.length > 0 && (
+            {filterData?.vendorNames && filterData.vendorNames.length > 0 && (
               <div>
                 <div className="bg-gradient-to-r from-primary to-blue-600 text-white px-3 py-1.5 text-xs font-semibold rounded-lg mb-3">
                   {t('vendors')}
                 </div>
                 <div className="space-y-2 max-h-32 overflow-y-auto">
-                  {filterData.vendors.map(vendor => (
-                    <label key={vendor} className={`flex items-center text-xs cursor-pointer hover:bg-gray-50 p-1 rounded ${
+                  {filterData.vendorNames.map(vendor => (
+                    <label key={vendor.name} className={`flex items-center text-xs cursor-pointer hover:bg-gray-50 p-1 rounded ${
                       isRTL ? 'flex-row-reverse' : ''
                     }`}>
                       <input 
                         type="checkbox" 
-                        checked={selectedVendors.includes(vendor)}
-                        onChange={() => handleVendorToggle(vendor)}
+                        checked={selectedVendors.includes(vendor.name)}
+                        onChange={() => handleVendorToggle(vendor.name)}
                         className={`${isRTL ? 'ml-2' : 'mr-2'} w-3 h-3 text-primary`}
                       />
                       <span className={`flex-1 text-gray-700 ${isRTL ? 'text-right pr-2' : 'text-left pl-2'}`}>
-                        {vendor}
+                        {vendor.name} ({vendor.quantity})
                       </span>
                     </label>
                   ))}
@@ -181,25 +155,25 @@ const OffersFilters = ({
               </div>
             )}
 
-            {/* Categories */}
-            {filterData?.categories && filterData.categories.length > 0 && (
+            {/* Car Types */}
+            {filterData?.types && filterData.types.length > 0 && (
               <div>
                 <div className="bg-gradient-to-r from-primary to-blue-600 text-white px-3 py-1.5 text-xs font-semibold rounded-lg mb-3">
-                  {t('categories')}
+                  {t('carTypes')}
                 </div>
                 <div className="space-y-2">
-                  {filterData.categories.map(category => (
-                    <label key={category} className={`flex items-center text-xs cursor-pointer hover:bg-gray-50 p-1 rounded ${
+                  {filterData.types.map(type => (
+                    <label key={type.name} className={`flex items-center text-xs cursor-pointer hover:bg-gray-50 p-1 rounded ${
                       isRTL ? 'flex-row-reverse' : ''
                     }`}>
                       <input 
                         type="checkbox" 
-                        checked={selectedCategories.includes(category)}
-                        onChange={() => handleCategoryToggle(category)}
+                        checked={selectedCategories.includes(type.name)}
+                        onChange={() => handleCategoryToggle(type.name)}
                         className={`${isRTL ? 'ml-2' : 'mr-2'} w-3 h-3 text-primary`}
                       />
                       <span className={`flex-1 text-gray-700 ${isRTL ? 'text-right pr-2' : 'text-left pl-2'}`}>
-                        {category}
+                        {type.name} ({type.quantity})
                       </span>
                     </label>
                   ))}
@@ -207,25 +181,77 @@ const OffersFilters = ({
               </div>
             )}
 
-            {/* Brands */}
-            {filterData?.brands && filterData.brands.length > 0 && (
+            {/* Fuel Types */}
+            {filterData?.fuelTypes && filterData.fuelTypes.length > 0 && (
               <div>
                 <div className="bg-gradient-to-r from-primary to-blue-600 text-white px-3 py-1.5 text-xs font-semibold rounded-lg mb-3">
-                  {t('brands')}
+                  {t('fuelTypes')}
                 </div>
                 <div className="space-y-2 max-h-32 overflow-y-auto">
-                  {filterData.brands.map(brand => (
-                    <label key={brand} className={`flex items-center text-xs cursor-pointer hover:bg-gray-50 p-1 rounded ${
+                  {filterData.fuelTypes.map(fuelType => (
+                    <label key={fuelType.name} className={`flex items-center text-xs cursor-pointer hover:bg-gray-50 p-1 rounded ${
                       isRTL ? 'flex-row-reverse' : ''
                     }`}>
                       <input 
                         type="checkbox" 
-                        checked={selectedCategories.includes(brand)}
-                        onChange={() => handleBrandToggle(brand)}
+                        checked={selectedCategories.includes(fuelType.name)}
+                        onChange={() => handleBrandToggle(fuelType.name)}
                         className={`${isRTL ? 'ml-2' : 'mr-2'} w-3 h-3 text-primary`}
                       />
                       <span className={`flex-1 text-gray-700 ${isRTL ? 'text-right pr-2' : 'text-left pl-2'}`}>
-                        {brand}
+                        {fuelType.name} ({fuelType.quantity})
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            {/* Branches */}
+            {filterData?.branches && filterData.branches.length > 0 && (
+              <div>
+                <div className="bg-gradient-to-r from-primary to-blue-600 text-white px-3 py-1.5 text-xs font-semibold rounded-lg mb-3">
+                  {t('branches')}
+                </div>
+                <div className="space-y-2 max-h-32 overflow-y-auto">
+                  {filterData.branches.map(branch => (
+                    <label key={branch.name} className={`flex items-center text-xs cursor-pointer hover:bg-gray-50 p-1 rounded ${
+                      isRTL ? 'flex-row-reverse' : ''
+                    }`}>
+                      <input 
+                        type="checkbox" 
+                        checked={selectedCategories.includes(branch.name)}
+                        onChange={() => handleCategoryToggle(branch.name)}
+                        className={`${isRTL ? 'ml-2' : 'mr-2'} w-3 h-3 text-primary`}
+                      />
+                      <span className={`flex-1 text-gray-700 ${isRTL ? 'text-right pr-2' : 'text-left pl-2'}`}>
+                        {branch.name} ({branch.quantity})
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            {/* Transmissions */}
+            {filterData?.transmissions && filterData.transmissions.length > 0 && (
+              <div>
+                <div className="bg-gradient-to-r from-primary to-blue-600 text-white px-3 py-1.5 text-xs font-semibold rounded-lg mb-3">
+                  {t('transmissions')}
+                </div>
+                <div className="space-y-2 max-h-32 overflow-y-auto">
+                  {filterData.transmissions.map(transmission => (
+                    <label key={transmission.name} className={`flex items-center text-xs cursor-pointer hover:bg-gray-50 p-1 rounded ${
+                      isRTL ? 'flex-row-reverse' : ''
+                    }`}>
+                      <input 
+                        type="checkbox" 
+                        checked={selectedCategories.includes(transmission.name)}
+                        onChange={() => handleCategoryToggle(transmission.name)}
+                        className={`${isRTL ? 'ml-2' : 'mr-2'} w-3 h-3 text-primary`}
+                      />
+                      <span className={`flex-1 text-gray-700 ${isRTL ? 'text-right pr-2' : 'text-left pl-2'}`}>
+                        {transmission.name} ({transmission.quantity})
                       </span>
                     </label>
                   ))}

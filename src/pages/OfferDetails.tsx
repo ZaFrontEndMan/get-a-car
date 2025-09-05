@@ -1,7 +1,6 @@
-
-import React from 'react';
-import { LanguageProvider } from '../contexts/LanguageContext';
-import OfferDetailsPage from '../components/offer-details/OfferDetailsPage';
+import React from "react";
+import { LanguageProvider } from "../contexts/LanguageContext";
+import OfferDetailsPage from "../components/offer-details/OfferDetailsPage";
 
 const OfferDetails = () => {
   return (

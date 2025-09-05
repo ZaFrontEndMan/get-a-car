@@ -2,7 +2,7 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import { useLanguage } from '../../contexts/LanguageContext';
-import { useOfferDetails } from '../../hooks/useOfferDetails';
+import { useOfferDetailsApi } from '../../hooks/website/useOfferDetailsApi';
 import { useOfferDetailsState } from '../../hooks/useOfferDetailsState';
 import Navbar from '../layout/navbar/Navbar';
 import MobileNav from '../MobileNav';
@@ -21,7 +21,7 @@ import OfferDetailsNotFound from './OfferDetailsNotFound';
 const OfferDetailsPage = () => {
   const { t } = useLanguage();
   const { id } = useParams();
-  const { offer, loading, additionalServices } = useOfferDetails(id);
+  const { offer, loading, additionalServices } = useOfferDetailsApi(id);
   const {
     selectedPricing,
     setSelectedPricing,
