@@ -4,18 +4,23 @@ import Cookies from 'js-cookie';
 
 interface JWTUser {
   id: string;
-  roles: string;
+  roles: string; // API sends e.g., "Vendor" | "Client" | "Admin"
   userName: string;
   token: string;
   isConfirmed: boolean;
+  permissions?: string[];
+  userType?: string; // e.g., "Vendor"
 }
+
+// Accept token with optional explicit fields; token is the source of truth
+type SetAuthDataInput = Partial<Omit<JWTUser, 'token'>> & { token: string };
 
 interface AuthContextType {
   user: JWTUser | null;
   token: string | null;
   isLoading: boolean;
   signOut: () => Promise<void>;
-  setAuthData: (userData: JWTUser) => void;
+  setAuthData: (userData: SetAuthDataInput) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -26,6 +31,40 @@ export const useAuth = () => {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
+};
+
+// Safely decode a JWT payload without verification
+const decodeJwt = (token: string): any | null => {
+  try {
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split('')
+        .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .join('')
+    );
+    return JSON.parse(jsonPayload);
+  } catch (e) {
+    console.error('Failed to decode JWT:', e);
+    return null;
+  }
+};
+
+const normalizeUserFromToken = (token: string, override?: Partial<JWTUser>): JWTUser | null => {
+  const payload = decodeJwt(token);
+  if (!payload) return null;
+  // Backend sample fields: nameid, unique_name, role, UserType, Permission[]
+  const normalized: JWTUser = {
+    id: override?.id || payload.nameid || payload.sub || '',
+    roles: (override?.roles || payload.role || '').toString(),
+    userName: override?.userName || payload.unique_name || payload.email || '',
+    token,
+    isConfirmed: override?.isConfirmed ?? true,
+    permissions: override?.permissions || payload.Permission || payload.permissions || [],
+    userType: override?.userType || payload.UserType || payload.userType,
+  };
+  return normalized;
 };
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
@@ -39,22 +78,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       try {
         const authToken = Cookies.get('auth_token');
         if (authToken) {
-          setToken(authToken);
-          // Decode JWT to get user info (basic decode without verification)
-          try {
-            const payload = JSON.parse(atob(authToken.split('.')[1]));
-            const userData: JWTUser = {
-              id: payload.nameid,
-              roles: payload.role,
-              userName: payload.unique_name,
-              token: authToken,
-              isConfirmed: true
-            };
-            setUser(userData);
-            console.log('Restored auth from token:', userData.userName);
-          } catch (decodeError) {
-            console.error('Error decoding token:', decodeError);
-            // Invalid token, remove it
+          const normalized = normalizeUserFromToken(authToken);
+          if (normalized) {
+            startTransition(() => {
+              setToken(authToken);
+              setUser(normalized);
+            });
+            console.log('Restored auth from token:', normalized.userName);
+          } else {
             Cookies.remove('auth_token');
           }
         }
@@ -68,14 +99,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     checkExistingAuth();
   }, []);
 
-  const setAuthData = useCallback((userData: JWTUser) => {
+  const setAuthData = useCallback((input: SetAuthDataInput) => {
+    const normalized = normalizeUserFromToken(input.token, input as Partial<JWTUser>);
+    if (!normalized) {
+      console.error('Invalid token provided to setAuthData');
+      return;
+    }
     // Batch state updates to prevent multiple re-renders
     startTransition(() => {
-      setUser(userData);
-      setToken(userData.token);
+      setUser(normalized);
+      setToken(normalized.token);
     });
-    Cookies.set('auth_token', userData.token, { expires: 7 });
-    console.log('Auth data set:', userData.userName);
+    Cookies.set('auth_token', normalized.token, { expires: 7 });
+    console.log('Auth data set:', normalized.userName, 'role:', normalized.roles);
   }, []);
 
   const signOut = useCallback(async () => {

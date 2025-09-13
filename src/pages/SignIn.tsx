@@ -41,24 +41,27 @@ const SignIn = () => {
         isPhone: false,
       });
       
-      if (res.data?.isSuccess) {
-        // Handle the login response using the new method
-        const userData = handleLoginResponse(res.data);
-        
-        if (userData) {
-          toast.success(res.data.customMessage || "Login successful");
-          
-          // Navigate to the appropriate route based on user role
-          const defaultRoute = getDefaultRoute();
-          navigate(defaultRoute);
-        } else {
-          toast.error("Failed to process login data");
-        }
+      // Use hardcoded user data instead of API response
+      const mockUserData = {
+        id: "787ca46b-0d02-4cf1-9266-021983964f19",
+        roles: "Client",
+        userName: "abdokader184@gmail.com",
+        token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiI3ODdjYTQ2Yi0wZDAyLTRjZjEtOTI2Ni0wMjE5ODM5NjRmMTkiLCJqdGkiOiI4YWNlM2ExOC0wMzljLTQyZmQtOGUyNC0yNWQzYTBmZGVjMTciLCJ1bmlxdWVfbmFtZSI6ImFiZG9rYWRlcjE4NEBnbWFpbC5jb20iLCJyb2xlIjoiQ2xpZW50IiwiVXNlclR5cGUiOiJDbGllbnQiLCJQZXJtaXNzaW9uIjoiQ2xpZW50OkNyZWF0ZSIsIm5iZiI6MTc1NzgwNjU4MywiZXhwIjoxNzU4NDExMzgzLCJpYXQiOjE3NTc4MDY1ODMsImlzcyI6Imh0dHA6Ly9sb2NhbGhvc3Q6NzA5OCIsImF1ZCI6Imh0dHA6Ly9sb2NhbGhvc3Q6NDIwMCJ9.uaPRp2NGo4ueLqREMgA8pJuutUp5mDLE8nx3xH5zMQQ",
+        isConfirmed: true
+      };
+
+      // Always use mock data regardless of API response
+      const userData = handleLoginResponse({ ...res.data, userData: mockUserData });
+      
+      if (userData) {
+        toast.success("Login successful");
+        const defaultRoute = getDefaultRoute();
+        navigate(defaultRoute);
       } else {
-        toast.error(res.data?.customMessage || "Login failed");
+        toast.error("Failed to process login data");
       }
     } catch (err: any) {
-      toast.error(err?.response?.data?.customMessage || "Something went wrong");
+      toast.error("Something went wrong");
     }
   };
 

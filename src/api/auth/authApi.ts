@@ -2,8 +2,13 @@
 import axiosInstance from "./../../utils/axiosInstance";
 
 export const authApi = {
-  login: (data: { username: string; password: string; isPhone: boolean }) =>
-    axiosInstance.post("/Auth/Login", data),
+  // Accept either `username` or `userName` from callers and normalize to backend's expected `userName`
+  login: (data: { username?: string; userName?: string; password: string; isPhone: boolean }) =>
+    axiosInstance.post("/Auth/Login", {
+      userName: data.userName ?? data.username ?? "",
+      password: data.password,
+      isPhone: data.isPhone,
+    }),
 
   confirmEmail: (id: string, token: string) =>
     axiosInstance.get(`/Auth/ConfirmEmail/${id}/${token}`),

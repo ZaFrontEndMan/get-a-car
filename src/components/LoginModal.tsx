@@ -6,9 +6,10 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Eye, EyeOff } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { authApi } from "@/api/auth/authApi";
+import { useUserData } from "@/hooks/useUserData";
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -18,6 +19,7 @@ interface LoginModalProps {
 
 const LoginModal = ({ isOpen, onClose, onSuccess }: LoginModalProps) => {
   const { t } = useLanguage();
+  const { handleLoginResponse } = useUserData();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -30,22 +32,27 @@ const LoginModal = ({ isOpen, onClose, onSuccess }: LoginModalProps) => {
     setIsLoading(true);
 
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: formData.email,
+      const res = await authApi.login({
+        username: formData.email,
         password: formData.password,
+        isPhone: false,
       });
 
-      if (error) {
-        toast.error(error.message);
-        return;
+      if (res.data?.isSuccess) {
+        const userData = handleLoginResponse(res.data);
+        if (userData) {
+          toast.success(res.data.customMessage || "Login successful");
+          onSuccess();
+          onClose();
+        } else {
+          toast.error("Failed to process login data");
+        }
+      } else {
+        toast.error(res.data?.customMessage || "Login failed");
       }
-
-      if (data.user) {
-        onSuccess();
-      }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Login error:", error);
-      toast.error("An error occurred during login");
+      toast.error(error?.response?.data?.customMessage || "An error occurred during login");
     } finally {
       setIsLoading(false);
     }

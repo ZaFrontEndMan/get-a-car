@@ -159,12 +159,12 @@ const AppRouter = () => {
     });
 
     if (routeSection) {
-      const [sectionName, sectionConfig] = routeSection;
-      const config = sectionConfig as RouteSection;
+      const [_, section] = routeSection;
+      const config = section as RouteSection;
 
       // Redirect authenticated users away from auth pages (signin, signup, etc.)
-      if (config.redirectIfAuthenticated && isAuthenticated) {
-        navigate(getDefaultRoute(), { replace: true }); // Redirect to role-specific dashboard
+      if (config.redirectIfAuthenticated && isAuthenticated) {        
+        navigate(getDefaultRoute(), { replace: true });
         return;
       }
 

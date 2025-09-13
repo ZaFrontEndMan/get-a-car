@@ -29,28 +29,28 @@ export const useUserData = () => {
   } = useQuery({
     queryKey: ["userInfo"],
     queryFn: getUserInfo,
-    enabled: !!authUser && !!token && authUser.roles === "Client", // Only fetch for client users with valid token
+    enabled: !!authUser && !!token && authUser.roles?.toLowerCase() === "client", // Only fetch for client users with valid token
     retry: false, // optional: avoid retry spamming if token expired
   });
 
   const handleLoginResponse = (response: LoginResponse) => {
-    if (response.isSuccess && response.data) {
-      const userData = {
+    if (response.isSuccess && response.data?.token) {
+      // Persist via AuthContext; it will decode JWT and normalize
+      setAuthData({ token: response.data.token });
+
+      // If it's a client, also fetch additional user data
+      if (response.data.roles?.toLowerCase() === "client") {
+        refetchUserData();
+      }
+
+      // Return the latest authUser shape if available (may update next tick)
+      return {
         id: response.data.id,
         roles: response.data.roles,
         userName: response.data.userName,
         token: response.data.token,
-        isConfirmed: response.data.isConfirmed
+        isConfirmed: response.data.isConfirmed,
       };
-      
-      setAuthData(userData);
-      
-      // If it's a client, also fetch additional user data
-      if (userData.roles === "Client") {
-        refetchUserData();
-      }
-      
-      return userData;
     }
     return null;
   };
@@ -62,7 +62,7 @@ export const useUserData = () => {
   }, [queryClient]);
 
   return {
-    user: authUser?.roles === "Client" ? user : authUser, // Return API user data for clients, auth user for others
+    user: authUser?.roles?.toLowerCase() === "client" ? user : authUser, // Return API user data for clients, auth user for others
     authUser, // Always available auth user from JWT
     refetchUserData, // ✅ call this manually when you want user data
     isLoading,
