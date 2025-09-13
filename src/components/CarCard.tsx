@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useLanguage } from "../contexts/LanguageContext";
 import { useWishlist } from "../hooks/useWishlist";
 import { Heart, Star, Users, Fuel, Settings } from "lucide-react";
+import LazyImage from "./ui/LazyImage";
 
 interface CarCardProps {
   car: {
@@ -34,12 +35,12 @@ interface CarCardProps {
       logo_url?: string;
     };
   };
+  viewMode?: "grid" | "list";
 }
 
-const CarCard = ({ car }: CarCardProps) => {
+const CarCard = ({ car, viewMode = "grid" }: CarCardProps) => {
   const { t } = useLanguage();
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
-  console.log(car);
 
   const handleFavoriteClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -88,25 +89,120 @@ const CarCard = ({ car }: CarCardProps) => {
   // Get rating with fallback
   const rating = car.rating || 4.5;
 
+  if (viewMode === "list") {
+    return (
+      <Link
+        to={`/cars/${car.id}`}
+        className="block bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300 hover:scale-[1.02] flex-grow"
+      >
+        <div className="flex gap-6 p-6">
+          {/* Image Section */}
+          <div className="relative w-48 h-32 flex-shrink-0">
+            <LazyImage
+              src={imageSource}
+              alt={car.title}
+              className="w-full h-full rounded-xl"
+            />
+
+            {/* Vendor Logo */}
+            {vendor?.logo_url && (
+              <div className="absolute bottom-2 left-2 w-8 h-8 rounded-full bg-white shadow-md overflow-hidden border-2 border-white">
+                <LazyImage
+                  src={vendor.logo_url}
+                  alt={vendor.name}
+                  className="w-full h-full"
+                />
+              </div>
+            )}
+
+            <button
+              onClick={handleFavoriteClick}
+              className={`absolute top-2 right-2 p-1.5 rounded-full transition-colors duration-200 z-10 ${
+                isCarFavorite
+                  ? "bg-red-500 text-white"
+                  : "bg-white/80 text-gray-600 hover:bg-red-500 hover:text-white"
+              }`}
+            >
+              <Heart
+                className="h-3 w-3"
+                fill={isCarFavorite ? "currentColor" : "none"}
+              />
+            </button>
+          </div>
+
+          {/* Content Section */}
+          <div className="flex-1 flex flex-col justify-between">
+            <div>
+              <div className="flex justify-between items-start mb-2">
+                <div>
+                  <h3 className="font-bold text-xl text-gray-900">
+                    {car.title}
+                  </h3>
+                  <p className="text-gray-600 text-sm">{car.brand}</p>
+                </div>
+                <div className="flex items-center space-x-1 rtl:space-x-reverse">
+                  <Star className="h-4 w-4 text-accent fill-current" />
+                  <span className="text-sm font-medium">{rating}</span>
+                </div>
+              </div>
+
+              <div className="flex items-center space-x-6 rtl:space-x-reverse text-gray-600 text-sm mb-4">
+                <div className="flex items-center space-x-1 rtl:space-x-reverse">
+                  <Users className="h-4 w-4" />
+                  <span>{car.seats}</span>
+                </div>
+                <div className="flex items-center space-x-1 rtl:space-x-reverse">
+                  <Fuel className="h-4 w-4" />
+                  <span>
+                    {fuelType ? t(fuelType.toLowerCase()) : t("gasoline")}
+                  </span>
+                </div>
+                <div className="flex items-center space-x-1 rtl:space-x-reverse">
+                  <Settings className="h-4 w-4" />
+                  <span>
+                    {transmissionType
+                      ? t(transmissionType.toLowerCase())
+                      : t("automatic")}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div className="space-y-1">
+                <span className="text-sm text-gray-600">{t("daily")}</span>
+                <div className="text-2xl font-bold text-primary">
+                  {t("currency")} {dailyPrice}
+                </div>
+              </div>
+              <button
+                onClick={handleBookClick}
+                className="bg-primary text-white px-6 py-2 rounded-lg hover:bg-primary/90 transition-colors duration-200"
+              >
+                {t("bookNow")}
+              </button>
+            </div>
+          </div>
+        </div>
+      </Link>
+    );
+  }
+
   return (
     <Link
       to={`/cars/${car.id}`}
-      className="block bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 transform hover:scale-105"
+      className="block bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300 hover:scale-[1.02]"
     >
       <div className="relative">
-        <img
-          src={imageSource}
-          alt={car.title}
-          className="w-full h-48 object-cover"
-        />
+        <LazyImage src={imageSource} alt={car.title} className="w-full h-48" />
 
         {/* Vendor Logo */}
         {vendor?.logo_url && (
           <div className="absolute bottom-3 left-3 w-10 h-10 rounded-full bg-white shadow-md overflow-hidden border-2 border-white">
-            <img
+            <LazyImage
               src={vendor.logo_url}
               alt={vendor.name}
-              className="w-full h-full object-cover"
+              className="w-full h-full"
             />
           </div>
         )}

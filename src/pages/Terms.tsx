@@ -22,10 +22,7 @@ const Terms = () => {
               {t('terms')}
             </h1>
             <p className="text-lg text-gray-600">
-              {language === 'ar' 
-                ? 'الشروط والأحكام الخاصة بخدمات تأجير السيارات' 
-                : 'Terms and conditions for our car rental services'
-              }
+              {t('termsDescription')}
             </p>
           </div>
 
@@ -39,7 +36,7 @@ const Terms = () => {
           ) : error ? (
             <div className="text-center py-12">
               <p className="text-red-600">
-                {language === 'ar' ? 'خطأ في تحميل الشروط والأحكام' : 'Error loading terms and conditions'}
+                {t('errorLoadingTerms')}
               </p>
             </div>
           ) : (
@@ -53,10 +50,7 @@ const Terms = () => {
               {terms && (
                 <div className="mt-8 pt-8 border-t border-gray-200">
                   <p className="text-sm text-gray-500">
-                    {language === 'ar' 
-                      ? `الإصدار ${terms.version} - آخر تحديث: ${new Date(terms.updated_at).toLocaleDateString('ar-SA')}` 
-                      : `Version ${terms.version} - Last updated: ${new Date(terms.updated_at).toLocaleDateString()}`
-                    }
+                    {`${t('version')} ${terms.version} - ${t('lastUpdated')}: ${new Date(terms.updated_at).toLocaleDateString(language === 'ar' ? 'ar-SA' : 'en-US')}`}
                   </p>
                 </div>
               )}

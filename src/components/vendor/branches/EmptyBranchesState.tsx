@@ -8,10 +8,9 @@ interface EmptyBranchesStateProps {
   type: 'no-auth' | 'error' | 'empty';
   error?: string;
   onAddBranch?: () => void;
-  currentUser?: any;
 }
 
-const EmptyBranchesState = ({ type, error, onAddBranch, currentUser }: EmptyBranchesStateProps) => {
+const EmptyBranchesState = ({ type, error, onAddBranch }: EmptyBranchesStateProps) => {
   if (type === 'no-auth') {
     return (
       <Card>
@@ -46,10 +45,7 @@ const EmptyBranchesState = ({ type, error, onAddBranch, currentUser }: EmptyBran
         <Building2 className="h-12 w-12 text-gray-400 mb-4" />
         <h3 className="text-lg font-medium text-gray-900 mb-2">No branches found</h3>
         <p className="text-gray-600 mb-4">
-          {currentUser 
-            ? "You don't have any branches yet. Contact support to set up your vendor account."
-            : "Please sign in to view your branches"
-          }
+          You don't have any branches yet.
         </p>
         <Button onClick={onAddBranch}>Add Your First Branch</Button>
       </CardContent>

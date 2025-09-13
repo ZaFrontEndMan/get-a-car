@@ -48,7 +48,11 @@ export const arTranslations = {
   email: "البريد الإلكتروني",
   message: "الرسالة",
   successMessage: "تم إرسال الرسالة بنجاح!",
-
+  contactDescription:
+    "نحن هنا لمساعدتك. تواصل معنا عبر النموذج أدناه أو استخدم معلومات الاتصال المتاحة.",
+  selectSubject: "اختر الموضوع",
+  phoneFormat: "تنسيق الهاتف",
+  messageBody: "نص الرسالة",
   // About Us - Main Content
   ourStory: "قصتنا",
   aboutUsTitle: "معلومات عنا",
@@ -129,6 +133,8 @@ export const arTranslations = {
 
   // More
   notFound: "الصفحة غير موجودة",
+  offerNotFound: "العرض غير موجود",
+  noOffersFound: "لا توجد عروض",
 
   // Form
   forgotPassword: "نسيت كلمة المرور؟",
@@ -287,6 +293,9 @@ export const arTranslations = {
   year: "السنة",
   color: "اللون",
   fuelType: "نوع الوقود",
+  gasoline: "بنزين",
+  automatic: "أوتوماتيك",
+  daily: "يومي",
   doors: "عدد الأبواب",
   airConditioning: "تكييف الهواء",
   bluetooth: "بلوتوث",
@@ -314,11 +323,8 @@ export const arTranslations = {
   bookingHistory: "تاريخ الحجوزات",
   bookingDetails: "تفاصيل الحجز",
   modifyBooking: "تعديل الحجز",
-  cancelBooking: "إلغاء الحجز",
-  extendBooking: "تمديد الحجز",
 
   // Payment
-  paymentMethod: "طريقة الدفع",
   creditCard: "بطاقة ائتمان",
   debitCard: "بطاقة مدين",
   paypal: "باي بال",
@@ -387,7 +393,7 @@ export const arTranslations = {
   reload: "إعادة تحميل",
 
   // Validation Messages
-  required: "هذا الحقل مطلوب",
+
   invalidEmail: "البريد الإلكتروني غير صحيح",
   passwordTooShort: "كلمة المرور قصيرة جداً",
   passwordsNotMatch: "كلمات المرور غير متطابقة",
@@ -519,7 +525,6 @@ export const arTranslations = {
   system: "النظام",
 
   // Form labels
-  phoneNumber: "رقم الهاتف",
 
   // Additional status and states
   enabled: "مفعل",
@@ -616,4 +621,86 @@ export const arTranslations = {
   distance: "المسافة",
   distanceNearToFar: "المسافة: من الأقرب إلى الأبعد",
   distanceFarToNear: "المسافة: من الأبعد إلى الأقرب",
+
+  // رسائل خطأ صفحة السيارات
+  errorLoadingCars: "خطأ في تحميل السيارات",
+  pleaseTryAgainLater: "يرجى المحاولة مرة أخرى لاحقاً",
+  reloadPage: "إعادة تحميل الصفحة",
+  unableToLoadFilters: "غير قادر على تحميل المرشحات. يرجى تحديث الصفحة.",
+  searchControlsUnavailable: "عناصر التحكم في البحث غير متاحة مؤقتاً.",
+  noCarsFound: "لم يتم العثور على سيارات",
+  tryAdjustingCriteria: "حاول تعديل معايير البحث أو التصفية",
+  paginationUnavailable: "التنقل بين الصفحات غير متاح مؤقتاً.",
+  carsFound: "السيارات الموجودة",
+
+  // صفحة من نحن
+  aboutUs: "من نحن",
+  errorLoadingTeamData: "خطأ في تحميل بيانات الفريق",
+  retry: "إعادة المحاولة",
+  quality: "الجودة",
+  service: "الخدمة",
+  innovation: "الابتكار",
+  missionDescription:
+    "تقديم خدمات تأجير سيارات استثنائية تتجاوز توقعات العملاء من خلال المركبات عالية الجودة والأسعار التنافسية وخدمة العملاء المتميزة.",
+  visionDescription:
+    "أن نكون شركة تأجير السيارات الرائدة في المملكة العربية السعودية، المعروفة بالابتكار والموثوقية ورضا العملاء.",
+  valuesDescription:
+    "المبادئ الأساسية التي توجه أعمالنا وتحدد التزامنا بالتميز.",
+  qualityDescription:
+    "نحافظ على أعلى المعايير في أسطول مركباتنا وتقديم الخدمات.",
+  serviceDescription: "رضا العملاء هو في قلب كل ما نقوم به.",
+  innovationDescription: "نحسن خدماتنا باستمرار من خلال التكنولوجيا والابتكار.",
+  aboutHeroDescription:
+    "نحن ملتزمون بتقديم أفضل تجربة تأجير سيارات في المملكة العربية السعودية مع أسطولنا المتميز وخدمتنا الاستثنائية.",
+  noTeamMembersFound: "لم يتم العثور على أعضاء الفريق",
+
+  // صفحة الشروط والأحكام
+  termsDescription: "الشروط والأحكام الخاصة بخدمات تأجير السيارات",
+  errorLoadingTerms: "خطأ في تحميل الشروط والأحكام",
+  version: "الإصدار",
+  lastUpdated: "آخر تحديث",
+
+  // صفحة سياسة الخصوصية
+  privacyDescription: "سياسة الخصوصية الخاصة بخدمات تأجير السيارات",
+  errorLoadingPrivacy: "خطأ في تحميل سياسة الخصوصية",
+
+  websiteLabel: "الموقع الإلكتروني",
+  businessHours: "ساعات العمل",
+  sundayThursdayHours: "الأحد - الخميس: 8:00 صباحاً - 6:00 مساءً",
+  fridaySaturdayHours: "الجمعة - السبت: 10:00 صباحاً - 4:00 مساءً",
+  interactiveMap: "الخريطة التفاعلية",
+
+  required: "*",
+  yourFullName: "اسمك الكامل",
+  yourEmail: "بريدك الإلكتروني",
+  phoneNumber: "رقم الهاتف",
+  subject: "الموضوع",
+  bookingInquiry: "استفسار حجز",
+  partnership: "شراكة",
+  feedback: "ملاحظات",
+  other: "أخرى",
+  messageHelp: "كيف يمكننا مساعدتك؟",
+
+  // مفاتيح إضافية
+  fuelTypes: "أنواع الوقود",
+  carTypes: "أنواع السيارات",
+  transmissions: "ناقل الحركة",
+  latestOffers: "أحدث العروض",
+
+  // قيم افتراضية لصفحة التواصل
+  defaultAddress: "123 طريق الملك فهد، الرياض 12345، المملكة العربية السعودية",
+  defaultPhone: "+966 11 123 4567",
+  defaultEmail: "info@getcar.sa",
+
+  // صفحة الملف الشخصي
+  profileDescription: "إدارة معلوماتك الشخصية والمستندات",
+  personalInformation: "المعلومات الشخصية",
+  fullNameLabel: "الاسم الكامل",
+  emailLabel: "البريد الإلكتروني",
+  selectGender: "اختر الجنس",
+  addressLabel: "العنوان",
+  nationalIdLabel: "الهوية الوطنية",
+  uploadProfilePhoto: "ارفع صورة ملفك الشخصي",
 };
+
+export default arTranslations;

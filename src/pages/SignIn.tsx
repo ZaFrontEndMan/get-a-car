@@ -5,9 +5,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useLanguage } from "../contexts/LanguageContext";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import Cookies from "js-cookie";
 import { authApi } from "@/api/auth/authApi";
 import { useUserData } from "@/hooks/useUserData";
+import { useUser } from "@/contexts/UserContext";
 
 const loginSchema = z.object({
   username: z.string().email("Invalid username address"),
@@ -19,7 +19,8 @@ type LoginFormData = z.infer<typeof loginSchema>;
 const SignIn = () => {
   const { t } = useLanguage();
   const navigate = useNavigate();
-  const { refetchUserData } = useUserData();
+  const { handleLoginResponse } = useUserData();
+  const { getDefaultRoute } = useUser();
 
   const {
     register,
@@ -39,17 +40,19 @@ const SignIn = () => {
         ...(data as { username: string; password: string }),
         isPhone: false,
       });
+      
       if (res.data?.isSuccess) {
-        const { token, roles } = res.data.data;
-
-        Cookies.set("auth_token", token, { expires: 7 });
-        refetchUserData();
-        toast.success(res.data.customMessage || "Login successful");
-
-        if (roles === "Client") {
-          navigate("/dashboard");
+        // Handle the login response using the new method
+        const userData = handleLoginResponse(res.data);
+        
+        if (userData) {
+          toast.success(res.data.customMessage || "Login successful");
+          
+          // Navigate to the appropriate route based on user role
+          const defaultRoute = getDefaultRoute();
+          navigate(defaultRoute);
         } else {
-          navigate("/");
+          toast.error("Failed to process login data");
         }
       } else {
         toast.error(res.data?.customMessage || "Login failed");

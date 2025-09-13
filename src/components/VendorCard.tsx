@@ -27,7 +27,7 @@ const VendorCard = ({ vendor }: VendorCardProps) => {
       <div className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:scale-105 border border-gray-100">
         <div className="aspect-video overflow-hidden">
           <img
-            src={`https://test.get2cars.com/${vendor.image}`}
+            src={`${import.meta.env.VITE_UPLOADS_BASE_URL}/${vendor.image}`}
             alt={vendor.name}
             className="w-full h-full object-cover rounded-t-2xl"
           />

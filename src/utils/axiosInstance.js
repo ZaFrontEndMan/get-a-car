@@ -30,7 +30,7 @@ axiosInstance.interceptors.response.use(
             toast.error(error.response.data.customMessage);
         } else if (error.message) {
 
-            toast.error(error.message);
+            // toast.error(error.message);
         }
 
         if (error.response?.status === 401) {

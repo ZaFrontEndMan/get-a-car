@@ -21,6 +21,33 @@ export interface Offer {
   type?: string;
 }
 
+export interface PopularCar {
+  carID: number;
+  name: string;
+  model: string;
+  liter: string;
+  doors: string;
+  type: string;
+  image: string | null;
+  pricePerDay: number;
+  pricePerWeek: number;
+  pricePerMonth: number;
+  availability: boolean;
+  isWishList: boolean | null;
+  isGoodRating: boolean | null;
+  bookingCount: number;
+}
+
+export interface PopularCarsResponse {
+  isSuccess: boolean;
+  data: PopularCar[];
+}
+
+export interface PopularOffersResponse {
+  isSuccess: boolean;
+  data: Offer[];
+}
+
 export interface CarFilter {
   header: string;
   filterData: { name: string; quantity: number }[];
@@ -66,17 +93,13 @@ export const getAllOffers = async (
 };
 
 // Get most popular offers (short list)
-export const getMostPopularOffers = async (
-  pageIndex: number,
-  pageSize: number
-): Promise<Offer[]> => {
-  const { data } = await axiosInstance.get(
-    "/Client/Website/CarAllOffers?pageSize=22418337&pageIndex=22418337",
-    {
-      params: { pageIndex, pageSize },
-    }
-  );
+export const getMostPopularOffers = async (): Promise<PopularOffersResponse> => {
+  const { data } = await axiosInstance.get("/Client/Website/getMostPopularOffers");
+  return data;
+};
 
-  // API wraps inside `data`
-  return data.data;
+// Get most popular cars
+export const getMostPopularCars = async (): Promise<PopularCarsResponse> => {
+  const { data } = await axiosInstance.get("/Client/Website/GetMostPopularCars");
+  return data;
 };

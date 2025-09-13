@@ -1,9 +1,12 @@
 // src/hooks/useOffers.ts
 import {
   getMostPopularOffers,
+  getMostPopularCars,
   getAllOffers,
   Offer,
   AllOffersResponse,
+  PopularCarsResponse,
+  PopularOffersResponse,
 } from "@/api/website/websiteOffers";
 import { useQuery } from "@tanstack/react-query";
 
@@ -25,10 +28,19 @@ export const useAllOffers = (pageIndex: number, pageSize: number) => {
 };
 
 // 🔹 Hook: Get most popular offers
-export const useMostPopularOffers = (pageIndex: number, pageSize: number) => {
-  return useQuery<Offer[]>({
-    queryKey: ["mostPopularOffers", pageIndex, pageSize],
-    queryFn: () => getMostPopularOffers(pageIndex, pageSize),
+export const useMostPopularOffers = () => {
+  return useQuery<PopularOffersResponse>({
+    queryKey: ["mostPopularOffers"],
+    queryFn: () => getMostPopularOffers(),
+    keepPreviousData: true,
+  });
+};
+
+// 🔹 Hook: Get most popular cars
+export const useMostPopularCars = () => {
+  return useQuery<PopularCarsResponse>({
+    queryKey: ["mostPopularCars"],
+    queryFn: () => getMostPopularCars(),
     keepPreviousData: true,
   });
 };

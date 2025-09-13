@@ -12,60 +12,78 @@ import {
   X
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 interface VendorSidebarProps {
   isOpen: boolean;
   onClose: () => void;
-  activeTab: string;
-  onTabChange: (tab: string) => void;
 }
 
-const VendorSidebar = ({ isOpen, onClose, activeTab, onTabChange }: VendorSidebarProps) => {
+const VendorSidebar = ({ isOpen, onClose }: VendorSidebarProps) => {
   const { t, language } = useLanguage();
   const isRTL = language === 'ar';
+  const navigate = useNavigate();
+  const location = useLocation();
+  const basePath = '/vendor-dashboard';
 
   const menuItems = [
     {
       id: 'overview',
       name: language === 'ar' ? 'نظرة عامة' : 'Overview',
       icon: BarChart3,
+      path: `${basePath}/overview`,
     },
     {
       id: 'branches',
       name: language === 'ar' ? 'الفروع' : 'Branches',
       icon: Building2,
+      path: `${basePath}/branches`,
     },
     {
       id: 'cars',
       name: language === 'ar' ? 'السيارات' : 'Cars',
       icon: Car,
+      path: `${basePath}/cars`,
     },
     {
       id: 'offers',
       name: language === 'ar' ? 'العروض' : 'Offers',
       icon: Tag,
+      path: `${basePath}/offers`,
     },
     {
       id: 'bookings',
       name: language === 'ar' ? 'الحجوزات' : 'Bookings',
       icon: Calendar,
+      path: `${basePath}/bookings`,
     },
     {
       id: 'policies',
       name: language === 'ar' ? 'السياسات' : 'Policies',
       icon: Shield,
+      path: `${basePath}/policies`,
     },
     {
       id: 'users',
       name: language === 'ar' ? 'المستخدمون' : 'Users',
       icon: Users,
+      path: `${basePath}/users`,
     },
     {
       id: 'profile',
       name: language === 'ar' ? 'الملف الشخصي' : 'Profile',
       icon: Settings,
+      path: `${basePath}/profile`,
     },
   ];
+
+  const isRouteActive = (itemPath: string, id: string) => {
+    const { pathname } = location;
+    if (id === 'overview') {
+      return pathname === basePath || pathname.startsWith(itemPath);
+    }
+    return pathname.startsWith(itemPath);
+  };
 
   return (
     <>
@@ -103,13 +121,13 @@ const VendorSidebar = ({ isOpen, onClose, activeTab, onTabChange }: VendorSideba
           <div className="space-y-2">
             {menuItems.map((item) => {
               const Icon = item.icon;
-              const isActive = activeTab === item.id;
+              const isActive = isRouteActive(item.path, item.id);
               
               return (
                 <button
                   key={item.id}
                   onClick={() => {
-                    onTabChange(item.id);
+                    navigate(item.path);
                     onClose();
                   }}
                   className={`

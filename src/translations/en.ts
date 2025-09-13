@@ -215,6 +215,9 @@ export const enTranslations = {
   year: "Year",
   color: "Color",
   fuelType: "Fuel Type",
+  gasoline: "Gasoline",
+  automatic: "Automatic",
+  daily: "Daily",
   doors: "Doors",
   airConditioning: "Air Conditioning",
   bluetooth: "Bluetooth",
@@ -341,4 +344,345 @@ export const enTranslations = {
   rentalDays: "Rental Days",
   totalDays: "Total Days",
   rentalPeriod: "Rental Period",
+
+  // Missing keys from Arabic translation
+  offerNotFound: "Offer not found",
+  noOffersFound: "No offers found",
+  aboutUsTitle: "About Us",
+  aboutUsDescription:
+    "We are a leading car rental company in Saudi Arabia, providing excellent services and a modern fleet of cars to meet your various needs.",
+  ourMission: "Our Mission",
+  missionText:
+    "To provide high-quality car rental services with a focus on customer satisfaction, safety, and comfort.",
+  ourVision: "Our Vision",
+  visionText:
+    "To be the first choice for car rental in the region through innovation and excellence in service.",
+  ourValues: "Our Values",
+  valuesText:
+    "Honesty, transparency, quality, and commitment to providing the best customer experience.",
+
+  // Statistics & Achievements
+  yearsOfExperience: "Years of Experience",
+  happyCustomers: "Happy Customers",
+  carsAvailable: "Cars Available",
+  citiesCovered: "Cities Covered",
+
+  // Team Section
+  ourTeam: "Our Team",
+  teamDescription: "A team of dedicated professionals at your service",
+  teamMemberRole: "Position",
+
+  // Why Choose Us
+  whyChooseUs: "Why Choose Us?",
+  reliableService: "Reliable Service",
+  reliableServiceDesc: "We guarantee you reliable service around the clock",
+  modernFleet: "Modern Fleet",
+  modernFleetDesc: "Modern and diverse cars to suit all your needs",
+  competitivePrices: "Competitive Prices",
+  competitivePricesDesc: "Best prices in the market with high quality",
+  customerSupport: "Customer Support",
+  customerSupportDesc: "Specialized support team available to help you anytime",
+
+  // Company Info
+  establishedYear: "Established in",
+  headquarters: "Headquarters",
+  totalEmployees: "Total Employees",
+  branchesCount: "Number of Branches",
+
+  // Services
+  ourServices: "Our Services",
+  shortTermRental: "Short Term Rental",
+  longTermRental: "Long Term Rental",
+  corporateRental: "Corporate Rental",
+  airportPickup: "Airport Pickup",
+  deliveryService: "Delivery Service",
+  driverService: "Driver Service",
+
+  // Footer Links
+  usefulLinks: "Useful Links",
+  quickLinks: "Quick Links",
+
+  // Sorting Options
+  sortByPriceLowToHigh: "Price: Low to High",
+  sortByPriceHighToLow: "Price: High to Low",
+  sortByNewestFirst: "Newest First",
+  sortByMostPopular: "Most Popular",
+
+  // Popular Cars Section
+  popularCarsDesc: "Discover our premium collection of most demanded cars",
+
+  // Testimonials Section
+  testimonialsDescription:
+    "Hear what our customers say about their experience with our car rental service",
+
+  // Certifications
+  ourCertifications: "Our Certifications and Licenses",
+  licensedOperator: "Licensed Operator",
+  insuranceCertified: "Insurance Certified",
+  safetyStandards: "Safety Standards",
+  qualityAssurance: "Quality Assurance",
+
+  // Additional missing keys
+  clientInfo: "Client Info",
+  activity: "Activity",
+  totalSpent: "Total Spent",
+  lastBooking: "Last Booking",
+  joined: "Joined",
+  actions: "Actions",
+  noPhone: "No Phone",
+  noBookings: "No Bookings",
+  noClientsFound: "No clients found",
+
+  branchName: "Branch Name",
+  manager: "Manager",
+  created: "Created",
+
+  bookingNumber: "Booking Number",
+  customer: "Customer",
+  vehicle: "Vehicle",
+  pickupDateShort: "Pickup Date",
+  returnDateShort: "Return Date",
+  amount: "Amount",
+
+  brand: "Brand",
+  model: "Model",
+  price: "Price",
+  category: "Category",
+  description: "Description",
+  image: "Image",
+  title: "Title",
+  content: "Content",
+  author: "Author",
+  published: "Published",
+  slug: "Slug",
+
+  companyName: "Company Name",
+  businessLicense: "Business License",
+
+  transactionId: "Transaction ID",
+  paymentDate: "Payment Date",
+
+  confirmed: "Confirmed",
+  cancelled: "Cancelled",
+  completed: "Completed",
+  inProgress: "In Progress",
+
+  growth: "Growth",
+  revenue: "Revenue",
+
+  noDataAvailable: "No data available",
+  loadingData: "Loading data...",
+  searchPlaceholder: "Search...",
+  filterBy: "Filter by",
+  sortBy: "Sort by",
+
+  heroTitle: "Hero Title",
+  heroSubtitle: "Hero Subtitle",
+  heroImage: "Hero Image",
+  order: "Order",
+
+  achievementTitle: "Achievement Title",
+  achievementValue: "Achievement Value",
+  achievementIcon: "Achievement Icon",
+
+  customerName: "Customer Name",
+  testimonialText: "Testimonial Text",
+  customerImage: "Customer Image",
+
+  countryName: "Country Name",
+  countryCode: "Country Code",
+  cityName: "City Name",
+
+  blogTitle: "Blog Title",
+  blogContent: "Blog Content",
+  blogImage: "Blog Image",
+  blogAuthor: "Blog Author",
+  publishedDate: "Published Date",
+  excerpt: "Excerpt",
+
+  editItem: "Edit Item",
+  deleteItem: "Delete Item",
+  addNew: "Add New",
+  cancelChanges: "Cancel Changes",
+
+  statistics: "Statistics",
+  reports: "Reports",
+  analytics: "Analytics",
+  management: "Management",
+  system: "System",
+
+  phoneNumber: "Phone Number",
+
+  enabled: "Enabled",
+  disabled: "Disabled",
+  online: "Online",
+  offline: "Offline",
+  draft: "Draft",
+  archived: "Archived",
+
+  usersManagement: "Users Management",
+  manageRegisteredUsers: "Manage all registered users",
+  addUser: "Add User",
+  searchUsers: "Search users...",
+  license: "License",
+  noLicense: "No License",
+  userIdShort: "ID",
+
+  manageCarRentalVendors: "Manage car rental vendors",
+  addVendor: "Add Vendor",
+  totalVendors: "Total Vendors",
+  totalCars: "Total Cars",
+  verifiedVendors: "Verified Vendors",
+  avgRating: "Avg Rating",
+  searchVendors: "Search vendors...",
+  vendorInfo: "Vendor Info",
+  noLocation: "No Location",
+  unverified: "Unverified",
+
+  bookingsManagement: "Bookings Management",
+  monitorAllBookings: "Monitor and manage all car bookings",
+  completedBookings: "Completed Bookings",
+  searchBookings: "Search bookings...",
+  bookingInfo: "Booking Info",
+  customerInfo: "Customer Info",
+
+  paymentsManagement: "Payments Management",
+  monitorPaymentTransactions: "Monitor and manage all payment transactions",
+  totalPayments: "Total Payments",
+  completedPayments: "Completed Payments",
+  pendingPayments: "Pending Payments",
+  searchPayments: "Search payments...",
+  paymentInfo: "Payment Info",
+  booking: "Booking",
+  method: "Method",
+  receipt: "Receipt",
+  completeTransactionHistory:
+    "Complete transaction history and payment details",
+
+  userInfo: "User Info",
+  driverLicense: "Driver License",
+  registrationDate: "Registration Date",
+
+  searchVendorsPlaceholder: "Search vendors...",
+  searchUsersPlaceholder: "Search users...",
+  searchBookingsPlaceholder: "Search bookings...",
+  searchPaymentsPlaceholder: "Search payments...",
+
+  priceLowToHigh: "Price: Low to High",
+  priceHighToLow: "Price: High to Low",
+  newestFirst: "Newest First",
+  mostPopular: "Most Popular",
+  page: "Page",
+  of: "of",
+
+  ratingHighToLow: "Rating: High to Low",
+  ratingLowToHigh: "Rating: Low to High",
+  nameAToZ: "Name: A to Z",
+  nameZToA: "Name: Z to A",
+  availabilityFirst: "Available First",
+  brandAToZ: "Brand: A to Z",
+  brandZToA: "Brand: Z to A",
+  yearNewestFirst: "Year: Newest First",
+  yearOldestFirst: "Year: Oldest First",
+  fuelEfficiency: "Fuel Efficiency",
+  seatsLowToHigh: "Seats: Low to High",
+  seatsHighToLow: "Seats: High to Low",
+  recommended: "Recommended",
+  featured: "Featured",
+
+  highestDiscount: "Highest Discount",
+  expiringSoon: "Expiring Soon",
+  searchOffers: "Search Offers",
+  claimOffer: "Claim Offer",
+  searchCarsPlaceholder: "Search cars...",
+  sortByRelevance: "Sort by Relevance",
+  distance: "Distance",
+  distanceNearToFar: "Distance: Near to Far",
+  distanceFarToNear: "Distance: Far to Near",
+
+  // Cars page error messages
+  errorLoadingCars: "Error loading cars",
+  pleaseTryAgainLater: "Please try again later",
+  reloadPage: "Reload Page",
+  unableToLoadFilters: "Unable to load filters. Please refresh the page.",
+  searchControlsUnavailable: "Search controls temporarily unavailable.",
+  noCarsFound: "No cars found",
+  tryAdjustingCriteria: "Try adjusting your search or filter criteria",
+  paginationUnavailable: "Pagination temporarily unavailable.",
+  carsFound: "Cars Found",
+
+  // About page
+  aboutUs: "About Us",
+  errorLoadingTeamData: "Error loading team data",
+  retry: "Retry",
+
+  quality: "Quality",
+  service: "Service",
+  innovation: "Innovation",
+  missionDescription:
+    "To provide exceptional car rental services that exceed customer expectations through quality vehicles, competitive pricing, and outstanding customer service.",
+  visionDescription:
+    "To be the leading car rental company in Saudi Arabia, known for innovation, reliability, and customer satisfaction.",
+  valuesDescription:
+    "The core principles that guide our business and define our commitment to excellence.",
+  qualityDescription:
+    "We maintain the highest standards in our vehicle fleet and service delivery.",
+  serviceDescription:
+    "Customer satisfaction is at the heart of everything we do.",
+  innovationDescription:
+    "We continuously improve our services through technology and innovation.",
+  aboutHeroDescription:
+    "We are dedicated to providing the best car rental experience in Saudi Arabia with our premium fleet and exceptional service.",
+  noTeamMembersFound: "No team members found",
+
+  // Terms page
+  termsDescription: "Terms and conditions for our car rental services",
+  errorLoadingTerms: "Error loading terms and conditions",
+  version: "Version",
+  lastUpdated: "Last updated",
+
+  // Privacy page
+  privacyDescription: "Privacy policy for our car rental services",
+  errorLoadingPrivacy: "Error loading privacy policy",
+
+  // Contact page
+
+  websiteLabel: "Website",
+  businessHours: "Business Hours",
+  sundayThursdayHours: "Sunday - Thursday: 8:00 AM - 6:00 PM",
+  fridaySaturdayHours: "Friday - Saturday: 10:00 AM - 4:00 PM",
+  interactiveMap: "Interactive Map",
+
+  yourFullName: "Your full name",
+  yourEmail: "Your email",
+  phoneFormat: "+966 XX XXX XXXX",
+  subject: "Subject",
+  selectSubject: "Select subject",
+  bookingInquiry: "Booking Inquiry",
+  partnership: "Partnership",
+  feedback: "Feedback",
+  other: "Other",
+  messageHelp: "How can we help you?",
+
+  // Additional keys
+  fuelTypes: "Fuel Types",
+  carTypes: "Car Types",
+  transmissions: "Transmissions",
+  latestOffers: "Latest Offers",
+
+  // Contact page fallback values
+  defaultAddress: "123 King Fahd Road, Riyadh 12345, Saudi Arabia",
+  defaultPhone: "+966 11 123 4567",
+  defaultEmail: "info@getcar.sa",
+
+  // Profile page
+  profileDescription: "Manage your personal information and documents",
+  personalInformation: "Personal Information",
+  fullNameLabel: "Full Name",
+  emailLabel: "Email",
+  selectGender: "Select gender",
+  nationalIdLabel: "National ID",
+  uploadProfilePhoto: "Upload your profile photo",
 };
+
+export default enTranslations;

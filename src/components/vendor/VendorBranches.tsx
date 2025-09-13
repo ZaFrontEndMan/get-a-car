@@ -1,37 +1,70 @@
-
-import React, { useState } from 'react';
-import BranchForm from './BranchForm';
-import BranchCard from './branches/BranchCard';
-import EmptyBranchesState from './branches/EmptyBranchesState';
-import BranchesHeader from './branches/BranchesHeader';
-import BranchesViewToggle from './branches/BranchesViewToggle';
-import BranchesListView from './branches/BranchesListView';
-import BranchesTableView from './branches/BranchesTableView';
-import { useBranches } from './branches/useBranches';
+import React, { useMemo, useState } from "react";
+import BranchForm from "./BranchForm";
+import BranchCard from "./branches/BranchCard";
+import EmptyBranchesState from "./branches/EmptyBranchesState";
+import BranchesViewToggle from "./branches/BranchesViewToggle";
+import BranchesListView from "./branches/BranchesListView";
+import BranchesTableView from "./branches/BranchesTableView";
+import { useGetVendorBranches } from "@/hooks/vendor/useVendorBranch";
+import { useQueryClient } from "@tanstack/react-query";
+import { useToast } from "@/hooks/use-toast";
+import { Button } from "../ui/button";
+import { Plus } from "lucide-react";
 
 const VendorBranches = () => {
   const [showForm, setShowForm] = useState(false);
-  const [editingBranch, setEditingBranch] = useState(null);
-  const [currentView, setCurrentView] = useState<'grid' | 'list' | 'table'>('grid');
-  
-  const {
-    currentUser,
-    branches,
-    isLoading,
-    error,
-    deleteMutation,
-    handleAddBranch,
-    refreshBranches
-  } = useBranches();
+  const [editingBranch, setEditingBranch] = useState<any>(null);
+  const [currentView, setCurrentView] = useState<"grid" | "list" | "table">(
+    "table"
+  );
+
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+  const { data, isLoading, error } = useGetVendorBranches();
+
+  const branches = useMemo(() => {
+    const raw =
+      (data as any)?.data?.vendorBranches ||
+      (data as any)?.vendorBranches ||
+      (data as any)?.data?.data?.branches ||
+      (data as any)?.data?.branches ||
+      (data as any)?.branches ||
+      (data as any)?.data ||
+      [];
+
+    return (raw as any[]).map((b) => ({
+      id: (b?.id ?? "").toString(),
+      name: b?.branchName ?? b?.name ?? "Branch",
+      address: b?.address ?? b?.streetAddress ?? "",
+      city: b?.city ?? b?.location ?? "",
+      phone: b?.branchPhoneNumber ?? b?.phone ?? b?.phoneNumber ?? "",
+      email: b?.email ?? "",
+      manager_name: b?.fullName ?? b?.manager_name ?? b?.managerName ?? "",
+      is_active:
+        typeof b?.is_active === "boolean"
+          ? b.is_active
+          : typeof b?.isActive === "boolean"
+          ? b.isActive
+          : true,
+      created_at:
+        b?.creationDate ??
+        b?.created_at ??
+        b?.createdAt ??
+        b?.createdOn ??
+        new Date().toISOString(),
+    }));
+  }, [data]);
 
   const handleEdit = (branch: any) => {
-    console.log('Editing branch:', branch);
     setEditingBranch(branch);
     setShowForm(true);
   };
 
   const handleDelete = (branchId: string) => {
-    deleteMutation.mutate(branchId);
+    toast({
+      title: "Not available",
+      description: "Branch deletion is not available at the moment.",
+    });
   };
 
   const handleFormClose = () => {
@@ -40,24 +73,17 @@ const VendorBranches = () => {
   };
 
   const handleFormSuccess = () => {
-    refreshBranches();
+    queryClient.invalidateQueries({ queryKey: ["vendor", "branches"] });
     handleFormClose();
   };
 
   const onAddBranch = () => {
-    if (handleAddBranch()) {
-      setShowForm(true);
-    }
+    // Creation endpoint not available yet; prevent opening the form
+    toast({
+      title: "Coming soon",
+      description: "Branch creation is not available yet.",
+    });
   };
-
-  if (!currentUser) {
-    return (
-      <div className="space-y-6">
-        <BranchesHeader onAddBranch={onAddBranch} />
-        <EmptyBranchesState type="no-auth" />
-      </div>
-    );
-  }
 
   if (isLoading) {
     return (
@@ -71,32 +97,33 @@ const VendorBranches = () => {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <BranchesHeader onAddBranch={onAddBranch} />
-        {branches && branches.length > 0 && (
-          <BranchesViewToggle 
-            currentView={currentView} 
-            onViewChange={setCurrentView} 
-          />
-        )}
+        <h2 className="text-3xl font-bold text-gray-900">Branches</h2>
+        <div className=" flex gap-4">
+          {branches && branches.length > 0 && (
+            <BranchesViewToggle
+              currentView={currentView}
+              onViewChange={setCurrentView}
+            />
+          )}
+          <Button onClick={onAddBranch} className="flex items-center space-x-2">
+            <Plus className="h-4 w-4" />
+            <span>Add Branch</span>
+          </Button>
+        </div>
       </div>
 
       {error && (
-        <EmptyBranchesState 
-          type="error" 
-          error={error.message} 
-        />
+        <EmptyBranchesState type="error" error={(error as any)?.message} />
       )}
 
       {!error && (!branches || branches.length === 0) ? (
-        <EmptyBranchesState 
-          type="empty" 
-          currentUser={currentUser}
-          onAddBranch={onAddBranch}
-        />
+        <EmptyBranchesState type="empty" onAddBranch={onAddBranch} />
       ) : (
-        !error && branches && branches.length > 0 && (
+        !error &&
+        branches &&
+        branches.length > 0 && (
           <>
-            {currentView === 'grid' && (
+            {currentView === "grid" && (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {branches.map((branch) => (
                   <BranchCard
@@ -104,27 +131,27 @@ const VendorBranches = () => {
                     branch={branch}
                     onEdit={handleEdit}
                     onDelete={handleDelete}
-                    isDeleting={deleteMutation.isPending}
+                    isDeleting={false}
                   />
                 ))}
               </div>
             )}
-            
-            {currentView === 'list' && (
+
+            {currentView === "list" && (
               <BranchesListView
                 branches={branches}
                 onEdit={handleEdit}
                 onDelete={handleDelete}
-                isDeleting={deleteMutation.isPending}
+                isDeleting={false}
               />
             )}
-            
-            {currentView === 'table' && (
+
+            {currentView === "table" && (
               <BranchesTableView
                 branches={branches}
                 onEdit={handleEdit}
                 onDelete={handleDelete}
-                isDeleting={deleteMutation.isPending}
+                isDeleting={false}
               />
             )}
           </>

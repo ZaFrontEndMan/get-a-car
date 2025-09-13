@@ -15,7 +15,6 @@ interface BranchFormProps {
 const BranchForm = ({ branch, onClose, onSuccess }: BranchFormProps) => {
   const {
     formData,
-    currentUser,
     mutation,
     handleChange,
     handleSubmit
@@ -29,14 +28,6 @@ const BranchForm = ({ branch, onClose, onSuccess }: BranchFormProps) => {
           onClose={onClose} 
         />
         <CardContent>
-          {!currentUser && (
-            <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
-              <p className="text-sm text-yellow-800">
-                ⚠️ You need to be signed in to create branches
-              </p>
-            </div>
-          )}
-          
           <form onSubmit={handleSubmit} className="space-y-4">
             <BranchFormFields 
               formData={formData}
@@ -46,7 +37,7 @@ const BranchForm = ({ branch, onClose, onSuccess }: BranchFormProps) => {
             <BranchFormActions
               isEditing={!!branch}
               isLoading={mutation.isPending}
-              isUserAuthenticated={!!currentUser}
+              isUserAuthenticated={true}
               onCancel={onClose}
             />
           </form>

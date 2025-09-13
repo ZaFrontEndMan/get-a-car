@@ -3,14 +3,17 @@ import { Link } from "react-router-dom";
 import { useLanguage } from "../contexts/LanguageContext";
 import { ChevronRight, ChevronLeft } from "lucide-react";
 import { useMostPopularOffers } from "@/hooks/website/useWebsiteOffers";
+import { SectionSkeleton } from "./ui/SkeletonLoaders";
+import SectionHeader from "./ui/SectionHeader";
+import { getImageUrl, DEFAULT_IMAGES } from "@/utils/imageUtils";
 const OffersSection = () => {
   const { t, language } = useLanguage();
   // Use the new API hook for popular offers
-  const { data: apiOffers = [], isLoading } = useMostPopularOffers(0, 4);
+  const { data: apiResponse, isLoading } = useMostPopularOffers();
 
   // Transform API response to match the expected format for the UI
   const offers =
-    apiOffers?.data?.carSearchResult?.map((offer) => ({
+    apiResponse?.data?.map((offer) => ({
       id: offer.id.toString(),
       title: offer.offerTitle,
       title_ar: "", // API doesn't provide Arabic titles yet
@@ -19,14 +22,12 @@ const OffersSection = () => {
       discount: `${Math.round(
         ((offer.oldPricePerDay - offer.totalPrice) / offer.oldPricePerDay) * 100
       )}% OFF`,
-      image:
-        offer.offerImage ||
-        "https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=400&h=250&fit=crop&crop=center",
+      image: getImageUrl(offer.offerImage, DEFAULT_IMAGES.offer),
       validUntil: offer.endDate,
       vendor: {
         id: offer.carId.toString(),
-        name: offer.vendorName || "Unknown Vendor",
-        logo_url: offer.companyLogo,
+        name: "Vendor", // API doesn't provide vendor name
+        logo_url: getImageUrl(offer.companyLogo),
       },
     })) || [];
   const getLocalizedTitle = (offer: any) => {
@@ -42,39 +43,16 @@ const OffersSection = () => {
     return offer.description;
   };
   if (isLoading) {
-    return (
-      <section className="py-16 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-            <span className="ml-2">Loading offers...</span>
-          </div>
-        </div>
-      </section>
-    );
+    return <SectionSkeleton type="offers" count={4} />;
   }
   return (
     <section className="py-16 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center mb-16">
-          <div>
-            <h2 className="text-3xl md:text-4xl font-bold text-gradient mb-4 py-[13px]">
-              {t("specialOffers")}
-            </h2>
-            <div className="w-24 h-1 gradient-primary rounded-full"></div>
-          </div>
-          <Link
-            to="/offers"
-            className="flex items-center space-x-2 text-primary hover:text-primary/80 transition-colors font-medium"
-          >
-            <span>{t("viewAll")}</span>
-            {language === "ar" ? (
-              <ChevronLeft className="h-4 w-4" />
-            ) : (
-              <ChevronRight className="h-4 w-4" />
-            )}
-          </Link>
-        </div>
+        <SectionHeader 
+          title={t("specialOffers")} 
+          viewAllLink="/offers" 
+          showViewAll={true}
+        />
 
         {offers.length === 0 ? (
           <div className="text-center py-12">

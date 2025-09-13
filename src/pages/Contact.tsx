@@ -71,8 +71,7 @@ const ContactContent = () => {
                           {t("address")}
                         </h3>
                         <p className="text-gray-600">
-                          {settings?.address ||
-                            "123 King Fahd Road, Riyadh 12345, Saudi Arabia"}
+                          {settings?.address || t("defaultAddress")}
                         </p>
                         <p className="text-gray-600">
                           {settings?.city}, {settings?.country}
@@ -89,7 +88,7 @@ const ContactContent = () => {
                           {t("phone")}
                         </h3>
                         <p className="text-gray-600">
-                          {settings?.supportPhone || "+966 11 123 4567"}
+                          {settings?.supportPhone || t("defaultPhone")}
                         </p>
                       </div>
                     </div>
@@ -103,7 +102,7 @@ const ContactContent = () => {
                           {t("email")}
                         </h3>
                         <p className="text-gray-600">
-                          {settings?.contactEmail || "info@getcar.sa"}
+                          {settings?.contactEmail || t("defaultEmail")}
                         </p>
                       </div>
                     </div>
@@ -115,7 +114,7 @@ const ContactContent = () => {
                         </div>
                         <div>
                           <h3 className="font-semibold text-gray-900">
-                            Website
+                            {t("websiteLabel")}
                           </h3>
                           <a
                             href={settings.website}
@@ -138,10 +137,10 @@ const ContactContent = () => {
                           {t("businessHours")}
                         </h3>
                         <p className="text-gray-600">
-                          Sunday - Thursday: 8:00 AM - 6:00 PM
+                          {t("sundayThursdayHours")}
                         </p>
                         <p className="text-gray-600">
-                          Friday - Saturday: 10:00 AM - 4:00 PM
+                          {t("fridaySaturdayHours")}
                         </p>
                       </div>
                     </div>
@@ -149,9 +148,18 @@ const ContactContent = () => {
                 )}
               </div>
 
-              {/* Map Placeholder */}
-              <div className="bg-gray-200 rounded-lg h-64 flex items-center justify-center">
-                <p className="text-gray-500">{t("interactiveMap")}</p>
+              {/* Interactive Map */}
+              <div className="rounded-lg h-64 overflow-hidden shadow-lg">
+                <iframe
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3624.4!2d46.6753!3d24.7136!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3e2f03890d489399%3A0xba974d1c98e79fd5!2sRiyadh%20Saudi%20Arabia!5e0!3m2!1sen!2s!4v1635000000000!5m2!1sen!2s"
+                  width="100%"
+                  height="100%"
+                  style={{ border: 0 }}
+                  allowFullScreen
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  title={t("interactiveMap")}
+                />
               </div>
             </div>
 

@@ -22,10 +22,7 @@ const Privacy = () => {
               {t('privacy')}
             </h1>
             <p className="text-lg text-gray-600">
-              {language === 'ar' 
-                ? 'سياسة الخصوصية الخاصة بخدمات تأجير السيارات' 
-                : 'Privacy policy for our car rental services'
-              }
+              {t('privacyDescription')}
             </p>
           </div>
 
@@ -39,7 +36,7 @@ const Privacy = () => {
           ) : error ? (
             <div className="text-center py-12">
               <p className="text-red-600">
-                {language === 'ar' ? 'خطأ في تحميل سياسة الخصوصية' : 'Error loading privacy policy'}
+                {t('errorLoadingPrivacy')}
               </p>
             </div>
           ) : (
@@ -53,10 +50,7 @@ const Privacy = () => {
               {privacy && (
                 <div className="mt-8 pt-8 border-t border-gray-200">
                   <p className="text-sm text-gray-500">
-                    {language === 'ar' 
-                      ? `الإصدار ${privacy.version} - آخر تحديث: ${new Date(privacy.updated_at).toLocaleDateString('ar-SA')}` 
-                      : `Version ${privacy.version} - Last updated: ${new Date(privacy.updated_at).toLocaleDateString()}`
-                    }
+                    {`${t('version')} ${privacy.version} - ${t('lastUpdated')}: ${new Date(privacy.updated_at).toLocaleDateString(language === 'ar' ? 'ar-SA' : 'en-US')}`}
                   </p>
                 </div>
               )}

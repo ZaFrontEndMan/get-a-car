@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,13 +8,15 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Plus, Edit, Trash2, Calendar, Percent, Globe, FileText } from 'lucide-react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import { useGetAllCarOffers, useCreateCarOffer, useEditCarOffer, useDeleteCarOffer } from '@/hooks/vendor/useVendorCarOffer';
+import { useGetAllCars } from '@/hooks/vendor/useVendorCar';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 interface Offer {
   id: string;
-  vendor_id: string;
+  vendor_id?: string;
   car_id: string;
   title: string;
   title_ar?: string;
@@ -23,8 +25,8 @@ interface Offer {
   discount_percentage: number;
   valid_until: string;
   status: 'draft' | 'published';
-  created_at: string;
-  updated_at: string;
+  created_at?: string;
+  updated_at?: string;
   car?: {
     name: string;
     brand: string;
@@ -58,151 +60,104 @@ const VendorOffers = () => {
 
   const queryClient = useQueryClient();
 
-  // Fetch current vendor data
-  const { data: currentVendor } = useQuery({
-    queryKey: ['current-vendor'],
-    queryFn: async () => {
-      console.log('Fetching current vendor...');
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (!user) {
-        throw new Error('No authenticated user');
-      }
+  // Fetch cars via API hook
+  const { data: carsData, isLoading: carsLoading, error: carsError } = useGetAllCars();
 
-      const { data, error } = await supabase
-        .from('vendors')
-        .select('id, name')
-        .eq('user_id', user.id)
-        .single();
+  const cars: Car[] = useMemo(() => {
+    const d: any = carsData as any;
+    const rawList =
+      d?.data?.data?.vendorCars ||
+      d?.data?.vendorCars ||
+      d?.vendorCars ||
+      d?.data ||
+      d || [];
 
-      if (error) {
-        console.error('Error fetching vendor:', error);
-        throw error;
-      }
+    const list = Array.isArray(rawList) ? rawList : [];
 
-      console.log('Current vendor:', data);
-      return data;
-    }
-  });
-
-  // Fetch vendor's cars with pricing info
-  const { data: cars = [], isLoading: carsLoading, error: carsError } = useQuery({
-    queryKey: ['vendor-cars'],
-    queryFn: async () => {
-      console.log('Fetching vendor cars...');
-      
-      if (!currentVendor?.id) {
-        console.log('No current vendor ID available');
-        return [];
-      }
-
-      const { data, error } = await supabase
-        .from('cars')
-        .select('id, name, brand, model, daily_rate')
-        .eq('vendor_id', currentVendor.id);
-      
-      if (error) {
-        console.error('Error fetching cars:', error);
-        throw error;
-      }
-
-      console.log('Cars fetched:', data);
-      return data as Car[];
-    },
-    enabled: !!currentVendor?.id
-  });
+    return list.map((c: any) => ({
+      id: String(c?.id ?? ''),
+      name: c?.name ?? '',
+      brand: c?.model ? String(c.model).split(' ')[0] : (c?.brand ?? ''),
+      model: c?.model ?? '',
+      daily_rate: c?.pricePerDay ?? c?.daily_rate ?? 0,
+    }));
+  }, [carsData]);
 
   // Get selected car's pricing info
   const selectedCar = cars.find(car => car.id === selectedCarId);
   const originalPrice = selectedCar?.daily_rate || 0;
-  const discountedPrice = originalPrice * (1 - formData.discount_percentage / 100);
+  const discountedPrice = originalPrice * (1 - (Number(formData.discount_percentage) || 0) / 100);
 
-  // Fetch vendor's offers
-  const { data: offers = [] } = useQuery({
-    queryKey: ['vendor-offers'],
-    queryFn: async () => {
-      if (!currentVendor?.id) {
-        return [];
-      }
+  // Fetch vendor's offers via API hook
+  const { data: offersData, isLoading: offersLoading, error: offersError } = useGetAllCarOffers();
+  
+  const offers: Offer[] = useMemo(() => {
+    const d: any = offersData as any;
+    const arr = d?.data || d?.offers || d?.data?.data || [];
+    const list = Array.isArray(arr) ? arr : [];
+    return list.map((o: any) => ({
+      id: String(o?.id ?? ''),
+      car_id: String(o?.carId ?? o?.carID ?? ''),
+      title: o?.titleEn ?? o?.title ?? '',
+      title_ar: o?.titleAr ?? '',
+      description: o?.descriptionEr ?? o?.description ?? '',
+      description_ar: o?.descriptionAr ?? '',
+      discount_percentage: 0,
+      valid_until: o?.endDate ?? '',
+      status: o?.isActive ? 'published' : 'draft',
+    }));
+  }, [offersData]);
 
-      const { data, error } = await supabase
-        .from('offers')
-        .select(`
-          *,
-          car:cars(name, brand, model, daily_rate)
-        `)
-        .eq('vendor_id', currentVendor.id)
-        .order('created_at', { ascending: false });
-      
-      if (error) throw error;
-      return data as Offer[];
-    },
-    enabled: !!currentVendor?.id
-  });
-
-  // Create/Update offer mutation
-  const offerMutation = useMutation({
-    mutationFn: async (offerData: typeof formData) => {
-      if (!currentVendor?.id) {
-        throw new Error('No vendor ID available');
-      }
-
-      if (editingOffer) {
-        const { error } = await supabase
-          .from('offers')
-          .update({
-            ...offerData,
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', editingOffer.id);
-        
-        if (error) throw error;
-      } else {
-        const { error } = await supabase
-          .from('offers')
-          .insert({
-            ...offerData,
-            vendor_id: currentVendor.id
-          });
-        
-        if (error) throw error;
-      }
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['vendor-offers'] });
-      toast.success(editingOffer ? 'Offer updated successfully!' : 'Offer created successfully!');
-      handleCloseModal();
-    },
-    onError: (error) => {
-      console.error('Offer mutation error:', error);
-      toast.error('Failed to save offer: ' + error.message);
-    }
-  });
-
-  // Delete offer mutation
-  const deleteMutation = useMutation({
-    mutationFn: async (offerId: string) => {
-      const { error } = await supabase
-        .from('offers')
-        .delete()
-        .eq('id', offerId);
-      
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['vendor-offers'] });
-      toast.success('Offer deleted successfully!');
-    },
-    onError: (error) => {
-      toast.error('Failed to delete offer: ' + error.message);
-    }
-  });
+  // Create/Edit/Delete mutations via API hooks
+  const createMutation = useCreateCarOffer();
+  const editMutation = useEditCarOffer();
+  const deleteMutation = useDeleteCarOffer();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Submitting offer with data:', formData);
-    console.log('Current vendor:', currentVendor);
-    offerMutation.mutate(formData);
+
+    try {
+      const fd = new FormData();
+      fd.append('TitleAr', formData.title_ar || '');
+      fd.append('TitleEn', formData.title || '');
+      fd.append('DescriptionAr', formData.description_ar || '');
+      fd.append('DescriptionEr', formData.description || '');
+      fd.append('totalPrice', String(discountedPrice || 0));
+      const nowIso = new Date().toISOString();
+      const toIso = formData.valid_until ? new Date(formData.valid_until).toISOString() : nowIso;
+      fd.append('from', nowIso);
+      fd.append('to', toIso);
+      fd.append('isActive', String(formData.status === 'published'));
+      fd.append('carID', formData.car_id || selectedCarId || '');
+      fd.append('pickUpLocationID', String(0));
+      // NOTE: offerImage can be appended here if UI provides a file input
+      if (editingOffer?.id) {
+        fd.append('id', String(editingOffer.id));
+        editMutation.mutate(fd, {
+          onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['vendor', 'carOffers'] });
+            toast.success('Offer updated successfully!');
+            handleCloseModal();
+          },
+          onError: (error: any) => {
+            toast.error('Failed to update offer: ' + (error?.message || 'Unknown error'));
+          },
+        });
+      } else {
+        createMutation.mutate(fd, {
+          onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['vendor', 'carOffers'] });
+            toast.success('Offer created successfully!');
+            handleCloseModal();
+          },
+          onError: (error: any) => {
+            toast.error('Failed to create offer: ' + (error?.message || 'Unknown error'));
+          },
+        });
+      }
+    } catch (error: any) {
+      toast.error('Failed to save offer: ' + (error?.message || 'Unknown error'));
+    }
   };
 
   const handleEdit = (offer: Offer) => {
@@ -215,15 +170,23 @@ const VendorOffers = () => {
       description: offer.description,
       description_ar: offer.description_ar || '',
       discount_percentage: offer.discount_percentage,
-      valid_until: offer.valid_until.split('T')[0],
-      status: offer.status
+      valid_until: offer.valid_until ? offer.valid_until.split('T')[0] : '',
+      status: offer.status,
     });
     setIsCreateModalOpen(true);
   };
 
   const handleDelete = (offerId: string) => {
     if (window.confirm('Are you sure you want to delete this offer?')) {
-      deleteMutation.mutate(offerId);
+      deleteMutation.mutate(offerId, {
+        onSuccess: () => {
+          queryClient.invalidateQueries({ queryKey: ['vendor', 'carOffers'] });
+          toast.success('Offer deleted successfully!');
+        },
+        onError: (error: any) => {
+          toast.error('Failed to delete offer: ' + (error?.message || 'Unknown error'));
+        },
+      });
     }
   };
 
@@ -262,8 +225,8 @@ const VendorOffers = () => {
   if (carsError) {
     return (
       <div className="text-center py-12">
-        <p className="text-red-600">Error loading cars: {carsError.message}</p>
-        <Button onClick={() => queryClient.invalidateQueries({ queryKey: ['vendor-cars'] })} className="mt-4">
+        <p className="text-red-600">Error loading cars: {(carsError as any)?.message || 'Unknown error'}</p>
+        <Button onClick={() => queryClient.invalidateQueries({ queryKey: ['vendor', 'cars'] })} className="mt-4">
           Retry
         </Button>
       </div>
@@ -414,7 +377,7 @@ const VendorOffers = () => {
               </div>
 
               <div className="flex space-x-2">
-                <Button type="submit" disabled={offerMutation.isPending || cars.length === 0}>
+                <Button type="submit" disabled={createMutation.isPending || editMutation.isPending || cars.length === 0}>
                   {editingOffer ? 'Update Offer' : 'Create Offer'}
                 </Button>
                 <Button type="button" variant="outline" onClick={handleCloseModal}>
@@ -462,7 +425,7 @@ const VendorOffers = () => {
                     </span>
                     <span className="flex items-center">
                       <Calendar className="mr-1 h-3 w-3" />
-                      Valid until {new Date(offer.valid_until).toLocaleDateString()}
+                      Valid until {offer.valid_until ? new Date(offer.valid_until).toLocaleDateString() : '—'}
                     </span>
                     {offer.car && (
                       <span>Car: {offer.car.brand} {offer.car.model} (SAR {offer.car.daily_rate}/day)</span>

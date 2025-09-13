@@ -92,7 +92,7 @@ const ProfileSection: React.FC = () => {
             {t("profileSettings")}
           </h1>
           <p className="text-gray-600 mt-1">
-            Manage your personal information and documents
+            {t("profileDescription")}
           </p>
         </div>
         <div className="flex gap-3">
@@ -106,20 +106,20 @@ const ProfileSection: React.FC = () => {
                 }}
                 disabled={editMutation.isPending}
               >
-                Cancel
+                {t("cancel")}
               </Button>
               <Button
                 onClick={form.handleSubmit(onSubmit)}
                 disabled={editMutation.isPending}
               >
                 <Save className="h-4 w-4 mr-2" />
-                {editMutation.isPending ? "Saving..." : "Save Changes"}
+                {editMutation.isPending ? t("saving") : t("saveChanges")}
               </Button>
             </>
           ) : (
             <Button onClick={() => setIsEditing(true)}>
               <Edit3 className="h-4 w-4 mr-2" />
-              Edit Profile
+              {t("editProfile")}
             </Button>
           )}
         </div>
@@ -133,7 +133,7 @@ const ProfileSection: React.FC = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <User className="h-5 w-5" />
-                Personal Information
+                {t("personalInformation")}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -192,7 +192,7 @@ const ProfileSection: React.FC = () => {
                       <FormItem>
                         <FormLabel className="flex items-center gap-2">
                           <User className="h-4 w-4" />
-                          Full Name
+                          {t("fullNameLabel")}
                         </FormLabel>
                         <FormControl>
                           <Input
@@ -213,7 +213,7 @@ const ProfileSection: React.FC = () => {
                       <FormItem>
                         <FormLabel className="flex items-center gap-2">
                           <Mail className="h-4 w-4" />
-                          Email
+                          {t("emailLabel")}
                         </FormLabel>
                         <FormControl>
                           <Input
@@ -274,7 +274,7 @@ const ProfileSection: React.FC = () => {
                       <FormItem>
                         <FormLabel className="flex items-center gap-2">
                           <User className="h-4 w-4" />
-                          Gender
+                          {t("gender")}
                         </FormLabel>
                         <Select
                           onValueChange={(value) =>
@@ -285,12 +285,12 @@ const ProfileSection: React.FC = () => {
                         >
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Select gender" />
+                              <SelectValue placeholder={t("selectGender")} />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="1">Male</SelectItem>
-                            <SelectItem value="2">Female</SelectItem>
+                            <SelectItem value="1">{t("male")}</SelectItem>
+                            <SelectItem value="2">{t("female")}</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />
@@ -306,7 +306,7 @@ const ProfileSection: React.FC = () => {
                         <FormItem>
                           <FormLabel className="flex items-center gap-2">
                             <Globe className="h-4 w-4" />
-                            Country
+                            {t("country")}
                           </FormLabel>
                           <FormControl>
                             <Input
@@ -326,7 +326,7 @@ const ProfileSection: React.FC = () => {
                         <FormItem>
                           <FormLabel className="flex items-center gap-2">
                             <MapPin className="h-4 w-4" />
-                            City
+                            {t("city")}
                           </FormLabel>
                           <FormControl>
                             <Input
@@ -348,7 +348,7 @@ const ProfileSection: React.FC = () => {
                       <FormItem>
                         <FormLabel className="flex items-center gap-2">
                           <MapPin className="h-4 w-4" />
-                          Address
+                          {t("addressLabel")}
                         </FormLabel>
                         <FormControl>
                           <Input
@@ -390,7 +390,7 @@ const ProfileSection: React.FC = () => {
                       <FormItem>
                         <FormLabel className="flex items-center gap-2">
                           <Hash className="h-4 w-4" />
-                          National ID
+                          {t("nationalIdLabel")}
                         </FormLabel>
                         <FormControl>
                           <Input
@@ -415,36 +415,36 @@ const ProfileSection: React.FC = () => {
             currentImageUrl={profile?.profilePicture || ""}
             onImageUpdate={() => {}}
             type="avatar"
-            title="Profile Picture"
-            description="Upload your profile photo"
+            title={t("profilePicture")}
+            description={t("uploadProfilePhoto")}
           />
           <ProfileImageUpload
             currentImageUrl={profile?.nationalIdFront || ""}
             onImageUpdate={() => {}}
             type="national_id"
-            title="National ID Front"
-            description="Upload your national ID front"
+            title={t("nationalIdFront")}
+            description={t("uploadNationalIdFront")}
           />
           <ProfileImageUpload
             currentImageUrl={profile?.nationalIdBack || ""}
             onImageUpdate={() => {}}
             type="national_id"
-            title="National ID Back"
-            description="Upload your national ID back"
+            title={t("nationalIdBack")}
+            description={t("uploadNationalIdBack")}
           />
           <ProfileImageUpload
             currentImageUrl={profile?.drivingLicenseFront || ""}
             onImageUpdate={() => {}}
             type="driving_license"
-            title="Driving License Front"
-            description="Upload your driving license front"
+            title={t("drivingLicenseFront")}
+            description={t("uploadDrivingLicenseFront")}
           />
           <ProfileImageUpload
             currentImageUrl={profile?.drivingLicenseBack || ""}
             onImageUpdate={() => {}}
             type="driving_license"
-            title="Driving License Back"
-            description="Upload your driving license back"
+            title={t("drivingLicenseBack")}
+            description={t("uploadDrivingLicenseBack")}
           />
         </div>
       </div>

@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import AdminAccessGuard from '@/components/admin/AdminAccessGuard';
 import ClientDetailsHeader from '@/components/admin/client-details/ClientDetailsHeader';
 import ClientInfoCard from '@/components/admin/client-details/ClientInfoCard';
 import ClientBookingsCard from '@/components/admin/client-details/ClientBookingsCard';
@@ -211,60 +210,54 @@ const AdminClientDetails = () => {
 
   if (loading) {
     return (
-      <AdminAccessGuard>
-        <div className="min-h-screen bg-gray-50">
-          <div className="flex items-center justify-center h-64">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-              <div className="text-gray-600">Loading client details...</div>
-            </div>
+      <div className="min-h-screen bg-gray-50">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <div className="text-gray-600">Loading client details...</div>
           </div>
         </div>
-      </AdminAccessGuard>
+      </div>
     );
   }
 
   if (!client) {
     return (
-      <AdminAccessGuard>
-        <div className="min-h-screen bg-gray-50">
-          <div className="flex items-center justify-center h-64">
-            <div className="text-center">
-              <div className="text-gray-500">Client not found</div>
-            </div>
+      <div className="min-h-screen bg-gray-50">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <div className="text-gray-500">Client not found</div>
           </div>
         </div>
-      </AdminAccessGuard>
+      </div>
     );
   }
 
   return (
-    <AdminAccessGuard>
-      <div className="min-h-screen bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="space-y-6">
-            <ClientDetailsHeader
-              clientName={client.name}
-              clientStatus={client.status}
-              totalBookings={client.totalBookings}
-              totalSpent={client.totalSpent}
-              joinedDate={client.joinedDate}
-              onBackClick={() => navigate('/admin')}
-            />
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="space-y-6">
+          <ClientDetailsHeader
+            clientName={client.name}
+            clientStatus={client.status}
+            totalBookings={client.totalBookings}
+            totalSpent={client.totalSpent}
+            joinedDate={client.joinedDate}
+            onBackClick={() => navigate('/admin')}
+          />
 
-            <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-              <div className="xl:col-span-1">
-                <ClientInfoCard client={client} />
-              </div>
-              
-              <div className="xl:col-span-2">
-                <ClientBookingsCard bookings={bookings} />
-              </div>
+          <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+            <div className="xl:col-span-1">
+              <ClientInfoCard client={client} />
+            </div>
+            
+            <div className="xl:col-span-2">
+              <ClientBookingsCard bookings={bookings} />
             </div>
           </div>
         </div>
       </div>
-    </AdminAccessGuard>
+    </div>
   );
 };
 

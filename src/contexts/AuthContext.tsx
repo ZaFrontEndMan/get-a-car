@@ -1,13 +1,21 @@
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import { User, Session } from '@supabase/supabase-js';
-import { supabase } from '@/integrations/supabase/client';
+import React, { createContext, useContext, useEffect, useState, useCallback, startTransition } from 'react';
+import Cookies from 'js-cookie';
+
+interface JWTUser {
+  id: string;
+  roles: string;
+  userName: string;
+  token: string;
+  isConfirmed: boolean;
+}
 
 interface AuthContextType {
-  user: User | null;
-  session: Session | null;
+  user: JWTUser | null;
+  token: string | null;
   isLoading: boolean;
   signOut: () => Promise<void>;
+  setAuthData: (userData: JWTUser) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -21,96 +29,82 @@ export const useAuth = () => {
 };
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
+  const [user, setUser] = useState<JWTUser | null>(null);
+  const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    let mounted = true;
-
-    // Set up auth state listener first
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        console.log('Auth state changed:', event, session?.user?.email);
-        
-        if (mounted) {
-          setSession(session);
-          setUser(session?.user ?? null);
-          // Only set loading to false after auth state is determined
-          if (event !== 'INITIAL_SESSION') {
-            setIsLoading(false);
-          }
-        }
-        
-        // Handle different auth events
-        if (event === 'TOKEN_REFRESHED') {
-          console.log('Token refreshed successfully');
-        } else if (event === 'SIGNED_OUT') {
-          console.log('User signed out');
-          if (mounted) {
-            setSession(null);
-            setUser(null);
-          }
-        } else if (event === 'SIGNED_IN') {
-          console.log('User signed in:', session?.user?.email);
-        }
-      }
-    );
-
-    // Get initial session after setting up listener
-    const getInitialSession = async () => {
+    // Check for existing token on mount
+    const checkExistingAuth = () => {
       try {
-        const { data: { session }, error } = await supabase.auth.getSession();
-        if (error) {
-          console.error('Error getting initial session:', error);
-        } else {
-          console.log('Initial session check:', session?.user?.email);
-          if (mounted) {
-            setSession(session);
-            setUser(session?.user ?? null);
+        const authToken = Cookies.get('auth_token');
+        if (authToken) {
+          setToken(authToken);
+          // Decode JWT to get user info (basic decode without verification)
+          try {
+            const payload = JSON.parse(atob(authToken.split('.')[1]));
+            const userData: JWTUser = {
+              id: payload.nameid,
+              roles: payload.role,
+              userName: payload.unique_name,
+              token: authToken,
+              isConfirmed: true
+            };
+            setUser(userData);
+            console.log('Restored auth from token:', userData.userName);
+          } catch (decodeError) {
+            console.error('Error decoding token:', decodeError);
+            // Invalid token, remove it
+            Cookies.remove('auth_token');
           }
         }
       } catch (error) {
-        console.error('Error in getInitialSession:', error);
+        console.error('Error checking existing auth:', error);
       } finally {
-        if (mounted) {
-          setIsLoading(false);
-        }
+        setIsLoading(false);
       }
     };
 
-    getInitialSession();
-
-    return () => {
-      mounted = false;
-      subscription.unsubscribe();
-    };
+    checkExistingAuth();
   }, []);
 
-  const signOut = async () => {
+  const setAuthData = useCallback((userData: JWTUser) => {
+    // Batch state updates to prevent multiple re-renders
+    startTransition(() => {
+      setUser(userData);
+      setToken(userData.token);
+    });
+    Cookies.set('auth_token', userData.token, { expires: 7 });
+    console.log('Auth data set:', userData.userName);
+  }, []);
+
+  const signOut = useCallback(async () => {
     try {
       console.log('Starting logout process...');
-      const { error } = await supabase.auth.signOut();
-      if (error) {
-        console.error('Error signing out:', error);
-        throw error;
-      }
+      Cookies.remove('auth_token');
+      // Batch state updates to prevent multiple re-renders
+      startTransition(() => {
+        setUser(null);
+        setToken(null);
+      });
       console.log('Sign out successful');
-      // Auth state change will handle the state updates
     } catch (error) {
       console.error('Sign out error:', error);
       // Force clear state even if signOut fails
-      setSession(null);
-      setUser(null);
+      startTransition(() => {
+        setUser(null);
+        setToken(null);
+      });
       throw error;
     }
-  };
+  }, []);
 
   const value = {
     user,
-    session,
+    token,
     isLoading,
-    signOut
+    signOut,
+    setAuthData
   };
 
   return (

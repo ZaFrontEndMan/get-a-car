@@ -1,5 +1,6 @@
 import React from "react";
 import { useTeamData } from "../hooks/useTeamData";
+import { useLanguage } from "../contexts/LanguageContext";
 import {
   Mail,
   Linkedin,
@@ -15,6 +16,7 @@ import {
 import PageLayout from "../components/layout/PageLayout";
 const About: React.FC = () => {
   const { data: teamMembers, isLoading, error } = useTeamData();
+  const { t } = useLanguage();
   if (isLoading) {
     return (
       <>
@@ -62,13 +64,13 @@ const About: React.FC = () => {
                 />
               </svg>
             </div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Error</h3>
-            <p className="text-gray-600 mb-6">Error loading team data</p>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">{t('error')}</h3>
+            <p className="text-gray-600 mb-6">{t('errorLoadingTeamData')}</p>
             <button
               onClick={() => window.location.reload()}
               className="bg-primary text-white px-6 py-3 rounded-lg hover:bg-primary/90 transition-colors font-medium"
             >
-              Retry
+              {t('retry')}
             </button>
           </div>
         </div>
@@ -77,7 +79,7 @@ const About: React.FC = () => {
   }
   return (
     <>
-      <AboutContent teamMembers={teamMembers} />
+      <AboutContent teamMembers={teamMembers} t={t} />
     </>
   );
 };
@@ -85,7 +87,8 @@ const About: React.FC = () => {
 // Separate component that receives translations as props to avoid useLanguage conflicts
 const AboutContent: React.FC<{
   teamMembers: any[] | undefined;
-}> = ({ teamMembers }) => {
+  t: (key: string) => string;
+}> = ({ teamMembers, t }) => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       {/* Hero Section */}
@@ -95,11 +98,10 @@ const AboutContent: React.FC<{
         <div className="relative container mx-auto px-4 py-24">
           <div className="text-center text-white">
             <h1 className="text-5xl md:text-6xl font-bold mb-6 leading-tight">
-              About Us
+              {t('aboutUs')}
             </h1>
             <p className="text-xl md:text-2xl opacity-90 max-w-4xl mx-auto leading-relaxed">
-              We are dedicated to providing the best car rental experience in
-              Saudi Arabia with our premium fleet and exceptional service.
+              {t('aboutHeroDescription')}
             </p>
           </div>
         </div>
@@ -115,23 +117,20 @@ const AboutContent: React.FC<{
                   <Target className="w-6 h-6 text-primary" />
                 </div>
                 <h2 className="text-3xl font-bold text-gray-900">
-                  Our Mission
+                  {t('ourMission')}
                 </h2>
               </div>
               <p className="text-lg text-gray-600 leading-relaxed mb-8">
-                To provide exceptional car rental services that exceed customer
-                expectations through quality vehicles, competitive pricing, and
-                outstanding customer service.
+                {t('missionDescription')}
               </p>
               <div className="flex items-center mb-6">
                 <div className="w-12 h-12 bg-secondary/10 rounded-lg flex items-center justify-center mr-4">
                   <Lightbulb className="w-6 h-6 text-secondary" />
                 </div>
-                <h2 className="text-3xl font-bold text-gray-900">Our Vision</h2>
+                <h2 className="text-3xl font-bold text-gray-900">{t('ourVision')}</h2>
               </div>
               <p className="text-lg text-gray-600 leading-relaxed">
-                To be the leading car rental company in Saudi Arabia, known for
-                innovation, reliability, and customer satisfaction.
+                {t('visionDescription')}
               </p>
             </div>
             <div className="relative">
@@ -152,11 +151,10 @@ const AboutContent: React.FC<{
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-gray-900 mb-6">
-              Our Values
+              {t('ourValues')}
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              The core principles that guide our business and define our
-              commitment to excellence.
+              {t('valuesDescription')}
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -164,19 +162,18 @@ const AboutContent: React.FC<{
               <div className="w-16 h-16 bg-primary/10 rounded-xl flex items-center justify-center mb-6">
                 <Award className="w-8 h-8 text-primary" />
               </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">Quality</h3>
+              <h3 className="text-2xl font-bold text-gray-900 mb-4">{t('quality')}</h3>
               <p className="text-gray-600 leading-relaxed">
-                We maintain the highest standards in our vehicle fleet and
-                service delivery.
+                {t('qualityDescription')}
               </p>
             </div>
             <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow">
               <div className="w-16 h-16 bg-secondary/10 rounded-xl flex items-center justify-center mb-6">
                 <Heart className="w-8 h-8 text-secondary" />
               </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">Service</h3>
+              <h3 className="text-2xl font-bold text-gray-900 mb-4">{t('service')}</h3>
               <p className="text-gray-600 leading-relaxed">
-                Customer satisfaction is at the heart of everything we do.
+                {t('serviceDescription')}
               </p>
             </div>
             <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow">
@@ -184,11 +181,10 @@ const AboutContent: React.FC<{
                 <Lightbulb className="w-8 h-8 text-primary" />
               </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-4">
-                Innovation
+                {t('innovation')}
               </h3>
               <p className="text-gray-600 leading-relaxed">
-                We continuously improve our services through technology and
-                innovation.
+                {t('innovationDescription')}
               </p>
             </div>
           </div>
@@ -203,11 +199,10 @@ const AboutContent: React.FC<{
               <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mr-4">
                 <Users className="w-6 h-6 text-primary" />
               </div>
-              <h2 className="text-4xl font-bold text-gray-900">Our Team</h2>
+              <h2 className="text-4xl font-bold text-gray-900">{t('ourTeam')}</h2>
             </div>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Meet the dedicated professionals who make our service excellence
-              possible.
+              {t('teamDescription')}
             </p>
           </div>
 
@@ -283,7 +278,7 @@ const AboutContent: React.FC<{
           ) : (
             <div className="text-center py-16 bg-gray-50 rounded-2xl">
               <Users className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-600 text-lg">No team members found</p>
+              <p className="text-gray-600 text-lg">{t('noTeamMembersFound')}</p>
             </div>
           )}
         </div>

@@ -1,116 +1,83 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import CarForm from './CarForm';
 import CarDetailsModal from './CarDetailsModal';
 import CarsImportModal from './cars/CarsImportModal';
 import { useToast } from '@/hooks/use-toast';
-import { useCarsData } from './cars/useCarsData';
-import { supabase } from '@/integrations/supabase/client';
 import CarsHeader from './cars/CarsHeader';
 import CarsGridView from './cars/CarsGridView';
 import CarsListView from './cars/CarsListView';
 import CarsTableView from './cars/CarsTableView';
 import CarsEmptyState from './cars/CarsEmptyState';
+import { useGetAllCars, useDeleteCar } from '@/hooks/vendor/useVendorCar';
+import { useQueryClient } from '@tanstack/react-query';
 
 const VendorCars = () => {
   const [showForm, setShowForm] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
-  const [editingCar, setEditingCar] = useState(null);
-  const [viewingCar, setViewingCar] = useState(null);
+  const [editingCar, setEditingCar] = useState<any>(null);
+  const [viewingCar, setViewingCar] = useState<any>(null);
   const [viewMode, setViewMode] = useState<'grid' | 'list' | 'table'>('grid');
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
-  const {
-    cars,
-    isLoading,
-    error,
-    currentUser,
-    handleDelete,
-    deleteMutation,
-    queryClient
-  } = useCarsData();
+  // Fetch cars via normal API hook
+  const { data, isLoading, error } = useGetAllCars();
+  const deleteMutation = useDeleteCar();
+
+  // Map API response to UI CarData shape without changing UI
+  const cars = useMemo(() => {
+    const rawList =
+      (data as any)?.data?.data?.vendorCars ||
+      (data as any)?.data?.vendorCars ||
+      (data as any)?.vendorCars ||
+      [];
+
+    const extractYear = (text?: string) => {
+      if (!text) return new Date().getFullYear();
+      const match = text.match(/(20\d{2}|19\d{2})/);
+      return match ? parseInt(match[1], 10) : new Date().getFullYear();
+    };
+
+    return (rawList as any[]).map((c) => ({
+      id: (c?.id ?? '').toString(),
+      name: c?.name ?? '',
+      brand: c?.model ? String(c.model).split(' ')[0] : '',
+      model: c?.model ?? '',
+      year: extractYear(c?.name),
+      type: 'sedan',
+      seats: 5,
+      fuel_type: 'petrol',
+      transmission: 'automatic',
+      daily_rate: c?.pricePerDay ?? 0,
+      weekly_rate: undefined,
+      monthly_rate: undefined,
+      is_available: Boolean(c?.status),
+      is_featured: false,
+      images: Array.isArray(c?.imageUrls) ? c.imageUrls : [],
+      features: [],
+      pickup_locations: [],
+      condition: 'excellent',
+      color: undefined,
+      license_plate: undefined,
+      mileage_limit: undefined,
+      deposit_amount: undefined,
+    }));
+  }, [data]);
 
   const handleDuplicate = async (car: any) => {
-    console.log('Duplicating car:', car);
-    
-    if (!currentUser) {
-      toast({
-        title: "Authentication Required",
-        description: "Please sign in to duplicate cars",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    try {
-      // Get the vendor ID for the current user
-      const { data: vendorData, error: vendorError } = await supabase
-        .from('vendors')
-        .select('id')
-        .eq('user_id', currentUser.id)
-        .single();
-
-      if (vendorError || !vendorData) {
-        console.error('Vendor lookup error:', vendorError);
-        toast({
-          title: "Error",
-          description: "Could not find vendor information",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      // Create a copy of the car data without the id and some unique fields
-      const { id, created_at, updated_at, license_plate, branches, ...carData } = car;
-      
-      // Add "Copy" to the name to distinguish it and ensure vendor_id is set
-      const duplicatedCar = {
-        ...carData,
-        name: `${car.name} (Copy)`,
-        license_plate: null, // Clear license plate for duplicate
-        vendor_id: vendorData.id, // Ensure the vendor_id is set correctly
-      };
-
-      console.log('Creating duplicate car:', duplicatedCar);
-
-      const { data, error } = await supabase
-        .from('cars')
-        .insert(duplicatedCar)
-        .select();
-
-      if (error) {
-        console.error('Duplicate error:', error);
-        toast({
-          title: "Error",
-          description: error.message || "Failed to duplicate car",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      console.log('Car duplicated successfully:', data);
-      queryClient.invalidateQueries({ queryKey: ['vendor-cars'] });
-      toast({
-        title: "Success",
-        description: "Car duplicated successfully",
-      });
-    } catch (error) {
-      console.error('Duplicate failed:', error);
-      toast({
-        title: "Error",
-        description: "Failed to duplicate car",
-        variant: "destructive",
-      });
-    }
+    // Duplicate via API is not defined; keep UI unchanged and inform user
+    toast({
+      title: 'Not available',
+      description: 'Duplicate action is not available at the moment.',
+    });
   };
 
   const handleEdit = (car: any) => {
-    console.log('Editing car:', car);
     setEditingCar(car);
     setShowForm(true);
   };
 
   const handleView = (car: any) => {
-    console.log('Viewing car:', car);
     setViewingCar(car);
   };
 
@@ -120,35 +87,25 @@ const VendorCars = () => {
   };
 
   const handleAddCar = () => {
-    if (!currentUser) {
-      toast({
-        title: "Authentication Required",
-        description: "Please sign in to add cars",
-        variant: "destructive",
-      });
-      return;
-    }
+    // User is already guarded; no auth checks
     setShowForm(true);
   };
 
   const handleImportCars = () => {
-    if (!currentUser) {
-      toast({
-        title: "Authentication Required",
-        description: "Please sign in to import cars",
-        variant: "destructive",
-      });
-      return;
-    }
+    // User is already guarded; no auth checks
     setShowImportModal(true);
   };
 
   const handleImportSuccess = () => {
-    queryClient.invalidateQueries({ queryKey: ['vendor-cars'] });
-    toast({
-      title: "Import Successful",
-      description: "Cars have been imported successfully",
-    });
+    queryClient.invalidateQueries({ queryKey: ['vendor', 'cars'] });
+    const description = 'Cars have been imported successfully';
+    toast({ title: 'Import Successful', description });
+  };
+
+  const handleDelete = async (carId: string) => {
+    if (confirm('Are you sure you want to delete this car?')) {
+      deleteMutation.mutate(carId);
+    }
   };
 
   const renderCurrentView = () => {
@@ -158,8 +115,8 @@ const VendorCars = () => {
       onDelete: handleDelete,
       onDuplicate: handleDuplicate,
       onView: handleView,
-      isDeleting: deleteMutation.isPending
-    };
+      isDeleting: deleteMutation.isPending,
+    } as any;
 
     switch (viewMode) {
       case 'grid':
@@ -191,9 +148,9 @@ const VendorCars = () => {
         onImportCars={handleImportCars}
       />
 
-      {(!currentUser || error || !cars || cars.length === 0) ? (
+      {(error || !cars || cars.length === 0) ? (
         <CarsEmptyState
-          currentUser={currentUser}
+          currentUser={{}}
           onAddCar={handleAddCar}
           error={error}
         />
@@ -206,25 +163,22 @@ const VendorCars = () => {
           car={editingCar}
           onClose={handleFormClose}
           onSuccess={() => {
-            queryClient.invalidateQueries({ queryKey: ['vendor-cars'] });
+            queryClient.invalidateQueries({ queryKey: ['vendor', 'cars'] });
             handleFormClose();
           }}
         />
       )}
 
       {viewingCar && (
-        <CarDetailsModal
-          car={viewingCar}
-          onClose={() => setViewingCar(null)}
-        />
+        <CarDetailsModal car={viewingCar} onClose={() => setViewingCar(null)} />
       )}
 
-      {showImportModal && currentUser && (
+      {showImportModal && (
         <CarsImportModal
           isOpen={showImportModal}
           onClose={() => setShowImportModal(false)}
           onImportSuccess={handleImportSuccess}
-          vendorId={currentUser.id}
+          vendorId=""
         />
       )}
     </div>

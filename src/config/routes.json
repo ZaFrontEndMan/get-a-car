@@ -1,0 +1,209 @@
+{
+  "public": {
+    "layout": "PageLayout",
+    "routes": [
+      {
+        "path": "/",
+        "component": "Index",
+        "exact": true
+      },
+      {
+        "path": "/cars",
+        "component": "Cars"
+      },
+      {
+        "path": "/cars/:id",
+        "component": "CarDetails"
+      },
+      {
+        "path": "/vendors",
+        "component": "Vendors"
+      },
+      {
+        "path": "/vendors/:id",
+        "component": "VendorDetails"
+      },
+      {
+        "path": "/offers",
+        "component": "Offers"
+      },
+      {
+        "path": "/offers/:id",
+        "component": "OfferDetails"
+      },
+      {
+        "path": "/contact",
+        "component": "Contact"
+      },
+      {
+        "path": "/about",
+        "component": "About"
+      },
+      {
+        "path": "/blog",
+        "component": "Blog"
+      },
+      {
+        "path": "/blog/:slug",
+        "component": "BlogDetails"
+      },
+      {
+        "path": "/faq",
+        "component": "FAQ"
+      },
+      {
+        "path": "/terms",
+        "component": "Terms"
+      },
+      {
+        "path": "/privacy",
+        "component": "Privacy"
+      },
+      {
+        "path": "/more",
+        "component": "More"
+      },
+      {
+        "path": "/favorites",
+        "component": "Favorites"
+      }
+    ]
+  },
+  "auth": {
+    "layout": null,
+    "requiresAuth": false,
+    "redirectIfAuthenticated": true,
+    "routes": [
+      {
+        "path": "/signin",
+        "component": "SignIn"
+      },
+      {
+        "path": "/signup",
+        "component": "SignUp"
+      },
+      {
+        "path": "/forgot-password",
+        "component": "ForgotPassword"
+      },
+      {
+        "path": "/reset-password",
+        "component": "ResetPassword"
+      }
+    ]
+  },
+  "client": {
+    "layout": "ClientLayout",
+    "requiresAuth": true,
+    "allowedRoles": ["client"],
+    "basePath": "/dashboard",
+    "defaultRedirect": "/dashboard",
+    "routes": [
+      {
+        "path": "",
+        "component": "BookingsList",
+        "index": true
+      },
+      {
+        "path": "bookings",
+        "component": "BookingsList"
+      },
+      {
+        "path": "favorites",
+        "component": "FavoritesList"
+      },
+      {
+        "path": "payments",
+        "component": "PaymentsList"
+      },
+      {
+        "path": "profile",
+        "component": "ProfileSection"
+      },
+      {
+        "path": "support",
+        "component": "SupportSection"
+      }
+    ]
+  },
+  "vendor": {
+    "layout": "VendorDashboardLayout",
+    "requiresAuth": true,
+    "allowedRoles": ["vendor"],
+    "basePath": "/vendor-dashboard",
+    "defaultRedirect": "/vendor-dashboard",
+    "routes": [
+      {
+        "path": "",
+        "component": "VendorOverview",
+        "index": true
+      },
+      {
+        "path": "overview",
+        "component": "VendorOverview"
+      },
+      {
+        "path": "branches",
+        "component": "VendorBranches"
+      },
+      {
+        "path": "cars",
+        "component": "VendorCars"
+      },
+      {
+        "path": "offers",
+        "component": "VendorOffers"
+      },
+      {
+        "path": "bookings",
+        "component": "VendorBookings"
+      },
+      {
+        "path": "users",
+        "component": "VendorUsers"
+      },
+      {
+        "path": "profile",
+        "component": "VendorProfile"
+      },
+      {
+        "path": "policies",
+        "component": "VendorPolicies"
+      },
+      {
+        "path": "cars/:id",
+        "component": "VendorCarDetails"
+      }
+    ]
+  },
+  "admin": {
+    "layout": "AdminDashboardLayout",
+    "requiresAuth": true,
+    "allowedRoles": ["admin"],
+    "basePath": "/admin",
+    "routes": [
+      {
+        "path": "",
+        "component": "AdminDashboard",
+        "index": true
+      },
+      {
+        "path": "vendors/:id",
+        "component": "AdminVendorDetails"
+      },
+      {
+        "path": "clients/:id",
+        "component": "AdminClientDetails"
+      }
+    ]
+  },
+  "fallback": {
+    "layout": null,
+    "routes": [
+      {
+        "path": "*",
+        "component": "NotFound"
+      }
+    ]
+  }
+}

@@ -1,5 +1,5 @@
 import React from "react";
-import { Search, Grid3X3, List } from "lucide-react";
+import { Search, Grid3X3, List, Loader2 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 interface CarsSearchControlsProps {
@@ -10,6 +10,7 @@ interface CarsSearchControlsProps {
   filteredCarsLength: number;
   currentPage: number;
   totalPages: number;
+  isSearching?: boolean;
 }
 
 const CarsSearchControls = ({
@@ -20,6 +21,7 @@ const CarsSearchControls = ({
   filteredCarsLength,
   currentPage,
   totalPages,
+  isSearching = false,
 }: CarsSearchControlsProps) => {
   const { t, language } = useLanguage();
   const isRTL = language === "ar";
@@ -28,11 +30,19 @@ const CarsSearchControls = ({
     <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 mb-6">
       <div className="flex flex-col lg:flex-row gap-4 mb-4">
         <div className="flex-1 relative">
-          <Search
-            className={`absolute top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5 ${
-              isRTL ? "right-4" : "left-4"
-            }`}
-          />
+          {isSearching ? (
+            <Loader2
+              className={`absolute top-1/2 transform -translate-y-1/2 text-primary h-5 w-5 animate-spin ${
+                isRTL ? "right-4" : "left-4"
+              }`}
+            />
+          ) : (
+            <Search
+              className={`absolute top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5 ${
+                isRTL ? "right-4" : "left-4"
+              }`}
+            />
+          )}
           <input
             type="text"
             placeholder={t("searchCars") || t("search")}
@@ -42,7 +52,7 @@ const CarsSearchControls = ({
               isRTL ? "pr-12 pl-4" : "pl-12 pr-4"
             } py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent bg-gray-50 transition-all ${
               isRTL ? "text-right" : "text-left"
-            }`}
+            } ${isSearching ? 'border-primary bg-blue-50' : ''}`}
             dir={isRTL ? "rtl" : "ltr"}
           />
         </div>
