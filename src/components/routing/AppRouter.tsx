@@ -135,18 +135,16 @@ const LoadingSpinner = ({ message = 'Loading...' }: LoadingSpinnerProps) => (
   </div>
 );
 
-const AppRouter = () => {
+const AppRouter = React.memo(() => {
   const { isAuthenticated, isLoading, userRole, getDefaultRoute, canAccessRoute } = useUser();
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Handle authentication redirects
+  // Enhanced auth guard logic
   useEffect(() => {
-    if (isLoading) return;
+    if (isLoading && isAuthenticated) return; // Only block if actually authenticating a user
 
     const currentPath = location.pathname;
-    
-    // Check if current route requires authentication
     const routeSection = Object.entries(routesConfig).find(([_, section]) => {
       const sectionConfig = section as RouteSection;
       if (sectionConfig.basePath) {
@@ -163,8 +161,12 @@ const AppRouter = () => {
       const config = section as RouteSection;
 
       // Redirect authenticated users away from auth pages (signin, signup, etc.)
-      if (config.redirectIfAuthenticated && isAuthenticated) {        
-        navigate(getDefaultRoute(), { replace: true });
+      if (config.redirectIfAuthenticated && isAuthenticated) {
+        // Role-based redirect after login
+        if (userRole === 'admin') navigate('/admin', { replace: true });
+        else if (userRole === 'vendor') navigate('/vendor-dashboard', { replace: true });
+        else if (userRole === 'client') navigate('/dashboard', { replace: true });
+        else navigate(getDefaultRoute(), { replace: true });
         return;
       }
 
@@ -176,13 +178,22 @@ const AppRouter = () => {
 
       // Check role-based access for protected routes only
       if (config.allowedRoles && !canAccessRoute(config.allowedRoles as any)) {
-        navigate(isAuthenticated ? getDefaultRoute() : '/', { replace: true });
+        if (isAuthenticated) {
+          // Role-based redirect
+          if (userRole === 'admin') navigate('/admin', { replace: true });
+          else if (userRole === 'vendor') navigate('/vendor-dashboard', { replace: true });
+          else if (userRole === 'client') navigate('/dashboard', { replace: true });
+          else navigate(getDefaultRoute(), { replace: true });
+        } else {
+          navigate('/', { replace: true });
+        }
         return;
       }
     }
   }, [isAuthenticated, isLoading, userRole, location.pathname, navigate, getDefaultRoute, canAccessRoute]);
 
-  if (isLoading) {
+  // Only show loading spinner if actually authenticating a user (not for visitors)
+  if (isLoading && isAuthenticated) {
     return <LoadingSpinner message="Authenticating..." />;
   }
 
@@ -239,21 +250,10 @@ const AppRouter = () => {
       {Object.entries(routesConfig).map(([sectionName, sectionConfig]) => 
         renderRouteSection(sectionName, sectionConfig as RouteSection)
       )}
-      
       {/* Default route handling */}
-      {isAuthenticated ? (
-        <Route 
-          path="/" 
-          element={<Navigate to={getDefaultRoute()} replace />} 
-        />
-      ) : (
-        <Route 
-          path="/" 
-          element={<Index />} 
-        />
-      )}
+      <Route path="/" element={<Index />} />
     </Routes>
   );
-};
+});
 
 export default AppRouter;

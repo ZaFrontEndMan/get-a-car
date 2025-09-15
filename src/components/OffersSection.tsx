@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { useLanguage } from "../contexts/LanguageContext";
+import { useLanguage } from '../contexts/LanguageContext';
 import { ChevronRight, ChevronLeft } from "lucide-react";
 import { useMostPopularOffers } from "@/hooks/website/useWebsiteOffers";
 import { SectionSkeleton } from "./ui/SkeletonLoaders";

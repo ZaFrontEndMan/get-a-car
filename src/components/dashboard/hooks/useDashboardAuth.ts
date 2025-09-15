@@ -1,7 +1,7 @@
 import { useAuth } from "../../../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 
 export const useDashboardAuth = () => {
   const { user, signOut, isLoading } = useAuth();
@@ -43,10 +43,10 @@ export const useDashboardAuth = () => {
     return user.email?.split("@")[0] || "User";
   };
 
-  return {
+  return useMemo(() => ({
     user,
     handleLogout,
     getUserDisplayName,
     isLoading,
-  };
+  }), [user, handleLogout, getUserDisplayName, isLoading]);
 };

@@ -22,10 +22,7 @@ interface Testimonial {
 }
 
 const TestimonialsSection = () => {
-  const {
-    t,
-    language
-  } = useLanguage();
+  const { t, language } = useLanguage();
   const {
     user
   } = useAuth();

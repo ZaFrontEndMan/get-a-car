@@ -1,5 +1,5 @@
 import React from "react";
-import { useLanguage } from "../contexts/LanguageContext";
+import { useLanguage } from '../contexts/LanguageContext';
 import { useMostPopularCars } from "@/hooks/website/useWebsiteOffers";
 import CarCard from "./CarCard";
 import { SectionSkeleton } from "./ui/SkeletonLoaders";
@@ -7,7 +7,7 @@ import SectionHeader from "./ui/SectionHeader";
 import { getImageUrl, DEFAULT_IMAGES } from "@/utils/imageUtils";
 
 const PopularCarsSection = () => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   // Use the new API hook for popular cars
   const { data: apiResponse, isLoading } = useMostPopularCars();

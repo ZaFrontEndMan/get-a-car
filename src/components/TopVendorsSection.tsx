@@ -1,5 +1,5 @@
 import React from "react";
-import { useLanguage } from "../contexts/LanguageContext";
+import { useLanguage } from '../contexts/LanguageContext';
 import {
   Carousel,
   CarouselContent,
@@ -13,7 +13,7 @@ import { SectionSkeleton } from "./ui/SkeletonLoaders";
 import SectionHeader from "./ui/SectionHeader";
 
 const TopVendorsSection = () => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { data, isLoading, error } = useWebsiteVendors();
 
   // ✅ Extract vendors safely from API response

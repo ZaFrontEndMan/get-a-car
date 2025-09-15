@@ -8,6 +8,7 @@ import { AuthProvider } from "./contexts/AuthContext";
 import { UserProvider } from "./contexts/UserContext";
 import { LanguageProvider } from "./contexts/LanguageContext";
 import { FavoritesProvider } from "./contexts/FavoritesContext";
+import { UserProfileProvider } from "./contexts/UserProfileContext";
 import AppRouter from "./components/routing/AppRouter";
 import ScrollToTop from "./components/ScrollToTop";
 
@@ -22,13 +23,15 @@ function App() {
         <BrowserRouter>
           <ScrollToTop />
           <AuthProvider>
-            <UserProvider>
-              <LanguageProvider>
-                <FavoritesProvider>
-                  <AppRouter />
-                </FavoritesProvider>
-              </LanguageProvider>
-            </UserProvider>
+            <UserProfileProvider>
+              <UserProvider>
+                <LanguageProvider>
+                  <FavoritesProvider>
+                    <AppRouter />
+                  </FavoritesProvider>
+                </LanguageProvider>
+              </UserProvider>
+            </UserProfileProvider>
           </AuthProvider>
         </BrowserRouter>
       </TooltipProvider>

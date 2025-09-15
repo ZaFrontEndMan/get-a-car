@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode, useMemo, useCallback } from 'react';
 import { useAuth } from './AuthContext';
-import { useUserData } from '@/hooks/useUserData';
 import { useNavigate } from 'react-router-dom';
+import { useUserProfile } from './UserProfileContext';
 
 export type UserRole = 'admin' | 'vendor' | 'client' | null;
 
@@ -54,7 +54,7 @@ interface UserProviderProps {
 
 export const UserProvider = ({ children }: UserProviderProps) => {
   const { user: authUser, isLoading: authLoading, signOut: authSignOut } = useAuth();
-  const { user: userData, isLoading: clientLoading, signOut: clientSignOut, refetchUserData } = useUserData();
+  const { profile, isLoading: profileLoading, refetchProfile } = useUserProfile();
   const navigate = useNavigate();
   
   const [userRole, setUserRole] = useState<UserRole>(null);
@@ -73,17 +73,14 @@ export const UserProvider = ({ children }: UserProviderProps) => {
   // Memoize computed values to prevent unnecessary re-renders
   const isAuthenticated = useMemo(() => !!authUser, [authUser]);
   
-  const isLoading = useMemo(() => authLoading || clientLoading, [authLoading, clientLoading]);
+  const isLoading = useMemo(() => authLoading || profileLoading, [authLoading, profileLoading]);
   
-  const user = useMemo(() => {
-    return userRole === 'client' ? userData : authUser;
-  }, [userRole, userData, authUser]);
+  const user = useMemo(() => profile, [profile]);
   
   // Memoize sign out function to prevent unnecessary re-renders
   const signOut = useCallback(async () => {
     try {
       await authSignOut();
-      clientSignOut();
       setUserRole(null);
       // Redirect to home page with visitor view
       navigate('/', { replace: true });
@@ -92,14 +89,12 @@ export const UserProvider = ({ children }: UserProviderProps) => {
       // Even if logout fails, redirect to home
       navigate('/', { replace: true });
     }
-  }, [authSignOut, clientSignOut, navigate]);
+  }, [authSignOut, navigate]);
   
   // Refetch user data
-  const refetchUser = () => {
-    if (userRole === 'client') {
-      refetchUserData();
-    }
-  };
+  const refetchUser = useCallback(() => {
+    refetchProfile();
+  }, [refetchProfile]);
   
   // Memoize navigation helper functions to prevent unnecessary re-renders
   const getDefaultRoute = useCallback((): string => {

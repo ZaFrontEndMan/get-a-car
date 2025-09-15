@@ -4,9 +4,7 @@ import { MapPin, Calendar, Search, Plus, Minus, Navigation } from 'lucide-react'
 import { useCarFilterData } from '@/hooks/useFilterData';
 import { useNavigate } from 'react-router-dom';
 const SearchBar = () => {
-  const {
-    t
-  } = useLanguage();
+  const { t, language } = useLanguage();
   const navigate = useNavigate();
   const [withDriver, setWithDriver] = useState(false);
   const [pickupLocation, setPickupLocation] = useState('');

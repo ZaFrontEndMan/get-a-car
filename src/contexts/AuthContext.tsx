@@ -122,6 +122,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       startTransition(() => {
         setUser(null);
         setToken(null);
+        setIsLoading(false); // Ensure loading is false after logout
       });
       console.log('Sign out successful');
     } catch (error) {
@@ -130,6 +131,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       startTransition(() => {
         setUser(null);
         setToken(null);
+        setIsLoading(false); // Ensure loading is false after logout
       });
       throw error;
     }
