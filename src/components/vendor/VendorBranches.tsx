@@ -7,7 +7,7 @@ import BranchesListView from "./branches/BranchesListView";
 import BranchesTableView from "./branches/BranchesTableView";
 import { useGetVendorBranches } from "@/hooks/vendor/useVendorBranch";
 import { useQueryClient } from "@tanstack/react-query";
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@/components/ui/use-toast";
 import { Button } from "../ui/button";
 import { Plus } from "lucide-react";
 

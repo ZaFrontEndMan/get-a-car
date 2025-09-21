@@ -1,9 +1,11 @@
-import React, { useState, useEffect, useMemo, useCallback } from "react";
+import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { useLanguage } from "../contexts/LanguageContext";
 import Navbar from "../components/layout/navbar/Navbar";
 import CarCard from "../components/CarCard";
+import OptimizedCarCard from "../components/cars/OptimizedCarCard";
 import CarsHeader from "../components/cars/CarsHeader";
 import CarsFilters from "../components/cars/CarsFilters";
+import MemoizedCarsFilters from "../components/cars/MemoizedCarsFilters";
 import CarsPagination from "../components/cars/CarsPagination";
 import { Search } from "lucide-react";
 import { useOptimizedCars, useBackgroundSync } from "@/hooks/useOptimizedCars";
@@ -20,18 +22,28 @@ import {
   ApiErrorBoundary,
   CarErrorBoundary,
 } from "@/components/ui/ErrorBoundary";
+import { CarsFilters as CarsFiltersType } from "@/api/website/websiteCars";
+import { parseUrlParamsToFilters, updateUrlWithFilters } from "@/utils/urlParams";
 
 const Cars = () => {
   const { language, t } = useLanguage();
+  
+  // Initialize filters from URL parameters
+  const [serverFilters, setServerFilters] = useState<CarsFiltersType>(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    return parseUrlParamsToFilters(urlParams);
+  });
+  
   const [searchTerm, setSearchTerm] = useState("");
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 2000]);
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [selectedVendors, setSelectedVendors] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const itemsPerPage = 12;
   const VIRTUAL_SCROLL_THRESHOLD = 50; // Use virtual scrolling when more than 50 items
   const CARD_HEIGHT = viewMode === "grid" ? 320 : 200; // Estimated heights for grid/list view
+  
+  // Performance optimization: use refs to avoid unnecessary re-renders
+  const containerRef = useRef<HTMLDivElement>(null);
+  const lastScrollPosition = useRef(0);
 
   // Use debounced search to improve performance
   const { debouncedSearchTerm, isSearching } = useDebouncedSearch(
@@ -46,138 +58,85 @@ const Cars = () => {
     refetch,
     prefetchNextPages,
     prefetchPreviousPage,
-  } = useOptimizedCars(currentPage, itemsPerPage);
+  } = useOptimizedCars(currentPage, itemsPerPage, serverFilters);
 
   // Enable background sync for fresh data
   useBackgroundSync();
 
-  // Memoize car data transformation to prevent unnecessary re-renders
+  // Memoize car data transformation with better performance
   const cars = useMemo(() => {
     if (!carsResponse?.carSearchResult) return [];
 
-    return carsResponse.carSearchResult.map((car) => ({
-      id: car?.carID.toString(),
-      title: car?.name || "No title",
-      title_ar: "",
-      description: car?.description || "No description",
-      description_ar: "",
-      image: car?.image
-        ? getImageUrl(car.image)
-        : "https://images.unsplash.com/photo-1549924231-f129b911e442",
-      price: car?.pricePerDay || 0,
-      vendorName: car?.vendorName || "Unknown Vendor",
-      vendor: {
-        id: car?.vendorId?.toString(),
-        name: car?.vendorName || "Unknown Vendor",
-        logo_url: car?.companyLogo ? getImageUrl(car.companyLogo) : null,
-      },
-      extra: {
-        model: car?.model,
-        fuelType: car?.fuelType,
-        branch: car?.branch,
-        transmission: car?.transmission,
-        type: car?.type,
-        pricePerWeek: car?.pricePerWeek,
-        pricePerMonth: car?.pricePerMonth,
-      },
-    }));
+    return carsResponse.carSearchResult.map((car) => {
+      const carId = car?.carID?.toString();
+      const vendorId = car?.vendorId?.toString();
+      const vendorName = car?.vendorName || "Unknown Vendor";
+      const carImage = car?.image ? getImageUrl(car.image) : "https://images.unsplash.com/photo-1549924231-f129b911e442";
+      const logoUrl = car?.companyLogo ? getImageUrl(car.companyLogo) : null;
+      
+      return {
+        id: carId,
+        title: car?.name || "No title",
+        brand: car?.model || "Unknown Brand",
+        image: carImage,
+        price: car?.pricePerDay || 0,
+        daily_rate: car?.pricePerDay || 0,
+        weeklyPrice: car?.pricePerWeek,
+        weekly_rate: car?.pricePerWeek,
+        monthlyPrice: car?.pricePerMonth,
+        monthly_rate: car?.pricePerMonth,
+        seats: 4, // Default seats, could be extracted from car data if available
+        fuel: car?.fuelType || "",
+        fuel_type: car?.fuelType || "",
+        transmission: car?.transmission || "",
+        vendor: {
+          id: vendorId,
+          name: vendorName,
+          logo_url: logoUrl,
+        },
+        vendors: {
+          id: vendorId,
+          name: vendorName,
+          logo_url: logoUrl,
+        },
+      };
+    });
   }, [carsResponse?.carSearchResult]);
 
-  // Memoize filtered cars to prevent unnecessary filtering on every render
+  // Apply client-side search filter only (server handles other filters)
   const filteredCars = useMemo(() => {
-    return cars.filter((car) => {
-      // Search term filter (using debounced search)
-      if (
-        debouncedSearchTerm &&
-        !car?.title.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
-      ) {
-        return false;
-      }
-
-      // Price range filter
-      const isDefaultPriceRange = priceRange[0] === 0 && priceRange[1] === 2000;
-      if (!isDefaultPriceRange) {
-        const carPrice = car?.price;
-        const minPrice = priceRange[0];
-        const maxPrice = priceRange[1];
-
-        if (isNaN(carPrice) || carPrice < minPrice || carPrice > maxPrice) {
-          return false;
-        }
-      }
-
-      // Vendor filter
-      if (
-        selectedVendors.length > 0 &&
-        !selectedVendors.includes(car?.vendor.name)
-      ) {
-        return false;
-      }
-
-      // Category filter
-      if (selectedCategories.length > 0) {
-        const originalCar = carsResponse?.carSearchResult.find(
-          (o) => o.carID.toString() === car?.id
-        );
-
-        if (!originalCar) return false;
-
-        const matchesCategory = selectedCategories.some((category) => {
-          const categoryLower = category.toLowerCase();
-          return (
-            (originalCar.fuelType &&
-              originalCar.fuelType.toLowerCase() === categoryLower) ||
-            (originalCar.transmission &&
-              originalCar.transmission.toLowerCase() === categoryLower) ||
-            (originalCar.type &&
-              originalCar.type.toLowerCase() === categoryLower) ||
-            (originalCar.branch &&
-              originalCar.branch.toLowerCase() === categoryLower)
-          );
-        });
-
-        if (!matchesCategory) return false;
-      }
-
-      return true;
-    });
-  }, [
-    cars,
-    debouncedSearchTerm,
-    priceRange,
-    selectedVendors,
-    selectedCategories,
-    carsResponse?.carSearchResult,
-  ]);
-
-  // Memoize pagination calculations
-  const paginationData = useMemo(() => {
-    const totalItems = filteredCars.length;
-    const totalPages = Math.ceil(totalItems / itemsPerPage);
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const paginatedCars = filteredCars.slice(
-      startIndex,
-      startIndex + itemsPerPage
+    if (!debouncedSearchTerm) return cars;
+    
+    return cars.filter((car) => 
+      car?.title.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
     );
+  }, [cars, debouncedSearchTerm]);
 
-    return { totalItems, totalPages, paginatedCars };
-  }, [filteredCars, currentPage, itemsPerPage]);
+  // Use server-side pagination data
+  const totalPages = carsResponse?.totalPages || 0;
+  const paginatedCars = filteredCars; // Server already handles pagination
 
-  const { totalPages, paginatedCars } = paginationData;
+  // Update server filters and URL when filters change
+  const updateFilters = useCallback((newFilters: Partial<CarsFiltersType>) => {
+    const updatedFilters = { ...serverFilters, ...newFilters };
+    setServerFilters(updatedFilters);
+    updateUrlWithFilters(updatedFilters);
+    setCurrentPage(1); // Reset to first page when filters change
+  }, [serverFilters]);
 
   // Memoize callback functions to prevent unnecessary re-renders
   const clearAllFilters = useCallback(() => {
-    setPriceRange([0, 2000]);
-    setSelectedCategories([]);
-    setSelectedVendors([]);
+    const clearedFilters: CarsFiltersType = {};
+    setServerFilters(clearedFilters);
+    updateUrlWithFilters(clearedFilters);
     setSearchTerm("");
     setCurrentPage(1);
   }, []);
 
-  // Reset to first page when filters change
+  // Reset to first page when server filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [priceRange, selectedCategories, selectedVendors, debouncedSearchTerm]);
+  }, [serverFilters]);
 
   const handlePageChange = useCallback(
     (page: number) => {
@@ -196,24 +155,84 @@ const Cars = () => {
     [currentPage, prefetchNextPages, prefetchPreviousPage]
   );
 
-  // Memoize filter data to prevent unnecessary re-renders
+  // Keyboard navigation for pagination
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      // Only handle keyboard shortcuts when not typing in input fields
+      if (
+        event.target instanceof HTMLInputElement ||
+        event.target instanceof HTMLTextAreaElement ||
+        event.target instanceof HTMLSelectElement
+      ) {
+        return;
+      }
+
+      switch (event.key) {
+        case "ArrowLeft":
+          if (currentPage > 1) {
+            event.preventDefault();
+            handlePageChange(currentPage - 1);
+          }
+          break;
+        case "ArrowRight":
+          if (currentPage < totalPages) {
+            event.preventDefault();
+            handlePageChange(currentPage + 1);
+          }
+          break;
+        case "Home":
+          if (currentPage > 1) {
+            event.preventDefault();
+            handlePageChange(1);
+          }
+          break;
+        case "End":
+          if (currentPage < totalPages) {
+            event.preventDefault();
+            handlePageChange(totalPages);
+          }
+          break;
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [currentPage, totalPages, handlePageChange]);
+
+  // Memoize filter data with better performance
   const filterData = useMemo(() => {
     if (!carsResponse?.carsCommonProp?.data) return {};
 
     const commonProps = carsResponse.carsCommonProp.data;
+    const filterMap = new Map();
+    
+    // Create a map for O(1) lookup instead of multiple find operations
+    commonProps.forEach(item => {
+      filterMap.set(item.header, item.filterData);
+    });
+
     return {
-      vendorNames: commonProps.find((item) => item.header === "vendorNames")
-        ?.filterData,
-      branches: commonProps.find((item) => item.header === "branches")
-        ?.filterData,
-      types: commonProps.find((item) => item.header === "types")?.filterData,
-      transmissions: commonProps.find((item) => item.header === "transmissions")
-        ?.filterData,
-      fuelTypes: commonProps.find((item) => item.header === "fuelTypes")
-        ?.filterData,
+      vendorNames: filterMap.get("vendorNames"),
+      branches: filterMap.get("branches"),
+      types: filterMap.get("types"),
+      transmissions: filterMap.get("transmissions"),
+      fuelTypes: filterMap.get("fuelTypes"),
       maxPrice: carsResponse.carsCommonProp.maxPrice,
     };
   }, [carsResponse?.carsCommonProp]);
+
+  // Convert server filters to component state format for backward compatibility
+  const priceRange: [number, number] = serverFilters.priceRange 
+    ? [serverFilters.priceRange.min, serverFilters.priceRange.max]
+    : [0, 2000];
+  
+  const selectedVendors = serverFilters.vendorNames || [];
+  const selectedCategories = [
+    ...(serverFilters.types || []),
+    ...(serverFilters.fuelTypes || []),
+    ...(serverFilters.branches || []),
+    ...(serverFilters.transmissions || [])
+  ];
 
   if (isLoading) {
     return (
@@ -293,13 +312,38 @@ const Cars = () => {
                     </div>
                   }
                 >
-                  <CarsFilters
+                  <MemoizedCarsFilters
                     priceRange={priceRange}
-                    setPriceRange={setPriceRange}
+                    setPriceRange={(range) => updateFilters({ 
+                      priceRange: { min: range[0], max: range[1] } 
+                    })}
                     selectedCategories={selectedCategories}
-                    setSelectedCategories={setSelectedCategories}
+                    setSelectedCategories={(categories) => {
+                      // Extract different category types from the combined array
+                      const types = categories.filter(cat => 
+                        filterData.types?.some(t => t.name === cat)
+                      );
+                      const fuelTypes = categories.filter(cat => 
+                        filterData.fuelTypes?.some(f => f.name === cat)
+                      );
+                      const branches = categories.filter(cat => 
+                        filterData.branches?.some(b => b.name === cat)
+                      );
+                      const transmissions = categories.filter(cat => 
+                        filterData.transmissions?.some(t => t.name === cat)
+                      );
+                      
+                      updateFilters({ 
+                        types: types.length > 0 ? types : undefined,
+                        fuelTypes: fuelTypes.length > 0 ? fuelTypes : undefined,
+                        branches: branches.length > 0 ? branches : undefined,
+                        transmissions: transmissions.length > 0 ? transmissions : undefined
+                      });
+                    }}
                     selectedVendors={selectedVendors}
-                    setSelectedVendors={setSelectedVendors}
+                    setSelectedVendors={(vendors) => updateFilters({ 
+                      vendorNames: vendors.length > 0 ? vendors : undefined 
+                    })}
                     searchTerm={searchTerm}
                     setSearchTerm={setSearchTerm}
                     onClearFilters={clearAllFilters}
@@ -334,7 +378,7 @@ const Cars = () => {
                 </ErrorBoundary>
 
                 {/* Cars Grid/List with Virtual Scrolling */}
-                <div className="mt-6">
+                <div className="mt-6" ref={containerRef}>
                   <ApiErrorBoundary>
                     {isSearching && searchTerm ? (
                       <CarsSkeleton
@@ -354,20 +398,11 @@ const Cars = () => {
                           }`}
                           renderItem={(car, index) => (
                             <CarErrorBoundary key={car?.id}>
-                              <div
-                                className="animate-fade-in flex-grow"
-                                style={{
-                                  animationDelay: `${Math.min(
-                                    index * 0.05,
-                                    0.5
-                                  )}s`,
-                                }}
-                              >
-                                <CarCard
+                              <div className="flex-grow">
+                                <OptimizedCarCard
                                   car={car}
-                                  viewMode={
-                                    viewMode === "list" ? "list" : undefined
-                                  }
+                                  viewMode={viewMode === "list" ? "list" : undefined}
+                                  animationDelay={index * 0.05}
                                 />
                               </div>
                             </CarErrorBoundary>
@@ -377,17 +412,10 @@ const Cars = () => {
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                           {paginatedCars.map((car, index) => (
                             <CarErrorBoundary key={car?.id}>
-                              <div
-                                className="animate-fade-in"
-                                style={{
-                                  animationDelay: `${Math.min(
-                                    index * 0.05,
-                                    0.5
-                                  )}s`,
-                                }}
-                              >
-                                <CarCard car={car} />
-                              </div>
+                              <OptimizedCarCard
+                                car={car}
+                                animationDelay={index * 0.05}
+                              />
                             </CarErrorBoundary>
                           ))}
                         </div>
@@ -395,17 +423,11 @@ const Cars = () => {
                         <div className="space-y-4">
                           {paginatedCars.map((car, index) => (
                             <CarErrorBoundary key={car?.id}>
-                              <div
-                                className="animate-fade-in"
-                                style={{
-                                  animationDelay: `${Math.min(
-                                    index * 0.05,
-                                    0.5
-                                  )}s`,
-                                }}
-                              >
-                                <CarCard car={car} viewMode="list" />
-                              </div>
+                              <OptimizedCarCard
+                                car={car}
+                                viewMode="list"
+                                animationDelay={index * 0.05}
+                              />
                             </CarErrorBoundary>
                           ))}
                         </div>

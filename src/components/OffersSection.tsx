@@ -24,6 +24,7 @@ const OffersSection = () => {
       )}% OFF`,
       image: getImageUrl(offer.offerImage, DEFAULT_IMAGES.offer),
       validUntil: offer.endDate,
+      carId: offer.carId,
       vendor: {
         id: offer.carId.toString(),
         name: "Vendor", // API doesn't provide vendor name
@@ -63,7 +64,7 @@ const OffersSection = () => {
             {offers.map((offer, index) => (
               <Link
                 key={offer.id}
-                to={`/offers/${offer.id}`}
+                to={`/offers/${offer.id}?carId=${offer.carId}`}
                 className="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 animate-fade-in overflow-hidden block flex flex-col h-full"
                 style={{
                   animationDelay: `${index * 0.1}s`,
@@ -99,7 +100,7 @@ const OffersSection = () => {
                     {getLocalizedDescription(offer)}
                   </p>
                   <p className="text-sm text-secondary font-medium mb-4 text-center">
-                    {t("validUntil")}{" "}
+                    {t("validUntil")} {" "}
                     {new Date(offer.validUntil).toLocaleDateString()}
                   </p>
 

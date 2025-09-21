@@ -9,7 +9,7 @@ import { usePaidFeatures } from './usePaidFeatures';
 import { useLocations } from './useLocations';
 import { useGetVendorBranches } from '@/hooks/vendor/useVendorBranch';
 import { useCreateCar, useUpdateCar } from '@/hooks/vendor/useVendorCar';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/components/ui/use-toast';
 
 interface CarFormProps {
   car?: any;

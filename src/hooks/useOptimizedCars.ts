@@ -5,21 +5,13 @@ import {
   getMostPopularCars,
   AllCarsResponse,
   Car,
+  CarsFilters,
 } from "@/api/website/websiteCars";
 
 // Cache configuration
 const CACHE_TIME = 5 * 60 * 1000; // 5 minutes
 const STALE_TIME = 2 * 60 * 1000; // 2 minutes
 const PREFETCH_PAGES = 2; // Number of pages to prefetch ahead
-
-interface CarsFilters {
-  vendors?: string[];
-  types?: string[];
-  transmissions?: string[];
-  fuelTypes?: string[];
-  branches?: string[];
-  priceRange?: [number, number];
-}
 
 // Enhanced hook with caching and prefetching
 export const useOptimizedCars = (

@@ -29,7 +29,8 @@ export const useUserData = () => {
   } = useQuery({
     queryKey: ["userInfo"],
     queryFn: getUserInfo,
-    enabled: !!authUser && !!token && authUser.roles?.toLowerCase() === "client", // Only fetch for client users with valid token
+    enabled:
+      !!authUser && !!token && authUser.roles?.toLowerCase() === "client", // Only fetch for client users with valid token
     retry: false, // optional: avoid retry spamming if token expired
   });
 
@@ -55,10 +56,19 @@ export const useUserData = () => {
     return null;
   };
 
-  const signOut = useCallback(() => {
-    Cookies.remove("auth_token");
-    queryClient.setQueryData(["userInfo"], null);
-    queryClient.clear(); // Clear all cached data
+  const signOut = useCallback(async () => {
+    try {
+      // Clear query cache and user data
+      queryClient.setQueryData(["userInfo"], null);
+      queryClient.clear();
+      
+      // Clear auth token cookie
+      Cookies.remove("auth_token");
+      
+      console.log("useUserData signOut completed");
+    } catch (error) {
+      console.error("Error during useUserData signOut:", error);
+    }
   }, [queryClient]);
 
   return {

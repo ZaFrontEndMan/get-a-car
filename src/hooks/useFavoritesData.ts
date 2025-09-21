@@ -2,7 +2,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getFavorites, addFavorite, removeFavorite } from '../api/client/clientFavorites';
 import { Favorite } from '../types/favorites';
-import { useToast } from './use-toast';
+import { useToast } from '@/components/ui/use-toast';
 
 export const useFavoritesData = () => {
   const { toast } = useToast();

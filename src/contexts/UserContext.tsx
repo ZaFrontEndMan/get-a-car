@@ -73,19 +73,34 @@ export const UserProvider = ({ children }: UserProviderProps) => {
   // Memoize computed values to prevent unnecessary re-renders
   const isAuthenticated = useMemo(() => !!authUser, [authUser]);
   
-  const isLoading = useMemo(() => authLoading || profileLoading, [authLoading, profileLoading]);
+  const isLoading = useMemo(() => {
+    if (!authUser) return false;
+    return authLoading || profileLoading;
+  }, [authUser, authLoading, profileLoading]);
   
   const user = useMemo(() => profile, [profile]);
   
-  // Memoize sign out function to prevent unnecessary re-renders
+  // Unified sign out function to prevent unnecessary re-renders
   const signOut = useCallback(async () => {
     try {
+      console.log('Starting unified logout process...');
+      
+      // 1. Clear auth context (user, token, cookies)
       await authSignOut();
+      
+      // 2. Clear user role
       setUserRole(null);
-      // Redirect to home page with visitor view
+      
+      console.log('Unified logout successful');
+      
+      // 3. Redirect to home page with visitor view
       navigate('/', { replace: true });
     } catch (error) {
-      console.error('Error signing out:', error);
+      console.error('Error during unified signOut:', error);
+      
+      // Force clear local state even if auth signOut fails
+      setUserRole(null);
+      
       // Even if logout fails, redirect to home
       navigate('/', { replace: true });
     }

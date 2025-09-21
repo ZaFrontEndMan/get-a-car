@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import CarForm from './CarForm';
 import CarDetailsModal from './CarDetailsModal';
 import CarsImportModal from './cars/CarsImportModal';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/components/ui/use-toast';
 import CarsHeader from './cars/CarsHeader';
 import CarsGridView from './cars/CarsGridView';
 import CarsListView from './cars/CarsListView';

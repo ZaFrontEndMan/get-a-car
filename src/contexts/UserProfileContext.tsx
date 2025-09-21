@@ -26,13 +26,15 @@ export const UserProfileProvider = ({ children }: { children: React.ReactNode })
   useEffect(() => {
     if (!user) {
       setProfile(null);
-      // If user is null, we are not loading any profile
+      console.log('UserProfile: User is null, clearing profile');
       return;
     }
     if (user.roles?.toLowerCase() === 'client') {
       setProfile(userData);
+      console.log('UserProfile: Setting client profile data');
     } else {
       setProfile(user);
+      console.log('UserProfile: Setting auth user as profile');
     }
   }, [user, userData]);
 
@@ -44,7 +46,7 @@ export const UserProfileProvider = ({ children }: { children: React.ReactNode })
 
   const value = useMemo(() => ({
     profile,
-    isLoading: !!user && isLoading, // Only loading if user exists and profile is loading
+    isLoading: !!user ? isLoading : false, // Always false if no user
     refetchProfile,
   }), [profile, isLoading, refetchProfile, user]);
 

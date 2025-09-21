@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Slider } from "@/components/ui/slider";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useDebouncedSlider } from "@/hooks/useDebouncedSlider";
 
 interface CarsFiltersProps {
   priceRange: [number, number];
@@ -36,6 +37,18 @@ const CarsFilters = ({
 }: CarsFiltersProps) => {
   const { t, language } = useLanguage();
   const isRTL = language === "ar";
+
+  // Use debounced slider for price range
+  const [sliderValue, setSliderValue, debouncedSliderValue] = useDebouncedSlider(
+    priceRange,
+    500, // 500ms delay
+    setPriceRange
+  );
+
+  // Update slider value when priceRange prop changes
+  useEffect(() => {
+    setSliderValue(priceRange);
+  }, [priceRange, setSliderValue]);
 
   const handleCategoryToggle = (category: string) => {
     setSelectedCategories(
@@ -114,17 +127,17 @@ const CarsFilters = ({
                 {t("priceRange")}
               </h3>
               <Slider
-                value={priceRange}
+                value={sliderValue}
                 onValueChange={(value) => {
-                  setPriceRange(value as [number, number]);
+                  setSliderValue(value as [number, number]);
                 }}
                 max={filterData?.maxPrice || 2000}
                 step={50}
                 className="mb-2"
               />
               <div className="text-xs text-gray-600 bg-gray-50 rounded-lg px-2 py-1">
-                {t("currency")} {priceRange[0]} - {t("currency")}{" "}
-                {priceRange[1]}
+                {t("currency")} {sliderValue[0]} - {t("currency")}{" "}
+                {sliderValue[1]}
               </div>
             </div>
 

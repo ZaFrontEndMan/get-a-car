@@ -15,9 +15,13 @@ export const arTranslations = {
   // Search
   search: "البحث",
   pickupLocation: "مكان الاستلام",
-  returnLocation: "مكان الإرجاع",
+  returnLocation: "مكان التسليم",
   pickupDate: "تاريخ الاستلام",
-  returnDate: "تاريخ الإرجاع",
+  returnDate: "تاريخ التسليم",
+  selectDate: "اختر تاريخاً",
+  selectPickupLocation: "اختر مكان الاستلام",
+  selectDropoffLocation: "اختر مكان التسليم",
+  similarCars: "السيارات المماثلة",
 
   // Filters
   filters: "المرشحات",
@@ -256,6 +260,7 @@ export const arTranslations = {
 
   // Fixed titles with proper case
   selectRentalPeriod: "اختر فترة الإيجار",
+  rentalPeriod: " فترة الإيجار",
   additionalServices: "خدمات إضافية",
   dropoffLocation: "مكان التسليم",
   topVendors: "أفضل المؤسسات",
@@ -418,7 +423,6 @@ export const arTranslations = {
   enableLocation: "تفعيل الموقع",
   rentalDays: "أيام الإيجار",
   totalDays: "إجمالي الأيام",
-  rentalPeriod: "فترة الإيجار",
 
   // Additional Admin Table Headers and Content
   clientInfo: "معلومات العميل",
@@ -430,6 +434,9 @@ export const arTranslations = {
   noPhone: "لا يوجد هاتف",
   noBookings: "لا توجد حجوزات",
   noClientsFound: "لم يتم العثور على عملاء",
+  pickupAndDropoff: "الاستلام والتسليم",
+  rentalDuration: "فترة الإيجار",
+  total: "إجمالي",
 
   // Branch related
   branchName: "اسم الفرع",
@@ -441,7 +448,7 @@ export const arTranslations = {
   customer: "العميل",
   vehicle: "المركبة",
   pickupDateShort: "تاريخ الاستلام",
-  returnDateShort: "تاريخ الإرجاع",
+  returnDateShort: "تاريخ التسليم",
   amount: "المبلغ",
 
   // Generic table terms
@@ -686,6 +693,27 @@ export const arTranslations = {
   carTypes: "أنواع السيارات",
   transmissions: "ناقل الحركة",
   latestOffers: "أحدث العروض",
+
+  // الحجز والتسعير
+  pricingCalculation: "حساب التسعير",
+  noAdditionalServices: "لا توجد خدمات إضافية متاحة",
+  basePrice: "السعر الأساسي",
+  bookThisOffer: "احجز هذا العرض",
+  freeCancellation: "إلغاء مجاني حتى 24 ساعة قبل الاستلام",
+  completeBooking: "إكمال الحجز",
+  secureVehicleRental: "حجز آمن لتأجير المركبات",
+  locationsPreSelected: "المواقع محددة مسبقاً",
+  driverOption: "خيار السائق",
+  paymentInformation: "معلومات الدفع",
+  priceSummary: "ملخص السعر",
+  processingPayment: "جاري معالجة الدفع...",
+  completePayment: "إكمال الدفع",
+  securePayment: "معالجة دفع آمنة",
+  paymentSuccessful: "تم الدفع بنجاح",
+  paymentFailed: "فشل الدفع",
+  pleaseTryAgain: "يرجى المحاولة مرة أخرى",
+  driver: "سائق",
+  delivery: "توصيل",
 
   // قيم افتراضية لصفحة التواصل
   defaultAddress: "123 طريق الملك فهد، الرياض 12345، المملكة العربية السعودية",

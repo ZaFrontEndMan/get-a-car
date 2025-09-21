@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { useMutation } from '@tanstack/react-query';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/components/ui/use-toast';
 import { useUpdateVendorBranch } from '@/hooks/vendor/useVendorBranch';
 
 interface BranchFormData {

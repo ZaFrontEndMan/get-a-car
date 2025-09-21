@@ -3,8 +3,12 @@ import { useQuery } from "@tanstack/react-query";
 import {
   getAllCars,
   getMostPopularCars,
+  getRentalCarDetailsById,
+  getCarDetailsById,
+  getSimilarCars,
   AllCarsResponse,
   Car,
+  RentalCarDetailsResponse,
 } from "@/api/website/websiteCars";
 
 // 🔹 Hook: Get all cars (paginated)
@@ -23,7 +27,7 @@ export const useAllCars = (
   return useQuery<AllCarsResponse>({
     queryKey: ["allCars", pageIndex, pageSize, filters],
     queryFn: () => getAllCars(pageIndex, pageSize, filters),
-    keepPreviousData: true, // smooth pagination
+    placeholderData: (previousData) => previousData, // smooth pagination
   });
 };
 
@@ -32,5 +36,39 @@ export const useMostPopularCars = (pageIndex: number, pageSize: number) => {
   return useQuery<Car[]>({
     queryKey: ["mostPopularCars", pageIndex, pageSize],
     queryFn: () => getMostPopularCars(pageIndex, pageSize),
+  });
+};
+
+// 🔹 Hook: Get rental car details by ID
+export const useRentalCarDetails = (carId: number, offerId: number) => {
+  return useQuery<RentalCarDetailsResponse>({
+    queryKey: ["rentalCarDetails", carId, offerId],
+    queryFn: () => getRentalCarDetailsById(carId, offerId),
+    enabled: carId > 0 && offerId > 0, // Only run query if both IDs are valid
+  });
+};
+
+// 🔹 Hook: Get car details by ID only
+export const useCarDetailsById = (carId: number) => {
+  return useQuery<RentalCarDetailsResponse>({
+    queryKey: ["carDetails", carId],
+    queryFn: () => getCarDetailsById(carId),
+    enabled: carId > 0, // Only run query if carId is valid
+  });
+};
+
+// 🔹 Hook: Get similar cars
+export const useSimilarCars = (requestBody: {
+  types: string[];
+  pickUpLocations: string[];
+  maxPrice: number;
+}) => {
+  // Only enable query if we have valid data
+  const enabled = (requestBody.types.length > 0 || requestBody.pickUpLocations.length > 0) && requestBody.maxPrice > 0;
+
+  return useQuery<{ isSuccess: boolean; customMessage: string; data: Car[] }>({
+    queryKey: ["similarCars", requestBody],
+    queryFn: () => getSimilarCars(requestBody),
+    enabled,
   });
 };

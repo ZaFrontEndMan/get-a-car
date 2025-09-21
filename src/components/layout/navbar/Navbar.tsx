@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Menu, X, User } from "lucide-react";
 import { toast } from "sonner";
-import { useUserData } from "@/hooks/useUserData";
+import { useUser } from "@/contexts/UserContext";
 
 import NavbarLogo from "./NavbarLogo";
 import NavbarLinks from "./NavbarLinks";
@@ -16,7 +16,7 @@ const Navbar = () => {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, signOut } = useUserData();
+  const { user, signOut } = useUser();
   const { t, language } = useLanguage();
   const isRTL = language === "ar";
 
@@ -24,7 +24,7 @@ const Navbar = () => {
     try {
       await signOut();
       toast.success(t("logoutSuccess"));
-      navigate("/");
+      // signOut already handles navigation to "/" - no need for manual navigation or reload
     } catch (error) {
       console.error("Logout error:", error);
       toast.error(t("logoutError"));

@@ -15,6 +15,9 @@ export const enTranslations = {
   returnLocation: "Return Location",
   pickupDate: "Pickup Date",
   returnDate: "Return Date",
+  selectDate: "Select a date",
+  selectPickupLocation: "Select pickup location",
+  selectDropoffLocation: "Select drop-off location",
 
   // Filters
   filters: "Filters",
@@ -178,6 +181,7 @@ export const enTranslations = {
 
   // Fixed titles with proper case
   selectRentalPeriod: "Select Rental Period",
+  rentalPeriod: "Rental Period",
   additionalServices: "Additional Services",
   dropoffLocation: "Drop-off Location",
   topVendors: "Top Vendors",
@@ -343,7 +347,10 @@ export const enTranslations = {
   enableLocation: "Enable Location",
   rentalDays: "Rental Days",
   totalDays: "Total Days",
-  rentalPeriod: "Rental Period",
+  pickupAndDropoff: "Pickup And Dropoff",
+  rentalDuration: "Rental Duration ",
+  total: "Total",
+  similarCars: "Similar Cars",
 
   // Missing keys from Arabic translation
   offerNotFound: "Offer not found",
@@ -669,6 +676,27 @@ export const enTranslations = {
   carTypes: "Car Types",
   transmissions: "Transmissions",
   latestOffers: "Latest Offers",
+
+  // Booking and Pricing
+  pricingCalculation: "Pricing Calculation",
+  noAdditionalServices: "No additional services available",
+  basePrice: "Base Price",
+  bookThisOffer: "Book This Offer",
+  freeCancellation: "Free cancellation up to 24 hours before pickup",
+  completeBooking: "Complete Booking",
+  secureVehicleRental: "Secure vehicle rental booking",
+  locationsPreSelected: "Locations pre-selected",
+  driverOption: "Driver Option",
+  paymentInformation: "Payment Information",
+  priceSummary: "Price Summary",
+  processingPayment: "Processing Payment...",
+  completePayment: "Complete Payment",
+  securePayment: "Secure payment processing",
+  paymentSuccessful: "Payment Successful",
+  paymentFailed: "Payment Failed",
+  pleaseTryAgain: "Please try again",
+  driver: "Driver",
+  delivery: "Delivery",
 
   // Contact page fallback values
   defaultAddress: "123 King Fahd Road, Riyadh 12345, Saudi Arabia",

@@ -2,7 +2,7 @@
 import React from 'react';
 import { Menu, Bell, User, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useAuth } from '@/contexts/AuthContext';
+import { useUser } from '@/contexts/UserContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
@@ -13,7 +13,7 @@ interface VendorHeaderProps {
 }
 
 const VendorHeader = ({ onMenuClick }: VendorHeaderProps) => {
-  const { signOut } = useAuth();
+  const { signOut } = useUser();
   const { t } = useLanguage();
   const navigate = useNavigate();
 
@@ -25,12 +25,10 @@ const VendorHeader = ({ onMenuClick }: VendorHeaderProps) => {
       console.log('Vendor logout initiated');
       await signOut();
       toast.success(t('signOut') + ' successfully');
-      navigate('/', { replace: true });
+      // signOut already handles navigation - no need for manual navigation
     } catch (error) {
-      console.error('Logout error:', error);
+      console.error('Vendor logout error:', error);
       toast.error('Failed to logout');
-      // Force navigation even if logout fails
-      navigate('/', { replace: true });
     }
   };
 

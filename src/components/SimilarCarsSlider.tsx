@@ -1,92 +1,128 @@
-
-import React, { useState, useEffect } from 'react';
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
-import CarCard from './CarCard';
-import { useLanguage } from '../contexts/LanguageContext';
-import { supabase } from '@/integrations/supabase/client';
+import React, { useMemo } from "react";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
+import CarCard from "./CarCard";
+import { useLanguage } from "../contexts/LanguageContext";
+import { useSimilarCars } from "@/hooks/website/useWebsiteCars";
 
 interface SimilarCarsSliderProps {
-  currentCarId: string;
+  /** The car object to find similar cars for */
+  car: {
+    id: string | number;
+    name?: string;
+    brand?: string;
+    model?: string;
+    image?: string;
+    price?: number;
+    weeklyPrice?: number;
+    monthlyPrice?: number;
+    rating?: number;
+    features?: string[];
+    seats?: number;
+    fuel?: string;
+    transmission?: string;
+    isOffer?: boolean;
+    discount?: string | null;
+    type?: string;
+    originalPricing?: {
+      daily: number;
+      weekly: number;
+      monthly: number;
+    };
+    pickUpLocations?: Array<{ address: string; id: number }>;
+  };
 }
 
-const SimilarCarsSlider = ({ currentCarId }: SimilarCarsSliderProps) => {
+/**
+ * SimilarCarsSlider component displays a carousel of similar cars based on the provided car object.
+ * It uses the car's type, pricing, and pickup locations to find relevant similar cars.
+ */
+const SimilarCarsSlider = ({ car }: SimilarCarsSliderProps) => {
   const { t } = useLanguage();
-  const [similarOffers, setSimilarOffers] = useState([]);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchSimilarOffers = async () => {
-      try {
-        setLoading(true);
-        
-        // Fetch similar offers (excluding the current car)
-        const { data: offersData, error } = await supabase
-          .from('offers')
-          .select(`
-            id,
-            title,
-            discount_percentage,
-            cars (
-              id,
-              name,
-              brand,
-              model,
-              images,
-              daily_rate,
-              weekly_rate,
-              monthly_rate,
-              seats,
-              fuel_type,
-              transmission,
-              features
-            )
-          `)
-          .neq('car_id', currentCarId)
-          .eq('status', 'published')
-          .limit(4);
+  // Prepare request body for similar cars API
+  const requestBody = useMemo(() => {
+    const maxPrice = car.originalPricing?.daily
+      ? Math.round(car.originalPricing.daily * 1.1)
+      : 20000; // +10%
+    const types = car.type ? [car.type] : [];
+    const pickUpLocations =
+      car.pickUpLocations?.map((loc) => loc.address).filter(Boolean) || [];
 
-        if (error) {
-          console.error('Error fetching similar offers:', error);
-          return;
-        }
-
-        // Transform the data to match CarCard format
-        const transformedOffers = offersData?.map(offer => ({
-          id: offer.cars.id,
-          name: offer.cars.name,
-          brand: offer.cars.brand,
-          image: offer.cars.images?.[0] || '/uploads/10b7fec1-615a-4b01-ae08-d35764ce917a.png',
-          price: Math.round(offer.cars.daily_rate * (1 - offer.discount_percentage / 100)),
-          weeklyPrice: Math.round((offer.cars.weekly_rate || offer.cars.daily_rate * 7) * (1 - offer.discount_percentage / 100)),
-          monthlyPrice: Math.round((offer.cars.monthly_rate || offer.cars.daily_rate * 30) * (1 - offer.discount_percentage / 100)),
-          rating: 4.7, // Default rating
-          features: offer.cars.features || [],
-          seats: offer.cars.seats,
-          fuel: offer.cars.fuel_type,
-          transmission: offer.cars.transmission,
-          isOffer: true,
-          discount: `${offer.discount_percentage}%`
-        })) || [];
-
-        setSimilarOffers(transformedOffers);
-      } catch (error) {
-        console.error('Error fetching similar offers:', error);
-      } finally {
-        setLoading(false);
-      }
+    return {
+      types,
+      pickUpLocations,
+      maxPrice,
     };
+  }, [car.originalPricing, car.type, car.pickUpLocations]);
 
-    fetchSimilarOffers();
-  }, [currentCarId]);
+  // Use the similar cars API
+  const {
+    data: similarCarsResponse,
+    isLoading,
+    error,
+    isError,
+  } = useSimilarCars(requestBody);
 
-  if (loading) {
+  // Transform API data to match CarCard format
+  const similarOffers = useMemo(() => {
+    if (!similarCarsResponse?.data || !Array.isArray(similarCarsResponse.data)) {
+      return [];
+    }
+
+    return similarCarsResponse.data
+      .filter((carData) => 
+        carData.carID.toString() !== car.id.toString() && 
+        carData.availability
+      )
+      .slice(0, 4) // Limit to 4 cars
+      .map((carData) => ({
+        id: carData.carID.toString(),
+        title: carData.name || "Unknown Car",
+        brand: carData.branch || "Unknown",
+        image: carData.image || "/uploads/10b7fec1-615a-4b01-ae08-d35764ce917a.png",
+        price: carData.pricePerDay || 0,
+        weeklyPrice: carData.pricePerWeek || 0,
+        monthlyPrice: carData.pricePerMonth || 0,
+        rating: 4.7, // Default rating
+        features: [],
+        seats: parseInt(carData.doors) || 4,
+        fuel: carData.fuelType || "Unknown",
+        transmission: carData.transmission || "Automatic",
+        isOffer: false,
+        discount: null,
+      }));
+  }, [similarCarsResponse, car.id]);
+
+
+  if (isLoading) {
     return (
       <div className="bg-white rounded-2xl shadow-lg p-6">
-        <h3 className="text-2xl font-bold text-gray-900 mb-6">{t('similarCars')}</h3>
+        <h3 className="text-2xl font-bold text-gray-900 mb-6">
+          {t("similarCars")}
+        </h3>
         <div className="flex items-center justify-center py-8">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-          <span className="ml-3 text-gray-600">{t('loading')}</span>
+          <span className="ml-3 text-gray-600">{t("loading")}</span>
         </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="bg-white rounded-2xl shadow-lg p-6">
+        <h3 className="text-2xl font-bold text-gray-900 mb-6">
+          {t("similarCars")}
+        </h3>
+        <p className="text-red-600 text-center py-8">
+          {t("errorLoadingSimilarCars") || "Error loading similar cars"}
+        </p>
       </div>
     );
   }
@@ -94,20 +130,29 @@ const SimilarCarsSlider = ({ currentCarId }: SimilarCarsSliderProps) => {
   if (similarOffers.length === 0) {
     return (
       <div className="bg-white rounded-2xl shadow-lg p-6">
-        <h3 className="text-2xl font-bold text-gray-900 mb-6">{t('similarCars')}</h3>
-        <p className="text-gray-600 text-center py-8">{t('noSimilarCarsFound')}</p>
+        <h3 className="text-2xl font-bold text-gray-900 mb-6">
+          {t("similarCars")}
+        </h3>
+        <p className="text-gray-600 text-center py-8">
+          {t("noSimilarCarsFound")}
+        </p>
       </div>
     );
   }
 
   return (
     <div className="bg-white rounded-2xl shadow-lg p-6">
-      <h3 className="text-2xl font-bold text-gray-900 mb-6">{t('similarCars')}</h3>
-      
+      <h3 className="text-2xl font-bold text-gray-900 mb-6">
+        {t("similarCars")}
+      </h3>
+
       <Carousel className="w-full">
         <CarouselContent className="-ml-4">
-          {similarOffers.map(car => (
-            <CarouselItem key={car.id} className="pl-4 md:basis-1/2 lg:basis-1/3">
+          {similarOffers.map((car) => (
+            <CarouselItem
+              key={car.id}
+              className="pl-4 md:basis-1/2 lg:basis-1/3"
+            >
               <CarCard car={car} />
             </CarouselItem>
           ))}

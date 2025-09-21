@@ -8,7 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/components/ui/use-toast';
 import ProfileImageUpload from '@/components/dashboard/ProfileImageUpload';
 import { useCountries, useCitiesByCountry, getSaudiArabiaId } from '@/hooks/useCountriesAndCities';
 import { useLanguage } from '@/contexts/LanguageContext';

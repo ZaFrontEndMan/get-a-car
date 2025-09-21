@@ -3,16 +3,17 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { MapPin, Plus, Shield } from 'lucide-react';
-import { useCarAdditionalServices } from '../../hooks/useCarDetails';
 import { useLanguage } from '../../contexts/LanguageContext';
 
 interface CarDetailsSidebarProps {
   car: any;
+  additionalServices?: any[];
   onBookNow: (selectedServices: string[], selectedPickup: string, selectedDropoff: string, totalPrice: number) => void;
 }
 
 const CarDetailsSidebar = ({
   car,
+  additionalServices = [],
   onBookNow
 }: CarDetailsSidebarProps) => {
   const { t } = useLanguage();
@@ -20,7 +21,6 @@ const CarDetailsSidebar = ({
   const [selectedPickup, setSelectedPickup] = React.useState('');
   const [selectedDropoff, setSelectedDropoff] = React.useState('');
   const [selectedServices, setSelectedServices] = React.useState<string[]>([]);
-  const { data: additionalServices = [], isLoading: servicesLoading } = useCarAdditionalServices(car.id);
 
   const pricingOptions = [
     {

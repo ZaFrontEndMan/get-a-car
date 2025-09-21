@@ -8,7 +8,7 @@ import Footer from '../components/Footer';
 import MobileNav from '../components/MobileNav';
 import { LanguageProvider } from '../contexts/LanguageContext';
 import BookingFlow from '../components/BookingFlow';
-import { useCarDetails } from '../hooks/useCarDetails';
+import { useCarDetailsNew } from '../hooks/useCarDetailsNew';
 import { useCarDetailsState } from '../hooks/useCarDetailsState';
 import CarDetailsMain from '../components/car-details/CarDetailsMain';
 import CarDetailsSidebar from '../components/car-details/CarDetailsSidebar';
@@ -17,7 +17,11 @@ import SimilarCarsSlider from '../components/car-details/SimilarCarsSlider';
 
 const CarDetailsContent = () => {
   const { id } = useParams();
-  const { data: car, isLoading: carLoading } = useCarDetails(id);
+  
+  // Convert id to number
+  const carId = id ? parseInt(id) : 0;
+  
+  const { car, loading: carLoading, additionalServices } = useCarDetailsNew(carId);
   const {
     isBookingOpen,
     setIsBookingOpen,
@@ -99,7 +103,7 @@ const CarDetailsContent = () => {
             <CarDetailsVendorInfo car={car} />
             
             {/* Sidebar (rental period) after main content on mobile */}
-            <CarDetailsSidebar car={car} onBookNow={handleBookNow} />
+            <CarDetailsSidebar car={car} additionalServices={additionalServices} onBookNow={handleBookNow} />
           </div>
 
           {/* Desktop Layout - Side by side */}
@@ -113,7 +117,7 @@ const CarDetailsContent = () => {
             {/* Sidebar - Sticky on desktop */}
             <div className="md:col-span-1">
               <div className="sticky top-24">
-                <CarDetailsSidebar car={car} onBookNow={handleBookNow} />
+                <CarDetailsSidebar car={car} additionalServices={additionalServices} onBookNow={handleBookNow} />
               </div>
             </div>
           </div>
@@ -147,15 +151,15 @@ const CarDetailsContent = () => {
             </div>
           )}
 
-          {/* Similar Cars Section */}
-          <div className="mt-12">
+          {/* Similar Cars Section - Temporarily disabled */}
+          {/* <div className="mt-12">
             <SimilarCarsSlider 
               currentCarId={car.id}
               carType={car.type}
               priceRange={priceRange}
               locations={car.pickup_locations}
             />
-          </div>
+          </div> */}
         </div>
       </div>
 

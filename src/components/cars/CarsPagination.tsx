@@ -8,6 +8,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface CarsPaginationProps {
   currentPage: number;
@@ -20,12 +21,20 @@ const CarsPagination = ({
   totalPages,
   setCurrentPage,
 }: CarsPaginationProps) => {
+  const { t, language } = useLanguage();
+  const isRTL = language === "ar";
+
   if (totalPages <= 1) return null;
 
   return (
     <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
-      <Pagination className="w-full">
-        <PaginationContent>
+      {/* Keyboard shortcuts hint */}
+      <div className="text-xs text-gray-500 mb-4 text-center">
+        {isRTL ? "استخدم الأسهم للتنقل • Home للصفحة الأولى • End للصفحة الأخيرة" : "Use arrow keys to navigate • Home for first page • End for last page"}
+      </div>
+      
+      <Pagination className={`w-full ${isRTL ? "flex-row-reverse" : ""}`}>
+        <PaginationContent className={isRTL ? "flex-row-reverse" : ""}>
           <PaginationItem>
             <PaginationPrevious
               href="#"
@@ -36,7 +45,9 @@ const CarsPagination = ({
               className={
                 currentPage === 1 ? "pointer-events-none opacity-50" : ""
               }
-            />
+            >
+              {t("previous")}
+            </PaginationPrevious>
           </PaginationItem>
 
           {[...Array(totalPages)].map((_, index) => {
@@ -88,7 +99,9 @@ const CarsPagination = ({
                   ? "pointer-events-none opacity-50"
                   : ""
               }
-            />
+            >
+              {t("next")}
+            </PaginationNext>
           </PaginationItem>
         </PaginationContent>
       </Pagination>

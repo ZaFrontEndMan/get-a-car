@@ -1,6 +1,12 @@
-
-import React, { createContext, useContext, useEffect, useState, useCallback, startTransition } from 'react';
-import Cookies from 'js-cookie';
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useCallback,
+  startTransition,
+} from "react";
+import Cookies from "js-cookie";
 
 interface JWTUser {
   id: string;
@@ -13,7 +19,7 @@ interface JWTUser {
 }
 
 // Accept token with optional explicit fields; token is the source of truth
-type SetAuthDataInput = Partial<Omit<JWTUser, 'token'>> & { token: string };
+type SetAuthDataInput = Partial<Omit<JWTUser, "token">> & { token: string };
 
 interface AuthContextType {
   user: JWTUser | null;
@@ -28,7 +34,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };
@@ -36,32 +42,36 @@ export const useAuth = () => {
 // Safely decode a JWT payload without verification
 const decodeJwt = (token: string): any | null => {
   try {
-    const base64Url = token.split('.')[1];
-    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const base64Url = token.split(".")[1];
+    const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
     const jsonPayload = decodeURIComponent(
       atob(base64)
-        .split('')
-        .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
-        .join('')
+        .split("")
+        .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+        .join("")
     );
     return JSON.parse(jsonPayload);
   } catch (e) {
-    console.error('Failed to decode JWT:', e);
+    console.error("Failed to decode JWT:", e);
     return null;
   }
 };
 
-const normalizeUserFromToken = (token: string, override?: Partial<JWTUser>): JWTUser | null => {
+const normalizeUserFromToken = (
+  token: string,
+  override?: Partial<JWTUser>
+): JWTUser | null => {
   const payload = decodeJwt(token);
   if (!payload) return null;
   // Backend sample fields: nameid, unique_name, role, UserType, Permission[]
   const normalized: JWTUser = {
-    id: override?.id || payload.nameid || payload.sub || '',
-    roles: (override?.roles || payload.role || '').toString(),
-    userName: override?.userName || payload.unique_name || payload.email || '',
+    id: override?.id || payload.nameid || payload.sub || "",
+    roles: (override?.roles || payload.role || "").toString(),
+    userName: override?.userName || payload.unique_name || payload.email || "",
     token,
     isConfirmed: override?.isConfirmed ?? true,
-    permissions: override?.permissions || payload.Permission || payload.permissions || [],
+    permissions:
+      override?.permissions || payload.Permission || payload.permissions || [],
     userType: override?.userType || payload.UserType || payload.userType,
   };
   return normalized;
@@ -76,7 +86,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     // Check for existing token on mount
     const checkExistingAuth = () => {
       try {
-        const authToken = Cookies.get('auth_token');
+        const authToken = Cookies.get("auth_token");
         if (authToken) {
           const normalized = normalizeUserFromToken(authToken);
           if (normalized) {
@@ -84,13 +94,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
               setToken(authToken);
               setUser(normalized);
             });
-            console.log('Restored auth from token:', normalized.userName);
+            console.log("Restored auth from token:", normalized.userName);
           } else {
-            Cookies.remove('auth_token');
+            Cookies.remove("auth_token");
           }
         }
       } catch (error) {
-        console.error('Error checking existing auth:', error);
+        console.error("Error checking existing auth:", error);
       } finally {
         setIsLoading(false);
       }
@@ -100,9 +110,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   const setAuthData = useCallback((input: SetAuthDataInput) => {
-    const normalized = normalizeUserFromToken(input.token, input as Partial<JWTUser>);
+    const normalized = normalizeUserFromToken(
+      input.token,
+      input as Partial<JWTUser>
+    );
     if (!normalized) {
-      console.error('Invalid token provided to setAuthData');
+      console.error("Invalid token provided to setAuthData");
       return;
     }
     // Batch state updates to prevent multiple re-renders
@@ -110,23 +123,28 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setUser(normalized);
       setToken(normalized.token);
     });
-    Cookies.set('auth_token', normalized.token, { expires: 7 });
-    console.log('Auth data set:', normalized.userName, 'role:', normalized.roles);
+    Cookies.set("auth_token", normalized.token, { expires: 7 });
+    console.log(
+      "Auth data set:",
+      normalized.userName,
+      "role:",
+      normalized.roles
+    );
   }, []);
 
   const signOut = useCallback(async () => {
     try {
-      console.log('Starting logout process...');
-      Cookies.remove('auth_token');
+      console.log("Starting logout process...");
+      Cookies.remove("auth_token");
       // Batch state updates to prevent multiple re-renders
       startTransition(() => {
         setUser(null);
         setToken(null);
         setIsLoading(false); // Ensure loading is false after logout
       });
-      console.log('Sign out successful');
+      console.log("Sign out successful");
     } catch (error) {
-      console.error('Sign out error:', error);
+      console.error("Sign out error:", error);
       // Force clear state even if signOut fails
       startTransition(() => {
         setUser(null);
@@ -142,12 +160,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     token,
     isLoading,
     signOut,
-    setAuthData
+    setAuthData,
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
