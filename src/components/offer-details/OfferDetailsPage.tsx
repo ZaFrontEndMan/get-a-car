@@ -1,5 +1,5 @@
 import React from "react";
-import { useParams, useSearchParams } from "react-router-dom";
+import { useParams, useSearchParams, useLocation } from "react-router-dom";
 import { useLanguage } from "../../contexts/LanguageContext";
 import { useRentalCarDetails } from "../../hooks/useRentalCarDetails";
 import { useOfferDetailsState } from "../../hooks/useOfferDetailsState";
@@ -18,12 +18,21 @@ const OfferDetailsPage = () => {
   const { t } = useLanguage();
   const { id } = useParams();
   const [searchParams] = useSearchParams();
+  const location = useLocation();
 
-  // Extract offerId from path parameter and carId from query parameter
-  const offerId = id ? parseInt(id) : 0;
-  const carId = searchParams.get("carId")
+  // Determine if current route is car details route (/cars/:id)
+  const isCarRoute = location.pathname.startsWith("/cars/");
+
+  // Compute offerId and carId based on route type
+  // - For /offers/:id: offerId comes from the path, carId from query (?carId=...)
+  // - For /cars/:id: carId comes from the path, offerId is not required (set to 0)
+  const pathId = id ? parseInt(id) : 0;
+  const queryCarId = searchParams.get("carId")
     ? parseInt(searchParams.get("carId")!)
     : 0;
+
+  const offerId = isCarRoute ? 0 : pathId;
+  const carId = isCarRoute ? pathId : queryCarId;
 
   const { offer, loading, additionalServices } = useRentalCarDetails(
     carId,
@@ -63,7 +72,8 @@ const OfferDetailsPage = () => {
     <div className="min-h-screen bg-cream">
       <div className="pt-20 pb-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <OfferDetailsHeader offer={offer} />
+          {/* Conditionally hide header on /cars/:id route */}
+          {!isCarRoute && <OfferDetailsHeader offer={offer} />}
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Main Content */}

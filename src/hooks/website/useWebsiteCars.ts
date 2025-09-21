@@ -43,8 +43,12 @@ export const useMostPopularCars = (pageIndex: number, pageSize: number) => {
 export const useRentalCarDetails = (carId: number, offerId: number) => {
   return useQuery<RentalCarDetailsResponse>({
     queryKey: ["rentalCarDetails", carId, offerId],
-    queryFn: () => getRentalCarDetailsById(carId, offerId),
-    enabled: carId > 0 && offerId > 0, // Only run query if both IDs are valid
+    // If offerId is provided (>0), fetch with offer; otherwise fetch by car only
+    queryFn: () =>
+      offerId > 0
+        ? getRentalCarDetailsById(carId, offerId)
+        : getCarDetailsById(carId),
+    enabled: carId > 0, // Allow when carId exists (with or without offerId)
   });
 };
 

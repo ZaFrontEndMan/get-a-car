@@ -29,3 +29,36 @@ export const getAllVendorsOwners =
     );
     return response.data;
   };
+
+// 🔹 Vendor Cars type
+export interface VendorCarsResponse {
+  isSuccess: boolean;
+  data: {
+    vendorDetails: {
+      companyLogo: string;
+      email: string;
+      phoneNumber: string;
+      companyName: string;
+      mainBranchAddress: string;
+      branches: number;
+      avilableCars: number;
+    };
+    carSearchResult: any[];
+    carsCommonProp: {
+      data: any[];
+      maxPrice: number;
+    };
+    totalRecord: number;
+    totalPages: number;
+  };
+}
+
+// 🔹 Function: Get vendor cars by vendor id
+export const getVendorCars = async (
+  vendorId: string
+): Promise<VendorCarsResponse> => {
+  const response = await axiosInstance.post<VendorCarsResponse>(
+    `/Client/Website/GetVendorCars?Vendorid=${vendorId}`
+  );
+  return response.data;
+};

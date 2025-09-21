@@ -172,7 +172,7 @@ const CarDetailsSidebar = ({
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-2">
-          {servicesLoading ? (
+          {false ? (
             <div className="text-center py-4">
               <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mx-auto"></div>
               <span className="text-xs text-gray-600 mt-2">{t('loadingServices')}</span>

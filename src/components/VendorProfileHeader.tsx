@@ -1,6 +1,7 @@
 import React from 'react';
 import { Star, Shield, MapPin, Phone, Mail, Clock, Calendar, Car, Users } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
+import { getImageUrl, DEFAULT_IMAGES } from '@/utils/imageUtils';
 interface VendorProfileHeaderProps {
   vendor: {
     id: string;
@@ -22,27 +23,21 @@ interface VendorProfileHeaderProps {
 const VendorProfileHeader = ({
   vendor
 }: VendorProfileHeaderProps) => {
-  const {
-    t
-  } = useLanguage();
+  const { t } = useLanguage();
 
-  // Use the uploaded vendor images based on vendor ID
-  const vendorImages = ['/uploads/984c47f8-006e-44f4-8059-24f7f00bc865.png',
-  // Yelo
-  '/uploads/019e4079-36bc-4104-b9ba-0f4e0ea897a6.png',
-  // Sixt
-  '/uploads/766b092f-f791-45f7-b296-387396496c28.png',
-  // Avis
-  '/uploads/8ea2ddab-da0e-4e94-869e-44a59b761085.png',
-  // Budget
-  '/uploads/3ea6ca2a-9bdf-4a51-8e0e-722188a4ea31.png',
-  // Hertz
-  '/uploads/3dbfcf21-ea34-4d7c-8136-362bcea338de.png' // RAK Transport
+  // Prefer vendor.logo from API; fallback to a deterministic uploaded image
+  const fallbackImages = [
+    '/uploads/984c47f8-006e-44f4-8059-24f7f00bc865.png',
+    '/uploads/019e4079-36bc-4104-b9ba-0f4e0ea897a6.png',
+    '/uploads/766b092f-f791-45f7-b296-387396496c28.png',
+    '/uploads/8ea2ddab-da0e-4e94-869e-44a59b761085.png',
+    '/uploads/3ea6ca2a-9bdf-4a51-8e0e-722188a4ea31.png',
+    '/uploads/3dbfcf21-ea34-4d7c-8136-362bcea338de.png'
   ];
+  const imageIndex = Number.isFinite(parseInt(vendor.id)) ? (parseInt(vendor.id) % fallbackImages.length) : 0;
+  const chosen = vendor.logo || fallbackImages[imageIndex];
+  const vendorImage = getImageUrl(chosen, DEFAULT_IMAGES.vendor);
 
-  // Select an image based on vendor ID for consistency
-  const imageIndex = parseInt(vendor.id) % vendorImages.length;
-  const vendorImage = vendorImages[imageIndex];
   return <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100">
       {/* Professional Cover Section */}
       <div className="relative h-32 sm:h-48 bg-gradient-to-r from-primary via-secondary to-accent">

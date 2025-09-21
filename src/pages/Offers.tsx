@@ -10,7 +10,6 @@ import { Search } from "lucide-react";
 import { useAllOffers } from "@/hooks/website/useWebsiteOffers";
 
 const Offers = () => {
-  const { language } = useLanguage();
   const [searchTerm, setSearchTerm] = useState("");
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 2000]);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
@@ -62,16 +61,11 @@ const Offers = () => {
             )}`
           : null,
       },
+      carId: offer?.carId,
     })) || [];
-  console.log(offers);
 
   // Implement local filtering
-  console.log("Filtering offers with:", {
-    searchTerm,
-    priceRange,
-    selectedCategories,
-    selectedVendors,
-  });
+
   const filteredOffers = offers.filter((offer) => {
     // Filter by search term
     if (
@@ -82,11 +76,6 @@ const Offers = () => {
     }
 
     // Filter by price range
-    // Add debug logging for price filtering
-    console.log(
-      `Checking price: ${offer.price} against range: ${priceRange[0]}-${priceRange[1]}`
-    );
-
     // Only filter if price range is not at default values
     const isDefaultPriceRange = priceRange[0] === 0 && priceRange[1] === 2000;
     if (!isDefaultPriceRange) {
@@ -96,14 +85,7 @@ const Offers = () => {
       const minPrice = priceRange[0];
       const maxPrice = priceRange[1];
 
-      console.log(
-        `Offer ${offer.id}: Price check - Offer price: ${offerPrice}, Range: [${minPrice}, ${maxPrice}]`
-      );
-
       if (isNaN(offerPrice) || offerPrice < minPrice || offerPrice > maxPrice) {
-        console.log(
-          `Price filter rejected offer: ${offer.title} with price ${offerPrice}`
-        );
         return false;
       }
     }
@@ -119,7 +101,6 @@ const Offers = () => {
     // Filter by selected categories
     if (selectedCategories.length > 0) {
       // For debugging
-      console.log("Selected categories:", selectedCategories);
 
       // We need to check the original API response fields
       // The original offer data is in offersResponse.carSearchResult
@@ -131,7 +112,6 @@ const Offers = () => {
       );
 
       if (!originalOffer) {
-        console.log(`Could not find original offer data for ${offer.id}`);
         return false;
       }
 
@@ -153,42 +133,17 @@ const Offers = () => {
           originalOffer.branch &&
           originalOffer.branch.toLowerCase() === categoryLower;
 
-        // For debugging
-        console.log(`Offer ${offer.id}: Checking category: ${category}`);
-        console.log(
-          `  - Fuel type match: ${matchesFuelType} (${
-            originalOffer.fuelType || "N/A"
-          })`
-        );
-        console.log(
-          `  - Transmission match: ${matchesTransmission} (${
-            originalOffer.transmission || "N/A"
-          })`
-        );
-        console.log(
-          `  - Car type match: ${matchesType} (${originalOffer.type || "N/A"})`
-        );
-        console.log(
-          `  - Branch match: ${matchesBranch} (${
-            originalOffer.branch || "N/A"
-          })`
-        );
-
         // Check if any of the fields match
         const isMatch =
           matchesFuelType ||
           matchesTransmission ||
           matchesType ||
           matchesBranch;
-        console.log(`  - Overall match: ${isMatch}`);
 
         return isMatch;
       });
 
       if (!matchesCategory) {
-        console.log(
-          `Offer ${offer.id} (${offer.title}) filtered out by categories`
-        );
         return false;
       }
     }
@@ -203,13 +158,6 @@ const Offers = () => {
   const paginatedOffers = filteredOffers.slice(
     startIndex,
     startIndex + itemsPerPage
-  );
-
-  console.log(
-    "Filtered offers:",
-    filteredOffers.length,
-    "Paginated offers:",
-    paginatedOffers.length
   );
 
   const clearAllFilters = () => {

@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { Star, MapPin, Car, Building } from "lucide-react";
+import { getImageUrl, DEFAULT_IMAGES } from "@/utils/imageUtils";
 
 interface VendorCardProps {
   vendor: {
@@ -22,12 +23,14 @@ const VendorCard = ({ vendor }: VendorCardProps) => {
       ? vendor.rating
       : 0;
 
+  const imageSrc = getImageUrl(vendor.image, DEFAULT_IMAGES.vendor);
+
   return (
     <Link to={`/vendors/${vendor.id}`} className="block">
       <div className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:scale-105 border border-gray-100">
         <div className="aspect-video overflow-hidden">
           <img
-            src={`${import.meta.env.VITE_UPLOADS_BASE_URL}/${vendor.image}`}
+            src={imageSrc}
             alt={vendor.name}
             className="w-full h-full object-cover rounded-t-2xl"
           />
