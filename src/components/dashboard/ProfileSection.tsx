@@ -35,10 +35,14 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { toast } from "sonner";
 
 const ProfileSection: React.FC = () => {
   const { t } = useLanguage();
   const [isEditing, setIsEditing] = useState(false);
+  const [originalData, setOriginalData] = useState<ProfileFormData | null>(
+    null
+  );
 
   const { data, isLoading } = useGetUserInfo();
   const editMutation = useEditClient();
@@ -52,7 +56,7 @@ const ProfileSection: React.FC = () => {
   // Reset form when profile data is fetched
   useEffect(() => {
     if (profile) {
-      form.reset({
+      const formData = {
         firstName: profile.firstName || "",
         lastName: profile.lastName || "",
         fullName: profile.fullName || "",
@@ -60,21 +64,71 @@ const ProfileSection: React.FC = () => {
         gender: profile.gender || 1,
         countryName: profile.countryName || "",
         cityName: profile.cityName || "",
-        address: profile.address || "",
         licenseNumber: profile.licenseNumber || "",
         email: profile.email || "",
         phoneNumber: profile.phoneNumber || "",
         nationalId: profile.nationalId || "",
         profilePictureIsDeleted: false,
-      });
+      };
+      form.reset(formData);
+      setOriginalData(formData);
     }
   }, [profile, form]);
 
+  // Function to get only changed fields
+  const getChangedFields = (
+    currentData: ProfileFormData
+  ): Partial<ProfileFormData> => {
+    if (!originalData) return currentData;
+
+    const changedFields: Partial<ProfileFormData> = {};
+
+    (Object.keys(currentData) as Array<keyof ProfileFormData>).forEach(
+      (key) => {
+        if (currentData[key] !== originalData[key]) {
+          (changedFields as any)[key] = currentData[key];
+        }
+      }
+    );
+
+    return changedFields;
+  };
+
+  // Handle image update for all document fields
+  const handleImageUpdate = (fieldName: string, file: File) => {
+    const updateData = { [fieldName]: file };
+    editMutation.mutate(updateData as ProfileFormData, {
+      onSuccess: (data) => {
+        toast.success(data?.customMessage);
+        setOriginalData((prev) => ({
+          ...prev,
+          ...data,
+        }));
+      },
+      onError: (error: any) => {
+        toast.error(
+          error?.response?.data?.error?.message ||
+            "An error occurred while updating the image."
+        );
+      },
+    });
+  };
+
   // Handle submit
   const onSubmit = (data: ProfileFormData) => {
-    editMutation.mutate(data, {
+    const changedFields = getChangedFields(data);
+
+    // Only submit if there are actual changes
+    if (Object.keys(changedFields).length === 0) {
+      setIsEditing(false);
+      return;
+    }
+
+    editMutation.mutate(changedFields as ProfileFormData, {
       onSuccess: () => {
         setIsEditing(false);
+        // Update original data with the new values
+        setOriginalData(data);
       },
     });
   };
@@ -91,9 +145,7 @@ const ProfileSection: React.FC = () => {
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
             {t("profileSettings")}
           </h1>
-          <p className="text-gray-600 mt-1">
-            {t("profileDescription")}
-          </p>
+          <p className="text-gray-600 mt-1">{t("profileDescription")}</p>
         </div>
         <div className="flex gap-3">
           {isEditing ? (
@@ -343,27 +395,6 @@ const ProfileSection: React.FC = () => {
 
                   <FormField
                     control={form.control}
-                    name="address"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="flex items-center gap-2">
-                          <MapPin className="h-4 w-4" />
-                          {t("addressLabel")}
-                        </FormLabel>
-                        <FormControl>
-                          <Input
-                            {...field}
-                            disabled={!isEditing}
-                            placeholder="Enter your address"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
                     name="licenseNumber"
                     render={({ field }) => (
                       <FormItem>
@@ -412,36 +443,46 @@ const ProfileSection: React.FC = () => {
         {/* Image Uploads (3/12) */}
         <div className="col-span-12 md:col-span-3 space-y-6">
           <ProfileImageUpload
+            loading={editMutation.isPending}
             currentImageUrl={profile?.profilePicture || ""}
-            onImageUpdate={() => {}}
+            fieldName="profilePicture"
+            onImageUpdate={handleImageUpdate}
             type="avatar"
             title={t("profilePicture")}
             description={t("uploadProfilePhoto")}
           />
           <ProfileImageUpload
+            loading={editMutation.isPending}
             currentImageUrl={profile?.nationalIdFront || ""}
-            onImageUpdate={() => {}}
+            fieldName="nationalIdFront"
+            onImageUpdate={handleImageUpdate}
             type="national_id"
             title={t("nationalIdFront")}
             description={t("uploadNationalIdFront")}
           />
           <ProfileImageUpload
+            loading={editMutation.isPending}
             currentImageUrl={profile?.nationalIdBack || ""}
-            onImageUpdate={() => {}}
+            fieldName="nationalIdBack"
+            onImageUpdate={handleImageUpdate}
             type="national_id"
             title={t("nationalIdBack")}
             description={t("uploadNationalIdBack")}
           />
           <ProfileImageUpload
+            loading={editMutation.isPending}
             currentImageUrl={profile?.drivingLicenseFront || ""}
-            onImageUpdate={() => {}}
+            fieldName="drivingLicenseFront"
+            onImageUpdate={handleImageUpdate}
             type="driving_license"
             title={t("drivingLicenseFront")}
             description={t("uploadDrivingLicenseFront")}
           />
           <ProfileImageUpload
+            loading={editMutation.isPending}
             currentImageUrl={profile?.drivingLicenseBack || ""}
-            onImageUpdate={() => {}}
+            fieldName="drivingLicenseBack"
+            onImageUpdate={handleImageUpdate}
             type="driving_license"
             title={t("drivingLicenseBack")}
             description={t("uploadDrivingLicenseBack")}

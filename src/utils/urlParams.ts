@@ -52,6 +52,32 @@ export const parseUrlParamsToFilters = (searchParams: URLSearchParams): CarsFilt
     };
   }
 
+  // Parse search parameters
+  const pickupLocationParam = searchParams.get('pickupLocation');
+  if (pickupLocationParam) {
+    filters.pickupLocation = pickupLocationParam;
+  }
+
+  const dropOffLocationParam = searchParams.get('dropOffLocation');
+  if (dropOffLocationParam) {
+    filters.dropOffLocation = dropOffLocationParam;
+  }
+
+  const pickupDateParam = searchParams.get('pickupDate');
+  if (pickupDateParam) {
+    filters.pickupDate = pickupDateParam;
+  }
+
+  const dropoffDateParam = searchParams.get('dropoffDate');
+  if (dropoffDateParam) {
+    filters.dropoffDate = dropoffDateParam;
+  }
+
+  const withDriverParam = searchParams.get('withDriver');
+  if (withDriverParam) {
+    filters.withDriver = withDriverParam.toLowerCase() === 'true';
+  }
+
   return filters;
 };
 
@@ -90,6 +116,27 @@ export const filtersToUrlParams = (filters: CarsFilters): URLSearchParams => {
     if (filters.priceRange.max < 2000) {
       params.set('maxPrice', filters.priceRange.max.toString());
     }
+  }
+
+  // Add search parameters
+  if (filters.pickupLocation) {
+    params.set('pickupLocation', filters.pickupLocation);
+  }
+
+  if (filters.dropOffLocation) {
+    params.set('dropOffLocation', filters.dropOffLocation);
+  }
+
+  if (filters.pickupDate) {
+    params.set('pickupDate', filters.pickupDate);
+  }
+
+  if (filters.dropoffDate) {
+    params.set('dropoffDate', filters.dropoffDate);
+  }
+
+  if (filters.withDriver !== undefined) {
+    params.set('withDriver', filters.withDriver.toString());
   }
 
   return params;

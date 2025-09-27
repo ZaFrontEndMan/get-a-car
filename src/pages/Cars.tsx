@@ -8,7 +8,6 @@ import React, {
 import { useLanguage } from "../contexts/LanguageContext";
 import OptimizedCarCard from "../components/cars/OptimizedCarCard";
 import CarsHeader from "../components/cars/CarsHeader";
-import CarsFilters from "../components/cars/CarsFilters";
 import MemoizedCarsFilters from "../components/cars/MemoizedCarsFilters";
 import CarsPagination from "../components/cars/CarsPagination";
 import { Search } from "lucide-react";
@@ -178,50 +177,6 @@ const Cars = () => {
     },
     [currentPage, prefetchNextPages, prefetchPreviousPage]
   );
-
-  // Keyboard navigation for pagination
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      // Only handle keyboard shortcuts when not typing in input fields
-      if (
-        event.target instanceof HTMLInputElement ||
-        event.target instanceof HTMLTextAreaElement ||
-        event.target instanceof HTMLSelectElement
-      ) {
-        return;
-      }
-
-      switch (event.key) {
-        case "ArrowLeft":
-          if (currentPage > 1) {
-            event.preventDefault();
-            handlePageChange(currentPage - 1);
-          }
-          break;
-        case "ArrowRight":
-          if (currentPage < totalPages) {
-            event.preventDefault();
-            handlePageChange(currentPage + 1);
-          }
-          break;
-        case "Home":
-          if (currentPage > 1) {
-            event.preventDefault();
-            handlePageChange(1);
-          }
-          break;
-        case "End":
-          if (currentPage < totalPages) {
-            event.preventDefault();
-            handlePageChange(totalPages);
-          }
-          break;
-      }
-    };
-
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [currentPage, totalPages, handlePageChange]);
 
   // Memoize filter data with better performance
   const filterData = useMemo(() => {

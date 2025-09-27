@@ -81,10 +81,14 @@ const Navbar = () => {
                 <div className="relative">
                   <button
                     type="button"
-                    className="p-2.5 bg-gray-50 rounded-xl"
                     onClick={() => setShowUserMenu(!showUserMenu)}
                   >
-                    <User className="h-5 w-5 text-gray-600" />
+                    <img
+                      src={`${import.meta.env.VITE_UPLOADS_BASE_URL}${
+                        user?.data?.profilePicture
+                      }`}
+                      className="h-7 w-7 rounded-full object-cover"
+                    />
                   </button>
                   {showUserMenu && (
                     <UserMenu isRTL={isRTL} onLogout={handleLogout} t={t} />

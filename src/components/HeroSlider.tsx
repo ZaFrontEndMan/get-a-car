@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { motion, AnimatePresence } from "framer-motion";
 
 const HeroSlider = () => {
   const { t, language } = useLanguage();
@@ -103,105 +104,198 @@ const HeroSlider = () => {
   return (
     <section className="relative h-[70vh] md:h-[80vh] overflow-hidden bg-gradient-to-br from-gray-900 to-gray-700">
       {/* Background Images */}
-      {displaySlides.map((slide, index) => (
-        <div
-          key={slide.id}
-          className={`absolute inset-0 transition-opacity duration-1000 ${
-            index === currentSlide ? "opacity-100" : "opacity-0"
-          }`}
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={currentSlide}
+          initial={{ opacity: 0, scale: 1.1 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.95 }}
+          transition={{ 
+            duration: 0.8, 
+            ease: [0.25, 0.46, 0.45, 0.94] 
+          }}
+          className="absolute inset-0"
         >
           <img
-            src={slide.image_url}
+            src={displaySlides[currentSlide]?.image_url}
             alt={
-              language === "ar" && slide.title_ar ? slide.title_ar : slide.title
+              language === "ar" && displaySlides[currentSlide]?.title_ar 
+                ? displaySlides[currentSlide].title_ar 
+                : displaySlides[currentSlide]?.title
             }
             className="w-full h-full object-cover"
           />
           <div className="absolute inset-0 bg-black/40"></div>
-        </div>
-      ))}
+        </motion.div>
+      </AnimatePresence>
 
       {/* Content */}
       <div className="relative h-full flex items-center justify-center">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-white">
-          <div className="animate-fade-in">
-            <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
-              {language === "ar" && displaySlides[currentSlide]?.title_ar
-                ? displaySlides[currentSlide].title_ar
-                : displaySlides[currentSlide]?.title}
-            </h1>
-            <p className="text-xl md:text-2xl mb-8 max-w-3xl mx-auto leading-relaxed opacity-90">
-              {language === "ar" && displaySlides[currentSlide]?.subtitle_ar
-                ? displaySlides[currentSlide].subtitle_ar
-                : displaySlides[currentSlide]?.subtitle}
-            </p>
-
-            {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              {displaySlides[currentSlide]?.button_text && (
-                <Button
-                  size="lg"
-                  className="bg-primary hover:bg-primary/90 text-white px-8 py-4 rounded-2xl font-semibold text-lg transition-all duration-300 transform hover:scale-105 shadow-2xl"
-                  onClick={() =>
-                    handleButtonClick(displaySlides[currentSlide]?.button_url)
-                  }
-                >
-                  {language === "ar" &&
-                  displaySlides[currentSlide]?.button_text_ar
-                    ? displaySlides[currentSlide].button_text_ar
-                    : displaySlides[currentSlide]?.button_text}
-                </Button>
-              )}
-              <Button
-                size="lg"
-                variant="outline"
-                className="bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white border-2 border-white/30 px-8 py-4 rounded-2xl font-semibold text-lg transition-all duration-300 transform hover:scale-105"
-                onClick={() => handleButtonClick("/vendors")}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={currentSlide}
+              initial={{ opacity: 0, y: 50 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -30 }}
+              transition={{ 
+                duration: 0.6, 
+                delay: 0.2,
+                ease: [0.25, 0.46, 0.45, 0.94] 
+              }}
+            >
+              <motion.h1 
+                className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight"
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ 
+                  duration: 0.8, 
+                  delay: 0.4,
+                  ease: [0.25, 0.46, 0.45, 0.94] 
+                }}
               >
-                {t("browseVendors") || "Browse Vendors"}
-              </Button>
-            </div>
-          </div>
+                {language === "ar" && displaySlides[currentSlide]?.title_ar
+                  ? displaySlides[currentSlide].title_ar
+                  : displaySlides[currentSlide]?.title}
+              </motion.h1>
+              <motion.p 
+                className="text-xl md:text-2xl mb-8 max-w-3xl mx-auto leading-relaxed opacity-90"
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ 
+                  duration: 0.8, 
+                  delay: 0.6,
+                  ease: [0.25, 0.46, 0.45, 0.94] 
+                }}
+              >
+                {language === "ar" && displaySlides[currentSlide]?.subtitle_ar
+                  ? displaySlides[currentSlide].subtitle_ar
+                  : displaySlides[currentSlide]?.subtitle}
+              </motion.p>
+
+              {/* CTA Buttons */}
+              <motion.div 
+                className="flex flex-col sm:flex-row gap-4 justify-center mb-16"
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ 
+                  duration: 0.8, 
+                  delay: 0.8,
+                  ease: [0.25, 0.46, 0.45, 0.94] 
+                }}
+              >
+                {displaySlides[currentSlide]?.button_text && (
+                  <motion.div
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                  >
+                    <Button
+                      size="lg"
+                      className="bg-primary hover:bg-primary/90 text-white px-8 py-4 rounded-2xl font-semibold text-lg transition-all duration-300 shadow-2xl"
+                      onClick={() =>
+                        handleButtonClick(displaySlides[currentSlide]?.button_url)
+                      }
+                    >
+                      {language === "ar" &&
+                      displaySlides[currentSlide]?.button_text_ar
+                        ? displaySlides[currentSlide].button_text_ar
+                        : displaySlides[currentSlide]?.button_text}
+                    </Button>
+                  </motion.div>
+                )}
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                >
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white border-2 border-white/30 px-8 py-4 rounded-2xl font-semibold text-lg transition-all duration-300"
+                    onClick={() => handleButtonClick("/vendors")}
+                  >
+                    {t("topVendors") || "Browse Vendors"}
+                  </Button>
+                </motion.div>
+              </motion.div>
+            </motion.div>
+          </AnimatePresence>
         </div>
       </div>
 
       {/* Navigation Arrows */}
-      <button
+      <motion.button
         onClick={prevSlide}
         className={`absolute top-1/2 transform -translate-y-1/2 ${
           isRTL ? "right-4" : "left-4"
         } bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white p-3 rounded-full transition-all duration-300 group`}
+        whileHover={{ 
+          scale: 1.1, 
+          backgroundColor: "rgba(255, 255, 255, 0.3)" 
+        }}
+        whileTap={{ scale: 0.9 }}
+        transition={{ type: "spring", stiffness: 400, damping: 17 }}
       >
-        {isRTL ? (
-          <ChevronRight className="h-6 w-6 group-hover:scale-110 transition-transform" />
-        ) : (
-          <ChevronLeft className="h-6 w-6 group-hover:scale-110 transition-transform" />
-        )}
-      </button>
-      <button
+        <motion.div
+          whileHover={{ x: isRTL ? 2 : -2 }}
+          transition={{ type: "spring", stiffness: 400, damping: 17 }}
+        >
+          {isRTL ? (
+            <ChevronRight className="h-6 w-6 transition-transform" />
+          ) : (
+            <ChevronLeft className="h-6 w-6 transition-transform" />
+          )}
+        </motion.div>
+      </motion.button>
+      <motion.button
         onClick={nextSlide}
         className={`absolute top-1/2 transform -translate-y-1/2 ${
           isRTL ? "left-4" : "right-4"
         } bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white p-3 rounded-full transition-all duration-300 group`}
+        whileHover={{ 
+          scale: 1.1, 
+          backgroundColor: "rgba(255, 255, 255, 0.3)" 
+        }}
+        whileTap={{ scale: 0.9 }}
+        transition={{ type: "spring", stiffness: 400, damping: 17 }}
       >
-        {isRTL ? (
-          <ChevronLeft className="h-6 w-6 group-hover:scale-110 transition-transform" />
-        ) : (
-          <ChevronRight className="h-6 w-6 group-hover:scale-110 transition-transform" />
-        )}
-      </button>
+        <motion.div
+          whileHover={{ x: isRTL ? -2 : 2 }}
+          transition={{ type: "spring", stiffness: 400, damping: 17 }}
+        >
+          {isRTL ? (
+            <ChevronLeft className="h-6 w-6 transition-transform" />
+          ) : (
+            <ChevronRight className="h-6 w-6 transition-transform" />
+          )}
+        </motion.div>
+      </motion.button>
 
       {/* Dots Indicator */}
       <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex space-x-3">
         {displaySlides.map((_, index) => (
-          <button
+          <motion.button
             key={index}
             onClick={() => setCurrentSlide(index)}
             className={`w-3 h-3 rounded-full transition-all duration-300 ${
               index === currentSlide
-                ? "bg-white shadow-lg scale-125"
+                ? "bg-white shadow-lg"
                 : "bg-white/50 hover:bg-white/70"
             }`}
+            whileHover={{ scale: 1.2 }}
+            whileTap={{ scale: 0.9 }}
+            animate={{
+              scale: index === currentSlide ? 1.25 : 1,
+              backgroundColor: index === currentSlide 
+                ? "rgba(255, 255, 255, 1)" 
+                : "rgba(255, 255, 255, 0.5)"
+            }}
+            transition={{ 
+              type: "spring", 
+              stiffness: 400, 
+              damping: 17 
+            }}
           />
         ))}
       </div>

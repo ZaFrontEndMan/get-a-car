@@ -10,7 +10,7 @@ import {
 
 // Cache configuration
 const CACHE_TIME = 5 * 60 * 1000; // 5 minutes
-const STALE_TIME = 2 * 60 * 1000; // 2 minutes
+const STALE_TIME = 10 * 60 * 1000; // 10 minutes
 const PREFETCH_PAGES = 2; // Number of pages to prefetch ahead
 
 // Enhanced hook with caching and prefetching

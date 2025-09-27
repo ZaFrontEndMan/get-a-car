@@ -128,15 +128,10 @@ interface RouteSection {
   routes: RouteConfig[];
 }
 
-interface LoadingSpinnerProps {
-  message?: string;
-}
-
-const LoadingSpinner = ({ message = "Loading..." }: LoadingSpinnerProps) => (
+const LoadingSpinner = () => (
   <div className="min-h-screen flex items-center justify-center bg-gray-50">
     <div className="flex items-center space-x-2">
       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      <span className="text-gray-600">{message}</span>
     </div>
   </div>
 );
@@ -148,13 +143,16 @@ const AppRouter = React.memo(() => {
     userRole,
     getDefaultRoute,
     canAccessRoute,
+    preserveCurrentRoute,
+    getPreservedRoute,
   } = useUser();
   const navigate = useNavigate();
   const location = useLocation();
 
   // Enhanced auth guard logic
   useEffect(() => {
-    if (isLoading && isAuthenticated) return; // Only block if actually authenticating a user
+    // Don't interfere during initial authentication loading
+    if (isLoading) return;
 
     const currentPath = location.pathname;
     const routeSection = Object.entries(routesConfig).find(([_, section]) => {
@@ -180,6 +178,13 @@ const AppRouter = React.memo(() => {
 
       // Redirect authenticated users away from auth pages (signin, signup, etc.)
       if (config.redirectIfAuthenticated && isAuthenticated) {
+        // Check if there's a preserved route to restore
+        const preserved = getPreservedRoute();
+        if (preserved) {
+          navigate(preserved, { replace: true });
+          return;
+        }
+        
         // Role-based redirect after login
         if (userRole === "admin") navigate("/admin", { replace: true });
         else if (userRole === "vendor")
@@ -190,8 +195,9 @@ const AppRouter = React.memo(() => {
         return;
       }
 
-      // Redirect unauthenticated users from protected routes
+      // Preserve current route before redirecting unauthenticated users
       if (config.requiresAuth && !isAuthenticated) {
+        preserveCurrentRoute();
         navigate("/signin", { replace: true });
         return;
       }
@@ -207,7 +213,8 @@ const AppRouter = React.memo(() => {
             navigate("/dashboard", { replace: true });
           else navigate(getDefaultRoute(), { replace: true });
         } else {
-          navigate("/", { replace: true });
+          preserveCurrentRoute();
+          navigate("/signin", { replace: true });
         }
         return;
       }
@@ -220,11 +227,17 @@ const AppRouter = React.memo(() => {
     navigate,
     getDefaultRoute,
     canAccessRoute,
+    preserveCurrentRoute,
+    getPreservedRoute,
   ]);
 
-  // Only show loading spinner if actually authenticating a user (not for visitors)
-  if (false) {
-    return <LoadingSpinner message="Authenticating..." />;
+  // Show loading spinner during authentication checks
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      </div>
+    );
   }
 
   const renderRouteSection = (

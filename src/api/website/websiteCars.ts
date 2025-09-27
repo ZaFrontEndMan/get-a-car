@@ -129,6 +129,11 @@ export interface CarsFilters {
     min: number;
     max: number;
   };
+  pickupLocation?: string;
+  dropOffLocation?: string;
+  pickupDate?: string;
+  dropoffDate?: string;
+  withDriver?: boolean;
 }
 
 // Get all cars with server-side filtering (POST request)
@@ -159,6 +164,21 @@ export const getAllCars = async (
     }
     if (filters.priceRange) {
       requestBody.priceRange = filters.priceRange;
+    }
+    if (filters.pickupLocation) {
+      requestBody.pickupLocation = filters.pickupLocation;
+    }
+    if (filters.dropOffLocation) {
+      requestBody.dropOffLocation = filters.dropOffLocation;
+    }
+    if (filters.pickupDate) {
+      requestBody.pickupDate = filters.pickupDate;
+    }
+    if (filters.dropoffDate) {
+      requestBody.dropoffDate = filters.dropoffDate;
+    }
+    if (filters.withDriver !== undefined) {
+      requestBody.withDriver = filters.withDriver;
     }
   }
 

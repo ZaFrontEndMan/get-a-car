@@ -84,8 +84,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     // Check for existing token on mount
-    const checkExistingAuth = () => {
+    const checkExistingAuth = async () => {
       try {
+        setIsLoading(true);
         const authToken = Cookies.get("auth_token");
         if (authToken) {
           const normalized = normalizeUserFromToken(authToken);
@@ -96,13 +97,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             });
             console.log("Restored auth from token:", normalized.userName);
           } else {
+            // Token is invalid, remove it
             Cookies.remove("auth_token");
+            console.warn("Invalid token found, removing from cookies");
           }
         }
       } catch (error) {
         console.error("Error checking existing auth:", error);
+        // Clear potentially corrupted auth data
+        Cookies.remove("auth_token");
       } finally {
-        setIsLoading(false);
+        // Add a small delay to prevent flash of loading state
+        setTimeout(() => setIsLoading(false), 100);
       }
     };
 
@@ -135,13 +141,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const signOut = useCallback(async () => {
     try {
       console.log("Starting logout process...");
+      setIsLoading(true); // Show loading during logout
+      
       Cookies.remove("auth_token");
+      
       // Batch state updates to prevent multiple re-renders
       startTransition(() => {
         setUser(null);
         setToken(null);
         setIsLoading(false); // Ensure loading is false after logout
       });
+      
       console.log("Sign out successful");
     } catch (error) {
       console.error("Sign out error:", error);
