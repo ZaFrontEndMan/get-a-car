@@ -1,24 +1,50 @@
-import React, { useState } from 'react';
-import { format } from 'date-fns';
-import { RotateCcw, Mail } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Table as TableComponent, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Booking } from '@/types/clientBookings';
-import { getStatusConfig } from '@/components/vendor/bookings/bookingUtils';
-import BookingInvoiceModal from '@/components/booking/BookingInvoiceModal';
+import React, { useState } from "react";
+import { format } from "date-fns";
+import { RotateCcw, Mail, CheckCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+  Table as TableComponent,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Booking } from "@/types/clientBookings";
+import { getStatusConfig } from "@/components/vendor/bookings/bookingUtils";
+import BookingInvoiceModal from "@/components/booking/BookingInvoiceModal";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface ClientBookingTableViewProps {
   bookings: Booking[];
   onReturnCar: (bookingId: string) => void;
   isReturning: boolean;
+  onAcceptReturnCar?: (bookingId: string) => void;
+  isAccepting?: boolean;
 }
 
-const ClientBookingTableView = ({ bookings, onReturnCar, isReturning }: ClientBookingTableViewProps) => {
+const ClientBookingTableView = ({
+  bookings,
+  onReturnCar,
+  isReturning,
+  onAcceptReturnCar,
+  isAccepting,
+}: ClientBookingTableViewProps) => {
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
-  
+  const { t } = useLanguage();
+
   const canReturnCar = (status: string) => {
-    return status.toLowerCase() === 'confirmed' || status.toLowerCase() === 'active' || status.toLowerCase() === 'in_progress' || status === 'InProgress';
+    return (
+      status.toLowerCase() === "confirmed" ||
+      status.toLowerCase() === "active" ||
+      status.toLowerCase() === "in_progress" ||
+      status === "InProgress"
+    );
+  };
+
+  const canAcceptReturn = (status: string) => {
+    return status.toLowerCase() === "return_requested";
   };
 
   return (
@@ -26,72 +52,115 @@ const ClientBookingTableView = ({ bookings, onReturnCar, isReturning }: ClientBo
       <TableComponent>
         <TableHeader>
           <TableRow className="bg-gray-50/50">
-            <TableHead className="font-semibold">Car</TableHead>
-            <TableHead className="font-semibold">Booking #</TableHead>
-            <TableHead className="font-semibold">Dates</TableHead>
-            <TableHead className="font-semibold">Amount</TableHead>
-            <TableHead className="font-semibold">Status</TableHead>
-            <TableHead className="font-semibold">Actions</TableHead>
+            <TableHead className="font-semibold text-start">
+              {t("car")}
+            </TableHead>
+            <TableHead className="font-semibold text-start">
+              {t("bookingNumber")}
+            </TableHead>
+            <TableHead className="font-semibold text-start">
+              {t("dates")}
+            </TableHead>
+            <TableHead className="font-semibold text-start">
+              {t("amount")}
+            </TableHead>
+            <TableHead className="font-semibold text-start">
+              {t("status")}
+            </TableHead>
+            <TableHead className="font-semibold text-start">
+              {t("actions")}
+            </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {bookings.map((booking) => {
             const statusConfig = getStatusConfig(booking.bookingStatus);
-            
+
             return (
-              <TableRow key={booking.id} className="hover:bg-gray-50/50 transition-colors">
+              <TableRow
+                key={booking.id}
+                className="hover:bg-gray-50/50 transition-colors"
+              >
                 <TableCell>
-                  <div className="flex items-center space-x-3">
+                  <div className="flex items-center gap-2">
                     <img
-                      src={booking.carImage ? (booking.carImage.startsWith('http') ? booking.carImage : `/${booking.carImage}`) : 'https://images.unsplash.com/photo-1549924231-f129b911e442'}
+                      src={`${import.meta.env.VITE_UPLOADS_BASE_URL}${
+                        booking.carImage
+                      }`}
                       alt={booking.carName}
                       className="h-12 w-16 object-cover rounded-lg"
                     />
                     <div>
-                      <div className="font-medium text-gray-900">{booking.carName}</div>
-                      <div className="text-sm text-gray-500">{booking.vendorName}</div>
+                      <div className="font-medium text-gray-900">
+                        {booking.carName}
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        {booking.vendorName}
+                      </div>
                     </div>
                   </div>
                 </TableCell>
                 <TableCell>
-                  <div className="font-medium text-gray-900">{booking.bookingNumber}</div>
-                </TableCell>
-                <TableCell>
-                  <div className="text-sm">
-                    {format(new Date(booking.fromDate), 'MMM dd, yyyy')} - 
-                    {format(new Date(booking.toDate), 'MMM dd, yyyy')}
+                  <div className="font-medium text-gray-900">
+                    {booking.bookingNumber}
                   </div>
                 </TableCell>
                 <TableCell>
-                  <div className="font-semibold text-gray-900">SAR {booking.totalPrice}</div>
+                  <div className="text-sm">
+                    {format(new Date(booking.fromDate), "MMM dd, yyyy")} -
+                    {format(new Date(booking.toDate), "MMM dd, yyyy")}
+                  </div>
                 </TableCell>
                 <TableCell>
-                  <Badge className={`border ${statusConfig.color}`}>
+                  <div className="font-semibold text-gray-900">
+                    SAR {booking.totalPrice}
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <Badge
+                    variant="outline"
+                    className={`border ${statusConfig.color}`}
+                  >
                     {statusConfig.label}
                   </Badge>
                 </TableCell>
                 <TableCell>
-                  <div className="flex space-x-2">
+                  <div className="flex gap-2">
                     {canReturnCar(booking.bookingStatus) && (
                       <Button
                         size="sm"
-                        variant="outline"
-                        onClick={() => onReturnCar(booking.id.toString())}
+                        variant="default"
+                        onClick={() => onAcceptReturnCar(booking.id.toString())}
                         disabled={isReturning}
-                        className="flex items-center space-x-1 hover:bg-blue-50 hover:border-blue-200 hover:text-blue-700 transition-colors"
+                        className="flex items-center gap-2 "
                       >
                         <RotateCcw className="h-4 w-4" />
-                        <span>Return Car</span>
+                        <span>{t("returnCar")}</span>
                       </Button>
                     )}
+                    {canAcceptReturn(booking.bookingStatus) &&
+                      onAcceptReturnCar && (
+                        <Button
+                          size="sm"
+                          variant="default"
+                          onClick={() =>
+                            onAcceptReturnCar(booking.id.toString())
+                          }
+                          disabled={isAccepting}
+                          className="flex items-center gap-2 "
+                        >
+                          <CheckCircle className="h-4 w-4" />
+                          <span>{t("acceptReturn")}</span>
+                        </Button>
+                      )}
                     <Button
                       size="sm"
                       variant="outline"
                       onClick={() => setSelectedBooking(booking)}
-                      className="flex items-center space-x-1 hover:bg-green-50 hover:border-green-200 hover:text-green-700 transition-colors"
+                      className="flex items-center gap-2 "
                     >
                       <Mail className="h-4 w-4" />
-                      <span>Invoice</span>
+                      <span>{t("invoice")}</span>
                     </Button>
                   </div>
                 </TableCell>
@@ -100,7 +169,7 @@ const ClientBookingTableView = ({ bookings, onReturnCar, isReturning }: ClientBo
           })}
         </TableBody>
       </TableComponent>
-      
+
       <BookingInvoiceModal
         isOpen={!!selectedBooking}
         onClose={() => setSelectedBooking(null)}

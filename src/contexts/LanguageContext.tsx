@@ -52,6 +52,19 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
   const handleSetLanguage = (lang: SupportedLanguage) => {
     console.log('Language change requested:', lang);
     setLanguage(lang);
+
+    // Persist immediately and refresh to ensure UI consistency across the app
+    try {
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('language', lang);
+        // Refresh the page to apply language changes consistently
+        setTimeout(() => {
+          window.location.reload();
+        }, 0);
+      }
+    } catch (e) {
+      console.warn('Failed to persist language before reload:', e);
+    }
   };
 
   return (

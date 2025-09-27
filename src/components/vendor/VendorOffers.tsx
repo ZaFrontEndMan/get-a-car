@@ -376,7 +376,7 @@ const VendorOffers = () => {
                 </Select>
               </div>
 
-              <div className="flex space-x-2">
+              <div className="flex gap-2">
                 <Button type="submit" disabled={createMutation.isPending || editMutation.isPending || cars.length === 0}>
                   {editingOffer ? 'Update Offer' : 'Create Offer'}
                 </Button>
@@ -395,7 +395,7 @@ const VendorOffers = () => {
             <CardContent className="p-6">
               <div className="flex items-start justify-between">
                 <div className="flex-1">
-                  <div className="flex items-center space-x-2 mb-2">
+                  <div className="flex items-center gap-2 mb-2">
                     <h3 className="text-lg font-semibold">{offer.title}</h3>
                     <Badge variant={offer.status === 'published' ? 'default' : 'secondary'}>
                       {offer.status === 'published' ? (
@@ -418,7 +418,7 @@ const VendorOffers = () => {
                   {offer.description_ar && (
                     <p className="text-gray-600 mb-2 text-sm" dir="rtl">{offer.description_ar}</p>
                   )}
-                  <div className="flex items-center space-x-4 text-sm text-gray-500">
+                  <div className="flex items-center gap-2 text-sm text-gray-500">
                     <span className="flex items-center">
                       <Percent className="mr-1 h-3 w-3" />
                       {offer.discount_percentage}% off
@@ -432,7 +432,7 @@ const VendorOffers = () => {
                     )}
                   </div>
                 </div>
-                <div className="flex items-center space-x-2 ml-4">
+                <div className="flex items-center gap-2 ml-4">
                   <Button variant="outline" size="sm" onClick={() => handleEdit(offer)}>
                     <Edit className="h-4 w-4" />
                   </Button>

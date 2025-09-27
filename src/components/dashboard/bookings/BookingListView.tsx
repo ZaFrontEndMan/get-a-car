@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { BookingWithCar } from '@/hooks/useBookings';
 import { getStatusConfig } from '@/components/vendor/bookings/bookingUtils';
 import BookingInvoiceModal from '@/components/booking/BookingInvoiceModal';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface BookingListViewProps {
   bookings: BookingWithCar[];
@@ -16,6 +17,7 @@ interface BookingListViewProps {
 
 const BookingListView = ({ bookings, onReturnCar, isReturning }: BookingListViewProps) => {
   const [selectedBooking, setSelectedBooking] = useState<BookingWithCar | null>(null);
+  const { t } = useLanguage();
   
   const canReturnCar = (status: string) => {
     return status.toLowerCase() === 'confirmed' || status.toLowerCase() === 'active' || status.toLowerCase() === 'in_progress';
@@ -61,8 +63,8 @@ const BookingListView = ({ bookings, onReturnCar, isReturning }: BookingListView
                         disabled={isReturning}
                         className="flex items-center space-x-1 hover:bg-blue-50 hover:border-blue-200 hover:text-blue-700 transition-colors"
                       >
-                        <RotateCcw className="h-4 w-4" />
-                        <span>Return</span>
+                        <RotateCcw className="h-4 w-4 me-2" />
+                        <span>{t('return')}</span>
                       </Button>
                     )}
                     <Button
@@ -71,8 +73,8 @@ const BookingListView = ({ bookings, onReturnCar, isReturning }: BookingListView
                       onClick={() => setSelectedBooking(booking)}
                       className="flex items-center space-x-1 hover:bg-green-50 hover:border-green-200 hover:text-green-700 transition-colors"
                     >
-                      <Mail className="h-4 w-4" />
-                      <span>Invoice</span>
+                      <Mail className="h-4 w-4 me-2" />
+                      <span>{t('invoice')}</span>
                     </Button>
                   </div>
                 </div>

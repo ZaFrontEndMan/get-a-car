@@ -24,14 +24,7 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
-    },
-    "types": []
+    }
   },
-  "include": ["src"],
-  "exclude": [
-    "src/test",
-    "**/*.test.*",
-    "**/*.spec.*",
-    "**/__tests__/**"
-  ]
+  "include": ["src"]
 }

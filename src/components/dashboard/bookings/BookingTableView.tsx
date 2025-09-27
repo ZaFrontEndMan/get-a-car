@@ -8,6 +8,7 @@ import { Table as TableComponent, TableBody, TableCell, TableHead, TableHeader, 
 import { BookingWithCar } from '@/hooks/useBookings';
 import { getStatusConfig } from '@/components/vendor/bookings/bookingUtils';
 import BookingInvoiceModal from '@/components/booking/BookingInvoiceModal';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface BookingTableViewProps {
   bookings: BookingWithCar[];
@@ -17,6 +18,7 @@ interface BookingTableViewProps {
 
 const BookingTableView = ({ bookings, onReturnCar, isReturning }: BookingTableViewProps) => {
   const [selectedBooking, setSelectedBooking] = useState<BookingWithCar | null>(null);
+  const { t } = useLanguage();
   
   const canReturnCar = (status: string) => {
     return status.toLowerCase() === 'confirmed' || status.toLowerCase() === 'active' || status.toLowerCase() === 'in_progress';
@@ -27,12 +29,12 @@ const BookingTableView = ({ bookings, onReturnCar, isReturning }: BookingTableVi
       <TableComponent>
         <TableHeader>
           <TableRow className="bg-gray-50/50">
-            <TableHead className="font-semibold">Car</TableHead>
-            <TableHead className="font-semibold">Booking #</TableHead>
-            <TableHead className="font-semibold">Dates</TableHead>
-            <TableHead className="font-semibold">Amount</TableHead>
-            <TableHead className="font-semibold">Status</TableHead>
-            <TableHead className="font-semibold">Actions</TableHead>
+            <TableHead className="font-semibold">{t('car')}</TableHead>
+            {/* <TableHead className="font-semibold">{t('bookingNumber')}</TableHead> */}
+            <TableHead className="font-semibold">{t('dates')}</TableHead>
+            <TableHead className="font-semibold">{t('amount')}</TableHead>
+            <TableHead className="font-semibold">{t('status')}</TableHead>
+            <TableHead className="font-semibold">{t('actions')}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -81,8 +83,8 @@ const BookingTableView = ({ bookings, onReturnCar, isReturning }: BookingTableVi
                         disabled={isReturning}
                         className="flex items-center space-x-1 hover:bg-blue-50 hover:border-blue-200 hover:text-blue-700 transition-colors"
                       >
-                        <RotateCcw className="h-4 w-4" />
-                        <span>Return Car</span>
+                        <RotateCcw className="h-4 w-4 me-2" />
+                        <span>{t('returnCar')}</span>
                       </Button>
                     )}
                     <Button
@@ -91,8 +93,8 @@ const BookingTableView = ({ bookings, onReturnCar, isReturning }: BookingTableVi
                       onClick={() => setSelectedBooking(booking)}
                       className="flex items-center space-x-1 hover:bg-green-50 hover:border-green-200 hover:text-green-700 transition-colors"
                     >
-                      <Mail className="h-4 w-4" />
-                      <span>Invoice</span>
+                      <Mail className="h-4 w-4 me-2" />
+                      <span>{t('invoice')}</span>
                     </Button>
                   </div>
                 </TableCell>

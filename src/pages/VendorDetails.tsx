@@ -60,6 +60,7 @@ const VendorDetailsContent = () => {
       images: (c.imageURLs || []).map((p: string) =>
         getImageUrl(normalizePath(p), DEFAULT_IMAGES.car)
       ),
+      isWishList: c?.isWishList,
       daily_rate: c.pricePerDay,
       weekly_rate: c.pricePerWeek,
       monthly_rate: c.pricePerMonth,

@@ -2,11 +2,13 @@ import React, { useState } from "react";
 import { useLanguage } from "../../contexts/LanguageContext";
 import { useFavoritesData } from "../../hooks/useFavoritesData";
 import { Grid, List, Users, Fuel, Car, Heart, Trash2 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const FavoritesList: React.FC = () => {
   const { t } = useLanguage();
   const { favorites, removeFromFavorites, isLoading } = useFavoritesData();
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const navigate = useNavigate();
 
   if (isLoading) {
     return (
@@ -38,18 +40,25 @@ const FavoritesList: React.FC = () => {
     );
   }
 
-  const handleRemove = (carId: string) => {
+  const handleRemove = (e: React.MouseEvent, carId: string) => {
+    e.stopPropagation();
     removeFromFavorites(carId);
+  };
+
+  const handleOpenCar = (carId?: string) => {
+    const id = carId || "";
+    if (!id) return;
+    navigate(`/cars/${id}`);
   };
 
   return (
     <div>
       <div className="flex justify-between items-center mb-4 md:mb-6">
         <h1 className="text-xl md:text-2xl font-bold text-gray-900">
-          {t("myFavorites")} ({favorites.length})
+          {t("favorites")} ({favorites.length})
         </h1>
         {/* Hide view toggle on mobile */}
-        <div className="hidden md:flex items-center space-x-2 rtl:space-x-reverse">
+        <div className="hidden md:flex items-center gap-2 rtl:gap-2">
           <button
             onClick={() => setViewMode("grid")}
             className={`p-2 rounded-lg transition-colors duration-200 ${
@@ -79,7 +88,8 @@ const FavoritesList: React.FC = () => {
           {favorites.map((favorite) => (
             <div
               key={favorite.id}
-              className="bg-white rounded-lg shadow-sm border overflow-hidden hover:shadow-md transition-shadow"
+              onClick={() => handleOpenCar((favorite as any).carId || favorite.car?.id)}
+              className="bg-white rounded-lg shadow-sm border overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
             >
               <div className="relative">
                 <img
@@ -88,7 +98,7 @@ const FavoritesList: React.FC = () => {
                   className="w-full h-48 object-cover"
                 />
                 <button
-                  onClick={() => handleRemove(favorite.car.id)}
+                  onClick={(e) => handleRemove(e, favorite.car.id)}
                   className="absolute top-2 right-2 p-2 bg-white rounded-full shadow-sm hover:bg-red-50 transition-colors"
                 >
                   <Trash2 className="h-4 w-4 text-red-500" />
@@ -103,19 +113,19 @@ const FavoritesList: React.FC = () => {
                   {favorite.car.brand} {favorite.car.model} {favorite.car.year}
                 </p>
 
-                <div className="flex items-center space-x-4 text-sm text-gray-500 mb-3">
-                  <div className="flex items-center space-x-1">
+                <div className="flex items-center gap-2 text-sm text-gray-500 mb-3">
+                  <div className="flex items-center gap-2">
                     <Users className="h-4 w-4" />
-                    <span>5 Seats</span>
+                    <span>5 {t("seats")}</span>
                   </div>
-                  <div className="flex items-center space-x-1">
+                  <div className="flex items-center gap-2">
                     <Fuel className="h-4 w-4" />
-                    <span>Petrol</span>
+                    <span>{t("gasoline")}</span>
                   </div>
                 </div>
 
                 <div className="flex justify-between items-center">
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center gap-2">
                     <img
                       src={favorite.car.vendor.logo_url || "/placeholder.svg"}
                       alt={favorite.car.vendor.name}
@@ -127,7 +137,7 @@ const FavoritesList: React.FC = () => {
                   </div>
                   <div className="text-right">
                     <p className="text-lg font-bold text-primary">
-                      ${favorite.car.daily_rate}/day
+                      {favorite.car.daily_rate} / {t("day")}
                     </p>
                   </div>
                 </div>
@@ -141,9 +151,10 @@ const FavoritesList: React.FC = () => {
           {favorites.map((favorite) => (
             <div
               key={favorite.id}
-              className="bg-white rounded-lg shadow-sm border p-6"
+              onClick={() => handleOpenCar((favorite as any).carId || favorite.car?.id)}
+              className="bg-white rounded-lg shadow-sm border p-6 cursor-pointer hover:shadow-md transition-shadow"
             >
-              <div className="flex items-center space-x-4">
+              <div className="flex items-center gap-2">
                 <img
                   src={favorite.car.images?.[0] || "/placeholder.svg"}
                   alt={favorite.car.name}
@@ -159,16 +170,16 @@ const FavoritesList: React.FC = () => {
                     {favorite.car.year}
                   </p>
 
-                  <div className="flex items-center space-x-4 text-sm text-gray-500">
-                    <div className="flex items-center space-x-1">
+                  <div className="flex items-center gap-2 text-sm text-gray-500">
+                    <div className="flex items-center gap-2">
                       <Users className="h-4 w-4" />
-                      <span>5 Seats</span>
+                      <span>5 {t("seats")}</span>
                     </div>
-                    <div className="flex items-center space-x-1">
+                    <div className="flex items-center gap-2">
                       <Fuel className="h-4 w-4" />
-                      <span>Petrol</span>
+                      <span>{t("gasoline")}</span>
                     </div>
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-center gap-2">
                       <img
                         src={favorite.car.vendor.logo_url || "/placeholder.svg"}
                         alt={favorite.car.vendor.name}
@@ -181,13 +192,13 @@ const FavoritesList: React.FC = () => {
 
                 <div className="text-right">
                   <p className="text-lg font-bold text-primary mb-2">
-                    ${favorite.car.daily_rate}/day
+                    {favorite.car.daily_rate} / {t("day")}
                   </p>
                   <button
-                    onClick={() => handleRemove(favorite.car.id)}
+                    onClick={(e) => handleRemove(e, favorite.car.id)}
                     className="px-4 py-2 text-red-600 border border-red-600 rounded-lg hover:bg-red-50 transition-colors text-sm"
                   >
-                    Remove
+                    {t("remove")}
                   </button>
                 </div>
               </div>

@@ -34,6 +34,7 @@ interface SimilarCarsSliderProps {
       weekly: number;
       monthly: number;
     };
+    isWishList: boolean;
     pickUpLocations?: Array<{ address: string; id: number }>;
   };
 }
@@ -71,26 +72,32 @@ const SimilarCarsSlider = ({ car }: SimilarCarsSliderProps) => {
 
   // Transform API data to match CarCard format
   const similarOffers = useMemo(() => {
-    if (!similarCarsResponse?.data || !Array.isArray(similarCarsResponse.data)) {
+    if (
+      !similarCarsResponse?.data ||
+      !Array.isArray(similarCarsResponse.data)
+    ) {
       return [];
     }
 
     return similarCarsResponse.data
-      .filter((carData) => 
-        carData.carID.toString() !== car.id.toString() && 
-        carData.availability
+      .filter(
+        (carData) =>
+          carData.carID.toString() !== car.id.toString() && carData.availability
       )
       .slice(0, 4) // Limit to 4 cars
       .map((carData) => ({
         id: carData.carID.toString(),
         title: carData.name || "Unknown Car",
         brand: carData.branch || "Unknown",
-        image: carData.image || "/uploads/10b7fec1-615a-4b01-ae08-d35764ce917a.png",
+        image:
+          carData.image || "/uploads/10b7fec1-615a-4b01-ae08-d35764ce917a.png",
         price: carData.pricePerDay || 0,
         weeklyPrice: carData.pricePerWeek || 0,
         monthlyPrice: carData.pricePerMonth || 0,
         rating: 4.7, // Default rating
         features: [],
+        isWishList: car?.isWishList,
+
         seats: parseInt(carData.doors) || 4,
         fuel: carData.fuelType || "Unknown",
         transmission: carData.transmission || "Automatic",
@@ -98,7 +105,6 @@ const SimilarCarsSlider = ({ car }: SimilarCarsSliderProps) => {
         discount: null,
       }));
   }, [similarCarsResponse, car.id]);
-
 
   if (isLoading) {
     return (

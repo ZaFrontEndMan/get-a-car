@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { useLanguage } from "../contexts/LanguageContext";
-import Navbar from "../components/layout/navbar/Navbar";
 import OfferCard from "../components/OfferCard";
 import OffersHeader from "../components/offers/OffersHeader";
 import OffersSearchControls from "../components/offers/OffersSearchControls";
@@ -178,7 +177,6 @@ const Offers = () => {
     console.error("Error in offers page:", error);
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50">
-        <Navbar />
         <div className="pt-20 pb-8">
           <div className="flex items-center justify-center py-12">
             <div className="text-center">
@@ -195,8 +193,6 @@ const Offers = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50">
-      <Navbar />
-
       <div className="pt-20 pb-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex gap-8">

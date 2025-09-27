@@ -68,7 +68,7 @@ const CarCard = ({ car, viewMode = "grid" }: CarCardProps) => {
     window.location.href = `/cars/${car.id}`;
   };
 
-  const isCarFavorite = isInWishlist(car.id);
+  const isCarFavorite = car?.isWishList;
 
   // Get the correct image source
   const imageSource =

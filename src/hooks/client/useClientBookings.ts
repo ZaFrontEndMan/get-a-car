@@ -3,6 +3,7 @@ import {
   useMutation,
   UseQueryOptions,
   UseMutationOptions,
+  useQueryClient,
 } from "@tanstack/react-query";
 import {
   createBooking,
@@ -10,9 +11,12 @@ import {
   getBookingById,
   getAllBooking,
   getCustomerBookingCar,
+  generateInvoicePdf,
+  acceptReturnCar,
 } from "./../../api/client/clientBookings";
 import { Booking, ClientBookingsResponse } from "@/types/clientBookings";
 import { InvoiceResponse } from "@/types/invoiceDetails";
+import { useToast } from "@/components/ui/use-toast";
 
 // Query params for fetching bookings
 interface GetAllBookingsParams {
@@ -29,6 +33,8 @@ interface BookingPayload {
 }
 
 export const useClientBookings = () => {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
   // 🔹 Create Booking
   const useCreateBookingMutation = (
     options?: UseMutationOptions<Booking, Error, BookingPayload>
@@ -94,6 +100,37 @@ export const useClientBookings = () => {
       ...options,
     });
 
+  // 🔹 Generate Invoice PDF
+  const useGenerateInvoicePdf = (
+    options?: UseMutationOptions<Blob, Error, { invoiceId: number | string }>
+  ) =>
+    useMutation({
+      mutationFn: ({ invoiceId }) => generateInvoicePdf(invoiceId),
+      ...options,
+    });
+
+  // 🔹 Accept Return Car
+  const useAcceptReturnCar = (
+    options?: UseMutationOptions<any, Error, { bookingId: string | number }>
+  ) =>
+    useMutation({
+      mutationFn: ({ bookingId }) => acceptReturnCar(bookingId),
+      onSuccess: (data) => {
+        toast({ title: "تم القبول", description: "تم قبول استرجاع السيارة بنجاح" });
+        // Refresh bookings and related queries
+        queryClient.invalidateQueries({ queryKey: ["bookings"] });
+        queryClient.invalidateQueries({ queryKey: ["booking"] });
+      },
+      onError: (error: any) => {
+        toast({
+          title: "خطأ",
+          description: error?.message || "فشل في قبول استرجاع السيارة",
+          variant: "destructive",
+        });
+      },
+      ...options,
+    });
+
   return {
     useCreateBookingMutation,
     usePaymentCallbackMutation,
@@ -101,5 +138,7 @@ export const useClientBookings = () => {
     useGetInvoiceDetails,
     useGetAllBookings,
     useGetCustomerBookingCar,
+    useGenerateInvoicePdf,
+    useAcceptReturnCar,
   };
 };

@@ -13,6 +13,7 @@ import { getStatusCounts } from "@/utils/bookingUtils";
 import { useClientBookings } from "@/hooks/client/useClientBookings";
 import { Booking } from "@/types/clientBookings";
 
+// Internal app statuses (English enums)
 type BookingStatus =
   | "pending"
   | "confirmed"
@@ -22,19 +23,46 @@ type BookingStatus =
   | "completed"
   | "cancelled";
 
+// Mapping API Arabic status → Internal status
+const bookingStatusMap: Record<string, BookingStatus> = {
+  "قيد الاجراء": "InProgress",
+  "تم إرجاع السيارة": "completed",
+  ملغي: "cancelled",
+  مؤكد: "confirmed",
+  نشط: "active",
+  "قيد الانتظار": "pending",
+  "طلب استرجاع": "return_requested",
+};
+
+// Reverse mapping Internal status → Arabic label (for UI display)
+export const bookingStatusLabels: Record<BookingStatus, string> = {
+  pending: "قيد الانتظار",
+  confirmed: "مؤكد",
+  active: "نشط",
+  InProgress: "قيد الاجراء",
+  return_requested: "طلب استرجاع",
+  completed: "تم إرجاع السيارة",
+  cancelled: "ملغي",
+};
+
 const BookingsList: React.FC = () => {
   const { viewMode, setViewMode } = useBookingViewMode();
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   const [statusFilter, setStatusFilter] = useState<BookingStatus | "all">(
     "all"
   );
 
-  // Fetch bookings with your hook
-  const { useGetAllBookings } = useClientBookings();
+  // Fetch bookings
+  const { useGetAllBookings, useAcceptReturnCar } = useClientBookings();
   const { data, isLoading, isError } = useGetAllBookings();
+  const acceptReturnMutation = useAcceptReturnCar();
 
-  // Extract bookings from API response
-  const bookings: Booking[] = data?.data?.items || [];
+  // Normalize API data → internal statuses
+  const bookings: Booking[] =
+    data?.data?.items?.map((item: any) => ({
+      ...item,
+      bookingStatus: bookingStatusMap[item.bookingStatus] || "pending",
+    })) || [];
 
   const filteredBookings = bookings.filter(
     (booking) =>
@@ -51,7 +79,7 @@ const BookingsList: React.FC = () => {
     return (
       <div className="text-center py-8">
         <p className="text-red-600">
-          Error loading bookings. Please try again later.
+          {t("errorLoadingBookings")}. {t("pleaseTryAgainLater")}
         </p>
       </div>
     );
@@ -61,6 +89,10 @@ const BookingsList: React.FC = () => {
     return <BookingsEmptyState />;
   }
 
+  const handleAcceptReturn = (bookingId: string) => {
+    acceptReturnMutation.mutate({ bookingId });
+  };
+
   const renderContent = () => {
     const commonProps = {
       bookings: filteredBookings,
@@ -68,6 +100,8 @@ const BookingsList: React.FC = () => {
         console.log("returning");
       },
       isReturning: false,
+      onAcceptReturnCar: handleAcceptReturn,
+      isAccepting: acceptReturnMutation.isPending,
     };
 
     const isMobile = window.innerWidth < 768;
@@ -99,6 +133,7 @@ const BookingsList: React.FC = () => {
           onFilterChange={setStatusFilter}
           statusCounts={statusCounts}
           totalBookings={bookings.length}
+          statusLabels={bookingStatusLabels}
         />
       </div>
 

@@ -16,6 +16,8 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { BookingWithCar } from "@/hooks/useBookings";
 import { getStatusConfig } from "@/components/vendor/bookings/bookingUtils";
+import { useLanguage } from "@/contexts/LanguageContext";
+
 interface BookingGridViewProps {
   bookings: BookingWithCar[];
   onReturnCar: (bookingId: string) => void;
@@ -29,6 +31,8 @@ const BookingGridView = ({
   const [selectedBooking, setSelectedBooking] = useState<BookingWithCar | null>(
     null
   );
+  const { t } = useLanguage();
+
   const canReturnCar = (status: string) => {
     return (
       status.toLowerCase() === "confirmed" ||
@@ -36,6 +40,7 @@ const BookingGridView = ({
       status.toLowerCase() === "in_progress"
     );
   };
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
       {bookings.map((booking) => {
@@ -73,7 +78,7 @@ const BookingGridView = ({
                   <div className="flex items-center gap-2">
                     <div className="text-xs text-slate-500 bg-slate-100 px-2 py-1 rounded-full text-start w-fit uppercase">
                       {booking.total_days}{" "}
-                      {booking.total_days === 1 ? "day" : "days"}
+                      {booking.total_days === 1 ? t("day") : t("days")}
                     </div>
                     <Badge
                       variant="outline"
@@ -96,7 +101,7 @@ const BookingGridView = ({
                   </div>
                   <div className="flex flex-col gap-1 items-start">
                     <p className="text-xs font-medium text-emerald-700 uppercase">
-                      Pickup
+                      {t("pickup")}
                     </p>
                     <p className="font-semibold text-slate-900 text-sm truncate">
                       {format(new Date(booking.pickup_date), "MMM dd, yyyy")}
@@ -109,7 +114,7 @@ const BookingGridView = ({
                   </div>
                   <div className="flex flex-col gap-1 items-start">
                     <p className="text-xs font-medium text-rose-700 uppercase">
-                      Pickup
+                      {t("return")}
                     </p>
                     <p className="font-semibold text-slate-900 text-sm truncate">
                       {format(new Date(booking.return_date), "MMM dd, yyyy")}
@@ -126,7 +131,7 @@ const BookingGridView = ({
                   </div>
                   <div className="flex-1">
                     <p className="text-xs font-medium text-slate-600 uppercase tracking-wide mb-1">
-                      From
+                      {t("from")}
                     </p>
                     <p className="font-medium text-slate-900 text-sm truncate">
                       {booking.pickup_location}
@@ -139,7 +144,7 @@ const BookingGridView = ({
                   </div>
                   <div className="flex-1 ">
                     <p className="text-xs font-medium text-slate-600 uppercase tracking-wide mb-1">
-                      To
+                      {t("to")}
                     </p>
                     <p className="font-medium text-slate-900 text-sm truncate">
                       {booking.return_location}
@@ -175,7 +180,9 @@ const BookingGridView = ({
                         : "secondary"
                     }
                   >
-                    {booking.payment_status}
+                    {booking.payment_status === "paid"
+                      ? t("paid")
+                      : booking.payment_status}
                   </Badge>
                 </div>
               </div>
@@ -189,8 +196,8 @@ const BookingGridView = ({
                     onClick={() => onReturnCar(booking.id)}
                     disabled={isReturning}
                   >
-                    <RotateCcw className="h-4 w-4 mr-2" />
-                    Return Car
+                    <RotateCcw className="h-4 w-4 me-2" />
+                    {t("returnCar")}
                   </Button>
                 )}
                 <Button
@@ -199,8 +206,8 @@ const BookingGridView = ({
                   variant="outline"
                   onClick={() => setSelectedBooking(booking)}
                 >
-                  <Mail className="h-4 w-4 mr-2" />
-                  Invoices
+                  <Mail className="h-4 w-4 me-2" />
+                  {t("invoice")}
                 </Button>
               </div>
             </CardContent>

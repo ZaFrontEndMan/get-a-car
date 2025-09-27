@@ -56,11 +56,11 @@ export const enTranslations = {
   recentPosts: "Recent Posts",
 
   // More
-  faq: "FAQ",
+  faqs: "FAQ",
   terms: "Terms of Service",
   privacy: "Privacy Policy",
   notFound: "Page Not Found",
-
+  frequentlyAskedQuestions: "Frequently Asked Questions",
   // Form
   forgotPassword: "Forgot Password?",
   resetPassword: "Reset Password",
@@ -563,6 +563,15 @@ export const enTranslations = {
   booking: "Booking",
   method: "Method",
   receipt: "Receipt",
+  invoice: "Invoice",
+  car: "Car",
+  dates: "Dates",
+  returnCar: "Return Car",
+  acceptReturn: "Accept Return",
+  pickup: "Pickup",
+  return: "Return",
+  from: "From",
+  to: "To",
   completeTransactionHistory:
     "Complete transaction history and payment details",
 
@@ -609,11 +618,15 @@ export const enTranslations = {
 
   // Cars page error messages
   errorLoadingCars: "Error loading cars",
+  errorLoadingBookings: "Error loading bookings",
   pleaseTryAgainLater: "Please try again later",
   reloadPage: "Reload Page",
   unableToLoadFilters: "Unable to load filters. Please refresh the page.",
   searchControlsUnavailable: "Search controls temporarily unavailable.",
   noCarsFound: "No cars found",
+  noBookingsDescription: "You don't have any bookings yet.",
+  noBookingsFoundWithSelectedStatus: "No bookings found with the selected status",
+  no: "No",
   tryAdjustingCriteria: "Try adjusting your search or filter criteria",
   paginationUnavailable: "Pagination temporarily unavailable.",
   carsFound: "Cars Found",
@@ -711,6 +724,52 @@ export const enTranslations = {
   selectGender: "Select gender",
   nationalIdLabel: "National ID",
   uploadProfilePhoto: "Upload your profile photo",
+
+  // Invoice modal
+  loadingInvoiceDetails: "Loading invoice details...",
+  errorLoadingInvoiceDetails: "Error loading invoice details",
+  premiumCarRentalService: "Premium Car Rental Service",
+  customerInformation: "Customer Information",
+  rentalDetails: "Rental Details",
+  duration: "Duration",
+  vehicleInformation: "Vehicle Information",
+  rate: "Rate",
+  rentalLabel: "Rental",
+  protectionFee: "Protection Fee",
+  carRental: "Car Rental",
+  totalAmount: "Total Amount",
+  thankYouChoosingGetCar: "Thank you for choosing Get Car!",
+  trustedCarRentalPartner: "Your trusted car rental partner in Saudi Arabia",
+  forSupport: "For support",
+  visitUs: "Visit us",
+  downloadPdf: "Download PDF",
+  typeLabel: "Type",
+  engine: "Engine",
+
+  // Support & Tickets translations
+  supportTickets: "Support Tickets",
+  createNewTicket: "Create New Ticket",
+  enterSubject: "Enter subject",
+  priority: "Priority",
+  low: "Low",
+  medium: "Medium",
+  high: "High",
+  describeIssue: "Describe your issue",
+  attachment: "Attachment",
+  submitTicket: "Submit Ticket",
+  myTickets: "My Tickets",
+  itemsPerPage: "Items per page",
+  ticketId: "Ticket ID",
+  lastUpdate: "Last update",
+  available24_7: "Available 24/7",
+  responseIn24h: "Response within 24 hours",
+  noFaqs: "No FAQs available",
+  "in-progress": "In Progress",
+  resolved: "Resolved",
+  ticketCreatedSuccessfully: "Ticket created successfully",
+  liveChat: "Live Chat",
+  startChat: "Start Chat",
+  instantSupport: "Instant support",
 };
 
 export default enTranslations;

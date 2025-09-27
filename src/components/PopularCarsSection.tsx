@@ -1,5 +1,5 @@
 import React from "react";
-import { useLanguage } from '../contexts/LanguageContext';
+import { useLanguage } from "../contexts/LanguageContext";
 import { useMostPopularCars } from "@/hooks/website/useWebsiteOffers";
 import CarCard from "./CarCard";
 import { SectionSkeleton } from "./ui/SkeletonLoaders";
@@ -24,6 +24,7 @@ const PopularCarsSection = () => {
       monthlyPrice: car.pricePerMonth,
       rating: car.isGoodRating ? 4.5 : 4.0,
       features: [],
+      isWishList: car?.isWishList,
       seats: parseInt(car.doors) || 4,
       fuel: car.liter || "Petrol",
       transmission: "Automatic", // Default value, API doesn't provide this

@@ -74,12 +74,8 @@ const PaymentsList: React.FC = () => {
 
   return (
     <div>
-      <h1
-        className={`text-2xl font-bold text-gray-900 mb-6 ${
-          isRTL ? "text-right" : "text-left"
-        }`}
-      >
-        {t("invoices")} ({invoices.length})
+      <h1 className={`text-2xl font-bold text-gray-900 mb-6 `}>
+        {t("payments")} ({invoices.length})
       </h1>
 
       <div className="space-y-4">
@@ -88,11 +84,7 @@ const PaymentsList: React.FC = () => {
             key={invoice.invoiceId}
             className="bg-white rounded-lg shadow-sm border p-6"
           >
-            <div
-              className={`flex justify-between items-start mb-4 ${
-                isRTL ? "flex-row-reverse" : "flex-row"
-              }`}
-            >
+            <div className={`flex justify-between items-start mb-4 `}>
               <div
                 className={`flex items-center space-x-3 ${
                   isRTL ? "space-x-reverse" : ""
@@ -105,9 +97,6 @@ const PaymentsList: React.FC = () => {
                   </h3>
                   <p className="text-gray-600">
                     {invoice.carName || t("noCar")}
-                  </p>
-                  <p className="text-sm text-gray-500">
-                    {t("vendor")}: {invoice.vendorName}
                   </p>
                 </div>
               </div>
@@ -128,7 +117,7 @@ const PaymentsList: React.FC = () => {
               >
                 <Calendar className="h-4 w-4 text-gray-400" />
                 <div className={isRTL ? "text-right" : "text-left"}>
-                  <p className="text-sm font-medium">{t("fromDate")}</p>
+                  <p className="text-sm font-medium">{t("pickupDate")}</p>
                   <p className="text-sm text-gray-600">
                     {format(new Date(invoice.fromDate), "MMM dd, yyyy")}
                   </p>
@@ -142,7 +131,7 @@ const PaymentsList: React.FC = () => {
               >
                 <Car className="h-4 w-4 text-gray-400" />
                 <div className={isRTL ? "text-right" : "text-left"}>
-                  <p className="text-sm font-medium">{t("toDate")}</p>
+                  <p className="text-sm font-medium">{t("returnDate")}</p>
                   <p className="text-sm text-gray-600">
                     {format(new Date(invoice.toDate), "MMM dd, yyyy")}
                   </p>

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useMemo } from "react";
 import { useLanguage } from "../contexts/LanguageContext";
 import PricingOptions from "./PricingOptions";
 import { Plus } from "lucide-react";
@@ -71,6 +71,26 @@ const OfferDetailsSidebar = ({
     t("currency")
   );
 
+  // Accordion state for pickup and dropoff locations when list is long
+  const pickupLocations = offer.locations || [];
+  const dropoffLocations = offer.dropoffLocations || offer.locations || [];
+
+  const pickupHasMore = pickupLocations.length > 3;
+  const dropoffHasMore = dropoffLocations.length > 3;
+
+  const [pickupExpanded, setPickupExpanded] = useState(false);
+  const [dropoffExpanded, setDropoffExpanded] = useState(false);
+
+  const visiblePickupLocations = useMemo(
+    () => (pickupExpanded || !pickupHasMore ? pickupLocations : pickupLocations.slice(0, 3)),
+    [pickupExpanded, pickupHasMore, pickupLocations]
+  );
+
+  const visibleDropoffLocations = useMemo(
+    () => (dropoffExpanded || !dropoffHasMore ? dropoffLocations : dropoffLocations.slice(0, 3)),
+    [dropoffExpanded, dropoffHasMore, dropoffLocations]
+  );
+
   const toggleService = (serviceId: string) => {
     if (selectedServices.includes(serviceId)) {
       onServicesChange(selectedServices.filter((id) => id !== serviceId));
@@ -97,7 +117,7 @@ const OfferDetailsSidebar = ({
               {t("pickupLocation")}
             </h4>
             <div className="space-y-2">
-              {offer.locations.map((location, index) => (
+              {visiblePickupLocations.map((location, index) => (
                 <div
                   key={`pickup-${index}`}
                   className="flex items-center p-3 border border-gray-200 rounded-lg hover:border-primary/50 transition-colors"
@@ -113,6 +133,15 @@ const OfferDetailsSidebar = ({
                   <span className="text-gray-900 px-3">{location}</span>
                 </div>
               ))}
+              {pickupHasMore && (
+                <button
+                  type="button"
+                  onClick={() => setPickupExpanded((v) => !v)}
+                  className="text-sm text-primary hover:underline mt-1"
+                >
+                  {pickupExpanded ? t("collapse") : t("expand")}
+                </button>
+              )}
             </div>
           </div>
 
@@ -122,23 +151,30 @@ const OfferDetailsSidebar = ({
               {t("dropoffLocation")}
             </h4>
             <div className="space-y-2">
-              {(offer.dropoffLocations || offer.locations).map(
-                (location, index) => (
-                  <div
-                    key={`dropoff-${index}`}
-                    className="flex items-center p-3 border border-gray-200 rounded-lg hover:border-primary/50 transition-colors"
-                  >
-                    <input
-                      type="radio"
-                      name="dropoffLocation"
-                      value={location}
-                      checked={selectedDropoff === location}
-                      onChange={() => onDropoffChange(location)}
-                      className="h-4 w-4 text-primary focus:ring-primary border-gray-300 ml-3 rtl:mr-3"
-                    />
-                    <span className="text-gray-900 px-3">{location}</span>
-                  </div>
-                )
+              {visibleDropoffLocations.map((location, index) => (
+                <div
+                  key={`dropoff-${index}`}
+                  className="flex items-center p-3 border border-gray-200 rounded-lg hover:border-primary/50 transition-colors"
+                >
+                  <input
+                    type="radio"
+                    name="dropoffLocation"
+                    value={location}
+                    checked={selectedDropoff === location}
+                    onChange={() => onDropoffChange(location)}
+                    className="h-4 w-4 text-primary focus:ring-primary border-gray-300 ml-3 rtl:mr-3"
+                  />
+                  <span className="text-gray-900 px-3">{location}</span>
+                </div>
+              ))}
+              {dropoffHasMore && (
+                <button
+                  type="button"
+                  onClick={() => setDropoffExpanded((v) => !v)}
+                  className="text-sm text-primary hover:underline mt-1"
+                >
+                  {dropoffExpanded ? t("collapse") : t("expand")}
+                </button>
               )}
             </div>
           </div>
@@ -201,7 +237,7 @@ const OfferDetailsSidebar = ({
           </div>
 
           {pricingBreakdown.servicesPrice > 0 && (
-            <div 
+            <div
               key={`services-${pricingBreakdown.servicesPrice}`}
               className="flex justify-between items-center animate-in slide-in-from-top-2 fade-in duration-200 ease-out"
             >

@@ -2,13 +2,10 @@ import React, { useState } from "react";
 import { format } from "date-fns";
 import {
   Calendar,
-  MapPin,
-  Phone,
   RotateCcw,
   Mail,
-  Car,
-  Clock,
   CreditCard,
+  CheckCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -16,19 +13,25 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Booking } from "@/types/clientBookings";
 import { getStatusConfig } from "@/components/vendor/bookings/bookingUtils";
 import BookingInvoiceModal from "@/components/booking/BookingInvoiceModal";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface ClientBookingGridViewProps {
   bookings: Booking[];
   onReturnCar: (bookingId: string) => void;
   isReturning: boolean;
+  onAcceptReturnCar?: (bookingId: string) => void;
+  isAccepting?: boolean;
 }
 
 const ClientBookingGridView = ({
   bookings,
   onReturnCar,
   isReturning,
+  onAcceptReturnCar,
+  isAccepting,
 }: ClientBookingGridViewProps) => {
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
+  const { t } = useLanguage();
 
   const canReturnCar = (status: string) => {
     return (
@@ -37,6 +40,11 @@ const ClientBookingGridView = ({
       status.toLowerCase() === "in_progress" ||
       status === "InProgress"
     );
+  };
+  console.log(bookings);
+
+  const canAcceptReturn = (status: string) => {
+    return status.toLowerCase() === "return_requested";
   };
 
   return (
@@ -55,13 +63,9 @@ const ClientBookingGridView = ({
                 <div className="relative">
                   <div className="w-20 h-16 rounded-xl overflow-hidden shadow-sm border border-slate-200">
                     <img
-                      src={
+                      src={`${import.meta.env.VITE_UPLOADS_BASE_URL}${
                         booking.carImage
-                          ? booking.carImage.startsWith("http")
-                            ? booking.carImage
-                            : `/${booking.carImage}`
-                          : "https://images.unsplash.com/photo-1549924231-f129b911e442"
-                      }
+                      }`}
                       alt={booking.carName}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     />
@@ -84,7 +88,13 @@ const ClientBookingGridView = ({
                           new Date(booking.fromDate).getTime()) /
                           (1000 * 60 * 60 * 24)
                       )}{" "}
-                      days
+                      {Math.ceil(
+                        (new Date(booking.toDate).getTime() -
+                          new Date(booking.fromDate).getTime()) /
+                          (1000 * 60 * 60 * 24)
+                      ) > 1
+                        ? t("days")
+                        : t("day")}
                     </div>
                     <Badge
                       variant="outline"
@@ -107,7 +117,7 @@ const ClientBookingGridView = ({
                   </div>
                   <div className="flex flex-col gap-1 items-start">
                     <p className="text-xs font-medium text-emerald-700 uppercase">
-                      Pickup
+                      {t("pickupDate")}
                     </p>
                     <p className="font-semibold text-slate-900 text-sm truncate">
                       {format(new Date(booking.fromDate), "MMM dd, yyyy")}
@@ -120,7 +130,7 @@ const ClientBookingGridView = ({
                   </div>
                   <div className="flex flex-col gap-1 items-start">
                     <p className="text-xs font-medium text-rose-700 uppercase">
-                      Return
+                      {t("returnDate")}
                     </p>
                     <p className="font-semibold text-slate-900 text-sm truncate">
                       {format(new Date(booking.toDate), "MMM dd, yyyy")}
@@ -133,7 +143,13 @@ const ClientBookingGridView = ({
               <div className="flex flex-col md:flex-row md:items-center md:justify-between pt-4 border-t border-slate-100 gap-4">
                 <div className="flex items-center gap-2 flex-1 min-w-0">
                   <div className="w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center">
-                    <Car className="h-4 w-4 text-slate-600" />
+                    <img
+                      src={`${import.meta.env.VITE_UPLOADS_BASE_URL}${
+                        booking.vendorLogo
+                      }`}
+                      alt={booking.vendorName}
+                      className="w-full h-full object-cover rounded-lg"
+                    />
                   </div>
                   <div className="min-w-0">
                     <p className="font-medium text-slate-900 text-sm truncate">
@@ -146,7 +162,7 @@ const ClientBookingGridView = ({
                 </div>
                 <div className="flex items-center space-x-2 uppercase">
                   <CreditCard className="h-4 w-4 text-slate-400 mx-[6px]" />
-                  <Badge variant="default">Paid</Badge>
+                  <Badge variant="default">{booking?.paymentStatus}</Badge>
                 </div>
               </div>
 
@@ -156,21 +172,33 @@ const ClientBookingGridView = ({
                   <Button
                     className="flex-1"
                     size="sm"
-                    onClick={() => onReturnCar(booking.id.toString())}
+                    onClick={() => onAcceptReturnCar(booking.id.toString())}
                     disabled={isReturning}
                   >
-                    <RotateCcw className="h-4 w-4 mr-2" />
-                    Return Car
+                    <RotateCcw className="h-4 w-4 me-2" />
+                    {t("returnCar")}
                   </Button>
                 )}
+                {canAcceptReturn(booking.bookingStatus) &&
+                  onAcceptReturnCar && (
+                    <Button
+                      className="flex-1"
+                      size="sm"
+                      onClick={() => onAcceptReturnCar(booking.id.toString())}
+                      disabled={isAccepting}
+                    >
+                      <CheckCircle className="h-4 w-4 me-2" />
+                      {t("acceptReturn")}
+                    </Button>
+                  )}
                 <Button
                   className="flex-1"
                   size="sm"
                   variant="outline"
                   onClick={() => setSelectedBooking(booking)}
                 >
-                  <Mail className="h-4 w-4 mr-2" />
-                  Invoice
+                  <Mail className="h-4 w-4 me-2" />
+                  {t("invoice")}
                 </Button>
               </div>
             </CardContent>

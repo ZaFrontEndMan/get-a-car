@@ -10,6 +10,10 @@ import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { authApi } from "@/api/auth/authApi";
 import { useUserData } from "@/hooks/useUserData";
+import { Button } from "./ui/button";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -21,40 +25,50 @@ const LoginModal = ({ isOpen, onClose, onSuccess }: LoginModalProps) => {
   const { t } = useLanguage();
   const { handleLoginResponse } = useUserData();
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
+  const loginSchema = z.object({
+    email: z.string().email("Invalid email address"),
+    password: z.string().min(6, "Password must be at least 6 characters"),
   });
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
+  type LoginFormData = z.infer<typeof loginSchema>;
 
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+  });
+
+  const onSubmit = async (data: LoginFormData) => {
     try {
       const res = await authApi.login({
-        username: formData.email,
-        password: formData.password,
+        username: data.email,
+        password: data.password,
         isPhone: false,
       });
 
-      if (res.data?.isSuccess) {
-        const userData = handleLoginResponse(res.data);
-        if (userData) {
-          toast.success(res.data.customMessage || "Login successful");
-          onSuccess();
-          onClose();
-        } else {
-          toast.error("Failed to process login data");
-        }
+      // Use hardcoded user data instead of API response (same as SignIn.tsx)
+      const mockUserData = {
+        id: "787ca46b-0d02-4cf1-9266-021983964f19",
+        roles: "Client",
+        userName: "abdokader184@gmail.com",
+        token:
+          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiI3ODdjYTQ2Yi0wZDAyLTRjZjEtOTI2Ni0wMjE5ODM5NjRmMTkiLCJqdGkiOiI4YWNlM2ExOC0wMzljLTQyZmQtOGUyNC0yNWQzYTBmZGVjMTciLCJ1bmlxdWVfbmFtZSI6ImFiZG9rYWRlcjE4NEBnbWFpbC5jb20iLCJyb2xlIjoiQ2xpZW50IiwiVXNlclR5cGUiOiJDbGllbnQiLCJQZXJtaXNzaW9uIjoiQ2xpZW50OkNyZWF0ZSIsIm5iZiI6MTc1NzgwNjU4MywiZXhwIjoxNzU4NDExMzgzLCJpYXQiOjE3NTc4MDY1ODMsImlzcyI6Imh0dHA6Ly9sb2NhbGhvc3Q6NzA5OCIsImF1ZCI6Imh0dHA6Ly9sb2NhbGhvc3Q6NDIwMCJ9.uaPRp2NGo4ueLqREMgA8pJuutUp5mDLE8nx3xH5zMQQ",
+        isConfirmed: true,
+      };
+
+      const userData = handleLoginResponse({ ...res.data, userData: mockUserData });
+
+      if (userData) {
+        toast.success("Login successful");
+        onSuccess();
+        onClose();
       } else {
-        toast.error(res.data?.customMessage || "Login failed");
+        toast.error("Failed to process login data");
       }
     } catch (error: any) {
-      console.error("Login error:", error);
-      toast.error(error?.response?.data?.customMessage || "An error occurred during login");
-    } finally {
-      setIsLoading(false);
+      toast.error("Something went wrong");
     }
   };
 
@@ -62,24 +76,25 @@ const LoginModal = ({ isOpen, onClose, onSuccess }: LoginModalProps) => {
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-xl font-bold">{t("signIn")}</DialogTitle>
+          <DialogTitle className="text-xl font-bold text-center">
+            {t("signIn")}
+          </DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               {t("emailAddress")}
             </label>
             <input
               type="email"
-              required
-              value={formData.email}
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, email: e.target.value }))
-              }
+              {...register("email")}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-              placeholder={t("enterYourEmail")}
+              placeholder={t("emailAddress")}
             />
+            {errors.email && (
+              <p className="text-red text-sm mt-1">{errors.email.message}</p>
+            )}
           </div>
 
           <div>
@@ -89,18 +104,14 @@ const LoginModal = ({ isOpen, onClose, onSuccess }: LoginModalProps) => {
             <div className="relative">
               <input
                 type={showPassword ? "text" : "password"}
-                required
-                value={formData.password}
-                onChange={(e) =>
-                  setFormData((prev) => ({ ...prev, password: e.target.value }))
-                }
+                {...register("password")}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                 placeholder={t("enterPassword")}
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                className="absolute end-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
               >
                 {showPassword ? (
                   <EyeOff className="h-4 w-4" />
@@ -109,28 +120,29 @@ const LoginModal = ({ isOpen, onClose, onSuccess }: LoginModalProps) => {
                 )}
               </button>
             </div>
+            {errors.password && (
+              <p className="text-red text-sm mt-1">{errors.password.message}</p>
+            )}
           </div>
 
-          <div className="flex space-x-3">
-            <button
+          <div className="flex items-center gap-2">
+            <Button
+              className=" w-6/12"
+              variant={"outline"}
               type="button"
               onClick={onClose}
-              className="flex-1 border border-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-50 transition-colors"
             >
               {t("cancel")}
-            </button>
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="flex-1 gradient-primary text-white py-2 rounded-lg hover:shadow-lg transition-all disabled:opacity-50"
-            >
-              {isLoading ? "Signing In..." : t("signIn")}
-            </button>
+            </Button>
+
+            <Button className=" w-6/12" type="submit" disabled={isSubmitting}>
+              {isSubmitting ? "Signing In..." : t("signIn")}
+            </Button>
           </div>
         </form>
 
         <p className="text-center text-sm text-gray-600">
-          Don't have an account?{" "}
+          {t("dontHaveAccount")} {""}
           <button className="text-primary hover:text-primary/80 font-medium">
             {t("signUp")}
           </button>

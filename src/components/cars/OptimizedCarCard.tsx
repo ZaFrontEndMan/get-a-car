@@ -1,5 +1,5 @@
-import React, { memo } from 'react';
-import CarCard from '../CarCard';
+import React, { memo } from "react";
+import CarCard from "../CarCard";
 
 interface OptimizedCarCardProps {
   car: {
@@ -30,24 +30,28 @@ interface OptimizedCarCardProps {
       name: string;
       logo_url?: string;
     };
+    isWishList?: boolean;
   };
+
   viewMode?: "grid" | "list";
   animationDelay?: number;
 }
 
-const OptimizedCarCard = memo<OptimizedCarCardProps>(({ car, viewMode, animationDelay = 0 }) => {
-  return (
-    <div
-      className="animate-fade-in"
-      style={{
-        animationDelay: `${Math.min(animationDelay, 0.5)}s`,
-      }}
-    >
-      <CarCard car={car} viewMode={viewMode} />
-    </div>
-  );
-});
+const OptimizedCarCard = memo<OptimizedCarCardProps>(
+  ({ car, viewMode, animationDelay = 0 }) => {
+    return (
+      <div
+        className="animate-fade-in"
+        style={{
+          animationDelay: `${Math.min(animationDelay, 0.5)}s`,
+        }}
+      >
+        <CarCard car={car} viewMode={viewMode} />
+      </div>
+    );
+  }
+);
 
-OptimizedCarCard.displayName = 'OptimizedCarCard';
+OptimizedCarCard.displayName = "OptimizedCarCard";
 
 export default OptimizedCarCard;
