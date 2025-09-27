@@ -64,6 +64,7 @@ export const enTranslations = {
   // Form
   forgotPassword: "Forgot Password?",
   resetPassword: "Reset Password",
+  confirmPassword: "Confirm Password",
 
   // Dashboard Common
   myProfile: "My Profile",
@@ -545,6 +546,8 @@ export const enTranslations = {
   vendorInfo: "Vendor Info",
   noLocation: "No Location",
   unverified: "Unverified",
+  vendor: "Vendor",
+  client: "Client",
 
   bookingsManagement: "Bookings Management",
   monitorAllBookings: "Monitor and manage all car bookings",
@@ -625,7 +628,8 @@ export const enTranslations = {
   searchControlsUnavailable: "Search controls temporarily unavailable.",
   noCarsFound: "No cars found",
   noBookingsDescription: "You don't have any bookings yet.",
-  noBookingsFoundWithSelectedStatus: "No bookings found with the selected status",
+  noBookingsFoundWithSelectedStatus:
+    "No bookings found with the selected status",
   no: "No",
   tryAdjustingCriteria: "Try adjusting your search or filter criteria",
   paginationUnavailable: "Pagination temporarily unavailable.",
@@ -690,6 +694,32 @@ export const enTranslations = {
   transmissions: "Transmissions",
   latestOffers: "Latest Offers",
 
+  // SignUp form specific keys
+  createAccount: "Create Account",
+  joinUs: "Join Us",
+  selectGender: "Select Gender",
+  selectCountry: "Select Country",
+  selectCity: "Select City",
+  drivingLicenseNumber: "Driving License Number",
+  documentUploads: "Document Uploads",
+  licenseIdFront: "License ID Front",
+  licenseIdBack: "License ID Back",
+  agreeToTerms: "I agree to the",
+  termsConditions: "Terms & Conditions",
+  creatingAccount: "Creating Account...",
+  alreadyHaveAccount: "Already have an account?",
+  signInHere: "Sign in here",
+
+  // SignUp form error messages
+  nameRequired: "Name is required",
+  emailRequired: "Email is required",
+  passwordMinLength: "Password must be at least 8 characters",
+  passwordMismatch: "Passwords do not match",
+  acceptTermsRequired: "You must accept the terms and conditions",
+  companyNameRequired: "Company name is required",
+  businessLicenseRequired: "Business license is required",
+  mustBe18OrOlder: "You must be 18 years or older",
+
   // Booking and Pricing
   pricingCalculation: "Pricing Calculation",
   noAdditionalServices: "No additional services available",
@@ -721,7 +751,6 @@ export const enTranslations = {
   personalInformation: "Personal Information",
   fullNameLabel: "Full Name",
   emailLabel: "Email",
-  selectGender: "Select gender",
   nationalIdLabel: "National ID",
   uploadProfilePhoto: "Upload your profile photo",
 

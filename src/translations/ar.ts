@@ -144,6 +144,7 @@ export const arTranslations = {
   // Form
   forgotPassword: "نسيت كلمة المرور؟",
   resetPassword: "إعادة تعيين كلمة المرور",
+  confirmPassword: "تأكيد كلمة المرور",
 
   // Dashboard Common
   myProfile: "ملفي الشخصي",
@@ -438,7 +439,8 @@ export const arTranslations = {
   pickupAndDropoff: "الاستلام والتسليم",
   rentalDuration: "فترة الإيجار",
   total: "إجمالي",
-
+  vendor: "مؤسس",
+  client: "عميل",
   // Branch related
   branchName: "اسم الفرع",
   manager: "المدير",
@@ -708,6 +710,32 @@ export const arTranslations = {
   transmissions: "ناقل الحركة",
   latestOffers: "أحدث العروض",
 
+  // مفاتيح خاصة بنموذج التسجيل
+  createAccount: "إنشاء حساب",
+  joinUs: "انضم إلينا",
+  selectGender: "اختر الجنس",
+  selectCountry: "اختر الدولة",
+  selectCity: "اختر المدينة",
+  drivingLicenseNumber: "رقم رخصة القيادة",
+  documentUploads: "رفع المستندات",
+  licenseIdFront: "رخصة الهوية (الوجه الأمامي)",
+  licenseIdBack: "رخصة الهوية (الوجه الخلفي)",
+  agreeToTerms: "أوافق على",
+  termsConditions: "الشروط والأحكام",
+  creatingAccount: "جاري إنشاء الحساب...",
+  alreadyHaveAccount: "لديك حساب بالفعل؟",
+  signInHere: "سجل الدخول هنا",
+
+  // رسائل خطأ نموذج التسجيل
+  nameRequired: "الاسم مطلوب",
+  emailRequired: "البريد الإلكتروني مطلوب",
+  passwordMinLength: "كلمة المرور يجب أن تكون 8 أحرف على الأقل",
+  passwordMismatch: "كلمات المرور غير متطابقة",
+  acceptTermsRequired: "يجب أن توافق على الشروط والأحكام",
+  companyNameRequired: "اسم الشركة مطلوب",
+  businessLicenseRequired: "رخصة العمل مطلوبة",
+  mustBe18OrOlder: "يجب أن تكون 18 سنة أو أكثر",
+
   // الحجز والتسعير
   pricingCalculation: "حساب التسعير",
   noAdditionalServices: "لا توجد خدمات إضافية متاحة",
@@ -739,7 +767,6 @@ export const arTranslations = {
   personalInformation: "المعلومات الشخصية",
   fullNameLabel: "الاسم الكامل",
   emailLabel: "البريد الإلكتروني",
-  selectGender: "اختر الجنس",
   addressLabel: "العنوان",
   nationalIdLabel: "الهوية الوطنية",
   uploadProfilePhoto: "ارفع صورة ملفك الشخصي",

@@ -61,7 +61,7 @@ const SignIn = () => {
         toast.error("Failed to process login data");
       }
     } catch (err: any) {
-      toast.error("Something went wrong");
+      toast.error(err?.response?.data?.customMessage);
     }
   };
 
@@ -82,8 +82,8 @@ const SignIn = () => {
       <div className="absolute inset-0 bg-gradient-to-br from-primary/50 to-secondary/50 z-10"></div>
 
       {/* Content */}
-      <div className="relative z-20 pt-20 px-4 min-h-screen flex items-center justify-center">
-        <div className="max-w-md w-full bg-white rounded-2xl shadow-2xl p-8">
+      <div className="relative z-20 pt-20 px-4 min-h-screen flex items-center justify-center w-full">
+        <div className="max-w-xl w-full bg-white rounded-2xl shadow-2xl p-8">
           <h2 className="text-2xl font-bold text-center text-primary">
             {t("signIn")}
           </h2>
@@ -92,7 +92,7 @@ const SignIn = () => {
           <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700">
-                {t("username")}
+                {t("email")}
               </label>
               <input
                 type="text"
