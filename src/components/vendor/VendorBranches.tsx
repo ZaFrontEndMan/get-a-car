@@ -10,8 +10,10 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "../ui/button";
 import { Plus } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const VendorBranches = () => {
+  const { t } = useLanguage();
   const [showForm, setShowForm] = useState(false);
   const [editingBranch, setEditingBranch] = useState<any>(null);
   const [currentView, setCurrentView] = useState<"grid" | "list" | "table">(
@@ -21,44 +23,12 @@ const VendorBranches = () => {
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const { data, isLoading, error } = useGetVendorBranches();
-
-  const branches = useMemo(() => {
-    const raw =
-      (data as any)?.data?.vendorBranches ||
-      (data as any)?.vendorBranches ||
-      (data as any)?.data?.data?.branches ||
-      (data as any)?.data?.branches ||
-      (data as any)?.branches ||
-      (data as any)?.data ||
-      [];
-
-    return (raw as any[]).map((b) => ({
-      id: (b?.id ?? "").toString(),
-      name: b?.branchName ?? b?.name ?? "Branch",
-      address: b?.address ?? b?.streetAddress ?? "",
-      city: b?.city ?? b?.location ?? "",
-      phone: b?.branchPhoneNumber ?? b?.phone ?? b?.phoneNumber ?? "",
-      email: b?.email ?? "",
-      manager_name: b?.fullName ?? b?.manager_name ?? b?.managerName ?? "",
-      is_active:
-        typeof b?.is_active === "boolean"
-          ? b.is_active
-          : typeof b?.isActive === "boolean"
-          ? b.isActive
-          : true,
-      created_at:
-        b?.creationDate ??
-        b?.created_at ??
-        b?.createdAt ??
-        b?.createdOn ??
-        new Date().toISOString(),
-    }));
-  }, [data]);
-
+  const branches = data?.data?.vendorBranches;
   const handleEdit = (branch: any) => {
     setEditingBranch(branch);
     setShowForm(true);
   };
+console.log(data);
 
   const handleDelete = (branchId: string) => {
     toast({
@@ -80,16 +50,16 @@ const VendorBranches = () => {
   const onAddBranch = () => {
     // Creation endpoint not available yet; prevent opening the form
     toast({
-      title: "Coming soon",
-      description: "Branch creation is not available yet.",
+      title: t("comingSoon"),
+      description: t("underMaintenance"),
     });
   };
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
+        <span className="me-2">{t("loadingData")}</span>
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-        <span className="ml-2">Loading branches...</span>
       </div>
     );
   }
@@ -97,7 +67,7 @@ const VendorBranches = () => {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-3xl font-bold text-gray-900">Branches</h2>
+        <h2 className="text-3xl font-bold text-gray-900">{t("branches")}</h2>
         <div className=" flex gap-4">
           {branches && branches.length > 0 && (
             <BranchesViewToggle
@@ -107,7 +77,7 @@ const VendorBranches = () => {
           )}
           <Button onClick={onAddBranch} className="flex items-center space-x-2">
             <Plus className="h-4 w-4" />
-            <span>Add Branch</span>
+            <span>{t("addNewBranch")}</span>
           </Button>
         </div>
       </div>
@@ -127,6 +97,7 @@ const VendorBranches = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {branches.map((branch) => (
                   <BranchCard
+                    t={t}
                     key={branch.id}
                     branch={branch}
                     onEdit={handleEdit}
@@ -139,6 +110,7 @@ const VendorBranches = () => {
 
             {currentView === "list" && (
               <BranchesListView
+                t={t}
                 branches={branches}
                 onEdit={handleEdit}
                 onDelete={handleDelete}
@@ -160,6 +132,7 @@ const VendorBranches = () => {
 
       {showForm && (
         <BranchForm
+          t={t}
           branch={editingBranch}
           onClose={handleFormClose}
           onSuccess={handleFormSuccess}

@@ -1,10 +1,16 @@
-
-import React from 'react';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Edit, Trash2 } from 'lucide-react';
-import { useLanguage } from '@/contexts/LanguageContext';
+import React from "react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Edit, Trash2 } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface Branch {
   id: string;
@@ -25,9 +31,14 @@ interface BranchesTableViewProps {
   isDeleting: boolean;
 }
 
-const BranchesTableView = ({ branches, onEdit, onDelete, isDeleting }: BranchesTableViewProps) => {
+const BranchesTableView = ({
+  branches,
+  onEdit,
+  onDelete,
+  isDeleting,
+}: BranchesTableViewProps) => {
   const { t, language } = useLanguage();
-  const isRTL = language === 'ar';
+  const isRTL = language === "ar";
 
   return (
     <div className="bg-white rounded-lg border overflow-hidden">
@@ -35,56 +46,60 @@ const BranchesTableView = ({ branches, onEdit, onDelete, isDeleting }: BranchesT
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className={isRTL ? 'text-right' : 'text-left'}>
-                {t('branchName')}
+              <TableHead className={isRTL ? "text-right" : "text-left"}>
+                {t("branchName")}
               </TableHead>
-              <TableHead className={isRTL ? 'text-right' : 'text-left'}>
-                {t('location')}
+              <TableHead className={isRTL ? "text-right" : "text-left"}>
+                {t("address")}
               </TableHead>
-              <TableHead className={isRTL ? 'text-right' : 'text-left'}>
-                {t('manager')}
+              <TableHead className={isRTL ? "text-right" : "text-left"}>
+                {t("manager")}
               </TableHead>
-              <TableHead className={isRTL ? 'text-right' : 'text-left'}>
-                {t('contact')}
+              <TableHead className={isRTL ? "text-right" : "text-left"}>
+                {t("email")}
               </TableHead>
-              <TableHead className={isRTL ? 'text-right' : 'text-left'}>
-                {t('status')}
+              <TableHead className={isRTL ? "text-right" : "text-left"}>
+                {t("status")}
               </TableHead>
-              <TableHead className={isRTL ? 'text-right' : 'text-left'}>
-                {t('created')}
-              </TableHead>
-              <TableHead className={isRTL ? 'text-right' : 'text-left'}>
-                {t('actions')}
+             
+              <TableHead className={isRTL ? "text-right" : "text-left"}>
+                {t("actions")}
               </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {branches.map((branch) => (
               <TableRow key={branch.id}>
-                <TableCell className="font-medium">{branch.name}</TableCell>
+                <TableCell className="font-medium">{branch.branchName}</TableCell>
                 <TableCell>
                   <div>
                     <div className="font-medium">{branch.city}</div>
-                    <div className="text-sm text-gray-500">{branch.address}</div>
+                    <div className="text-sm text-gray-500">
+                      {branch.address}
+                    </div>
                   </div>
                 </TableCell>
-                <TableCell>{branch.manager_name || '-'}</TableCell>
+                <TableCell>{branch.managerName || t("notAvailable")}</TableCell>
                 <TableCell>
                   <div className="text-sm">
                     {branch.phone && <div>{branch.phone}</div>}
-                    {branch.email && <div className="text-gray-500">{branch.email}</div>}
+                    {branch.email && (
+                      <div className="text-gray-500">{branch.email}</div>
+                    )}
                   </div>
                 </TableCell>
                 <TableCell>
                   <Badge variant={branch.is_active ? "default" : "secondary"}>
-                    {branch.is_active ? t('active') : t('inactive')}
+                    {branch.is_active ? t("active") : t("inactive")}
                   </Badge>
                 </TableCell>
-                <TableCell className="text-sm text-gray-500">
-                  {new Date(branch.created_at).toLocaleDateString(isRTL ? 'ar' : 'en')}
-                </TableCell>
-                <TableCell className={isRTL ? 'text-left' : 'text-right'}>
-                  <div className={`flex items-center justify-end space-x-2 ${isRTL ? 'space-x-reverse' : ''}`}>
+
+                <TableCell className={isRTL ? "text-left" : "text-right"}>
+                  <div
+                    className={`flex items-center justify-end space-x-2 ${
+                      isRTL ? "space-x-reverse" : ""
+                    }`}
+                  >
                     <Button
                       variant="ghost"
                       size="sm"

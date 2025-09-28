@@ -105,7 +105,7 @@ const VendorBookingListView = ({
               </Badge>
             </div>
             <div className="text-sm text-gray-500">
-              {new Date(booking.created_at).toLocaleDateString()}
+              {new Date(booking.pickup_date).toLocaleDateString()}
             </div>
           </div>
 
@@ -121,8 +121,8 @@ const VendorBookingListView = ({
             <div className="flex items-center space-x-2">
               <Car className="h-4 w-4 text-gray-400" />
               <div>
-                <div className="font-medium text-sm">{booking.cars?.name}</div>
-                <div className="text-xs text-gray-500">{booking.cars?.brand} {booking.cars?.model}</div>
+                <div className="font-medium text-sm">{booking.cars?.[0]?.name}</div>
+                <div className="text-xs text-gray-500">{booking.cars?.[0]?.name}</div>
               </div>
             </div>
 

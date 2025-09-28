@@ -25,7 +25,6 @@ interface BookingStatusFilterProps {
   onFilterChange: (status: BookingStatus | "all") => void;
   statusCounts: Record<string, number>;
   totalBookings: number;
-  statusLabels: Record<BookingStatus, string>;
 }
 
 const BookingStatusFilter = ({
@@ -33,23 +32,22 @@ const BookingStatusFilter = ({
   onFilterChange,
   statusCounts,
   totalBookings,
-  statusLabels,
 }: BookingStatusFilterProps) => {
   const { language } = useLanguage();
 
   const filterButtons = [
     { key: "all", label: language === "ar" ? "الكل" : "All", icon: Filter },
-    { key: "pending", label: statusLabels.pending, icon: Clock },
-    { key: "confirmed", label: statusLabels.confirmed, icon: CheckCircle },
-    { key: "active", label: statusLabels.active, icon: PlayCircle },
-    { key: "InProgress", label: statusLabels.InProgress, icon: PauseCircle },
+    { key: "pending", label: language === "ar" ? "قيد الانتظار" : "Pending", icon: Clock },
+    { key: "confirmed", label: language === "ar" ? "تم التأكيد" : "Confirmed", icon: CheckCircle },
+    { key: "active", label: language === "ar" ? "نشط" : "Active", icon: PlayCircle },
+    { key: "InProgress", label: language === "ar" ? "قيد التقدم" : "In Progress", icon: PauseCircle },
     {
       key: "return_requested",
-      label: statusLabels.return_requested,
+      label: language === "ar" ? "طلب إرجاع" : "Return Requested",
       icon: Car,
     },
-    { key: "completed", label: statusLabels.completed, icon: CheckCircle },
-    { key: "cancelled", label: statusLabels.cancelled, icon: XCircle },
+    { key: "completed", label: language === "ar" ? "مكتمل" : "Completed", icon: CheckCircle },
+    { key: "cancelled", label: language === "ar" ? "ملغى" : "Cancelled", icon: XCircle },
   ];
 
   return (

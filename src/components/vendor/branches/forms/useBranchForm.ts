@@ -1,29 +1,30 @@
-
-import { useState, useEffect } from 'react';
-import { useMutation } from '@tanstack/react-query';
-import { useToast } from '@/components/ui/use-toast';
-import { useUpdateVendorBranch } from '@/hooks/vendor/useVendorBranch';
+import { useState, useEffect } from "react";
+import { useMutation } from "@tanstack/react-query";
+import { useToast } from "@/components/ui/use-toast";
+import { useUpdateVendorBranch } from "@/hooks/vendor/useVendorBranch";
 
 interface BranchFormData {
-  name: string;
+  nickName: string;
   address: string;
-  city: string;
-  phone: string;
-  email: string;
-  manager_name: string;
-  is_active: boolean;
+  managerName: string;
+  fullName: string;
+  password: string;
 }
 
-export const useBranchForm = (branch: any, onSuccess: () => void) => {
+interface FormErrors {
+  password?: string;
+}
+
+export const useBranchForm = (branch: any, onSuccess: () => void, t: any) => {
   const [formData, setFormData] = useState<BranchFormData>({
-    name: '',
-    address: '',
-    city: '',
-    phone: '',
-    email: '',
-    manager_name: '',
-    is_active: true
+    nickName: "",
+    address: "",
+    managerName: "",
+    fullName: "",
+    password: "",
   });
+
+  const [errors, setErrors] = useState<FormErrors>({});
 
   const { toast } = useToast();
   const updateBranchMutation = useUpdateVendorBranch();
@@ -31,13 +32,11 @@ export const useBranchForm = (branch: any, onSuccess: () => void) => {
   useEffect(() => {
     if (branch) {
       setFormData({
-        name: branch.name || '',
-        address: branch.address || '',
-        city: branch.city || '',
-        phone: branch.phone || '',
-        email: branch.email || '',
-        manager_name: branch.manager_name || '',
-        is_active: branch.is_active ?? true
+        nickName: branch.nickName || "",
+        address: branch.address || "",
+        managerName: branch.managerName || "",
+        fullName: branch.fullName || "",
+        password: branch.password || "",
       });
     }
   }, [branch]);
@@ -46,47 +45,95 @@ export const useBranchForm = (branch: any, onSuccess: () => void) => {
     mutationFn: async () => {
       const payload: any = {
         id: branch?.id ?? undefined,
-        branchName: formData.name,
-        address: formData.address,
-        email: formData.email || null,
-        branchPhoneNumber: formData.phone || null,
-        managerPhoneNumber: formData.phone || null,
-        fullName: formData.manager_name || null,
-        isActive: formData.is_active,
       };
 
-      // Delegate to API mutation
+      if (formData.nickName !== (branch?.nickName || ""))
+        payload.nickName = formData.nickName;
+      if (formData.address !== (branch?.address || ""))
+        payload.address = formData.address;
+      if (formData.managerName !== (branch?.managerName || ""))
+        payload.managerName = formData.managerName;
+      if (formData.fullName !== (branch?.fullName || ""))
+        payload.fullName = formData.fullName;
+      if (formData.password !== (branch?.password || ""))
+        payload.password = formData.password;
+
       return updateBranchMutation.mutateAsync(payload);
     },
     onSuccess: () => {
       toast({
-        title: 'Success',
-        description: `Branch ${branch ? 'updated' : 'saved'} successfully`,
+        title: t("update"),
       });
       onSuccess();
     },
     onError: (error: any) => {
       toast({
-        title: 'Error',
-        description: error?.message || `Failed to ${branch ? 'update' : 'save'} branch`,
-        variant: 'destructive',
+        title: "Error",
+        description:
+          error?.response.data.error.message ||
+          `Failed to ${branch ? "update" : "save"} branch`,
+        variant: "destructive",
       });
     },
   });
 
+  const validatePassword = (password: string): string | undefined => {
+    if (!password) return undefined;
+
+    if (password.length < 8) {
+      return "Password must be at least 8 characters long";
+    }
+
+    if (!/[A-Z]/.test(password)) {
+      return "Password must contain at least one uppercase letter";
+    }
+
+    if (!/[a-z]/.test(password)) {
+      return "Password must contain at least one lowercase letter";
+    }
+
+    if (!/\d/.test(password)) {
+      return "Password must contain at least one digit";
+    }
+
+    if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+      return "Password must contain at least one special character";
+    }
+
+    return undefined;
+  };
+
   const handleChange = (field: string, value: any) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
+
+    if (field === "password") {
+      const passwordError = validatePassword(value);
+      setErrors((prev) => ({ ...prev, password: passwordError }));
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    const passwordError = validatePassword(formData.password);
+    if (passwordError) {
+      setErrors((prev) => ({ ...prev, password: passwordError }));
+      toast({
+        title: "Validation Error",
+        description: passwordError,
+        variant: "destructive",
+      });
+      return;
+    }
+
     mutation.mutate();
   };
 
   return {
     formData,
+    errors,
     mutation,
     handleChange,
-    handleSubmit
+    handleSubmit,
   };
 };

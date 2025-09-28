@@ -23,7 +23,7 @@ export const getAllBookings = async (params?: {
   if (params?.bookingStatus) queryParams.append('bookingStatus', params.bookingStatus);
   
   const queryString = queryParams.toString();
-  const url = queryString ? `/api/Vendor/Booking/GetAllBooking?${queryString}` : '/api/Vendor/Booking/GetAllBooking';
+  const url = queryString ? `/Vendor/Booking/GetAllBooking?${queryString}` : '/Vendor/Booking/GetAllBooking';
   
   const { data } = await axiosInstance.get(url);
   return data;
@@ -31,12 +31,12 @@ export const getAllBookings = async (params?: {
 
 // Get bookings statistics
 export const getBookingsStatistics = async () => {
-  const { data } = await axiosInstance.get("/api/Vendor/Booking/GetBookingsStatistics");
+  const { data } = await axiosInstance.get("/Vendor/Booking/GetBookingsStatistics");
   return data;
 };
 
 // Accept return car booking
 export const acceptReturnCarBooking = async (bookingId: string) => {
-  const { data } = await axiosInstance.post(`/api/Vendor/Booking/AcceptReturnCarBooking/${bookingId}`);
+  const { data } = await axiosInstance.post(`/Vendor/Booking/AcceptReturnCarBooking/${bookingId}`);
   return data;
 };

@@ -59,7 +59,8 @@ export const useUpdateVendorBranch = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: updateVendorBranch,
+    mutationFn: ({ ...branchData }: { [key: string]: any }) =>
+      updateVendorBranch(branchData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: VENDOR_BRANCH_QUERY_KEYS.all });
     },

@@ -26,6 +26,7 @@ const SignIn = () => {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
+    setValue,
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -40,19 +41,23 @@ const SignIn = () => {
         ...(data as { username: string; password: string }),
         isPhone: false,
       });
-      
+
       // Use hardcoded user data instead of API response
       const mockUserData = {
         id: "787ca46b-0d02-4cf1-9266-021983964f19",
         roles: "Client",
         userName: "abdokader184@gmail.com",
-        token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiI3ODdjYTQ2Yi0wZDAyLTRjZjEtOTI2Ni0wMjE5ODM5NjRmMTkiLCJqdGkiOiI4YWNlM2ExOC0wMzljLTQyZmQtOGUyNC0yNWQzYTBmZGVjMTciLCJ1bmlxdWVfbmFtZSI6ImFiZG9rYWRlcjE4NEBnbWFpbC5jb20iLCJyb2xlIjoiQ2xpZW50IiwiVXNlclR5cGUiOiJDbGllbnQiLCJQZXJtaXNzaW9uIjoiQ2xpZW50OkNyZWF0ZSIsIm5iZiI6MTc1NzgwNjU4MywiZXhwIjoxNzU4NDExMzgzLCJpYXQiOjE3NTc4MDY1ODMsImlzcyI6Imh0dHA6Ly9sb2NhbGhvc3Q6NzA5OCIsImF1ZCI6Imh0dHA6Ly9sb2NhbGhvc3Q6NDIwMCJ9.uaPRp2NGo4ueLqREMgA8pJuutUp5mDLE8nx3xH5zMQQ",
-        isConfirmed: true
+        token:
+          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiI3ODdjYTQ2Yi0wZDAyLTRjZjEtOTI2Ni0wMjE5ODM5NjRmMTkiLCJqdGkiOiI4YWNlM2ExOC0wMzljLTQyZmQtOGUyNC0yNWQzYTBmZGVjMTciLCJ1bmlxdWVfbmFtZSI6ImFiZG9rYWRlcjE4NEBnbWFpbC5jb20iLCJyb2xlIjoiQ2xpZW50IiwiVXNlclR5cGUiOiJDbGllbnQiLCJQZXJtaXNzaW9uIjoiQ2xpZW50OkNyZWF0ZSIsIm5iZiI6MTc1NzgwNjU4MywiZXhwIjoxNzU4NDExMzgzLCJpYXQiOjE3NTc4MDY1ODMsImlzcyI6Imh0dHA6Ly9sb2NhbGhvc3Q6NzA5OCIsImF1ZCI6Imh0dHA6Ly9sb2NhbGhvc3Q6NDIwMCJ9.uaPRp2NGo4ueLqREMgA8pJuutUp5mDLE8nx3xH5zMQQ",
+        isConfirmed: true,
       };
 
       // Always use mock data regardless of API response
-      const userData = handleLoginResponse({ ...res.data, userData: mockUserData });
-      
+      const userData = handleLoginResponse({
+        ...res.data,
+        userData: mockUserData,
+      });
+
       if (userData) {
         toast.success("Login successful");
         const defaultRoute = getDefaultRoute();
@@ -63,6 +68,26 @@ const SignIn = () => {
     } catch (err: any) {
       toast.error(err?.response?.data?.customMessage);
     }
+  };
+
+  const handleQuickLogin = (role: "client" | "vendor" | "admin") => {
+    const credentials = {
+      client: {
+        username: "abdokader184@gmail.com",
+        password: "LEESQgMOD4p23/7tUFsGHQ==",
+      },
+      vendor: {
+        username: "mahmoud7@gmail.com",
+        password: "LEESQgMOD4p23/7tUFsGHQ==",
+      },
+      admin: {
+        username: "mahmoud@gmail.com",
+        password: "LEESQgMOD4p23/7tUFsGHQ==",
+      },
+    };
+
+    setValue("username", credentials[role].username);
+    setValue("password", credentials[role].password);
   };
 
   return (
@@ -129,6 +154,30 @@ const SignIn = () => {
             >
               {isSubmitting ? t("loading") : t("login")}
             </button>
+
+            <div className="flex justify-between gap-2">
+              <button
+                type="button"
+                onClick={() => handleQuickLogin("client")}
+                className="flex-1 rounded-lg bg-secondary px-4 py-2 text-white font-medium shadow-md hover:bg-secondary/90"
+              >
+                {t("quickLoginClient")}
+              </button>
+              <button
+                type="button"
+                onClick={() => handleQuickLogin("vendor")}
+                className="flex-1 rounded-lg bg-secondary px-4 py-2 text-white font-medium shadow-md hover:bg-secondary/90"
+              >
+                {t("quickLoginVendor")}
+              </button>
+              <button
+                type="button"
+                onClick={() => handleQuickLogin("admin")}
+                className="flex-1 rounded-lg bg-secondary px-4 py-2 text-white font-medium shadow-md hover:bg-secondary/90"
+              >
+                {t("quickLoginAdmin")}
+              </button>
+            </div>
           </form>
 
           <div className="mt-6 text-center">

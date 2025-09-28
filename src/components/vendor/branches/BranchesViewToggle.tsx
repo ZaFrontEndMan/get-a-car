@@ -13,7 +13,7 @@ const BranchesViewToggle = ({ currentView, onViewChange }: BranchesViewTogglePro
   const { t } = useLanguage();
 
   return (
-    <div className="flex items-center space-x-2 bg-gray-100 rounded-lg p-1">
+    <div className="flex items-center gap-2 bg-gray-100 rounded-lg p-1">
       <Button
         variant={currentView === 'grid' ? 'default' : 'ghost'}
         size="sm"

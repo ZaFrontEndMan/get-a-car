@@ -4,8 +4,9 @@ import BookingCard from './BookingCard';
 import VendorBookingMobileCard from './VendorBookingMobileCard';
 
 interface Booking {
-  id: string;
-  booking_number: string;
+  id: number;
+  booking_number: number;
+  booking_status: string;
   customer_name: string;
   customer_email: string;
   customer_phone: string;
@@ -14,14 +15,17 @@ interface Booking {
   pickup_location: string;
   return_location: string;
   total_amount: number;
-  booking_status: string;
+  total_days: number;
+  daily_rate: number;
   payment_status: string;
-  cars: {
+  special_requests: string;
+  cars: Array<{
+    id: number;
     name: string;
-    brand: string;
-    model: string;
     images: string[];
-  };
+    daily_rate: number;
+    total_amount: number;
+  }>;
 }
 
 interface VendorBookingGridViewProps {

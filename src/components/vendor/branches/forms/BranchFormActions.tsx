@@ -7,25 +7,27 @@ interface BranchFormActionsProps {
   isLoading: boolean;
   isUserAuthenticated: boolean;
   onCancel: () => void;
+  t: (key: string) => string;
 }
 
 const BranchFormActions = ({ 
   isEditing, 
   isLoading, 
   isUserAuthenticated, 
-  onCancel 
+  onCancel,
+  t
 }: BranchFormActionsProps) => {
   return (
     <div className="flex space-x-2 pt-4">
       <Button type="button" variant="outline" onClick={onCancel} className="flex-1">
-        Cancel
+        {t("cancelButton")}
       </Button>
       <Button 
         type="submit" 
         className="flex-1"
         disabled={isLoading || !isUserAuthenticated}
       >
-        {isLoading ? 'Saving...' : (isEditing ? 'Update' : 'Create')}
+        {isLoading ? t("savingButton") : (isEditing ? t("updateButton") : t("createButton"))}
       </Button>
     </div>
   );

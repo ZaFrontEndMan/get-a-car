@@ -36,6 +36,7 @@ const LoginModal = ({ isOpen, onClose, onSuccess }: LoginModalProps) => {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
+    setValue,
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
   });
@@ -58,7 +59,10 @@ const LoginModal = ({ isOpen, onClose, onSuccess }: LoginModalProps) => {
         isConfirmed: true,
       };
 
-      const userData = handleLoginResponse({ ...res.data, userData: mockUserData });
+      const userData = handleLoginResponse({
+        ...res.data,
+        userData: mockUserData,
+      });
 
       if (userData) {
         toast.success("Login successful");
@@ -70,6 +74,26 @@ const LoginModal = ({ isOpen, onClose, onSuccess }: LoginModalProps) => {
     } catch (error: any) {
       toast.error("Something went wrong");
     }
+  };
+
+  const handleQuickLogin = (role: "client" | "vendor" | "admin") => {
+    const credentials = {
+      client: {
+        email: "abdokader184@gmail.com",
+        password: "LEESQgMOD4p23/7tUFsGHQ==",
+      },
+      vendor: {
+        email: "mahmoud7@gmail.com",
+        password: "LEESQgMOD4p23/7tUFsGHQ==",
+      },
+      admin: {
+        email: "mahmoud@gmail.com",
+        password: "LEESQgMOD4p23/7tUFsGHQ==",
+      },
+    };
+
+    setValue("email", credentials[role].email);
+    setValue("password", credentials[role].password);
   };
 
   return (
@@ -127,7 +151,7 @@ const LoginModal = ({ isOpen, onClose, onSuccess }: LoginModalProps) => {
 
           <div className="flex items-center gap-2">
             <Button
-              className=" w-6/12"
+              className="w-6/12"
               variant={"outline"}
               type="button"
               onClick={onClose}
@@ -135,8 +159,35 @@ const LoginModal = ({ isOpen, onClose, onSuccess }: LoginModalProps) => {
               {t("cancel")}
             </Button>
 
-            <Button className=" w-6/12" type="submit" disabled={isSubmitting}>
+            <Button className="w-6/12" type="submit" disabled={isSubmitting}>
               {isSubmitting ? "Signing In..." : t("signIn")}
+            </Button>
+          </div>
+
+          <div className="flex justify-between gap-2">
+            <Button
+              variant="secondary"
+              type="button"
+              onClick={() => handleQuickLogin("client")}
+              className="flex-1"
+            >
+              {t("quickLoginClient")}
+            </Button>
+            <Button
+              variant="secondary"
+              type="button"
+              onClick={() => handleQuickLogin("vendor")}
+              className="flex-1"
+            >
+              {t("quickLoginVendor")}
+            </Button>
+            <Button
+              variant="secondary"
+              type="button"
+              onClick={() => handleQuickLogin("admin")}
+              className="flex-1"
+            >
+              {t("quickLoginAdmin")}
             </Button>
           </div>
         </form>

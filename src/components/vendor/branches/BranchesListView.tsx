@@ -1,9 +1,8 @@
-
-import React from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Edit, Trash2, MapPin, User, Phone, Mail } from 'lucide-react';
+import React from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Edit, Trash2, MapPin, User, Phone, Mail } from "lucide-react";
 
 interface Branch {
   id: string;
@@ -15,6 +14,7 @@ interface Branch {
   email?: string;
   is_active?: boolean;
   created_at: string;
+  t: any;
 }
 
 interface BranchesListViewProps {
@@ -24,7 +24,13 @@ interface BranchesListViewProps {
   isDeleting: boolean;
 }
 
-const BranchesListView = ({ branches, onEdit, onDelete, isDeleting }: BranchesListViewProps) => {
+const BranchesListView = ({
+  branches,
+  onEdit,
+  onDelete,
+  isDeleting,
+  t,
+}: BranchesListViewProps) => {
   return (
     <div className="space-y-4">
       {branches.map((branch) => (
@@ -32,53 +38,53 @@ const BranchesListView = ({ branches, onEdit, onDelete, isDeleting }: BranchesLi
           <CardContent className="p-6">
             <div className="flex items-start justify-between">
               <div className="flex-1">
-                <div className="flex items-center space-x-3 mb-3">
-                  <h3 className="text-lg font-semibold">{branch.name}</h3>
+                <div className="flex items-center gap-3 mb-3">
+                  <h3 className="text-lg font-semibold">{branch.branchName}</h3>
                   <Badge variant={branch.is_active ? "default" : "secondary"}>
-                    {branch.is_active ? 'Active' : 'Inactive'}
+                    {branch.is_active ? t("active") : t("inactive")}
                   </Badge>
                 </div>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                   <div className="space-y-2">
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-center gap-2">
                       <MapPin className="h-4 w-4 text-gray-500" />
                       <span>{branch.city}</span>
                     </div>
-                    <div className="flex items-start space-x-2">
+                    <div className="flex items-start gap-2">
                       <MapPin className="h-4 w-4 text-gray-500 mt-0.5" />
                       <span className="text-gray-600">{branch.address}</span>
                     </div>
                   </div>
-                  
+
                   <div className="space-y-2">
-                    {branch.manager_name && (
-                      <div className="flex items-center space-x-2">
+                    {branch.managerName && (
+                      <div className="flex items-center gap-2">
                         <User className="h-4 w-4 text-gray-500" />
-                        <span>{branch.manager_name}</span>
+                        <span>{branch.managerName}</span>
                       </div>
                     )}
                     {branch.phone && (
-                      <div className="flex items-center space-x-2">
+                      <div className="flex items-center gap-2">
                         <Phone className="h-4 w-4 text-gray-500" />
                         <span>{branch.phone}</span>
                       </div>
                     )}
                     {branch.email && (
-                      <div className="flex items-center space-x-2">
+                      <div className="flex items-center gap-2">
                         <Mail className="h-4 w-4 text-gray-500" />
                         <span>{branch.email}</span>
                       </div>
                     )}
                   </div>
                 </div>
-                
+
                 <div className="mt-3 text-xs text-gray-500">
-                  Created: {new Date(branch.created_at).toLocaleDateString()}
+                  {t("created")}: {new Date(branch.created_at).toLocaleDateString()}
                 </div>
               </div>
-              
-              <div className="flex items-center space-x-2 ml-4">
+
+              <div className="flex items-center gap-2 ml-4">
                 <Button
                   variant="outline"
                   size="sm"

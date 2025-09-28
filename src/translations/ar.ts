@@ -140,6 +140,36 @@ export const arTranslations = {
   notFound: "الصفحة غير موجودة",
   offerNotFound: "العرض غير موجود",
   noOffersFound: "لا توجد عروض",
+  title: "إدارة العروض",
+  subtitle: "إنشاء وإدارة العروض الخاصة بسياراتك",
+  createOffer: "إنشاء عرض",
+  editOffer: "تعديل العرض",
+  createNewOffer: "إنشاء عرض جديد",
+  formDescription: "أدخل تفاصيل العرض الخاص بك",
+  selectCar: "اختر السيارة",
+  noCars: "لا توجد سيارات متاحة. يرجى إضافة سيارات أولاً قبل إنشاء العروض.",
+  selectCarPlaceholder: "اختر سيارة",
+  sarPerDay: "ريال/يوم",
+  pricingPreview: "معاينة الأسعار",
+  originalPrice: "السعر الأصلي",
+  discountedPrice: "السعر بعد الخصم",
+  titleEn: "عنوان العرض (بالإنجليزية)",
+  titleEnPlaceholder: "مثال: عرض خاص لعطلة نهاية الأسبوع",
+  titleAr: "عنوان العرض (بالعربية)",
+  titleArPlaceholder: "عرض خاص لعطلة نهاية الأسبوع",
+  descriptionEn: "الوصف (بالإنجليزية)",
+  descriptionEnPlaceholder: "صف عرضك الخاص...",
+  descriptionAr: "الوصف (بالعربية)",
+  descriptionArPlaceholder: "وصف العرض الخاص...",
+  discountPercentage: "نسبة الخصم",
+  validUntil: "صالح حتى",
+  status: "الحالة",
+  draft: "مسودة",
+  published: "منشور",
+  updateOffer: "تحديث العرض",
+  off: "خصم",
+  validUntilDate: "صالح حتى",
+  carInfo: "السيارة:",
 
   // Form
   forgotPassword: "نسيت كلمة المرور؟",
@@ -222,7 +252,6 @@ export const arTranslations = {
   add: "إضافة",
   save: "حفظ",
   confirm: "تأكيد",
-  status: "الحالة",
   active: "نشط",
   inactive: "غير نشط",
   pending: "قيد الانتظار",
@@ -232,7 +261,6 @@ export const arTranslations = {
   // Offers
   specialOffers: "العروض الخاصة",
   discount: "الخصم",
-  validUntil: "صالح حتى",
   viewOffer: "عرض العرض",
 
   // Car types
@@ -461,10 +489,8 @@ export const arTranslations = {
   category: "الفئة",
   description: "الوصف",
   image: "الصورة",
-  title: "العنوان",
   content: "المحتوى",
   author: "الكاتب",
-  published: "تاريخ النشر",
   slug: "الرابط",
 
   // Vendor specific
@@ -531,6 +557,12 @@ export const arTranslations = {
   statistics: "الإحصائيات",
   reports: "التقارير",
   analytics: "التحليلات",
+
+  // Booking Statistics
+  bookingStatistics: "إحصائيات الحجوزات",
+  totalBookingsCount: "إجمالي الحجوزات",
+  pendingBookingsCount: "الحجوزات المعلقة",
+  cancelledBookingsCount: "الحجوزات الملغاة",
   management: "الإدارة",
   system: "النظام",
 
@@ -541,7 +573,6 @@ export const arTranslations = {
   disabled: "معطل",
   online: "متصل",
   offline: "غير متصل",
-  draft: "مسودة",
   archived: "مؤرشف",
 
   // Users Management
@@ -816,6 +847,37 @@ export const arTranslations = {
   liveChat: "دردشة مباشرة",
   startChat: "ابدأ الدردشة",
   instantSupport: "دعم فوري",
+
+  // Branch Form
+  editBranch: "تعديل الفرع",
+  addNewBranch: "إضافة فرع جديد",
+  branchNameLabel: "اسم الفرع",
+  branchNamePlaceholder: "ادخل اسم الفرع",
+  addressPlaceholder: "ادخل عنوان الفرع",
+  cityLabel: "المدينة",
+  cityPlaceholder: "اختر المدينة",
+  phoneLabel: "رقم الهاتف",
+  phonePlaceholder: "ادخل رقم الهاتف",
+  emailPlaceholder: "ادخل البريد الإلكتروني",
+  managerNameLabel: "اسم المدير",
+  managerNamePlaceholder: "ادخل اسم المدير",
+  activeLabel: "نشط",
+  cancelButton: "إلغاء",
+  savingButton: "يتم الحفظ...",
+  updateButton: "تحديث",
+  createButton: "إنشاء",
+  confirmDeleteBranch: "هل أنت متأكد من رغبتك في حذف الفرع؟",
+  confirmDeleteOffer: "هل أنت متأكد من رغبتك في حذف العرض",
+  deleteOfferDescription:
+    "هل أنت متأكد من حذف هذا العرض؟ سيتم إزالته نهائيًا من النظام.",
+  actionCannotBeUndone: "هذا الإجراء لا يمكن التراجع عنه.",
+  notAvailable: "غير متوفر",
+  inProgressBookingCount: "الحجوزات قيد التنفيذ",
+  carReturnedBookingCount: "السيارات المعادة",
+  completedBookingsCount: "الحجوزات المكتملة",
+  gettingStarted: "البدء",
+  welcomeMessage:
+    "مرحبًا بك في لوحة تحكم البائع! ابدأ بإضافة سيارتك الأولى وإعداد الفروع لتبدأ في إدارة أعمال التأجير الخاصة بك.",
 };
 
 export default arTranslations;

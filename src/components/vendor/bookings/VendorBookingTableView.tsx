@@ -167,8 +167,8 @@ const VendorBookingTableView = ({
                 </TableCell>
                 <TableCell>
                   <div>
-                    <div className="font-medium text-sm">{booking.cars?.name}</div>
-                    <div className="text-xs text-gray-500">{booking.cars?.brand}</div>
+                    <div className="font-medium text-sm">{booking.cars?.[0]?.name}</div>
+                    <div className="text-xs text-gray-500">{booking.cars?.[0]?.name}</div>
                   </div>
                 </TableCell>
                 <TableCell className="text-sm">
