@@ -1,259 +1,249 @@
-
-import React, { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Plus, Edit2, Trash2, Shield, Save, X } from 'lucide-react';
-import { toast } from 'sonner';
-import { useAuth } from '@/contexts/AuthContext';
-import { useLanguage } from '@/contexts/LanguageContext';
+import React, { useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Plus, Edit2, Trash2, Shield, Save, X } from "lucide-react";
+import { toast } from "sonner";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { useVendorPolicies } from "@/hooks/vendor/useVendorPolicies";
 
 interface VendorPolicy {
   id: string;
-  title_en: string;
-  title_ar?: string;
-  description_en: string;
-  description_ar?: string;
-  policy_type: string;
-  is_active: boolean;
-  order_index: number;
+  title: string;
+  description: string;
+  policyType: number;
+  displayOrder: number;
+  isActive: boolean;
+  vendorId: string;
+  vendorBranchId: string | null;
 }
 
 const VendorPolicies = () => {
-  const { user } = useAuth();
-  const { t, language } = useLanguage();
-  const queryClient = useQueryClient();
+  const { t } = useLanguage();
+  const {
+    policies,
+    isLoading,
+    createPolicy,
+    updatePolicy,
+    deletePolicy,
+    isCreating,
+    isUpdating,
+    isDeleting,
+  } = useVendorPolicies();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [editingPolicy, setEditingPolicy] = useState<VendorPolicy | null>(null);
+  const [deletingPolicyId, setDeletingPolicyId] = useState<string | null>(null);
   const [formData, setFormData] = useState({
-    title_en: '',
-    title_ar: '',
-    description_en: '',
-    description_ar: '',
-    policy_type: 'general',
-    is_active: true,
-    order_index: 0
+    title: "",
+    description: "",
+    policyType: 0, // Default to 0 (general) as per API response
+    displayOrder: 0,
+    isActive: true,
   });
-
-  // Fetch vendor policies
-  const { data: policies = [], isLoading } = useQuery({
-    queryKey: ['vendor-policies'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('vendor_policies')
-        .select('*')
-        .order('order_index', { ascending: true });
-      
-      if (error) throw error;
-      return data;
-    },
-  });
-
-  // Create/Update policy mutation
-  const policyMutation = useMutation({
-    mutationFn: async (policy: Partial<VendorPolicy>) => {
-      const { data: vendor } = await supabase
-        .from('vendors')
-        .select('id')
-        .eq('user_id', user?.id)
-        .single();
-
-      if (!vendor) throw new Error('Vendor not found');
-
-      // Ensure required fields are present and properly typed
-      const policyData = {
-        title_en: policy.title_en || '',
-        title_ar: policy.title_ar || null,
-        description_en: policy.description_en || '',
-        description_ar: policy.description_ar || null,
-        policy_type: policy.policy_type || 'general',
-        is_active: policy.is_active ?? true,
-        order_index: policy.order_index || 0
-      };
-
-      if (editingPolicy) {
-        const { data, error } = await supabase
-          .from('vendor_policies')
-          .update({
-            ...policyData,
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', editingPolicy.id)
-          .select()
-          .single();
-        
-        if (error) throw error;
-        return data;
-      } else {
-        const { data, error } = await supabase
-          .from('vendor_policies')
-          .insert({
-            ...policyData,
-            vendor_id: vendor.id
-          })
-          .select()
-          .single();
-        
-        if (error) throw error;
-        return data;
-      }
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['vendor-policies'] });
-      toast.success(editingPolicy ? 'Policy updated successfully' : 'Policy created successfully');
-      resetForm();
-    },
-    onError: (error) => {
-      console.error('Policy mutation error:', error);
-      toast.error('Failed to save policy');
-    }
-  });
-
-  // Delete policy mutation
-  const deleteMutation = useMutation({
-    mutationFn: async (policyId: string) => {
-      const { error } = await supabase
-        .from('vendor_policies')
-        .delete()
-        .eq('id', policyId);
-      
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['vendor-policies'] });
-      toast.success('Policy deleted successfully');
-    },
-    onError: () => {
-      toast.error('Failed to delete policy');
-    }
-  });
-
-  const resetForm = () => {
-    setFormData({
-      title_en: '',
-      title_ar: '',
-      description_en: '',
-      description_ar: '',
-      policy_type: 'general',
-      is_active: true,
-      order_index: 0
-    });
-    setEditingPolicy(null);
-    setIsDialogOpen(false);
-  };
 
   const handleEdit = (policy: VendorPolicy) => {
     setEditingPolicy(policy);
     setFormData({
-      title_en: policy.title_en,
-      title_ar: policy.title_ar || '',
-      description_en: policy.description_en,
-      description_ar: policy.description_ar || '',
-      policy_type: policy.policy_type,
-      is_active: policy.is_active,
-      order_index: policy.order_index
+      title: policy.title,
+      description: policy.description,
+      policyType: policy.policyType,
+      displayOrder: policy.displayOrder,
+      isActive: policy.isActive,
     });
     setIsDialogOpen(true);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.title_en || !formData.description_en) {
-      toast.error('Please fill in required English fields');
+    if (!formData.title || !formData.description) {
+      toast.error(t("errors_required_english_fields"));
       return;
     }
-    policyMutation.mutate(formData);
+
+    const body = {
+      titleEn: formData.title,
+      titleAr: undefined, // Removed language separation; adjust if needed
+      descriptionEn: formData.description,
+      descriptionAr: undefined, // Removed language separation; adjust if needed
+      policyType: formData.policyType,
+      displayOrder: formData.displayOrder,
+      isActive: formData.isActive,
+    };
+
+    if (editingPolicy) {
+      updatePolicy({ policyId: editingPolicy.id, body });
+    } else {
+      createPolicy(body);
+    }
+
+    resetForm();
+  };
+
+  const handleDelete = (policyId: string) => {
+    setDeletingPolicyId(policyId);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = () => {
+    if (deletingPolicyId) {
+      deletePolicy(deletingPolicyId);
+      setIsDeleteDialogOpen(false);
+      setDeletingPolicyId(null);
+    }
+  };
+
+  const resetForm = () => {
+    setFormData({
+      title: "",
+      description: "",
+      policyType: 0,
+      displayOrder: 0,
+      isActive: true,
+    });
+    setEditingPolicy(null);
+    setIsDialogOpen(false);
   };
 
   const policyTypes = [
-    { value: 'general', label: 'General' },
-    { value: 'booking', label: 'Booking' },
-    { value: 'cancellation', label: 'Cancellation' },
-    { value: 'payment', label: 'Payment' },
-    { value: 'insurance', label: 'Insurance' },
-    { value: 'fuel', label: 'Fuel' },
-    { value: 'damage', label: 'Damage' }
+    { value: "0", label: t("policy_types_general") }, // Map to policyType 0
+    { value: "1", label: t("policy_types_booking") }, // Map to policyType 1 (example)
+    { value: "2", label: t("policy_types_cancellation") }, // Map to policyType 2 (example)
+    { value: "3", label: t("policy_types_payment") }, // Map to policyType 3 (example)
+    { value: "4", label: t("policy_types_insurance") }, // Map to policyType 4 (example)
+    { value: "5", label: t("policy_types_fuel") }, // Map to policyType 5 (example)
+    { value: "6", label: t("policy_types_damage") }, // Map to policyType 6 (example)
   ];
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-center">Loading policies...</div>
-      </div>
-    );
-  }
+  const SkeletonLoader = () => (
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead className="w-[100px] text-start" />
+          <TableHead className="w-[100px] text-start" />
+          <TableHead className="w-[100px] text-start" />
+          <TableHead className="w-[100px] text-start" />
+          <TableHead className="w-[100px] text-start" />
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {Array(3)
+          .fill(0)
+          .map((_, index) => (
+            <TableRow key={index}>
+              <TableCell>
+                <div className="h-4 bg-gray-200 animate-pulse rounded" />
+              </TableCell>
+              <TableCell>
+                <div className="h-4 bg-gray-200 animate-pulse rounded" />
+              </TableCell>
+              <TableCell>
+                <div className="h-4 bg-gray-200 animate-pulse rounded" />
+              </TableCell>
+              <TableCell>
+                <div className="h-4 bg-gray-200 animate-pulse rounded" />
+              </TableCell>
+              <TableCell>
+                <div className="h-4 bg-gray-200 animate-pulse rounded" />
+              </TableCell>
+            </TableRow>
+          ))}
+      </TableBody>
+    </Table>
+  );
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold">{language === 'ar' ? 'سياسات التأجير' : 'Rental Policies'}</h2>
-          <p className="text-gray-600">
-            {language === 'ar' ? 'إدارة سياسات التأجير الخاصة بك' : 'Manage your rental policies'}
-          </p>
+          <h2 className="text-2xl font-bold">{t("rental_policies_title")}</h2>
+          <p className="text-gray-600">{t("rental_policies_description")}</p>
         </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <Button onClick={() => setEditingPolicy(null)}>
+            <Button
+              onClick={() => setEditingPolicy(null)}
+              disabled={isCreating}
+            >
               <Plus className="mr-2 h-4 w-4" />
-              {language === 'ar' ? 'إضافة سياسة' : 'Add Policy'}
+              {t("actions_add_policy")}
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>
-                {editingPolicy 
-                  ? (language === 'ar' ? 'تعديل السياسة' : 'Edit Policy')
-                  : (language === 'ar' ? 'إضافة سياسة جديدة' : 'Add New Policy')
-                }
+            <DialogHeader >
+              <DialogTitle className=" text-start">
+                {editingPolicy
+                  ? t("actions_edit_policy")
+                  : t("actions_add_new_policy")}
               </DialogTitle>
-              <DialogDescription>
-                {language === 'ar' 
-                  ? 'أضف أو عدّل سياسات التأجير بكلا اللغتين العربية والإنجليزية'
-                  : 'Add or edit rental policies in both Arabic and English'
-                }
+              <DialogDescription className=" text-start">
+                {t("rental_policies_form_description")}
               </DialogDescription>
             </DialogHeader>
-            
+
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium mb-2">
-                    {language === 'ar' ? 'العنوان (إنجليزي) *' : 'Title (English) *'}
+                    {t("form_title")}
                   </label>
                   <Input
-                    value={formData.title_en}
-                    onChange={(e) => setFormData({ ...formData, title_en: e.target.value })}
-                    placeholder="Enter English title"
+                    value={formData.title}
+                    onChange={(e) =>
+                      setFormData({ ...formData, title: e.target.value })
+                    }
+                    placeholder={t("form_placeholder_title")}
                     required
                   />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    {language === 'ar' ? 'العنوان (عربي)' : 'Title (Arabic)'}
-                  </label>
-                  <Input
-                    value={formData.title_ar}
-                    onChange={(e) => setFormData({ ...formData, title_ar: e.target.value })}
-                    placeholder="أدخل العنوان بالعربية"
-                  />
-                </div>
+                {/* Removed title_ar input since it's not in the response */}
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium mb-2">
-                    {language === 'ar' ? 'نوع السياسة' : 'Policy Type'}
+                    {t("form_policy_type")}
                   </label>
-                  <Select value={formData.policy_type} onValueChange={(value) => setFormData({ ...formData, policy_type: value })}>
+                  <Select
+                    value={formData.policyType.toString()} // Convert to string for Select
+                    onValueChange={(value) =>
+                      setFormData({
+                        ...formData,
+                        policyType: parseInt(value) || 0,
+                      })
+                    }
+                  >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -268,12 +258,17 @@ const VendorPolicies = () => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-2">
-                    {language === 'ar' ? 'ترتيب العرض' : 'Display Order'}
+                    {t("form_display_order")}
                   </label>
                   <Input
                     type="number"
-                    value={formData.order_index}
-                    onChange={(e) => setFormData({ ...formData, order_index: parseInt(e.target.value) || 0 })}
+                    value={formData.displayOrder}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        displayOrder: parseInt(e.target.value) || 0,
+                      })
+                    }
                     min="0"
                   />
                 </div>
@@ -281,53 +276,47 @@ const VendorPolicies = () => {
 
               <div>
                 <label className="block text-sm font-medium mb-2">
-                  {language === 'ar' ? 'الوصف (إنجليزي) *' : 'Description (English) *'}
+                  {t("form_description")}
                 </label>
                 <Textarea
-                  value={formData.description_en}
-                  onChange={(e) => setFormData({ ...formData, description_en: e.target.value })}
-                  placeholder="Enter English description"
+                  value={formData.description}
+                  onChange={(e) =>
+                    setFormData({ ...formData, description: e.target.value })
+                  }
+                  placeholder={t("form_placeholder_description")}
                   rows={4}
                   required
                 />
               </div>
 
-              <div>
-                <label className="block text-sm font-medium mb-2">
-                  {language === 'ar' ? 'الوصف (عربي)' : 'Description (Arabic)'}
-                </label>
-                <Textarea
-                  value={formData.description_ar}
-                  onChange={(e) => setFormData({ ...formData, description_ar: e.target.value })}
-                  placeholder="أدخل الوصف بالعربية"
-                  rows={4}
-                />
-              </div>
-
               <div className="flex items-center justify-between pt-4">
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center gap-2">
                   <input
                     type="checkbox"
                     id="is_active"
-                    checked={formData.is_active}
-                    onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
+                    checked={formData.isActive}
+                    onChange={(e) =>
+                      setFormData({ ...formData, isActive: e.target.checked })
+                    }
                     className="rounded"
                   />
                   <label htmlFor="is_active" className="text-sm font-medium">
-                    {language === 'ar' ? 'نشط' : 'Active'}
+                    {t("form_is_active")}
                   </label>
                 </div>
-                <div className="flex space-x-2">
-                  <Button type="button" variant="outline" onClick={resetForm}>
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={resetForm}
+                    disabled={isCreating || isUpdating}
+                  >
                     <X className="mr-2 h-4 w-4" />
-                    {language === 'ar' ? 'إلغاء' : 'Cancel'}
+                    {t("actions_cancel")}
                   </Button>
-                  <Button type="submit" disabled={policyMutation.isPending}>
+                  <Button type="submit" disabled={isCreating || isUpdating}>
                     <Save className="mr-2 h-4 w-4" />
-                    {policyMutation.isPending 
-                      ? (language === 'ar' ? 'جاري الحفظ...' : 'Saving...')
-                      : (language === 'ar' ? 'حفظ' : 'Save')
-                    }
+                    {t("actions_save")}
                   </Button>
                 </div>
               </div>
@@ -336,41 +325,42 @@ const VendorPolicies = () => {
         </Dialog>
       </div>
 
-      {/* Policies List */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
+          <CardTitle className="flex items-center gap-2">
             <Shield className="h-5 w-5 text-primary" />
-            <span>{language === 'ar' ? 'السياسات الحالية' : 'Current Policies'}</span>
+            <span>{t("current_policies_title")}</span>
           </CardTitle>
-          <CardDescription>
-            {language === 'ar' 
-              ? 'قائمة بجميع سياسات التأجير الخاصة بك'
-              : 'List of all your rental policies'
-            }
-          </CardDescription>
+          <CardDescription>{t("current_policies_description")}</CardDescription>
         </CardHeader>
         <CardContent>
-          {policies.length === 0 ? (
+          {isLoading ? (
+            <SkeletonLoader />
+          ) : policies.length === 0 ? (
             <div className="text-center py-8 text-gray-500">
               <Shield className="mx-auto h-12 w-12 text-gray-300 mb-4" />
-              <p>{language === 'ar' ? 'لم تقم بإضافة أي سياسات بعد' : 'No policies added yet'}</p>
-              <p className="text-sm">
-                {language === 'ar' 
-                  ? 'ابدأ بإضافة سياسات التأجير الخاصة بك'
-                  : 'Start by adding your rental policies'
-                }
-              </p>
+              <p>{t("current_policies_no_policies")}</p>
+              <p className="text-sm">{t("current_policies_start_adding")}</p>
             </div>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>{language === 'ar' ? 'العنوان' : 'Title'}</TableHead>
-                  <TableHead>{language === 'ar' ? 'النوع' : 'Type'}</TableHead>
-                  <TableHead>{language === 'ar' ? 'الحالة' : 'Status'}</TableHead>
-                  <TableHead>{language === 'ar' ? 'الترتيب' : 'Order'}</TableHead>
-                  <TableHead>{language === 'ar' ? 'الإجراءات' : 'Actions'}</TableHead>
+                  <TableHead className="text-start">
+                    {t("table_title")}
+                  </TableHead>
+                  <TableHead className="text-start">
+                    {t("table_type")}
+                  </TableHead>
+                  <TableHead className="text-start">
+                    {t("table_status")}
+                  </TableHead>
+                  <TableHead className="text-start">
+                    {t("table_order")}
+                  </TableHead>
+                  <TableHead className="text-start">
+                    {t("table_actions")}
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -378,45 +368,54 @@ const VendorPolicies = () => {
                   <TableRow key={policy.id}>
                     <TableCell>
                       <div>
-                        <div className="font-medium">
-                          {language === 'ar' && policy.title_ar ? policy.title_ar : policy.title_en}
-                        </div>
+                        <div className="font-medium">{policy.title}</div>
                         <div className="text-sm text-gray-500 truncate max-w-xs">
-                          {language === 'ar' && policy.description_ar ? policy.description_ar : policy.description_en}
+                          {policy.description}
                         </div>
                       </div>
                     </TableCell>
                     <TableCell>
                       <Badge variant="outline">
-                        {policy.policy_type}
+                        {policy.policyType === 0
+                          ? t("policy_types_general")
+                          : policy.policyType === 1
+                          ? t("policy_types_booking")
+                          : policy.policyType === 2
+                          ? t("policy_types_cancellation")
+                          : policy.policyType === 3
+                          ? t("policy_types_payment")
+                          : policy.policyType === 4
+                          ? t("policy_types_insurance")
+                          : policy.policyType === 5
+                          ? t("policy_types_fuel")
+                          : t("policy_types_damage")}
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      <Badge variant={policy.is_active ? "default" : "secondary"}>
-                        {policy.is_active 
-                          ? (language === 'ar' ? 'نشط' : 'Active')
-                          : (language === 'ar' ? 'غير نشط' : 'Inactive')
-                        }
+                      <Badge
+                        variant={policy.isActive ? "default" : "secondary"}
+                      >
+                        {policy.isActive
+                          ? t("status_active")
+                          : t("status_inactive")}
                       </Badge>
                     </TableCell>
-                    <TableCell>{policy.order_index}</TableCell>
+                    <TableCell>{policy.displayOrder}</TableCell>
                     <TableCell>
-                      <div className="flex space-x-2">
+                      <div className="flex gap-2">
                         <Button
                           variant="outline"
                           size="sm"
                           onClick={() => handleEdit(policy)}
+                          disabled={isDeleting}
                         >
                           <Edit2 className="h-4 w-4" />
                         </Button>
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => {
-                            if (confirm(language === 'ar' ? 'هل أنت متأكد من حذف هذه السياسة؟' : 'Are you sure you want to delete this policy?')) {
-                              deleteMutation.mutate(policy.id);
-                            }
-                          }}
+                          onClick={() => handleDelete(policy.id)}
+                          disabled={isDeleting}
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
@@ -429,8 +428,74 @@ const VendorPolicies = () => {
           )}
         </CardContent>
       </Card>
+
+      {/* Delete Confirmation Modal */}
+      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("modal_delete_title")}</DialogTitle>
+            <DialogDescription>
+              {t("modal_delete_description")}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end gap-2 mt-4">
+            <Button
+              variant="outline"
+              onClick={() => setIsDeleteDialogOpen(false)}
+              disabled={isDeleting}
+            >
+              <X className="mr-2 h-4 w-4" />
+              {t("actions_cancel")}
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={confirmDelete}
+              disabled={isDeleting}
+            >
+              {isDeleting ? t("modal_deleting") : t("modal_confirm_delete")}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
+
+const SkeletonLoader = () => (
+  <Table>
+    <TableHeader>
+      <TableRow>
+        <TableHead className="w-[100px] text-start" />
+        <TableHead className="w-[100px] text-start" />
+        <TableHead className="w-[100px] text-start" />
+        <TableHead className="w-[100px] text-start" />
+        <TableHead className="w-[100px] text-start" />
+      </TableRow>
+    </TableHeader>
+    <TableBody>
+      {Array(3)
+        .fill(0)
+        .map((_, index) => (
+          <TableRow key={index}>
+            <TableCell>
+              <div className="h-4 bg-gray-200 animate-pulse rounded" />
+            </TableCell>
+            <TableCell>
+              <div className="h-4 bg-gray-200 animate-pulse rounded" />
+            </TableCell>
+            <TableCell>
+              <div className="h-4 bg-gray-200 animate-pulse rounded" />
+            </TableCell>
+            <TableCell>
+              <div className="h-4 bg-gray-200 animate-pulse rounded" />
+            </TableCell>
+            <TableCell>
+              <div className="h-4 bg-gray-200 animate-pulse rounded" />
+            </TableCell>
+          </TableRow>
+        ))}
+    </TableBody>
+  </Table>
+);
 
 export default VendorPolicies;
