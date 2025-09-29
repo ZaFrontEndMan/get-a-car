@@ -2,7 +2,7 @@ import axiosInstance from "../../utils/axiosInstance";
 
 // Get booking by ID
 export const getBookingById = async (bookingId: string) => {
-  const { data } = await axiosInstance.get(`/api/Vendor/Booking/GetBookingById?Id=${bookingId}`);
+  const { data } = await axiosInstance.get(`/Vendor/Booking/GetBookingById?Id=${bookingId}`);
   return data;
 };
 

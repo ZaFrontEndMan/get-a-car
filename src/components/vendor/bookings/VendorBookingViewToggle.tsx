@@ -9,7 +9,7 @@ interface VendorBookingViewToggleProps {
 
 const VendorBookingViewToggle = ({ viewMode, onViewModeChange }: VendorBookingViewToggleProps) => {
   return (
-    <div className="flex items-center space-x-1 bg-gray-100 rounded-lg p-1">
+    <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-1">
       <Button
         variant={viewMode === 'grid' ? 'default' : 'ghost'}
         size="sm"

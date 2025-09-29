@@ -125,14 +125,16 @@ const BookingInvoiceModal: React.FC<BookingInvoiceModalProps> = ({
           <DialogTitle className="text-2xl font-bold">
             {t("invoice")}
           </DialogTitle>
-          <Button
-            onClick={handleDownloadPDF}
-            className="flex items-center gap-2"
-            disabled={generateInvoicePdfMutation.isPending}
-          >
-            <Download className="h-4 w-4" />
-            <span>{t("downloadPdf")}</span>
-          </Button>
+          {type === "client" && (
+            <Button
+              onClick={handleDownloadPDF}
+              className="flex items-center gap-2"
+              disabled={generateInvoicePdfMutation.isPending}
+            >
+              <Download className="h-4 w-4" />
+              <span>{t("downloadPdf")}</span>
+            </Button>
+          )}
         </DialogHeader>
 
         <div className="bg-white p-8 border border-gray-200 rounded-lg print:shadow-none print:border-none">
@@ -401,17 +403,21 @@ const BookingInvoiceModal: React.FC<BookingInvoiceModalProps> = ({
           </div>
 
           {/* Footer */}
-          <div className="mt-8 pt-8 border-t border-gray-200 text-center text-gray-600">
-            <p className="text-lg font-medium">{t("thankYouChoosingGetCar")}</p>
-            <p className="text-sm mt-2">{t("trustedCarRentalPartner")}</p>
-            <div className="mt-4 text-xs space-y-1">
-              <p>
-                {t("forSupport")}: {vendorDetails.email} |{" "}
-                {vendorDetails.phoneNumber}
+          {type === "client" && (
+            <div className="mt-8 pt-8 border-t border-gray-200 text-center text-gray-600">
+              <p className="text-lg font-medium">
+                {t("thankYouChoosingGetCar")}
               </p>
-              <p>{t("visitUs")}: www.getcar.sa</p>
+              <p className="text-sm mt-2">{t("trustedCarRentalPartner")}</p>
+              <div className="mt-4 text-xs space-y-1">
+                <p>
+                  {t("forSupport")}: {vendorDetails.email} |{" "}
+                  {vendorDetails.phoneNumber}
+                </p>
+                <p>{t("visitUs")}: www.getcar.sa</p>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </DialogContent>
     </Dialog>
