@@ -8,6 +8,19 @@ import VendorBookingTableView from "./bookings/VendorBookingTableView";
 import EmptyBookingsState from "./bookings/EmptyBookingsState";
 import { Car } from "lucide-react";
 import { toast } from "sonner";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationPrevious,
+  PaginationNext,
+  PaginationEllipsis,
+} from "@/components/ui/pagination";
+import {
+  useGetAllBookings,
+  useAcceptReturnCarBooking,
+} from "@/hooks/vendor/useVendorBooking";
 
 // Internal app statuses (English enums)
 type BookingStatus =
@@ -41,57 +54,18 @@ const bookingStatusLabels: Record<BookingStatus, string> = {
   cancelled: "ملغي",
 };
 
-interface Booking {
-  id: number;
-  carName: string;
-  clientName: string;
-  carImage: string;
-  clientId: string;
-  bookingNumber: number;
-  vendorName: string;
-  vendorLogo: string;
-  totalPrice: number;
-  fromDate: string;
-  toDate: string;
-  bookingStatus: string;
-  paymentStatus: string;
-}
-
-const staticBookingsData = {
-  isSuccess: true,
-  data: {
-    items: [
-      {
-        id: 4,
-        carName: "كيا سيراتو 2023",
-        clientName: "عبدالرحمن سيف ssfff",
-        carImage:
-          "Car\\2c6d581f-239c-4498-8c04-b6529a3d8a56\\22\\df82e986-9c44-48be-bdb9-1c13153f8a24.png",
-        clientId: "a2686cd3-902b-4d1d-a1aa-ec625bf418ed",
-        bookingNumber: 1,
-        vendorName: "GETCAR",
-        vendorLogo:
-          "Vendor\\2c6d581f-239c-4498-8c04-b6529a3d8a56\\2428c3dc-24f0-4153-ae7c-6ba401f8dc85.png",
-        totalPrice: 550,
-        fromDate: "2025-04-17T12:21:00",
-        toDate: "2025-04-19T12:21:00",
-        bookingStatus: "تم إرجاع السيارة",
-        paymentStatus: "غير مدفوع",
-      },
-    ],
-    totalRecords: 1,
-    pageNumber: 0,
-    pageSize: 0,
-    totalPages: null,
-  },
-};
-
-const VendorBookings = () => {
+const VendorBookings = ({
+  vendorId = "default-vendor-id",
+}: {
+  vendorId?: string;
+}) => {
   const { t, language } = useLanguage();
   const [statusFilter, setStatusFilter] = useState<BookingStatus | "all">(
     "all"
   );
   const [viewMode, setViewMode] = useState<"grid" | "list" | "table">("grid");
+  const [pageNumber, setPageNumber] = useState(1);
+  const [pageSize] = useState(10); // Fixed page size, adjustable as needed
 
   // Set default view mode based on screen size
   useEffect(() => {
@@ -110,61 +84,57 @@ const VendorBookings = () => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Transform static data to match expected structure of child components
+  // Fetch bookings using React Query
+  const { data, isLoading, isError } = useGetAllBookings({
+    pageNumber,
+    pageSize,
+  });
+
+  const acceptReturnMutation = useAcceptReturnCarBooking();
+
+  // Transform API data to match expected structure of child components
   const transformBookingData = (booking: any) => {
+    const totalDays = Math.ceil(
+      (new Date(booking.toDate).getTime() -
+        new Date(booking.fromDate).getTime()) /
+        (1000 * 60 * 60 * 24)
+    );
     return {
       id: booking.id,
       booking_number: booking.bookingNumber,
       booking_status: bookingStatusMap[booking.bookingStatus] || "pending",
-      customer_name: booking.clientName,
-      customer_email: "", // Not available in static data
-      customer_phone: "", // Not available in static data
+      customer_name: booking.clientName || t("unknownCustomer"),
+      customer_email: "", // Not available in API response
+      customer_phone: "", // Not available in API response
       pickup_date: booking.fromDate,
       return_date: booking.toDate,
-      pickup_location: "", // Not available in static data
-      return_location: "", // Not available in static data
-      total_amount: booking.totalPrice,
-      total_days: Math.ceil(
-        (new Date(booking.toDate).getTime() -
-          new Date(booking.fromDate).getTime()) /
-          (1000 * 60 * 60 * 24)
-      ),
-      daily_rate:
-        booking.totalPrice /
-        Math.ceil(
-          (new Date(booking.toDate).getTime() -
-            new Date(booking.fromDate).getTime()) /
-            (1000 * 60 * 60 * 24)
-        ),
-      payment_status:
-        booking.paymentStatus === "غير مدفوع"
-          ? "pending"
-          : booking.paymentStatus,
-      special_requests: "", // Not available in static data
+      pickup_location: "", // Not available in API response
+      return_location: "", // Not available in API response
+      total_amount: booking.totalPrice || 0,
+      total_days: totalDays || 1,
+      daily_rate: booking.totalPrice / (totalDays || 1),
+      payment_status: booking.paymentStatus || "pending",
+      special_requests: "", // Not available in API response
       cars: [
         {
           id: booking.id,
-          name: booking.carName,
-          images: [booking.carImage],
-          brand: "", // Not available in static data
-          model: "", // Not available in static data
-          daily_rate:
-            booking.totalPrice /
-            Math.ceil(
-              (new Date(booking.toDate).getTime() -
-                new Date(booking.fromDate).getTime()) /
-                (1000 * 60 * 60 * 24)
-            ),
-          total_amount: booking.totalPrice,
+          name: booking.carName || t("unknownCar"),
+          images: booking.carImage
+            ? [`${import.meta.env.VITE_UPLOADS_BASE_URL}${booking.carImage}`]
+            : [],
+          brand: "", // Not available in API response
+          model: "", // Not available in API response
+          daily_rate: booking.totalPrice / (totalDays || 1),
+          total_amount: booking.totalPrice || 0,
         },
       ],
     };
   };
 
   const bookings = useMemo(() => {
-    if (!staticBookingsData.isSuccess) return [];
-    return staticBookingsData.data.items.map(transformBookingData);
-  }, []);
+    if (!data?.data?.items) return [];
+    return data.data.items.map(transformBookingData);
+  }, [data]);
 
   const filteredBookings = useMemo(() => {
     return bookings.filter(
@@ -183,14 +153,27 @@ const VendorBookings = () => {
 
   const statusCounts = getStatusCounts();
 
-  const handleAction = (action: string) => {
-    // Simulate action success since static data doesn't support mutations
-    toast.success(
-      t("actionSuccess", { action: t(action.toLowerCase().replace(" ", "")) })
-    );
+  const handleAcceptReturn = (bookingId: string) => {
+    acceptReturnMutation.mutate(bookingId, {
+      onSuccess: () => {
+        toast.success(t("actionSuccess"));
+      },
+      onError: (error) => {
+        toast.error(t("actionError"));
+      },
+    });
   };
 
-  if (!staticBookingsData.isSuccess) {
+  const handleAction = (action: string, bookingId: string) => {
+    // Placeholder for other actions (accept, reject, start progress)
+    toast.success(t("actionSuccess"));
+  };
+
+  if (isLoading) {
+    return <span content={t("loading")} />;
+  }
+
+  if (isError) {
     return (
       <div className="text-center py-12">
         <Car className="h-16 w-16 text-gray-400 mx-auto mb-4" />
@@ -205,14 +188,14 @@ const VendorBookings = () => {
   const renderBookingsContent = () => {
     const commonProps = {
       bookings: filteredBookings,
-      onAcceptBooking: (id: string) => handleAction("acceptBooking"),
-      onRejectBooking: (id: string) => handleAction("rejectBooking"),
-      onStartProgress: (id: string) => handleAction("startProgress"),
-      onAcceptReturn: (id: string) => handleAction("acceptReturn"),
-      isAcceptLoading: false,
+      onAcceptBooking: (id: string) => handleAction("acceptBooking", id),
+      onRejectBooking: (id: string) => handleAction("rejectBooking", id),
+      onStartProgress: (id: string) => handleAction("startProgress", id),
+      onAcceptReturn: handleAcceptReturn,
+      isAcceptLoading: false, // Add mutation hooks for these if needed
       isRejectLoading: false,
       isStartLoading: false,
-      isReturnLoading: false,
+      isReturnLoading: acceptReturnMutation.isPending,
     };
 
     switch (viewMode) {
@@ -227,6 +210,65 @@ const VendorBookings = () => {
     }
   };
 
+  const totalPages = data?.data?.totalPages || 1;
+  const currentPage = data?.data?.pageNumber || 1;
+
+  const handlePageChange = (page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      setPageNumber(page);
+    }
+  };
+
+  const renderPaginationItems = () => {
+    const items = [];
+    const maxVisiblePages = 5;
+    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
+    if (endPage - startPage + 1 < maxVisiblePages) {
+      startPage = Math.max(1, endPage - maxVisiblePages + 1);
+    }
+
+    if (startPage > 1) {
+      items.push(
+        <PaginationItem key="first">
+          <PaginationLink onClick={() => handlePageChange(1)}>1</PaginationLink>
+        </PaginationItem>
+      );
+      if (startPage > 2) {
+        items.push(<PaginationEllipsis key="start-ellipsis" />);
+      }
+    }
+
+    for (let page = startPage; page <= endPage; page++) {
+      items.push(
+        <PaginationItem key={page}>
+          <PaginationLink
+            isActive={page === currentPage}
+            onClick={() => handlePageChange(page)}
+          >
+            {page}
+          </PaginationLink>
+        </PaginationItem>
+      );
+    }
+
+    if (endPage < totalPages) {
+      if (endPage < totalPages - 1) {
+        items.push(<PaginationEllipsis key="end-ellipsis" />);
+      }
+      items.push(
+        <PaginationItem key="last">
+          <PaginationLink onClick={() => handlePageChange(totalPages)}>
+            {totalPages}
+          </PaginationLink>
+        </PaginationItem>
+      );
+    }
+
+    return items;
+  };
+
   return (
     <div className={language === "ar" ? "text-right" : "text-left"}>
       <div className="space-y-6">
@@ -236,7 +278,7 @@ const VendorBookings = () => {
               {t("bookings")}
             </h2>
             <p className="text-gray-600 mt-1">
-              {bookings.length} {t("totalBookings")}
+              {data?.data?.totalRecords || 0} {t("totalBookings")}
             </p>
           </div>
           <VendorBookingViewToggle
@@ -249,12 +291,35 @@ const VendorBookings = () => {
           statusFilter={statusFilter}
           onFilterChange={setStatusFilter}
           statusCounts={statusCounts}
-          totalBookings={bookings.length}
+          totalBookings={data?.data?.totalRecords || 0}
           statusLabels={bookingStatusLabels}
         />
 
         {filteredBookings.length > 0 ? (
-          renderBookingsContent()
+          <>
+            {renderBookingsContent()}
+            {totalPages > 1 && (
+              <Pagination className="mt-6">
+                <PaginationContent>
+                  <PaginationPrevious
+                    onClick={() => handlePageChange(currentPage - 1)}
+                    className={
+                      currentPage === 1 ? "pointer-events-none opacity-50" : ""
+                    }
+                  />
+                  {renderPaginationItems()}
+                  <PaginationNext
+                    onClick={() => handlePageChange(currentPage + 1)}
+                    className={
+                      currentPage === totalPages
+                        ? "pointer-events-none opacity-50"
+                        : ""
+                    }
+                  />
+                </PaginationContent>
+              </Pagination>
+            )}
+          </>
         ) : (
           <EmptyBookingsState
             isFiltered={statusFilter !== "all"}

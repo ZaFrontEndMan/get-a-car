@@ -56,13 +56,11 @@ const BookingCard = ({
             <div className="flex items-center gap-2 flex-1 min-w-0">
               <div className="relative flex-shrink-0">
                 <div className="w-16 h-12 sm:w-20 sm:h-16 rounded-lg overflow-hidden shadow-sm border border-slate-200">
-                  {booking.cars?.images?.[0] && (
-                    <img
-                      src={booking.cars.images[0]}
-                      alt={booking.cars.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                  )}
+                  <img
+                    src={booking?.cars[0]?.images[0] || ""}
+                    alt={booking?.cars[0]?.name || ""}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
                 </div>
                 <div
                   className={`absolute -top-1 -right-1 w-3 h-3 rounded-full ${statusConfig.dotColor} ring-2 ring-white shadow-sm`}
@@ -70,10 +68,10 @@ const BookingCard = ({
               </div>
               <div className="flex-1 min-w-0">
                 <CardTitle className="text-base sm:text-lg font-semibold text-slate-900 mb-1 truncate">
-                  {booking.cars?.name}
+                  {booking.cars[0]?.name}
                 </CardTitle>
                 <p className="text-slate-600 font-medium text-sm truncate">
-                  {booking.cars?.brand} {booking.cars?.model}
+                  {booking.cars[0]?.brand} {booking.cars[0]?.model}
                 </p>
               </div>
               <div className="text-right flex-shrink-0">
@@ -319,12 +317,14 @@ const BookingCard = ({
             </div>
           </div>
         </CardContent>
-
-        <BookingInvoiceModal
-          isOpen={isInvoiceOpen}
-          onClose={() => setIsInvoiceOpen(false)}
-          booking={booking}
-        />
+        {isInvoiceOpen && (
+          <BookingInvoiceModal
+            type="vendor"
+            isOpen={isInvoiceOpen}
+            onClose={() => setIsInvoiceOpen(false)}
+            booking={booking}
+          />
+        )}
       </Card>
     </div>
   );

@@ -15,26 +15,34 @@ import { format } from "date-fns";
 import { Button } from "../ui/button";
 import { useClientBookings } from "../../hooks/client/useClientBookings";
 import { Booking } from "../../types/clientBookings";
+import { toast } from "sonner";
+import { useGetBookingById } from "@/hooks/vendor/useVendorBooking";
 
 interface BookingInvoiceModalProps {
   isOpen: boolean;
   onClose: () => void;
   booking: Booking | null;
+  type: "client" | "vendor";
 }
+
 const BookingInvoiceModal: React.FC<BookingInvoiceModalProps> = ({
   isOpen,
   onClose,
   booking,
+  type = "client",
 }) => {
   const { t } = useLanguage();
   const { useGetInvoiceDetails, useGenerateInvoicePdf } = useClientBookings();
   const bookingId = booking?.id?.toString();
 
+  // Conditionally select the appropriate hook based on type
   const {
     data: invoiceResponse,
     isLoading,
     isError,
-  } = useGetInvoiceDetails(bookingId, undefined);
+  } = type === "client"
+    ? useGetInvoiceDetails(bookingId, undefined)
+    : useGetBookingById(bookingId || "");
 
   const generateInvoicePdfMutation = useGenerateInvoicePdf();
 
@@ -98,6 +106,7 @@ const BookingInvoiceModal: React.FC<BookingInvoiceModalProps> = ({
       window.URL.revokeObjectURL(url);
     } catch (e) {
       console.error("Failed to download invoice PDF", e);
+      toast.error(t("errorDownloadingInvoice"));
     }
   };
 
@@ -108,6 +117,7 @@ const BookingInvoiceModal: React.FC<BookingInvoiceModalProps> = ({
       minimumFractionDigits: 2,
     }).format(amount);
   };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
@@ -118,6 +128,7 @@ const BookingInvoiceModal: React.FC<BookingInvoiceModalProps> = ({
           <Button
             onClick={handleDownloadPDF}
             className="flex items-center gap-2"
+            disabled={generateInvoicePdfMutation.isPending}
           >
             <Download className="h-4 w-4" />
             <span>{t("downloadPdf")}</span>
@@ -129,7 +140,7 @@ const BookingInvoiceModal: React.FC<BookingInvoiceModalProps> = ({
           <div className="flex justify-between items-start mb-8">
             <div className="flex items-center gap-2">
               <div className="flex flex-col">
-                <div className=" flex gap-2">
+                <div className="flex gap-2">
                   <div className="bg-gradient-to-r from-primary to-secondary p-2 rounded-lg w-fit">
                     <Car className="h-6 w-6 text-white" />
                   </div>
@@ -348,7 +359,7 @@ const BookingInvoiceModal: React.FC<BookingInvoiceModalProps> = ({
           </div>
 
           {/* Totals */}
-          <div className="flex  w-full justify-center">
+          <div className="flex w-full justify-center">
             <div className="space-y-2">
               <div className="flex justify-between py-2">
                 <span className="text-gray-600">{t("carRental")}</span>
@@ -406,4 +417,5 @@ const BookingInvoiceModal: React.FC<BookingInvoiceModalProps> = ({
     </Dialog>
   );
 };
+
 export default BookingInvoiceModal;
