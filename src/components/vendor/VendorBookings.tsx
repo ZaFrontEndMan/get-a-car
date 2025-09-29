@@ -9,6 +9,7 @@ import EmptyBookingsState from "./bookings/EmptyBookingsState";
 import { Car } from "lucide-react";
 import { toast } from "sonner";
 
+// Internal app statuses (English enums)
 type BookingStatus =
   | "pending"
   | "confirmed"
@@ -17,6 +18,28 @@ type BookingStatus =
   | "return_requested"
   | "completed"
   | "cancelled";
+
+// Mapping API Arabic status → Internal status
+const bookingStatusMap: Record<string, BookingStatus> = {
+  "قيد الاجراء": "in_progress",
+  "تم إرجاع السيارة": "completed",
+  ملغي: "cancelled",
+  مؤكد: "confirmed",
+  نشط: "active",
+  "قيد الانتظار": "pending",
+  "طلب استرجاع": "return_requested",
+};
+
+// Reverse mapping Internal status → Arabic label (for UI display)
+const bookingStatusLabels: Record<BookingStatus, string> = {
+  pending: "قيد الانتظار",
+  confirmed: "مؤكد",
+  active: "نشط",
+  in_progress: "قيد الاجراء",
+  return_requested: "طلب استرجاع",
+  completed: "تم إرجاع السيارة",
+  cancelled: "ملغي",
+};
 
 interface Booking {
   id: number;
@@ -64,7 +87,7 @@ const staticBookingsData = {
 };
 
 const VendorBookings = () => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [statusFilter, setStatusFilter] = useState<BookingStatus | "all">(
     "all"
   );
@@ -87,19 +110,12 @@ const VendorBookings = () => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Map Arabic status to BookingStatus type
-  const mapBookingStatus = (status: string): BookingStatus => {
-    if (status === "تم إرجاع السيارة") return "completed";
-    // Add more mappings as needed for other Arabic statuses
-    return "pending"; // Default fallback
-  };
-
   // Transform static data to match expected structure of child components
   const transformBookingData = (booking: any) => {
     return {
       id: booking.id,
       booking_number: booking.bookingNumber,
-      booking_status: mapBookingStatus(booking.bookingStatus),
+      booking_status: bookingStatusMap[booking.bookingStatus] || "pending",
       customer_name: booking.clientName,
       customer_email: "", // Not available in static data
       customer_phone: "", // Not available in static data
@@ -109,27 +125,39 @@ const VendorBookings = () => {
       return_location: "", // Not available in static data
       total_amount: booking.totalPrice,
       total_days: Math.ceil(
-        (new Date(booking.toDate).getTime() - new Date(booking.fromDate).getTime()) / 
-        (1000 * 60 * 60 * 24)
+        (new Date(booking.toDate).getTime() -
+          new Date(booking.fromDate).getTime()) /
+          (1000 * 60 * 60 * 24)
       ),
-      daily_rate: booking.totalPrice / Math.ceil(
-        (new Date(booking.toDate).getTime() - new Date(booking.fromDate).getTime()) / 
-        (1000 * 60 * 60 * 24)
-      ),
-      payment_status: booking.paymentStatus,
+      daily_rate:
+        booking.totalPrice /
+        Math.ceil(
+          (new Date(booking.toDate).getTime() -
+            new Date(booking.fromDate).getTime()) /
+            (1000 * 60 * 60 * 24)
+        ),
+      payment_status:
+        booking.paymentStatus === "غير مدفوع"
+          ? "pending"
+          : booking.paymentStatus,
       special_requests: "", // Not available in static data
       cars: [
         {
           id: booking.id,
           name: booking.carName,
           images: [booking.carImage],
-          daily_rate: booking.totalPrice / Math.ceil(
-            (new Date(booking.toDate).getTime() - new Date(booking.fromDate).getTime()) / 
-            (1000 * 60 * 60 * 24)
-          ),
-          total_amount: booking.totalPrice
-        }
-      ]
+          brand: "", // Not available in static data
+          model: "", // Not available in static data
+          daily_rate:
+            booking.totalPrice /
+            Math.ceil(
+              (new Date(booking.toDate).getTime() -
+                new Date(booking.fromDate).getTime()) /
+                (1000 * 60 * 60 * 24)
+            ),
+          total_amount: booking.totalPrice,
+        },
+      ],
     };
   };
 
@@ -158,7 +186,7 @@ const VendorBookings = () => {
   const handleAction = (action: string) => {
     // Simulate action success since static data doesn't support mutations
     toast.success(
-      `${action} action would be performed in a real implementation`
+      t("actionSuccess", { action: t(action.toLowerCase().replace(" ", "")) })
     );
   };
 
@@ -177,10 +205,10 @@ const VendorBookings = () => {
   const renderBookingsContent = () => {
     const commonProps = {
       bookings: filteredBookings,
-      onAcceptBooking: () => handleAction("Accept booking"),
-      onRejectBooking: () => handleAction("Reject booking"),
-      onStartProgress: () => handleAction("Start progress"),
-      onAcceptReturn: () => handleAction("Accept return"),
+      onAcceptBooking: (id: string) => handleAction("acceptBooking"),
+      onRejectBooking: (id: string) => handleAction("rejectBooking"),
+      onStartProgress: (id: string) => handleAction("startProgress"),
+      onAcceptReturn: (id: string) => handleAction("acceptReturn"),
       isAcceptLoading: false,
       isRejectLoading: false,
       isStartLoading: false,
@@ -200,35 +228,40 @@ const VendorBookings = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-3xl font-bold text-gray-900">{t("bookings")}</h2>
-          <p className="text-gray-600 mt-1">
-            {bookings.length} {t("totalBookings")}
-          </p>
+    <div className={language === "ar" ? "text-right" : "text-left"}>
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-3xl font-bold text-gray-900">
+              {t("bookings")}
+            </h2>
+            <p className="text-gray-600 mt-1">
+              {bookings.length} {t("totalBookings")}
+            </p>
+          </div>
+          <VendorBookingViewToggle
+            viewMode={viewMode}
+            onViewModeChange={setViewMode}
+          />
         </div>
-        <VendorBookingViewToggle
-          viewMode={viewMode}
-          onViewModeChange={setViewMode}
-        />
-      </div>
 
-      <BookingStatusFilter
-        statusFilter={statusFilter}
-        onFilterChange={setStatusFilter}
-        statusCounts={statusCounts}
-        totalBookings={bookings.length}
-      />
-
-      {filteredBookings.length > 0 ? (
-        renderBookingsContent()
-      ) : (
-        <EmptyBookingsState
-          isFiltered={statusFilter !== "all"}
+        <BookingStatusFilter
           statusFilter={statusFilter}
+          onFilterChange={setStatusFilter}
+          statusCounts={statusCounts}
+          totalBookings={bookings.length}
+          statusLabels={bookingStatusLabels}
         />
-      )}
+
+        {filteredBookings.length > 0 ? (
+          renderBookingsContent()
+        ) : (
+          <EmptyBookingsState
+            isFiltered={statusFilter !== "all"}
+            statusFilter={statusFilter}
+          />
+        )}
+      </div>
     </div>
   );
 };

@@ -878,6 +878,27 @@ export const arTranslations = {
   gettingStarted: "البدء",
   welcomeMessage:
     "مرحبًا بك في لوحة تحكم البائع! ابدأ بإضافة سيارتك الأولى وإعداد الفروع لتبدأ في إدارة أعمال التأجير الخاصة بك.",
+  paymentDetails: "تفاصيل الدفع",
+  specialRequests: "طلبات خاصة",
+  acceptBooking: "قبول الحجز",
+  rejectBooking: "رفض",
+  startTrip: "بدء الرحلة",
+  viewInvoice: "عرض الفاتورة",
+  sar: "ر.س",
+  paymentStatusPaid: "مدفوع",
+  paymentStatusPending: "معلق",
+  statusPending: "معلق",
+  statusConfirmed: "مؤكد",
+  statusActive: "نشط",
+  statusInProgress: "قيد التنفيذ",
+  statusReturnRequested: "طلب الإرجاع",
+  statusCompleted: "مكتمل",
+  statusCancelled: "ملغى",
+  statusUnknown: "غير معروف",
+  unknownCar: "سيارة غير معروفة",
+  unknownBrand: "غير معروف",
+  unknownModel: "غير معروف",
+  unknownLocation: "موقع غير معروف",
 };
 
 export default arTranslations;

@@ -862,6 +862,27 @@ export const enTranslations = {
   gettingStarted: "Getting Started",
   welcomeMessage:
     "Welcome to your vendor dashboard! Start by adding your first car and setting up branches to begin managing your rental business.",
+  paymentDetails: "Payment Details",
+  specialRequests: "Special Requests",
+  acceptBooking: "Accept Booking",
+  rejectBooking: "Reject",
+  startTrip: "Start Trip",
+  viewInvoice: "View Invoice",
+  sar: "SAR",
+  paymentStatusPaid: "Paid",
+  paymentStatusPending: "Pending",
+  statusPending: "Pending",
+  statusConfirmed: "Confirmed",
+  statusActive: "Active",
+  statusInProgress: "In Progress",
+  statusReturnRequested: "Return Requested",
+  statusCompleted: "Completed",
+  statusCancelled: "Cancelled",
+  statusUnknown: "Unknown",
+  unknownCar: "Unknown Car",
+  unknownBrand: "Unknown",
+  unknownModel: "Unknown",
+  unknownLocation: "Unknown Location",
 };
 
 export default enTranslations;
