@@ -485,7 +485,7 @@ const SearchBar = () => {
 
           <button
             onClick={handleSearch}
-            className="gradient-primary px-6 py-2 rounded-lg font-semibold hover:shadow-lg transform hover:scale-105 transition-all duration-300 flex items-center space-x-2 rtl:space-x-reverse text-zinc-50 bg-blue-900 hover:bg-blue-800"
+            className="gradient-primary px-6 py-2 rounded-lg font-semibold hover:shadow-lg transform hover:scale-105 transition-all duration-300 flex items-center gap-2 rtl:gap-reverse text-zinc-50 bg-blue-900 hover:bg-blue-800"
           >
             <Search className="h-4 w-4" />
             <span>{t("searchCars")}</span>

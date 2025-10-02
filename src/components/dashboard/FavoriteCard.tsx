@@ -52,7 +52,7 @@ const FavoriteCard: React.FC<FavoriteCardProps> = ({ favorite, onRemove, onBookN
         >
           <X className="h-4 w-4" />
         </button>
-        <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 bg-white/90 backdrop-blur-sm rounded-full px-3 py-1 flex items-center space-x-2 rtl:space-x-reverse">
+        <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 bg-white/90 backdrop-blur-sm rounded-full px-3 py-1 flex items-center gap-2 rtl:gap-reverse">
           <img
             src={favorite.vendorLogo}
             alt={favorite.vendor}
@@ -66,11 +66,11 @@ const FavoriteCard: React.FC<FavoriteCardProps> = ({ favorite, onRemove, onBookN
           <h3 className="font-semibold text-base md:text-lg text-gray-900">{favorite.carTitle}</h3>
         </div>
         
-        <div className="flex items-center space-x-3 md:space-x-4 rtl:space-x-reverse mb-3">
+        <div className="flex items-center gap-3 md:gap-4 rtl:gap-reverse mb-3">
           {favorite.features.map((feature, index) => {
             const IconComponent = feature.icon;
             return (
-              <div key={index} className="flex items-center space-x-1 rtl:space-x-reverse text-gray-500">
+              <div key={index} className="flex items-center gap-1 rtl:gap-reverse text-gray-500">
                 <IconComponent className="h-3 w-3 md:h-4 md:w-4" />
                 <span className="text-xs">{feature.label}</span>
               </div>
@@ -85,7 +85,7 @@ const FavoriteCard: React.FC<FavoriteCardProps> = ({ favorite, onRemove, onBookN
           <button
             type="button"
             onClick={handleBookNowClick}
-            className="w-full bg-primary text-white px-3 md:px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors flex items-center justify-center space-x-1 rtl:space-x-reverse text-sm"
+            className="w-full bg-primary text-white px-3 md:px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors flex items-center justify-center gap-1 rtl:gap-reverse text-sm"
           >
             <ShoppingCart className="h-4 w-4" />
             <span>{t('bookNow')}</span>

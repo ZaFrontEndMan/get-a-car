@@ -105,7 +105,7 @@ const VendorCarsList = ({ vendorId, filters, currentPage, onPageChange, cars }: 
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="flex justify-center items-center space-x-2 mt-8">
+            <div className="flex justify-center items-center gap-2 mt-8">
               <button
                 onClick={() => onPageChange(Math.max(1, currentPage - 1))}
                 disabled={currentPage === 1}

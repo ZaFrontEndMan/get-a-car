@@ -35,7 +35,7 @@ const VendorHeader = ({ onMenuClick }: VendorHeaderProps) => {
   return (
     <header className="bg-white shadow-sm border-b border-gray-200 px-6 py-4 fixed top-0 left-0 right-0 z-50">
       <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4 rtl:space-x-reverse">
+        <div className="flex items-center gap-4 rtl:gap-reverse">
           <Button
             variant="ghost"
             size="sm"
@@ -47,7 +47,7 @@ const VendorHeader = ({ onMenuClick }: VendorHeaderProps) => {
           <h1 className="text-2xl font-bold text-gray-900">{t('vendorDashboard')}</h1>
         </div>
 
-        <div className="flex items-center space-x-4 rtl:space-x-reverse">
+        <div className="flex items-center gap-4 rtl:gap-reverse">
           <LanguageSwitcher />
           <Button variant="ghost" size="sm">
             <Bell className="h-5 w-5" />

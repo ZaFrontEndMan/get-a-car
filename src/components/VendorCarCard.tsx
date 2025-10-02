@@ -86,22 +86,22 @@ const VendorCarCard = ({ car, isVendorDashboard = false }: VendorCarCardProps) =
             <h3 className="font-bold text-lg text-gray-900">{car.name}</h3>
             <p className="text-gray-600 text-sm">{car.brand}</p>
           </div>
-          <div className="flex items-center space-x-1 rtl:space-x-reverse">
+          <div className="flex items-center gap-1 rtl:gap-reverse">
             <Star className="h-4 w-4 text-accent fill-current" />
             <span className="text-sm font-medium">{car.rating}</span>
           </div>
         </div>
 
-        <div className="flex items-center space-x-4 rtl:space-x-reverse text-gray-600 text-sm mb-3">
-          <div className="flex items-center space-x-1 rtl:space-x-reverse">
+        <div className="flex items-center gap-4 rtl:gap-reverse text-gray-600 text-sm mb-3">
+          <div className="flex items-center gap-1 rtl:gap-reverse">
             <Users className="h-4 w-4" />
             <span>{car.seats}</span>
           </div>
-          <div className="flex items-center space-x-1 rtl:space-x-reverse">
+          <div className="flex items-center gap-1 rtl:gap-reverse">
             <Fuel className="h-4 w-4" />
             <span>{t(car.fuel.toLowerCase())}</span>
           </div>
-          <div className="flex items-center space-x-1 rtl:space-x-reverse">
+          <div className="flex items-center gap-1 rtl:gap-reverse">
             <Settings className="h-4 w-4" />
             <span>{t(car.transmission.toLowerCase())}</span>
           </div>

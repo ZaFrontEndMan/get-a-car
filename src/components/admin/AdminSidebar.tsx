@@ -73,8 +73,8 @@ const AdminSidebar = ({ activeTab, onTabChange, isOpen, onClose }: AdminSidebarP
           </div>
           
           <div className={cn(
-            "flex items-center space-x-3 relative",
-            isRTL && "space-x-reverse"
+            "flex items-center gap-3 relative",
+            isRTL && "gap-reverse"
           )}>
             <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center shadow-lg backdrop-blur-sm">
               <Shield className="w-6 h-6 text-white" />

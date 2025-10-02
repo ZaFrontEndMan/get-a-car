@@ -104,7 +104,7 @@ const OffersSection = () => {
                     {new Date(offer.validUntil).toLocaleDateString()}
                   </p>
 
-                  <div className="w-full gradient-primary text-white py-3 rounded-lg font-semibold hover:shadow-lg transition-all duration-300 flex items-center justify-center space-x-2 rtl:space-x-reverse mt-auto bg-blue-900">
+                  <div className="w-full gradient-primary text-white py-3 rounded-lg font-semibold hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-2 rtl:gap-reverse mt-auto bg-blue-900">
                     <span>{t("viewOffer")}</span>
                     {language === "ar" ? (
                       <ChevronLeft className="h-4 w-4" />

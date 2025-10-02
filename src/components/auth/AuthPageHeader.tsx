@@ -18,7 +18,7 @@ const AuthPageHeader: React.FC = () => {
           </Link>
 
           {/* Navigation Menu */}
-          <nav className="hidden md:flex space-x-8 rtl:space-x-reverse">
+          <nav className="hidden md:flex gap-8 rtl:gap-reverse">
             <Link
               to="/"
               className="text-gray-700 dark:text-gray-300 hover:text-primary transition-colors"
@@ -52,7 +52,7 @@ const AuthPageHeader: React.FC = () => {
           </nav>
 
           {/* Language Switcher */}
-          <div className="flex items-center space-x-4 rtl:space-x-reverse">
+          <div className="flex items-center gap-4 rtl:gap-reverse">
             <LanguageSwitcher />
           </div>
         </div>

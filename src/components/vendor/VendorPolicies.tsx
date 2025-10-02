@@ -40,8 +40,10 @@ import { useVendorPolicies } from "@/hooks/vendor/useVendorPolicies";
 
 interface VendorPolicy {
   id: string;
-  title: string;
-  description: string;
+  titleEn: string;
+  titleAr: string;
+  descriptionEn: string;
+  descriptionAr: string;
   policyType: number;
   displayOrder: number;
   isActive: boolean;
@@ -66,9 +68,11 @@ const VendorPolicies = () => {
   const [editingPolicy, setEditingPolicy] = useState<VendorPolicy | null>(null);
   const [deletingPolicyId, setDeletingPolicyId] = useState<string | null>(null);
   const [formData, setFormData] = useState({
-    title: "",
-    description: "",
-    policyType: 0, // Default to 0 (general) as per API response
+    titleEn: "",
+    titleAr: "",
+    descriptionEn: "",
+    descriptionAr: "",
+    policyType: 0,
     displayOrder: 0,
     isActive: true,
   });
@@ -76,8 +80,10 @@ const VendorPolicies = () => {
   const handleEdit = (policy: VendorPolicy) => {
     setEditingPolicy(policy);
     setFormData({
-      title: policy.title,
-      description: policy.description,
+      titleEn: policy.titleEn,
+      titleAr: policy.titleAr,
+      descriptionEn: policy.descriptionEn,
+      descriptionAr: policy.descriptionAr,
       policyType: policy.policyType,
       displayOrder: policy.displayOrder,
       isActive: policy.isActive,
@@ -87,16 +93,21 @@ const VendorPolicies = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.title || !formData.description) {
+    if (!formData.titleEn || !formData.descriptionEn) {
       toast.error(t("errors_required_english_fields"));
+      return;
+    }
+    // Optionally, require Arabic fields
+    if (!formData.titleAr || !formData.descriptionAr) {
+      toast.error(t("errors_required_arabic_fields"));
       return;
     }
 
     const body = {
-      titleEn: formData.title,
-      titleAr: undefined, // Removed language separation; adjust if needed
-      descriptionEn: formData.description,
-      descriptionAr: undefined, // Removed language separation; adjust if needed
+      titleEn: formData.titleEn,
+      titleAr: formData.titleAr,
+      descriptionEn: formData.descriptionEn,
+      descriptionAr: formData.descriptionAr,
       policyType: formData.policyType,
       displayOrder: formData.displayOrder,
       isActive: formData.isActive,
@@ -126,8 +137,10 @@ const VendorPolicies = () => {
 
   const resetForm = () => {
     setFormData({
-      title: "",
-      description: "",
+      titleEn: "",
+      titleAr: "",
+      descriptionEn: "",
+      descriptionAr: "",
       policyType: 0,
       displayOrder: 0,
       isActive: true,
@@ -137,51 +150,21 @@ const VendorPolicies = () => {
   };
 
   const policyTypes = [
-    { value: "0", label: t("policy_types_general") }, // Map to policyType 0
-    { value: "1", label: t("policy_types_booking") }, // Map to policyType 1 (example)
-    { value: "2", label: t("policy_types_cancellation") }, // Map to policyType 2 (example)
-    { value: "3", label: t("policy_types_payment") }, // Map to policyType 3 (example)
-    { value: "4", label: t("policy_types_insurance") }, // Map to policyType 4 (example)
-    { value: "5", label: t("policy_types_fuel") }, // Map to policyType 5 (example)
-    { value: "6", label: t("policy_types_damage") }, // Map to policyType 6 (example)
+    { value: "0", label: t("policy_types_general") },
+    { value: "1", label: t("policy_types_booking") },
+    { value: "2", label: t("policy_types_cancellation") },
+    { value: "3", label: t("policy_types_payment") },
+    { value: "4", label: t("policy_types_insurance") },
+    { value: "5", label: t("policy_types_fuel") },
+    { value: "6", label: t("policy_types_damage") },
+    // Allow custom policy types
+    { value: "custom", label: t("policy_types_custom") },
   ];
 
-  const SkeletonLoader = () => (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead className="w-[100px] text-start" />
-          <TableHead className="w-[100px] text-start" />
-          <TableHead className="w-[100px] text-start" />
-          <TableHead className="w-[100px] text-start" />
-          <TableHead className="w-[100px] text-start" />
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {Array(3)
-          .fill(0)
-          .map((_, index) => (
-            <TableRow key={index}>
-              <TableCell>
-                <div className="h-4 bg-gray-200 animate-pulse rounded" />
-              </TableCell>
-              <TableCell>
-                <div className="h-4 bg-gray-200 animate-pulse rounded" />
-              </TableCell>
-              <TableCell>
-                <div className="h-4 bg-gray-200 animate-pulse rounded" />
-              </TableCell>
-              <TableCell>
-                <div className="h-4 bg-gray-200 animate-pulse rounded" />
-              </TableCell>
-              <TableCell>
-                <div className="h-4 bg-gray-200 animate-pulse rounded" />
-              </TableCell>
-            </TableRow>
-          ))}
-      </TableBody>
-    </Table>
-  );
+  const getPolicyTypeLabel = (policyType: number) => {
+    const type = policyTypes.find((t) => parseInt(t.value) === policyType);
+    return type ? type.label : `${t("policy_types_custom")} (${policyType})`;
+  };
 
   return (
     <div className="space-y-6">
@@ -201,13 +184,13 @@ const VendorPolicies = () => {
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-2xl">
-            <DialogHeader >
-              <DialogTitle className=" text-start">
+            <DialogHeader>
+              <DialogTitle className="text-start">
                 {editingPolicy
                   ? t("actions_edit_policy")
                   : t("actions_add_new_policy")}
               </DialogTitle>
-              <DialogDescription className=" text-start">
+              <DialogDescription className="text-start">
                 {t("rental_policies_form_description")}
               </DialogDescription>
             </DialogHeader>
@@ -216,18 +199,30 @@ const VendorPolicies = () => {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium mb-2">
-                    {t("form_title")}
+                    {t("form_title_en")}
                   </label>
                   <Input
-                    value={formData.title}
+                    value={formData.titleEn}
                     onChange={(e) =>
-                      setFormData({ ...formData, title: e.target.value })
+                      setFormData({ ...formData, titleEn: e.target.value })
                     }
-                    placeholder={t("form_placeholder_title")}
+                    placeholder={t("form_placeholder_title_en")}
                     required
                   />
                 </div>
-                {/* Removed title_ar input since it's not in the response */}
+                <div>
+                  <label className="block text-sm font-medium mb-2">
+                    {t("form_title_ar")}
+                  </label>
+                  <Input
+                    value={formData.titleAr}
+                    onChange={(e) =>
+                      setFormData({ ...formData, titleAr: e.target.value })
+                    }
+                    placeholder={t("form_placeholder_title_ar")}
+                    required
+                  />
+                </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
@@ -236,11 +231,18 @@ const VendorPolicies = () => {
                     {t("form_policy_type")}
                   </label>
                   <Select
-                    value={formData.policyType.toString()} // Convert to string for Select
+                    value={
+                      policyTypes.some(
+                        (type) => type.value === formData.policyType.toString()
+                      )
+                        ? formData.policyType.toString()
+                        : "custom"
+                    }
                     onValueChange={(value) =>
                       setFormData({
                         ...formData,
-                        policyType: parseInt(value) || 0,
+                        policyType:
+                          value === "custom" ? 0 : parseInt(value) || 0,
                       })
                     }
                   >
@@ -274,19 +276,41 @@ const VendorPolicies = () => {
                 </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium mb-2">
-                  {t("form_description")}
-                </label>
-                <Textarea
-                  value={formData.description}
-                  onChange={(e) =>
-                    setFormData({ ...formData, description: e.target.value })
-                  }
-                  placeholder={t("form_placeholder_description")}
-                  rows={4}
-                  required
-                />
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-2">
+                    {t("form_description_en")}
+                  </label>
+                  <Textarea
+                    value={formData.descriptionEn}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        descriptionEn: e.target.value,
+                      })
+                    }
+                    placeholder={t("form_placeholder_description_en")}
+                    rows={4}
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">
+                    {t("form_description_ar")}
+                  </label>
+                  <Textarea
+                    value={formData.descriptionAr}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        descriptionAr: e.target.value,
+                      })
+                    }
+                    placeholder={t("form_placeholder_description_ar")}
+                    rows={4}
+                    required
+                  />
+                </div>
               </div>
 
               <div className="flex items-center justify-between pt-4">
@@ -347,7 +371,10 @@ const VendorPolicies = () => {
               <TableHeader>
                 <TableRow>
                   <TableHead className="text-start">
-                    {t("table_title")}
+                    {t("table_title_en")}
+                  </TableHead>
+                  <TableHead className="text-start">
+                    {t("table_title_ar")}
                   </TableHead>
                   <TableHead className="text-start">
                     {t("table_type")}
@@ -368,27 +395,23 @@ const VendorPolicies = () => {
                   <TableRow key={policy.id}>
                     <TableCell>
                       <div>
-                        <div className="font-medium">{policy.title}</div>
+                        <div className="font-medium">{policy.titleEn}</div>
                         <div className="text-sm text-gray-500 truncate max-w-xs">
-                          {policy.description}
+                          {policy.descriptionEn}
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div>
+                        <div className="font-medium">{policy.titleAr}</div>
+                        <div className="text-sm text-gray-500 truncate max-w-xs">
+                          {policy.descriptionAr}
                         </div>
                       </div>
                     </TableCell>
                     <TableCell>
                       <Badge variant="outline">
-                        {policy.policyType === 0
-                          ? t("policy_types_general")
-                          : policy.policyType === 1
-                          ? t("policy_types_booking")
-                          : policy.policyType === 2
-                          ? t("policy_types_cancellation")
-                          : policy.policyType === 3
-                          ? t("policy_types_payment")
-                          : policy.policyType === 4
-                          ? t("policy_types_insurance")
-                          : policy.policyType === 5
-                          ? t("policy_types_fuel")
-                          : t("policy_types_damage")}
+                        {getPolicyTypeLabel(policy.policyType)}
                       </Badge>
                     </TableCell>
                     <TableCell>
@@ -429,22 +452,22 @@ const VendorPolicies = () => {
         </CardContent>
       </Card>
 
-      {/* Delete Confirmation Modal */}
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{t("modal_delete_title")}</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-start">
+              {t("modal_delete_title")}
+            </DialogTitle>
+            <DialogDescription className="text-start">
               {t("modal_delete_description")}
             </DialogDescription>
           </DialogHeader>
-          <div className="flex justify-end gap-2 mt-4">
+          <div className="flex justify-start gap-2 mt-4">
             <Button
               variant="outline"
               onClick={() => setIsDeleteDialogOpen(false)}
               disabled={isDeleting}
             >
-              <X className="mr-2 h-4 w-4" />
               {t("actions_cancel")}
             </Button>
             <Button
@@ -470,6 +493,7 @@ const SkeletonLoader = () => (
         <TableHead className="w-[100px] text-start" />
         <TableHead className="w-[100px] text-start" />
         <TableHead className="w-[100px] text-start" />
+        <TableHead className="w-[100px] text-start" />
       </TableRow>
     </TableHeader>
     <TableBody>
@@ -477,6 +501,9 @@ const SkeletonLoader = () => (
         .fill(0)
         .map((_, index) => (
           <TableRow key={index}>
+            <TableCell>
+              <div className="h-4 bg-gray-200 animate-pulse rounded" />
+            </TableCell>
             <TableCell>
               <div className="h-4 bg-gray-200 animate-pulse rounded" />
             </TableCell>

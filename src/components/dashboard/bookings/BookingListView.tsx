@@ -31,7 +31,7 @@ const BookingListView = ({ bookings, onReturnCar, isReturning }: BookingListView
         return (
           <div key={booking.id} className="bg-white rounded-xl shadow-sm border hover:shadow-md transition-all duration-200 p-4">
             <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
+              <div className="flex items-center gap-4">
                 <img
                   src={booking.car.images?.[0] || 'https://images.unsplash.com/photo-1549924231-f129b911e442'}
                   alt={booking.car.name}
@@ -43,7 +43,7 @@ const BookingListView = ({ bookings, onReturnCar, isReturning }: BookingListView
                   <p className="text-sm text-gray-500">#{booking.booking_number}</p>
                 </div>
               </div>
-              <div className="flex items-center space-x-4">
+              <div className="flex items-center gap-4">
                 <div className="text-right">
                   <p className="text-sm text-gray-600">
                     {format(new Date(booking.pickup_date), 'MMM dd')} - {format(new Date(booking.return_date), 'MMM dd')}
@@ -54,14 +54,14 @@ const BookingListView = ({ bookings, onReturnCar, isReturning }: BookingListView
                   <Badge className={`border text-xs ${statusConfig.color}`}>
                     {statusConfig.label}
                   </Badge>
-                  <div className="flex space-x-2">
+                  <div className="flex gap-2">
                     {canReturnCar(booking.booking_status) && (
                       <Button
                         size="sm"
                         variant="outline"
                         onClick={() => onReturnCar(booking.id)}
                         disabled={isReturning}
-                        className="flex items-center space-x-1 hover:bg-blue-50 hover:border-blue-200 hover:text-blue-700 transition-colors"
+                        className="flex items-center gap-1 hover:bg-blue-50 hover:border-blue-200 hover:text-blue-700 transition-colors"
                       >
                         <RotateCcw className="h-4 w-4 me-2" />
                         <span>{t('return')}</span>
@@ -71,7 +71,7 @@ const BookingListView = ({ bookings, onReturnCar, isReturning }: BookingListView
                       size="sm"
                       variant="outline"
                       onClick={() => setSelectedBooking(booking)}
-                      className="flex items-center space-x-1 hover:bg-green-50 hover:border-green-200 hover:text-green-700 transition-colors"
+                      className="flex items-center gap-1 hover:bg-green-50 hover:border-green-200 hover:text-green-700 transition-colors"
                     >
                       <Mail className="h-4 w-4 me-2" />
                       <span>{t('invoice')}</span>

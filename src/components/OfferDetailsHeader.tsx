@@ -38,7 +38,7 @@ const OfferDetailsHeader = ({ offer }: OfferDetailsHeaderProps) => {
       {/* Breadcrumb */}
       <div className="mb-6">
         <nav className="flex" aria-label="Breadcrumb">
-          <ol className="flex items-center space-x-2 rtl:space-x-reverse">
+          <ol className="flex items-center gap-2 rtl:gap-reverse">
             <li><Link to="/" className="text-gray-500 hover:text-primary">Home</Link></li>
             <li><span className="text-gray-500">/</span></li>
             <li><Link to="/vendors" className="text-gray-500 hover:text-primary">Vendors</Link></li>
@@ -50,13 +50,13 @@ const OfferDetailsHeader = ({ offer }: OfferDetailsHeaderProps) => {
 
       {/* Offer Banner */}
       <div className="bg-gradient-to-r from-red to-red/80 rounded-2xl p-6 text-white mb-8">
-        <div className="flex items-center space-x-3 rtl:space-x-reverse mb-4">
+        <div className="flex items-center gap-3 rtl:gap-reverse mb-4">
           <Tag className="h-6 w-6" />
           <span className="text-2xl font-bold">{offer.discount} {t('discount')}</span>
         </div>
         <h1 className="text-3xl font-bold mb-2">{getLocalizedTitle()}</h1>
         <p className="text-lg mb-4">{getLocalizedDescription()}</p>
-        <div className="flex items-center space-x-2 rtl:space-x-reverse text-sm">
+        <div className="flex items-center gap-2 rtl:gap-reverse text-sm">
           <Calendar className="h-4 w-4" />
           <span>{t('validUntil')} {new Date(offer.validUntil).toLocaleDateString()}</span>
         </div>

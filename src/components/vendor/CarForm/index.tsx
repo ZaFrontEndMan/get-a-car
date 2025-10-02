@@ -204,7 +204,7 @@ const CarForm = ({ car, onClose, onSuccess }: CarFormProps) => {
               branchesLoading={branchesLoading}
             />
 
-            <div className="flex space-x-2 pt-4">
+            <div className="flex gap-2 pt-4">
               <Button type="button" variant="outline" onClick={onClose} className="flex-1">
                 Cancel
               </Button>

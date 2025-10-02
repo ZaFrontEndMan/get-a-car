@@ -378,7 +378,7 @@ const UserForm = ({ user, onClose, onSuccess }: UserFormProps) => {
             {user && (
               <div className="bg-gray-50 p-3 rounded">
                 <p className="text-sm text-gray-600">
-                  Editing user: {user.user_id.slice(-8)}
+                  Editing user: {user.id}
                 </p>
               </div>
             )}
@@ -401,7 +401,7 @@ const UserForm = ({ user, onClose, onSuccess }: UserFormProps) => {
               <Label className="text-sm font-medium">Permissions</Label>
               <div className="space-y-2 mt-2">
                 {availablePermissions.map((permission) => (
-                  <div key={permission} className="flex items-center space-x-2">
+                  <div key={permission} className="flex items-center gap-2">
                     <Switch
                       id={permission}
                       checked={formData.permissions.includes(permission)}
@@ -415,7 +415,7 @@ const UserForm = ({ user, onClose, onSuccess }: UserFormProps) => {
               </div>
             </div>
 
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center gap-2">
               <Switch
                 id="is_active"
                 checked={formData.is_active}
@@ -424,7 +424,7 @@ const UserForm = ({ user, onClose, onSuccess }: UserFormProps) => {
               <Label htmlFor="is_active">Active</Label>
             </div>
 
-            <div className="flex space-x-2 pt-4">
+            <div className="flex gap-2 pt-4">
               <Button type="button" variant="outline" onClick={onClose} className="flex-1">
                 Cancel
               </Button>

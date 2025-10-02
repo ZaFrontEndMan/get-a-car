@@ -86,7 +86,7 @@ const OfferDetailsPage = () => {
                     alt={offer.car.name}
                     className="w-full h-80 md:h-96 object-cover"
                   />
-                  <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full flex items-center space-x-1 rtl:space-x-reverse">
+                  <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full flex items-center gap-1 rtl:gap-reverse">
                     <span className="font-medium text-sm">
                       {offer.car.rating}
                     </span>
@@ -95,7 +95,7 @@ const OfferDetailsPage = () => {
                     </span>
                   </div>
                   {offer.discount !== "0%" && (
-                    <div className="absolute top-4 right-4 bg-red-500 text-white px-3 py-1.5 rounded-full flex items-center space-x-1 rtl:space-x-reverse">
+                    <div className="absolute top-4 right-4 bg-red-500 text-white px-3 py-1.5 rounded-full flex items-center gap-1 rtl:gap-reverse">
                       <span className="font-bold text-sm">
                         {offer.discount} OFF
                       </span>

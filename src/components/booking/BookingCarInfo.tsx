@@ -34,7 +34,7 @@ const BookingCarInfo = ({
 
   return (
     <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-shadow duration-300">
-      <div className="flex flex-col lg:flex-row items-center gap-6 rtl:space-x-reverse">
+      <div className="flex flex-col lg:flex-row items-center gap-6 rtl:gap-reverse">
         <div className="relative">
           <img
             src={car.image}

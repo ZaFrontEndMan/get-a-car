@@ -18,7 +18,7 @@ const BranchFormActions = ({
   t
 }: BranchFormActionsProps) => {
   return (
-    <div className="flex space-x-2 pt-4">
+    <div className="flex gap-2 pt-4">
       <Button type="button" variant="outline" onClick={onCancel} className="flex-1">
         {t("cancelButton")}
       </Button>

@@ -27,7 +27,7 @@ const OfferPoliciesTranslated = ({ offer }: OfferPoliciesTranslatedProps) => {
           return (
             <div
               key={index}
-              className="flex items-start space-x-3 rtl:space-x-reverse"
+              className="flex items-start gap-3 rtl:gap-reverse"
             >
               <div className="flex-shrink-0 w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
                 <Ban className="w-4 h-4 text-primary" />

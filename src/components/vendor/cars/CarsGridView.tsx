@@ -83,22 +83,22 @@ const CarsGridView = ({ cars, onEdit, onDelete, onDuplicate, onView }: CarsGridV
                 </div>
                 
                 <div className="grid grid-cols-3 gap-2 text-sm text-gray-600">
-                  <div className="flex items-center space-x-1">
+                  <div className="flex items-center gap-1">
                     <Calendar className="h-3 w-3" />
                     <span>{car.year}</span>
                   </div>
-                  <div className="flex items-center space-x-1">
+                  <div className="flex items-center gap-1">
                     <Users className="h-3 w-3" />
                     <span>{car.seats}</span>
                   </div>
-                  <div className="flex items-center space-x-1">
+                  <div className="flex items-center gap-1">
                     <Fuel className="h-3 w-3" />
                     <span className="capitalize">{car.fuel_type}</span>
                   </div>
                 </div>
                 
                 <div className="flex justify-between items-center pt-2 border-t">
-                  <div className="flex space-x-2">
+                  <div className="flex gap-2">
                     <Button
                       variant="outline"
                       size="sm"

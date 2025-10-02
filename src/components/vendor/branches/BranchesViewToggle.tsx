@@ -18,7 +18,7 @@ const BranchesViewToggle = ({ currentView, onViewChange }: BranchesViewTogglePro
         variant={currentView === 'grid' ? 'default' : 'ghost'}
         size="sm"
         onClick={() => onViewChange('grid')}
-        className="flex items-center space-x-1"
+        className="flex items-center gap-1"
         title={t('gridView')}
       >
         <Grid3X3 className="h-4 w-4" />
@@ -27,7 +27,7 @@ const BranchesViewToggle = ({ currentView, onViewChange }: BranchesViewTogglePro
         variant={currentView === 'list' ? 'default' : 'ghost'}
         size="sm"
         onClick={() => onViewChange('list')}
-        className="flex items-center space-x-1"
+        className="flex items-center gap-1"
         title={t('listView')}
       >
         <List className="h-4 w-4" />
@@ -36,7 +36,7 @@ const BranchesViewToggle = ({ currentView, onViewChange }: BranchesViewTogglePro
         variant={currentView === 'table' ? 'default' : 'ghost'}
         size="sm"
         onClick={() => onViewChange('table')}
-        className="flex items-center space-x-1"
+        className="flex items-center gap-1"
         title={t('tableView')}
       >
         <Table className="h-4 w-4" />

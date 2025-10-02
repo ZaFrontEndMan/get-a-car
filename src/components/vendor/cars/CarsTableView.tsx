@@ -67,7 +67,7 @@ const CarsTableView = ({ cars, onEdit, onDelete, onDuplicate, onView, isDeleting
           {cars.map((car) => (
             <TableRow key={car.id}>
               <TableCell>
-                <div className="flex items-center space-x-3">
+                <div className="flex items-center gap-3">
                   <div className="w-12 h-8 bg-gray-200 rounded overflow-hidden">
                     {car.images && car.images.length > 0 ? (
                       <img 
@@ -108,7 +108,7 @@ const CarsTableView = ({ cars, onEdit, onDelete, onDuplicate, onView, isDeleting
                 </span>
               </TableCell>
               <TableCell>
-                <div className="flex space-x-2">
+                <div className="flex gap-2">
                   <Button
                     variant="outline"
                     size="sm"

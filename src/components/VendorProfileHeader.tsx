@@ -43,7 +43,7 @@ const VendorProfileHeader = ({
       <div className="relative h-32 sm:h-48 bg-gradient-to-r from-primary via-secondary to-accent">
         <div className="absolute inset-0 bg-black/10"></div>
         <div className="absolute bottom-4 sm:bottom-6 left-4 sm:left-6 right-4 sm:right-6">
-          <div className="flex flex-col sm:flex-row sm:items-end space-y-4 sm:space-y-0 sm:space-x-6 rtl:space-x-reverse">
+          <div className="flex flex-col sm:flex-row sm:items-end space-y-4 sm:space-y-0 sm:gap-6 rtl:gap-reverse">
             {/* Professional Logo - Fixed mobile size */}
             <div className="relative flex-shrink-0 self-center sm:self-auto">
               <img src={vendorImage} alt={vendor.name} className="w-20 h-20 sm:w-32 sm:h-32 rounded-xl sm:rounded-2xl border-3 sm:border-4 border-white shadow-2xl object-cover bg-white p-1 sm:p-2" />
@@ -55,13 +55,13 @@ const VendorProfileHeader = ({
             {/* Basic Info */}
             <div className="flex-1 text-white text-center sm:text-left pb-2 sm:pb-4">
               <h1 className="text-xl sm:text-3xl font-bold mb-1 sm:mb-2">{vendor.name}</h1>
-              <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-4 rtl:space-x-reverse">
-                <div className="flex items-center justify-center sm:justify-start space-x-1 rtl:space-x-reverse bg-white/20 backdrop-blur-sm px-2 sm:px-3 py-1 rounded-full">
+              <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:gap-4 rtl:gap-reverse">
+                <div className="flex items-center justify-center sm:justify-start gap-1 rtl:gap-reverse bg-white/20 backdrop-blur-sm px-2 sm:px-3 py-1 rounded-full">
                   <Star className="h-3 w-3 sm:h-4 sm:w-4 text-yellow-400 fill-current" />
                   <span className="font-semibold text-sm sm:text-base">{vendor.rating}</span>
                   <span className="text-xs sm:text-sm">({vendor.reviews} {t('reviews')})</span>
                 </div>
-                <div className="flex items-center justify-center sm:justify-start space-x-1 rtl:space-x-reverse bg-white/20 backdrop-blur-sm px-2 sm:px-3 py-1 rounded-full">
+                <div className="flex items-center justify-center sm:justify-start gap-1 rtl:gap-reverse bg-white/20 backdrop-blur-sm px-2 sm:px-3 py-1 rounded-full">
                   <Calendar className="h-3 w-3 sm:h-4 sm:w-4" />
                   <span className="text-xs sm:text-sm">{t('since')} {vendor.joinedDate}</span>
                 </div>
@@ -106,20 +106,20 @@ const VendorProfileHeader = ({
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
           {/* Contact Information */}
           <div className="bg-gray-50 p-4 sm:p-6 rounded-xl">
-            <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-3 sm:mb-4 flex items-center space-x-2 rtl:space-x-reverse">
+            <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-3 sm:mb-4 flex items-center gap-2 rtl:gap-reverse">
               <Phone className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
               <span>{t('contactInfo')}</span>
             </h3>
             <div className="space-y-3 sm:space-y-4">
-              <div className="flex items-center space-x-3 rtl:space-x-reverse">
+              <div className="flex items-center gap-3 rtl:gap-reverse">
                 <Phone className="h-4 w-4 text-gray-500" />
                 <span className="text-sm sm:text-base text-gray-700">{vendor.phone}</span>
               </div>
-              <div className="flex items-center space-x-3 rtl:space-x-reverse">
+              <div className="flex items-center gap-3 rtl:gap-reverse">
                 <Mail className="h-4 w-4 text-gray-500" />
                 <span className="text-sm sm:text-base text-gray-700">{vendor.email}</span>
               </div>
-              <div className="flex items-start space-x-3 rtl:space-x-reverse">
+              <div className="flex items-start gap-3 rtl:gap-reverse">
                 <MapPin className="h-4 w-4 text-gray-500 mt-1" />
                 <span className="text-sm sm:text-base text-gray-700">{vendor.address}</span>
               </div>

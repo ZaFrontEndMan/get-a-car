@@ -160,7 +160,7 @@ const ClientBookingGridView = ({
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center space-x-2 uppercase">
+                <div className="flex items-center gap-2 uppercase">
                   <CreditCard className="h-4 w-4 text-slate-400 mx-[6px]" />
                   <Badge variant="default">{booking?.paymentStatus}</Badge>
                 </div>

@@ -512,7 +512,7 @@ const VendorProfile = () => {
       <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>{t("editProfile")}</DialogTitle>
+            <DialogTitle className=" text-start">{t("editProfile")}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div>
@@ -569,21 +569,8 @@ const VendorProfile = () => {
                 }
               />
             </div>
-            <div>
-              <Label htmlFor="companyLogo">{t("companyLogo")}</Label>
-              <Input
-                id="companyLogo"
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={handleLogoChange}
-              />
-              {logoFile && (
-                <p className="text-sm text-gray-600">{logoFile.name}</p>
-              )}
-            </div>
           </div>
-          <div className="flex justify-end space-x-2">
+          <div className="flex justify-end gap-2">
             <Button variant="outline" onClick={handleCancelEdit}>
               {t("cancel")}
             </Button>
@@ -599,7 +586,7 @@ const VendorProfile = () => {
             <DialogTitle>{t("confirmDelete")}</DialogTitle>
           </DialogHeader>
           <div className="py-4">{t("confirmDeleteMessage")}</div>
-          <div className="flex justify-end space-x-2">
+          <div className="flex justify-end gap-2">
             <Button variant="outline" onClick={cancelRemoveLogo}>
               {t("cancel")}
             </Button>

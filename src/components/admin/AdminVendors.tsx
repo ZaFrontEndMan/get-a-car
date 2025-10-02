@@ -135,7 +135,7 @@ const AdminVendors = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className={`flex items-center space-x-2 mb-4 ${isRTL ? 'space-x-reverse' : ''}`}>
+          <div className={`flex items-center gap-2 mb-4 ${isRTL ? 'gap-reverse' : ''}`}>
             <Search className="h-4 w-4 text-gray-400" />
             <Input
               placeholder={t('searchVendors')}
@@ -162,7 +162,7 @@ const AdminVendors = () => {
                 {filteredVendors.map((vendor) => (
                   <TableRow key={vendor.id}>
                     <TableCell>
-                      <div className={`flex items-center space-x-3 ${isRTL ? 'space-x-reverse' : ''}`}>
+                      <div className={`flex items-center gap-3 ${isRTL ? 'gap-reverse' : ''}`}>
                         {vendor.logo_url ? (
                           <img
                             src={vendor.logo_url}
@@ -176,7 +176,7 @@ const AdminVendors = () => {
                         )}
                         <div>
                           <div className="font-medium">{vendor.name}</div>
-                          <div className={`text-sm text-gray-500 flex items-center ${isRTL ? 'space-x-reverse' : ''}`}>
+                          <div className={`text-sm text-gray-500 flex items-center ${isRTL ? 'gap-reverse' : ''}`}>
                             <MapPin className="h-3 w-3 mr-1" />
                             {vendor.location || t('noLocation')}
                           </div>
@@ -191,18 +191,18 @@ const AdminVendors = () => {
                     </TableCell>
                     <TableCell>
                       <div className="space-y-1">
-                        <div className={`flex items-center text-sm ${isRTL ? 'space-x-reverse' : ''}`}>
+                        <div className={`flex items-center text-sm ${isRTL ? 'gap-reverse' : ''}`}>
                           <Car className="h-3 w-3 mr-1" />
                           {vendor.cars?.[0]?.count || 0} {t('cars')}
                         </div>
-                        <div className={`flex items-center text-sm text-gray-600 ${isRTL ? 'space-x-reverse' : ''}`}>
+                        <div className={`flex items-center text-sm text-gray-600 ${isRTL ? 'gap-reverse' : ''}`}>
                           <Building2 className="h-3 w-3 mr-1" />
                           {vendor.branches?.[0]?.count || 0} {t('branches')}
                         </div>
                       </div>
                     </TableCell>
                     <TableCell>
-                      <div className={`flex items-center space-x-1 ${isRTL ? 'space-x-reverse' : ''}`}>
+                      <div className={`flex items-center gap-1 ${isRTL ? 'gap-reverse' : ''}`}>
                         <Star className="h-4 w-4 text-yellow-400 fill-current" />
                         <span>{vendor.rating || '0.0'}</span>
                         <span className="text-sm text-gray-500">
@@ -221,7 +221,7 @@ const AdminVendors = () => {
                       {new Date(vendor.created_at).toLocaleDateString(isRTL ? 'ar' : 'en')}
                     </TableCell>
                     <TableCell>
-                      <div className={`flex space-x-2 ${isRTL ? 'space-x-reverse' : ''}`}>
+                      <div className={`flex gap-2 ${isRTL ? 'gap-reverse' : ''}`}>
                         <Button 
                           variant="outline" 
                           size="sm"

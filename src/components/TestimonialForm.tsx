@@ -84,7 +84,7 @@ const TestimonialForm = () => {
           {/* Rating */}
           <div className="space-y-2">
             <Label>{t('rating') || 'Rating'}</Label>
-            <div className="flex items-center space-x-1">
+            <div className="flex items-center gap-1">
               {[1, 2, 3, 4, 5].map((star) => (
                 <button
                   key={star}

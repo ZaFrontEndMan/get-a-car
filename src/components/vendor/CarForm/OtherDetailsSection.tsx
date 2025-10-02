@@ -52,8 +52,8 @@ const OtherDetailsSection = ({ formData, handleChange, branches, branchesLoading
         </div>
       </div>
 
-      <div className="flex items-center space-x-6 mt-4">
-        <div className="flex items-center space-x-2">
+      <div className="flex items-center gap-6 mt-4">
+        <div className="flex items-center gap-2">
           <Switch
             id="is_available"
             checked={formData.is_available}
@@ -62,7 +62,7 @@ const OtherDetailsSection = ({ formData, handleChange, branches, branchesLoading
           <Label htmlFor="is_available">Available</Label>
         </div>
 
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center gap-2">
           <Switch
             id="is_featured"
             checked={formData.is_featured}

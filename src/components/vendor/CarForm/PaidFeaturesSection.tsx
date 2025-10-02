@@ -40,7 +40,7 @@ const PaidFeaturesSection = ({ paidFeatures, setPaidFeatures }: PaidFeaturesSect
         </Button>
       </div>
       {paidFeatures.map((feature, index) => (
-        <div key={index} className="flex items-center space-x-2 mb-2">
+        <div key={index} className="flex items-center gap-2 mb-2">
           <Input
             placeholder="Feature title"
             value={feature.title}

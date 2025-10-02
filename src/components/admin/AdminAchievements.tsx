@@ -288,7 +288,7 @@ const AdminAchievements = () => {
                     onChange={(e) => setFormData({...formData, order_index: parseInt(e.target.value)})}
                   />
                 </div>
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center gap-2">
                   <Switch
                     id="is_active"
                     checked={formData.is_active}
@@ -349,7 +349,7 @@ const AdminAchievements = () => {
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    <div className="flex space-x-2">
+                    <div className="flex gap-2">
                       <Button
                         variant="outline"
                         size="sm"

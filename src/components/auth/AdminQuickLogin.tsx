@@ -10,7 +10,7 @@ const AdminQuickLogin = ({ onAdminLogin }: AdminQuickLoginProps) => {
   return (
     <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
       <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center gap-2">
           <ShieldCheck className="h-5 w-5 text-blue-600" />
           <span className="text-sm font-medium text-blue-800">Admin Access</span>
         </div>

@@ -16,7 +16,7 @@ const CarDetailsBookingCard = ({ car, onBookNow }: CarDetailsBookingCardProps) =
         <CardTitle>Book This Car</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center gap-4">
           <Badge variant={car.is_available ? "default" : "secondary"}>
             {car.is_available ? 'Available' : 'Unavailable'}
           </Badge>

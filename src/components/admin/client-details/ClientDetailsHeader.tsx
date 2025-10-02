@@ -26,7 +26,7 @@ const ClientDetailsHeader: React.FC<ClientDetailsHeaderProps> = ({
       {/* Header with gradient background */}
       <div className="bg-gradient-to-r from-blue-600 to-purple-600 px-4 sm:px-6 lg:px-8 py-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center space-x-4 mb-4 sm:mb-0">
+          <div className="flex items-center gap-4 mb-4 sm:mb-0">
             <Button 
               variant="outline" 
               size="sm" 
@@ -36,7 +36,7 @@ const ClientDetailsHeader: React.FC<ClientDetailsHeaderProps> = ({
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back
             </Button>
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center gap-3">
               <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
                 <User className="h-6 w-6 text-white" />
               </div>

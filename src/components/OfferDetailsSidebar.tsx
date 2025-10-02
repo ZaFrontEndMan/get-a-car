@@ -106,7 +106,7 @@ const OfferDetailsSidebar = ({
 
       {/* Location Picker */}
       <div className="bg-white rounded-2xl shadow-lg p-6">
-        <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center space-x-2 rtl:space-x-reverse">
+        <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2 rtl:gap-reverse">
           <span>{t("pickupAndDropoff")}</span>
         </h3>
 
@@ -183,7 +183,7 @@ const OfferDetailsSidebar = ({
 
       {/* Additional Services */}
       <div className="bg-white rounded-2xl shadow-lg p-6">
-        <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center space-x-2 rtl:space-x-reverse">
+        <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2 rtl:gap-reverse">
           <Plus className="h-5 w-5 text-primary" />
           <span>{t("additionalServices")}</span>
         </h3>
@@ -195,7 +195,7 @@ const OfferDetailsSidebar = ({
                 key={service.id}
                 className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:border-primary/50 transition-colors"
               >
-                <div className="flex items-center space-x-3 rtl:space-x-reverse">
+                <div className="flex items-center gap-3 rtl:gap-reverse">
                   <input
                     type="checkbox"
                     checked={selectedServices.includes(service.id)}

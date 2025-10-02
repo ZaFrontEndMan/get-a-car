@@ -186,7 +186,7 @@ const CarDetailsSidebar = ({
                   key={service.id}
                   className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:border-primary/50 transition-colors"
                 >
-                  <div className="flex items-center space-x-2 flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-1 min-w-0">
                     <input
                       type="checkbox"
                       checked={selectedServices.includes(service.id)}

@@ -11,8 +11,8 @@ const NavbarLinks = ({ navigation, isRTL }: NavbarLinksProps) => {
   return (
     <div
       className={`flex items-baseline ${
-        isRTL ? "space-x-reverse" : ""
-      } space-x-6`}
+        isRTL ? "gap-reverse" : ""
+      } gap-6`}
     >
       {navigation.map((item) => (
         <Link

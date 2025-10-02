@@ -31,7 +31,7 @@ const AdminHeader = ({ user, onSignOut, onSettings, onMenuClick }: AdminHeaderPr
     <header className="bg-white/95 backdrop-blur-md border-b border-gray-200/60 shadow-lg sticky top-0 z-50">
       <div className={`flex items-center justify-between px-4 sm:px-6 py-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
         {/* Left Section - Menu and Title */}
-        <div className={`flex items-center space-x-4 ${isRTL ? 'space-x-reverse' : ''}`}>
+        <div className={`flex items-center gap-4 ${isRTL ? 'gap-reverse' : ''}`}>
           <Button
             variant="ghost"
             size="sm"
@@ -41,8 +41,8 @@ const AdminHeader = ({ user, onSignOut, onSettings, onMenuClick }: AdminHeaderPr
             <Menu className="h-5 w-5 text-gray-700" />
           </Button>
           
-          <div className={`hidden md:flex items-center space-x-4 ${isRTL ? 'space-x-reverse' : ''}`}>
-            <div className={`flex items-center space-x-3 ${isRTL ? 'space-x-reverse' : ''}`}>
+          <div className={`hidden md:flex items-center gap-4 ${isRTL ? 'gap-reverse' : ''}`}>
+            <div className={`flex items-center gap-3 ${isRTL ? 'gap-reverse' : ''}`}>
               <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
                 <Shield className="h-5 w-5 text-white" />
               </div>
@@ -79,7 +79,7 @@ const AdminHeader = ({ user, onSignOut, onSettings, onMenuClick }: AdminHeaderPr
         </div>
 
         {/* Right Section - Actions and User */}
-        <div className={`flex items-center space-x-3 ${isRTL ? 'space-x-reverse' : ''}`}>
+        <div className={`flex items-center gap-3 ${isRTL ? 'gap-reverse' : ''}`}>
           {/* Language Switcher */}
           <div className="hidden sm:block">
             <LanguageSwitcher />
@@ -102,8 +102,8 @@ const AdminHeader = ({ user, onSignOut, onSettings, onMenuClick }: AdminHeaderPr
             <DropdownMenuTrigger asChild>
               <Button 
                 variant="ghost" 
-                className={`flex items-center space-x-3 hover:bg-blue-50 p-2 rounded-xl transition-all duration-200 ${
-                  isRTL ? 'space-x-reverse' : ''
+                className={`flex items-center gap-3 hover:bg-blue-50 p-2 rounded-xl transition-all duration-200 ${
+                  isRTL ? 'gap-reverse' : ''
                 }`}
               >
                 <Avatar className="h-9 w-9 ring-2 ring-blue-100">
@@ -126,13 +126,13 @@ const AdminHeader = ({ user, onSignOut, onSettings, onMenuClick }: AdminHeaderPr
               align={isRTL ? 'start' : 'end'} 
               className="w-56 rounded-xl border-gray-200 shadow-lg"
             >
-              <DropdownMenuItem className={`flex items-center space-x-3 p-3 ${isRTL ? 'space-x-reverse text-right' : ''}`}>
+              <DropdownMenuItem className={`flex items-center gap-3 p-3 ${isRTL ? 'gap-reverse text-right' : ''}`}>
                 <User className="h-4 w-4 text-blue-600" />
                 <span className={isRTL ? 'font-arabic' : ''}>{t('profile')}</span>
               </DropdownMenuItem>
               <DropdownMenuItem 
                 onClick={onSettings}
-                className={`flex items-center space-x-3 p-3 ${isRTL ? 'space-x-reverse text-right' : ''}`}
+                className={`flex items-center gap-3 p-3 ${isRTL ? 'gap-reverse text-right' : ''}`}
               >
                 <Settings className="h-4 w-4 text-gray-600" />
                 <span className={isRTL ? 'font-arabic' : ''}>{t('settings')}</span>
@@ -140,8 +140,8 @@ const AdminHeader = ({ user, onSignOut, onSettings, onMenuClick }: AdminHeaderPr
               <DropdownMenuSeparator />
               <DropdownMenuItem 
                 onClick={onSignOut}
-                className={`flex items-center space-x-3 p-3 text-red-600 focus:text-red-600 cursor-pointer ${
-                  isRTL ? 'space-x-reverse text-right' : ''
+                className={`flex items-center gap-3 p-3 text-red-600 focus:text-red-600 cursor-pointer ${
+                  isRTL ? 'gap-reverse text-right' : ''
                 }`}
               >
                 <LogOut className="h-4 w-4" />

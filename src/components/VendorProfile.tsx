@@ -26,7 +26,7 @@ const VendorProfile = ({ vendor }: VendorProfileProps) => {
       <div className="bg-white rounded-lg shadow-lg overflow-hidden">
         {/* Mobile-optimized header */}
         <div className="p-4 sm:p-6">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:gap-6">
             {/* Logo - Mobile optimized */}
             <div className="flex-shrink-0 w-full sm:w-auto flex justify-center sm:justify-start">
               {vendor.logo_url ? (
@@ -45,7 +45,7 @@ const VendorProfile = ({ vendor }: VendorProfileProps) => {
             {/* Vendor info - Mobile optimized */}
             <div className="flex-1 text-center sm:text-left w-full">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-2">
-                <div className="flex items-center justify-center sm:justify-start space-x-2 mb-2 sm:mb-0">
+                <div className="flex items-center justify-center sm:justify-start gap-2 mb-2 sm:mb-0">
                   <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">{vendor.name}</h1>
                   {vendor.verified && (
                     <Badge className="bg-blue-100 text-blue-800 flex items-center">
@@ -58,7 +58,7 @@ const VendorProfile = ({ vendor }: VendorProfileProps) => {
 
               {/* Rating */}
               {vendor.rating && (
-                <div className="flex items-center justify-center sm:justify-start space-x-2 mb-2">
+                <div className="flex items-center justify-center sm:justify-start gap-2 mb-2">
                   <div className="flex items-center">
                     {[...Array(5)].map((_, i) => (
                       <Star
@@ -91,7 +91,7 @@ const VendorProfile = ({ vendor }: VendorProfileProps) => {
                   </div>
                 )}
                 
-                <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-6 space-y-2 sm:space-y-0">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:gap-6 space-y-2 sm:space-y-0">
                   {vendor.phone && (
                     <div className="flex items-center justify-center sm:justify-start text-sm text-gray-600">
                       <Phone className="w-4 h-4 mr-2 flex-shrink-0" />

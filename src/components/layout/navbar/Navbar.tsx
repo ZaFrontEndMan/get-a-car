@@ -57,8 +57,8 @@ const Navbar = () => {
 
           <div className="hidden md:block">
             <div
-              className={`flex items-center space-x-4 ${
-                isRTL ? "space-x-reverse" : ""
+              className={`flex items-center gap-4 ${
+                isRTL ? "gap-reverse" : ""
               }`}
             >
               <LanguageSwitcher />
@@ -99,8 +99,8 @@ const Navbar = () => {
           </div>
 
           <div
-            className={`md:hidden flex items-center space-x-3 ${
-              isRTL ? "space-x-reverse" : ""
+            className={`md:hidden flex items-center gap-3 ${
+              isRTL ? "gap-reverse" : ""
             }`}
           >
             <LanguageSwitcher />

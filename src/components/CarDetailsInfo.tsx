@@ -36,19 +36,19 @@ const CarDetailsInfo = ({ car, selectedPricing }: CarDetailsInfoProps) => {
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <div className="flex items-center space-x-2 p-3 bg-gray-50 rounded-lg">
+        <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg">
           <Users className="h-5 w-5 text-primary" />
           <span>{car.seats} Seats</span>
         </div>
-        <div className="flex items-center space-x-2 p-3 bg-gray-50 rounded-lg">
+        <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg">
           <Fuel className="h-5 w-5 text-primary" />
           <span>{car.fuel}</span>
         </div>
-        <div className="flex items-center space-x-2 p-3 bg-gray-50 rounded-lg">
+        <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg">
           <Settings className="h-5 w-5 text-primary" />
           <span>{car.transmission}</span>
         </div>
-        <div className="flex items-center space-x-2 p-3 bg-gray-50 rounded-lg">
+        <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg">
           <Calendar className="h-5 w-5 text-primary" />
           <span>{car.year}</span>
         </div>

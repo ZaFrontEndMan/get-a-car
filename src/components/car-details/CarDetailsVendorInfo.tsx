@@ -42,14 +42,14 @@ const CarDetailsVendorInfo = ({ car }: CarDetailsVendorInfoProps) => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex items-start space-x-4">
+            <div className="flex items-start gap-4">
               <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
                 <span className="text-primary font-bold text-lg">
                   {car.vendors.name?.charAt(0) || 'V'}
                 </span>
               </div>
               <div className="flex-1">
-                <div className="flex items-center space-x-2 mb-2">
+                <div className="flex items-center gap-2 mb-2">
                   <h4 className="font-semibold text-gray-900">{car.vendors.name || 'Unknown Vendor'}</h4>
                   <Badge variant="secondary" className="text-xs">
                     <Star className="h-3 w-3 mr-1 fill-current" />

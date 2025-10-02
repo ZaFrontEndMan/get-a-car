@@ -70,7 +70,7 @@ const VendorBookingTableView = ({
     switch (status) {
       case 'pending':
         return (
-          <div className={`flex space-x-1 ${isRTL ? 'space-x-reverse' : ''}`}>
+          <div className={`flex gap-1 ${isRTL ? 'gap-reverse' : ''}`}>
             <Button
               onClick={() => onAcceptBooking(booking.id)}
               disabled={isAcceptLoading}

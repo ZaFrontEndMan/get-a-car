@@ -33,7 +33,7 @@ const ClientInfoCard: React.FC<ClientInfoCardProps> = ({ client }) => {
               Contact Information
             </h3>
             
-            <div className="flex items-start space-x-3">
+            <div className="flex items-start gap-3">
               <FileText className="h-5 w-5 text-gray-500 mt-0.5" />
               <div>
                 <p className="text-sm font-medium text-gray-900">Client ID</p>
@@ -41,7 +41,7 @@ const ClientInfoCard: React.FC<ClientInfoCardProps> = ({ client }) => {
               </div>
             </div>
 
-            <div className="flex items-start space-x-3">
+            <div className="flex items-start gap-3">
               <Mail className="h-5 w-5 text-gray-500 mt-0.5" />
               <div>
                 <p className="text-sm font-medium text-gray-900">Email</p>
@@ -50,7 +50,7 @@ const ClientInfoCard: React.FC<ClientInfoCardProps> = ({ client }) => {
             </div>
             
             {client.phone && (
-              <div className="flex items-start space-x-3">
+              <div className="flex items-start gap-3">
                 <Phone className="h-5 w-5 text-gray-500 mt-0.5" />
                 <div>
                   <p className="text-sm font-medium text-gray-900">Phone</p>
@@ -59,7 +59,7 @@ const ClientInfoCard: React.FC<ClientInfoCardProps> = ({ client }) => {
               </div>
             )}
             
-            <div className="flex items-start space-x-3">
+            <div className="flex items-start gap-3">
               <Calendar className="h-5 w-5 text-gray-500 mt-0.5" />
               <div>
                 <p className="text-sm font-medium text-gray-900">Joined</p>
@@ -78,7 +78,7 @@ const ClientInfoCard: React.FC<ClientInfoCardProps> = ({ client }) => {
               </h3>
               
               {client.city && (
-                <div className="flex items-start space-x-3">
+                <div className="flex items-start gap-3">
                   <Building className="h-5 w-5 text-gray-500 mt-0.5" />
                   <div>
                     <p className="text-sm font-medium text-gray-900">City</p>
@@ -88,7 +88,7 @@ const ClientInfoCard: React.FC<ClientInfoCardProps> = ({ client }) => {
               )}
 
               {client.address && (
-                <div className="flex items-start space-x-3">
+                <div className="flex items-start gap-3">
                   <MapPin className="h-5 w-5 text-gray-500 mt-0.5" />
                   <div>
                     <p className="text-sm font-medium text-gray-900">Address</p>
@@ -98,7 +98,7 @@ const ClientInfoCard: React.FC<ClientInfoCardProps> = ({ client }) => {
               )}
 
               {/* Country - Saudi Arabia by default for now */}
-              <div className="flex items-start space-x-3">
+              <div className="flex items-start gap-3">
                 <Globe className="h-5 w-5 text-gray-500 mt-0.5" />
                 <div>
                   <p className="text-sm font-medium text-gray-900">Country</p>
@@ -115,7 +115,7 @@ const ClientInfoCard: React.FC<ClientInfoCardProps> = ({ client }) => {
                 Document Information
               </h3>
               
-              <div className="flex items-start space-x-3">
+              <div className="flex items-start gap-3">
                 <CreditCard className="h-5 w-5 text-gray-500 mt-0.5" />
                 <div>
                   <p className="text-sm font-medium text-gray-900">Driver License Number</p>

@@ -972,6 +972,23 @@ export const arTranslations = {
     "هل أنت متأكد من حذف هذه السياسة؟ لا يمكن التراجع عن هذا الإجراء.",
   modal_confirm_delete: "حذف",
   modal_deleting: "جاري الحذف...",
+  table_title_en: "العنوان (بالإنجليزية)",
+  table_title_ar: "العنوان (بالعربية)",
+  policy_types_custom: "مخصص",
+  users_title: "المستخدمون",
+  add_user: "إضافة مستخدم",
+  no_users: "لا يوجد مستخدمون بعد",
+  add_team_members: "أضف أعضاء الفريق للمساعدة في إدارة حساب المورد",
+  add_first_user: "إضافة المستخدم الأول",
+  email_label: "البريد الإلكتروني",
+  phone_label: "رقم الهاتف",
+  branch_label: "الفرع",
+  status_label: "الحالة",
+  added_label: "تمت الإضافة",
+  success_title: "نجاح",
+  user_removed_success: "تم إزالة المستخدم بنجاح",
+  user_added_success: "تم إضافة المستخدم بنجاح",
+  user_updated_success: "تم تحديث المستخدم بنجاح",
 };
 
 export default arTranslations;

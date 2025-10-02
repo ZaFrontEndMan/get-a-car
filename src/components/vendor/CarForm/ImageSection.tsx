@@ -35,7 +35,7 @@ const ImageSection = ({ formData, handleChange }: ImageSectionProps) => {
         <CardTitle className="text-lg">Car Images</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="flex space-x-2">
+        <div className="flex gap-2">
           <div className="flex-1">
             <Label htmlFor="image-url">Image URL</Label>
             <Input
@@ -62,7 +62,7 @@ const ImageSection = ({ formData, handleChange }: ImageSectionProps) => {
             <Label>Current Images ({formData.images.length})</Label>
             <div className="grid grid-cols-1 gap-3">
               {formData.images.map((imageUrl, index) => (
-                <div key={index} className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                <div key={index} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
                   <img
                     src={imageUrl}
                     alt={`Car image ${index + 1}`}

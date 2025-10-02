@@ -21,7 +21,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   return (
     <header className="bg-white shadow-sm border-b">
       <div className="flex items-center justify-between px-4 py-4">
-        <div className="flex items-center space-x-4 rtl:space-x-reverse">
+        <div className="flex items-center gap-4 rtl:gap-reverse">
           <DashboardMobileMenuButton 
             isSidebarOpen={isSidebarOpen}
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}

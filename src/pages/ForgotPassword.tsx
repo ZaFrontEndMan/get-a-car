@@ -41,7 +41,7 @@ const ForgotPassword = () => {
       <div className="max-w-md w-full bg-white rounded-2xl shadow-2xl p-8">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="flex items-center justify-center space-x-2 mb-4">
+          <div className="flex items-center justify-center gap-2 mb-4">
             <div className="gradient-primary p-3 rounded-lg">
               <Car className="h-8 w-8 text-white" />
             </div>

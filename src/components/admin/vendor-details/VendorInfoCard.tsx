@@ -14,7 +14,7 @@ export const VendorInfoCard: React.FC<VendorInfoCardProps> = ({ vendor, carsCoun
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center space-x-3">
+        <CardTitle className="flex items-center gap-3">
           {vendor.logo_url ? (
             <img src={vendor.logo_url} alt={vendor.name} className="w-12 h-12 rounded-full" />
           ) : (
@@ -23,13 +23,13 @@ export const VendorInfoCard: React.FC<VendorInfoCardProps> = ({ vendor, carsCoun
             </div>
           )}
           <div>
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center gap-2">
               <span>{vendor.name}</span>
               <Badge variant={vendor.verified ? "default" : "secondary"}>
                 {vendor.verified ? 'Verified' : 'Unverified'}
               </Badge>
             </div>
-            <div className="flex items-center space-x-1 text-sm text-gray-500">
+            <div className="flex items-center gap-1 text-sm text-gray-500">
               <Star className="h-3 w-3 text-yellow-400 fill-current" />
               <span>{vendor.rating || '0.0'}</span>
               <span>({vendor.total_reviews || 0} reviews)</span>
@@ -39,7 +39,7 @@ export const VendorInfoCard: React.FC<VendorInfoCardProps> = ({ vendor, carsCoun
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center gap-2">
             <Mail className="h-4 w-4 text-gray-500" />
             <div>
               <p className="text-sm font-medium">Email</p>
@@ -48,7 +48,7 @@ export const VendorInfoCard: React.FC<VendorInfoCardProps> = ({ vendor, carsCoun
           </div>
           
           {vendor.phone && (
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center gap-2">
               <Phone className="h-4 w-4 text-gray-500" />
               <div>
                 <p className="text-sm font-medium">Phone</p>
@@ -58,7 +58,7 @@ export const VendorInfoCard: React.FC<VendorInfoCardProps> = ({ vendor, carsCoun
           )}
 
           {vendor.country && (
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center gap-2">
               <Globe2 className="h-4 w-4 text-gray-500" />
               <div>
                 <p className="text-sm font-medium">Country</p>
@@ -68,7 +68,7 @@ export const VendorInfoCard: React.FC<VendorInfoCardProps> = ({ vendor, carsCoun
           )}
 
           {vendor.city && (
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center gap-2">
               <MapPin className="h-4 w-4 text-gray-500" />
               <div>
                 <p className="text-sm font-medium">City</p>
@@ -78,7 +78,7 @@ export const VendorInfoCard: React.FC<VendorInfoCardProps> = ({ vendor, carsCoun
           )}
 
           {vendor.national_id && (
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center gap-2">
               <CreditCard className="h-4 w-4 text-gray-500" />
               <div>
                 <p className="text-sm font-medium">National ID</p>
@@ -88,7 +88,7 @@ export const VendorInfoCard: React.FC<VendorInfoCardProps> = ({ vendor, carsCoun
           )}
 
           {vendor.license_id && (
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center gap-2">
               <FileText className="h-4 w-4 text-gray-500" />
               <div>
                 <p className="text-sm font-medium">License ID</p>
@@ -98,7 +98,7 @@ export const VendorInfoCard: React.FC<VendorInfoCardProps> = ({ vendor, carsCoun
           )}
 
           {vendor.date_of_birth && (
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center gap-2">
               <Calendar className="h-4 w-4 text-gray-500" />
               <div>
                 <p className="text-sm font-medium">Date of Birth</p>
@@ -109,7 +109,7 @@ export const VendorInfoCard: React.FC<VendorInfoCardProps> = ({ vendor, carsCoun
             </div>
           )}
 
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center gap-2">
             <Calendar className="h-4 w-4 text-gray-500" />
             <div>
               <p className="text-sm font-medium">Joined</p>
@@ -119,7 +119,7 @@ export const VendorInfoCard: React.FC<VendorInfoCardProps> = ({ vendor, carsCoun
             </div>
           </div>
 
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center gap-2">
             <Car className="h-4 w-4 text-gray-500" />
             <div>
               <p className="text-sm font-medium">Total Cars</p>
@@ -127,7 +127,7 @@ export const VendorInfoCard: React.FC<VendorInfoCardProps> = ({ vendor, carsCoun
             </div>
           </div>
 
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center gap-2">
             <Building2 className="h-4 w-4 text-gray-500" />
             <div>
               <p className="text-sm font-medium">Branches</p>

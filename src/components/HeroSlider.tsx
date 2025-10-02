@@ -273,7 +273,7 @@ const HeroSlider = () => {
       </motion.button>
 
       {/* Dots Indicator */}
-      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex space-x-3">
+      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex gap-3">
         {displaySlides.map((_, index) => (
           <motion.button
             key={index}

@@ -62,7 +62,7 @@ const ContactContent = () => {
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    <div className="flex items-start space-x-4 rtl:space-x-reverse">
+                    <div className="flex items-start gap-4 rtl:gap-reverse">
                       <div className="bg-primary p-3 rounded-lg">
                         <MapPin className="h-6 w-6 text-white" />
                       </div>
@@ -79,7 +79,7 @@ const ContactContent = () => {
                       </div>
                     </div>
 
-                    <div className="flex items-start space-x-4 rtl:space-x-reverse">
+                    <div className="flex items-start gap-4 rtl:gap-reverse">
                       <div className="bg-secondary p-3 rounded-lg">
                         <Phone className="h-6 w-6 text-white" />
                       </div>
@@ -93,7 +93,7 @@ const ContactContent = () => {
                       </div>
                     </div>
 
-                    <div className="flex items-start space-x-4 rtl:space-x-reverse">
+                    <div className="flex items-start gap-4 rtl:gap-reverse">
                       <div className="bg-accent p-3 rounded-lg">
                         <Mail className="h-6 w-6 text-black" />
                       </div>
@@ -108,7 +108,7 @@ const ContactContent = () => {
                     </div>
 
                     {settings?.website && (
-                      <div className="flex items-start space-x-4 rtl:space-x-reverse">
+                      <div className="flex items-start gap-4 rtl:gap-reverse">
                         <div className="bg-blue-600 p-3 rounded-lg">
                           <Globe className="h-6 w-6 text-white" />
                         </div>
@@ -128,7 +128,7 @@ const ContactContent = () => {
                       </div>
                     )}
 
-                    <div className="flex items-start space-x-4 rtl:space-x-reverse">
+                    <div className="flex items-start gap-4 rtl:gap-reverse">
                       <div className="bg-gold p-3 rounded-lg">
                         <Clock className="h-6 w-6 text-black" />
                       </div>
@@ -253,7 +253,7 @@ const ContactContent = () => {
 
                 <button
                   type="submit"
-                  className="w-full bg-primary text-white py-3 rounded-lg hover:bg-primary/90 transition-colors duration-200 flex items-center justify-center space-x-2 rtl:space-x-reverse"
+                  className="w-full bg-primary text-white py-3 rounded-lg hover:bg-primary/90 transition-colors duration-200 flex items-center justify-center gap-2 rtl:gap-reverse"
                 >
                   <Send className="h-5 w-5" />
                   <span>{t("sendMessage")}</span>

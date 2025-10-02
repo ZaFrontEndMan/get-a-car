@@ -58,7 +58,7 @@ const More = () => {
                 to={item.href}
                 className="block bg-white rounded-lg shadow-sm border p-4 hover:shadow-md transition-shadow"
               >
-                <div className="flex items-center space-x-4">
+                <div className="flex items-center gap-4">
                   <div className="flex-shrink-0">
                     <IconComponent className="h-6 w-6 text-primary" />
                   </div>

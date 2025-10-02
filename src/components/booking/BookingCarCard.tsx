@@ -21,7 +21,7 @@ const BookingCarCard = ({ car, rentalDays, onAdjustDays }: BookingCarCardProps) 
   return (
     <div className="bg-white rounded-lg p-3 sm:p-4">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
-        <div className="flex items-center space-x-3 sm:space-x-4 rtl:space-x-reverse flex-1">
+        <div className="flex items-center gap-3 sm:gap-4 rtl:gap-reverse flex-1">
           <img 
             src={car.image} 
             alt={car.name}
@@ -40,7 +40,7 @@ const BookingCarCard = ({ car, rentalDays, onAdjustDays }: BookingCarCardProps) 
         <div className="bg-blue-50 rounded-lg p-2 sm:p-3 w-full sm:w-auto">
           <div className="flex items-center justify-between sm:justify-center sm:flex-col sm:space-y-2">
             <span className="text-xs sm:text-sm text-gray-600">{t('rentalDays')}</span>
-            <div className="flex items-center space-x-2 sm:space-x-3 rtl:space-x-reverse">
+            <div className="flex items-center gap-2 sm:gap-3 rtl:gap-reverse">
               <button 
                 onClick={() => onAdjustDays(false)}
                 className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gray-200 flex items-center justify-center hover:bg-gray-300 transition-colors"

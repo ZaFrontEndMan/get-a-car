@@ -96,8 +96,8 @@ const BranchesTableView = ({
 
                 <TableCell className={isRTL ? "text-left" : "text-right"}>
                   <div
-                    className={`flex items-center justify-end space-x-2 ${
-                      isRTL ? "space-x-reverse" : ""
+                    className={`flex items-center justify-end gap-2 ${
+                      isRTL ? "gap-reverse" : ""
                     }`}
                   >
                     <Button

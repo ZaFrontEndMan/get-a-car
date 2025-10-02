@@ -30,7 +30,7 @@ const VendorDetailsHeader: React.FC<VendorDetailsHeaderProps> = ({
       {/* Header with gradient background */}
       <div className="bg-gradient-to-r from-blue-600 to-purple-600 px-4 sm:px-6 lg:px-8 py-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center space-x-4 mb-4 sm:mb-0">
+          <div className="flex items-center gap-4 mb-4 sm:mb-0">
             <Button 
               variant="outline" 
               size="sm" 
@@ -40,7 +40,7 @@ const VendorDetailsHeader: React.FC<VendorDetailsHeaderProps> = ({
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back
             </Button>
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center gap-3">
               {vendor.logo_url ? (
                 <img 
                   src={vendor.logo_url} 
@@ -53,7 +53,7 @@ const VendorDetailsHeader: React.FC<VendorDetailsHeaderProps> = ({
                 </div>
               )}
               <div>
-                <div className="flex items-center space-x-2 mb-1">
+                <div className="flex items-center gap-2 mb-1">
                   <h1 className="text-2xl font-bold text-white">{vendor.name}</h1>
                   <Badge 
                     variant={vendor.verified ? 'default' : 'secondary'}
@@ -66,7 +66,7 @@ const VendorDetailsHeader: React.FC<VendorDetailsHeaderProps> = ({
                     )}
                   </Badge>
                 </div>
-                <div className="flex items-center space-x-1 text-sm text-white/90">
+                <div className="flex items-center gap-1 text-sm text-white/90">
                   <Star className="h-3 w-3 text-yellow-400 fill-current" />
                   <span>{vendor.rating || '0.0'}</span>
                   <span>({vendor.total_reviews || 0} reviews)</span>

@@ -71,7 +71,7 @@ const OfferDetailsContent = ({
           </div>
           <div className="text-left md:text-right">
             <div className="flex flex-col md:items-end space-y-2">
-              <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <div className="flex items-center gap-2 rtl:gap-reverse">
                 <div className="text-2xl md:text-3xl font-bold text-primary">
                   {t('currency')} {offer.car.pricing[selectedPricing]}
                 </div>
@@ -93,28 +93,28 @@ const OfferDetailsContent = ({
 
         {/* Car Specifications */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-          <div className="flex items-center space-x-3 rtl:space-x-reverse p-3 bg-gray-50 rounded-lg">
+          <div className="flex items-center gap-3 rtl:gap-reverse p-3 bg-gray-50 rounded-lg">
             <Users className="h-5 w-5 text-primary flex-shrink-0" />
             <div>
               <div className="text-sm font-medium text-gray-900">{offer.car.seats}</div>
               <div className="text-xs text-gray-500">{t('seats')}</div>
             </div>
           </div>
-          <div className="flex items-center space-x-3 rtl:space-x-reverse p-3 bg-gray-50 rounded-lg">
+          <div className="flex items-center gap-3 rtl:gap-reverse p-3 bg-gray-50 rounded-lg">
             <Fuel className="h-5 w-5 text-primary flex-shrink-0" />
             <div>
               <div className="text-sm font-medium text-gray-900">{offer.car.fuel}</div>
               <div className="text-xs text-gray-500">{t('fuel')}</div>
             </div>
           </div>
-          <div className="flex items-center space-x-3 rtl:space-x-reverse p-3 bg-gray-50 rounded-lg">
+          <div className="flex items-center gap-3 rtl:gap-reverse p-3 bg-gray-50 rounded-lg">
             <Settings className="h-5 w-5 text-primary flex-shrink-0" />
             <div>
               <div className="text-sm font-medium text-gray-900">{offer.car.transmission}</div>
               <div className="text-xs text-gray-500">{t('transmission')}</div>
             </div>
           </div>
-          <div className="flex items-center space-x-3 rtl:space-x-reverse p-3 bg-gray-50 rounded-lg">
+          <div className="flex items-center gap-3 rtl:gap-reverse p-3 bg-gray-50 rounded-lg">
             <Calendar className="h-5 w-5 text-primary flex-shrink-0" />
             <div>
               <div className="text-sm font-medium text-gray-900">{offer.car.year}</div>

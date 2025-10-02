@@ -73,7 +73,7 @@ const AdminUsers = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className={`flex items-center space-x-2 mb-4 ${isRTL ? 'space-x-reverse' : ''}`}>
+          <div className={`flex items-center gap-2 mb-4 ${isRTL ? 'gap-reverse' : ''}`}>
             <Search className="h-4 w-4 text-gray-400" />
             <Input
               placeholder={t('searchUsers')}
@@ -109,7 +109,7 @@ const AdminUsers = () => {
                     <TableCell>
                       <div className="space-y-1">
                         {user.phone && (
-                          <div className={`flex items-center text-sm ${isRTL ? 'space-x-reverse' : ''}`}>
+                          <div className={`flex items-center text-sm ${isRTL ? 'gap-reverse' : ''}`}>
                             <Phone className="h-3 w-3 mr-1" />
                             {user.phone}
                           </div>
@@ -117,7 +117,7 @@ const AdminUsers = () => {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <div className={`flex items-center text-sm ${isRTL ? 'space-x-reverse' : ''}`}>
+                      <div className={`flex items-center text-sm ${isRTL ? 'gap-reverse' : ''}`}>
                         <MapPin className="h-3 w-3 mr-1" />
                         {user.city || t('noLocation')}
                       </div>
@@ -133,7 +133,7 @@ const AdminUsers = () => {
                       {new Date(user.created_at).toLocaleDateString(isRTL ? 'ar' : 'en')}
                     </TableCell>
                     <TableCell>
-                      <div className={`flex space-x-2 ${isRTL ? 'space-x-reverse' : ''}`}>
+                      <div className={`flex gap-2 ${isRTL ? 'gap-reverse' : ''}`}>
                         <Button variant="outline" size="sm">
                           {t('view')}
                         </Button>

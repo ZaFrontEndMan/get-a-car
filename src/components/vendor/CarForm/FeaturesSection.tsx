@@ -54,7 +54,7 @@ const FeaturesSection = ({ formData, handleChange }: FeaturesSectionProps) => {
         <CardTitle className="text-lg">Car Features</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="flex space-x-2">
+        <div className="flex gap-2">
           <div className="flex-1">
             <Label htmlFor="new-feature">Add Custom Feature</Label>
             <Input

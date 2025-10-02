@@ -124,13 +124,13 @@ const AdminCities = () => {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center gap-3">
           <MapPin className="h-8 w-8 text-primary" />
           <h1 className="text-3xl font-bold text-gray-900">{t('citiesManagement')}</h1>
         </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <Button onClick={resetForm} className="flex items-center space-x-2">
+            <Button onClick={resetForm} className="flex items-center gap-2">
               <Plus className="h-4 w-4" />
               <span>{t('addCity')}</span>
             </Button>
@@ -178,7 +178,7 @@ const AdminCities = () => {
                   required
                 />
               </div>
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center gap-2">
                 <Switch
                   id="is_active"
                   checked={formData.is_active}
@@ -186,7 +186,7 @@ const AdminCities = () => {
                 />
                 <Label htmlFor="is_active">{t('active')}</Label>
               </div>
-              <div className="flex justify-end space-x-2">
+              <div className="flex justify-end gap-2">
                 <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
                   {t('cancel')}
                 </Button>
@@ -298,12 +298,12 @@ const AdminCities = () => {
                           onCheckedChange={() => toggleStatus(city.id, city.is_active)}
                         />
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium gap-2">
                         <Button
                           variant="outline"
                           size="sm"
                           onClick={() => handleEdit(city)}
-                          className="inline-flex items-center space-x-1"
+                          className="inline-flex items-center gap-1"
                         >
                           <Edit className="h-3 w-3" />
                           <span>{t('edit')}</span>
@@ -312,7 +312,7 @@ const AdminCities = () => {
                           variant="outline"
                           size="sm"
                           onClick={() => handleDelete(city.id)}
-                          className="inline-flex items-center space-x-1 text-red-600 hover:text-red-700"
+                          className="inline-flex items-center gap-1 text-red-600 hover:text-red-700"
                         >
                           <Trash2 className="h-3 w-3" />
                           <span>{t('delete')}</span>

@@ -320,7 +320,7 @@ const AdminTestimonials = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center gap-2">
                     <Switch
                       id="is_featured"
                       checked={formData.is_featured}
@@ -328,7 +328,7 @@ const AdminTestimonials = () => {
                     />
                     <Label htmlFor="is_featured">Featured</Label>
                   </div>
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center gap-2">
                     <Switch
                       id="is_active"
                       checked={formData.is_active}
@@ -372,7 +372,7 @@ const AdminTestimonials = () => {
               {testimonials?.map((testimonial) => (
                 <TableRow key={testimonial.id}>
                   <TableCell>
-                    <div className="flex items-center space-x-3">
+                    <div className="flex items-center gap-3">
                       {testimonial.avatar_url && (
                         <img 
                           src={testimonial.avatar_url} 
@@ -418,7 +418,7 @@ const AdminTestimonials = () => {
                     </div>
                   </TableCell>
                   <TableCell>
-                    <div className="flex space-x-2">
+                    <div className="flex gap-2">
                       <Button
                         variant="outline"
                         size="sm"

@@ -69,7 +69,7 @@ const BookingStatusFilter = ({
               onClick={() =>
                 onFilterChange(button.key as BookingStatus | "all")
               }
-              className={`flex items-center space-x-2 rtl:space-x-reverse transition-all duration-200 ${
+              className={`flex items-center gap-2 rtl:gap-reverse transition-all duration-200 ${
                 isActive
                   ? "bg-primary text-primary-foreground shadow-sm"
                   : "hover:bg-gray-50 border-gray-200"

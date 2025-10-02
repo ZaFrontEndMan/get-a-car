@@ -259,7 +259,7 @@ const AdminSliders = () => {
                 </div>
               </div>
 
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center gap-2">
                 <Switch
                   id="is_active"
                   name="is_active"
@@ -268,7 +268,7 @@ const AdminSliders = () => {
                 <Label htmlFor="is_active">Active</Label>
               </div>
 
-              <div className="flex justify-end space-x-2">
+              <div className="flex justify-end gap-2">
                 <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
                   Cancel
                 </Button>
@@ -296,7 +296,7 @@ const AdminSliders = () => {
                   </CardTitle>
                   <p className="text-sm text-muted-foreground">{slide.subtitle}</p>
                 </div>
-                <div className="flex space-x-2">
+                <div className="flex gap-2">
                   <Button
                     variant="outline"
                     size="sm"

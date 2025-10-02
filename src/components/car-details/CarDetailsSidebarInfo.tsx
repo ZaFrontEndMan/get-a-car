@@ -57,13 +57,13 @@ const CarDetailsSidebarInfo = ({ car }: CarDetailsSidebarInfoProps) => {
           <CardContent>
             <div className="space-y-2">
               <div className="font-medium">{car.vendors.name}</div>
-              <div className="flex items-center space-x-4 text-sm text-gray-600">
-                <div className="flex items-center space-x-1">
+              <div className="flex items-center gap-4 text-sm text-gray-600">
+                <div className="flex items-center gap-1">
                   <Mail className="h-4 w-4" />
                   <span>{car.vendors.email}</span>
                 </div>
                 {car.vendors.phone && (
-                  <div className="flex items-center space-x-1">
+                  <div className="flex items-center gap-1">
                     <Phone className="h-4 w-4" />
                     <span>{car.vendors.phone}</span>
                   </div>

@@ -79,7 +79,7 @@ const Footer = () => {
       <div className="max-w-4xl mx-auto px-4 py-12 text-center space-y-2">
         {/* Logo + Name */}
         <div className=" flex flex-col items-start">
-          <div className="flex justify-center items-center space-x-2">
+          <div className="flex justify-center items-center gap-2">
             <Car className="h-8 w-8 text-primary" />
             <h3 className="text-xl font-bold">
               {settings?.siteName || "GetCar Rental"}
@@ -97,15 +97,15 @@ const Footer = () => {
 
         {/* Contact Info */}
         <div className="space-y-2 text-sm text-gray-300">
-          <div className="flex justify-center items-center space-x-2">
+          <div className="flex justify-center items-center gap-2">
             <Phone className="h-4 w-4 text-primary" />
             <span>{settings?.supportPhone || "+966 11 123 4567"}</span>
           </div>
-          <div className="flex justify-center items-center space-x-2">
+          <div className="flex justify-center items-center gap-2">
             <Mail className="h-4 w-4 text-primary" />
             <span>{settings?.contactEmail || "info@getcar.sa"}</span>
           </div>
-          <div className="flex justify-center items-center space-x-2">
+          <div className="flex justify-center items-center gap-2">
             <MapPin className="h-4 w-4 text-primary" />
             <span>
               {settings?.address || "King Fahd Road, Riyadh, Saudi Arabia"}
@@ -118,7 +118,7 @@ const Footer = () => {
           © {new Date().getFullYear()} {settings?.siteName || "GetCar"}.{" "}
           {t("allRightsReserved") || "All rights reserved."}
         </p>
-        <div className="flex justify-center space-x-4">
+        <div className="flex justify-center gap-4">
           {getSocialIcons().map((social) => {
             const IconComponent = social.icon;
             return (

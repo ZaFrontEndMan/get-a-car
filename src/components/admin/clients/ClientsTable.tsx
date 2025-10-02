@@ -107,7 +107,7 @@ const ClientsTable = ({ clients }: ClientsTableProps) => {
                 </Badge>
               </TableCell>
               <TableCell>
-                <div className={`flex space-x-2 ${isRTL ? 'space-x-reverse' : ''}`}>
+                <div className={`flex gap-2 ${isRTL ? 'gap-reverse' : ''}`}>
                   <Button 
                     variant="outline" 
                     size="sm" 

@@ -241,7 +241,7 @@ const AboutContent: React.FC<{
                       )}
                     </div>
 
-                    <div className="flex justify-center space-x-4 pt-6 border-t border-gray-100">
+                    <div className="flex justify-center gap-4 pt-6 border-t border-gray-100">
                       {member.email && (
                         <a
                           href={`mailto:${member.email}`}

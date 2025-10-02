@@ -29,7 +29,7 @@ const CarDetailsHeader = ({ car, selectedPricing }: CarDetailsHeaderProps) => {
           alt={car.name}
           className="w-full h-96 object-cover"
         />
-        <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full flex items-center space-x-1">
+        <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full flex items-center gap-1">
           <Star className="h-4 w-4 text-yellow-500 fill-current" />
           <span className="font-medium">{car.rating}</span>
           <span className="text-gray-600">({car.reviews})</span>

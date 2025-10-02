@@ -44,7 +44,7 @@ const BookingTableView = ({ bookings, onReturnCar, isReturning }: BookingTableVi
             return (
               <TableRow key={booking.id} className="hover:bg-gray-50/50 transition-colors">
                 <TableCell>
-                  <div className="flex items-center space-x-3">
+                  <div className="flex items-center gap-3">
                     <img
                       src={booking.car.images?.[0] || 'https://images.unsplash.com/photo-1549924231-f129b911e442'}
                       alt={booking.car.name}
@@ -74,14 +74,14 @@ const BookingTableView = ({ bookings, onReturnCar, isReturning }: BookingTableVi
                   </Badge>
                 </TableCell>
                 <TableCell>
-                  <div className="flex space-x-2">
+                  <div className="flex gap-2">
                     {canReturnCar(booking.booking_status) && (
                       <Button
                         size="sm"
                         variant="outline"
                         onClick={() => onReturnCar(booking.id)}
                         disabled={isReturning}
-                        className="flex items-center space-x-1 hover:bg-blue-50 hover:border-blue-200 hover:text-blue-700 transition-colors"
+                        className="flex items-center gap-1 hover:bg-blue-50 hover:border-blue-200 hover:text-blue-700 transition-colors"
                       >
                         <RotateCcw className="h-4 w-4 me-2" />
                         <span>{t('returnCar')}</span>
@@ -91,7 +91,7 @@ const BookingTableView = ({ bookings, onReturnCar, isReturning }: BookingTableVi
                       size="sm"
                       variant="outline"
                       onClick={() => setSelectedBooking(booking)}
-                      className="flex items-center space-x-1 hover:bg-green-50 hover:border-green-200 hover:text-green-700 transition-colors"
+                      className="flex items-center gap-1 hover:bg-green-50 hover:border-green-200 hover:text-green-700 transition-colors"
                     >
                       <Mail className="h-4 w-4 me-2" />
                       <span>{t('invoice')}</span>

@@ -151,7 +151,7 @@ const AdminPayments = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className={`flex items-center space-x-2 mb-4 ${isRTL ? 'space-x-reverse' : ''}`}>
+          <div className={`flex items-center gap-2 mb-4 ${isRTL ? 'gap-reverse' : ''}`}>
             <Search className="h-4 w-4 text-gray-400" />
             <Input
               placeholder={t('searchPayments')}
@@ -179,7 +179,7 @@ const AdminPayments = () => {
                 {filteredPayments.map((payment) => (
                   <TableRow key={payment.id}>
                     <TableCell>
-                      <div className={`flex items-center space-x-2 ${isRTL ? 'space-x-reverse' : ''}`}>
+                      <div className={`flex items-center gap-2 ${isRTL ? 'gap-reverse' : ''}`}>
                         {getStatusIcon(payment.payment_status)}
                         <div>
                           <div className="font-medium">
@@ -232,7 +232,7 @@ const AdminPayments = () => {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <div className={`flex space-x-2 ${isRTL ? 'space-x-reverse' : ''}`}>
+                      <div className={`flex gap-2 ${isRTL ? 'gap-reverse' : ''}`}>
                         <Button variant="outline" size="sm">
                           {t('view')}
                         </Button>

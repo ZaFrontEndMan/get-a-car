@@ -136,14 +136,14 @@ const VendorBookingMobileCard = ({ booking }: VendorBookingMobileCardProps) => {
           {/* Header */}
           <div className="flex items-start justify-between">
             <div className="flex-1">
-              <div className="flex items-center space-x-2 mb-2">
+              <div className="flex items-center gap-2 mb-2">
                 <Car className="h-4 w-4 text-gray-500" />
                 <h3 className="font-semibold text-lg">
                   {booking?.cars?.brand} {booking?.cars?.model}
                 </h3>
               </div>
               <p className="text-sm text-gray-600 mb-2">{booking?.cars?.name}</p>
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center gap-2">
                 <Badge
                   className={`${statusConfig.bgColor} ${statusConfig.textColor} border-0`}
                 >
@@ -172,7 +172,7 @@ const VendorBookingMobileCard = ({ booking }: VendorBookingMobileCardProps) => {
 
           {/* Customer Info */}
           <div className="grid grid-cols-1 gap-2 text-sm">
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center gap-2">
               <User className="h-4 w-4 text-gray-400" />
               <span className="font-medium">{booking?.customer_name}</span>
             </div>
@@ -180,7 +180,7 @@ const VendorBookingMobileCard = ({ booking }: VendorBookingMobileCardProps) => {
 
           {/* Dates */}
           <div className="grid grid-cols-2 gap-2 text-sm">
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center gap-2">
               <Calendar className="h-4 w-4 text-gray-400" />
               <div>
                 <p className="font-medium">Pickup</p>
@@ -189,7 +189,7 @@ const VendorBookingMobileCard = ({ booking }: VendorBookingMobileCardProps) => {
                 </p>
               </div>
             </div>
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center gap-2">
               <Calendar className="h-4 w-4 text-gray-400" />
               <div>
                 <p className="font-medium">Return</p>
@@ -204,25 +204,25 @@ const VendorBookingMobileCard = ({ booking }: VendorBookingMobileCardProps) => {
           {isExpanded && (
             <div className="space-y-3 pt-3 border-t">
               <div className="grid grid-cols-1 gap-2 text-sm">
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center gap-2">
                   <Phone className="h-4 w-4 text-gray-400" />
                   <span>{booking?.customer_phone}</span>
                 </div>
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center gap-2">
                   <Mail className="h-4 w-4 text-gray-400" />
                   <span className="text-xs">{booking?.customer_email}</span>
                 </div>
               </div>
 
               <div className="grid grid-cols-1 gap-2 text-sm">
-                <div className="flex items-start space-x-2">
+                <div className="flex items-start gap-2">
                   <MapPin className="h-4 w-4 text-gray-400 mt-0.5" />
                   <div>
                     <p className="font-medium">Pickup Location</p>
                     <p className="text-gray-600">{booking?.pickup_location}</p>
                   </div>
                 </div>
-                <div className="flex items-start space-x-2">
+                <div className="flex items-start gap-2">
                   <MapPin className="h-4 w-4 text-gray-400 mt-0.5" />
                   <div>
                     <p className="font-medium">Return Location</p>
@@ -232,7 +232,7 @@ const VendorBookingMobileCard = ({ booking }: VendorBookingMobileCardProps) => {
               </div>
 
               <div className="flex items-center justify-between pt-2">
-                <div className="flex items-center space-x-2 text-sm">
+                <div className="flex items-center gap-2 text-sm">
                   <DollarSign className="h-4 w-4 text-gray-400" />
                   <span>Payment: </span>
                   <Badge

@@ -86,8 +86,8 @@ const PaymentsList: React.FC = () => {
           >
             <div className={`flex justify-between items-start mb-4 `}>
               <div
-                className={`flex items-center space-x-3 ${
-                  isRTL ? "space-x-reverse" : ""
+                className={`flex items-center gap-3 ${
+                  isRTL ? "gap-reverse" : ""
                 }`}
               >
                 {getStatusIcon(invoice.status)}
@@ -111,8 +111,8 @@ const PaymentsList: React.FC = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div
-                className={`flex items-center space-x-2 ${
-                  isRTL ? "space-x-reverse" : ""
+                className={`flex items-center gap-2 ${
+                  isRTL ? "gap-reverse" : ""
                 }`}
               >
                 <Calendar className="h-4 w-4 text-gray-400" />
@@ -125,8 +125,8 @@ const PaymentsList: React.FC = () => {
               </div>
 
               <div
-                className={`flex items-center space-x-2 ${
-                  isRTL ? "space-x-reverse" : ""
+                className={`flex items-center gap-2 ${
+                  isRTL ? "gap-reverse" : ""
                 }`}
               >
                 <Car className="h-4 w-4 text-gray-400" />

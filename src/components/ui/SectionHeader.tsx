@@ -29,7 +29,7 @@ const SectionHeader: React.FC<SectionHeaderProps> = ({
       {showViewAll && viewAllLink && (
         <Link
           to={viewAllLink}
-          className="flex items-center space-x-2 text-primary hover:text-primary/80 transition-colors font-medium"
+          className="flex items-center gap-2 text-primary hover:text-primary/80 transition-colors font-medium"
         >
           <span>{t("viewAll")}</span>
           {language === "ar" ? (

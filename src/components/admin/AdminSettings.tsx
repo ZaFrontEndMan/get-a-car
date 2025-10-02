@@ -285,7 +285,7 @@ const AdminSettings = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-4">
-                <div className="flex items-center space-x-3">
+                <div className="flex items-center gap-3">
                   <Facebook className="h-5 w-5 text-blue-600" />
                   <div className="flex-1">
                     <Label htmlFor="facebookUrl">Facebook URL</Label>
@@ -299,7 +299,7 @@ const AdminSettings = () => {
                   </div>
                 </div>
 
-                <div className="flex items-center space-x-3">
+                <div className="flex items-center gap-3">
                   <Twitter className="h-5 w-5 text-blue-400" />
                   <div className="flex-1">
                     <Label htmlFor="twitterUrl">Twitter URL</Label>
@@ -313,7 +313,7 @@ const AdminSettings = () => {
                   </div>
                 </div>
 
-                <div className="flex items-center space-x-3">
+                <div className="flex items-center gap-3">
                   <Instagram className="h-5 w-5 text-pink-600" />
                   <div className="flex-1">
                     <Label htmlFor="instagramUrl">Instagram URL</Label>
@@ -327,7 +327,7 @@ const AdminSettings = () => {
                   </div>
                 </div>
 
-                <div className="flex items-center space-x-3">
+                <div className="flex items-center gap-3">
                   <Linkedin className="h-5 w-5 text-blue-700" />
                   <div className="flex-1">
                     <Label htmlFor="linkedinUrl">LinkedIn URL</Label>
@@ -341,7 +341,7 @@ const AdminSettings = () => {
                   </div>
                 </div>
 
-                <div className="flex items-center space-x-3">
+                <div className="flex items-center gap-3">
                   <Globe className="h-5 w-5 text-red-600" />
                   <div className="flex-1">
                     <Label htmlFor="youtubeUrl">YouTube URL</Label>
@@ -546,7 +546,7 @@ const AdminSettings = () => {
 
               <div className="space-y-4">
                 <h4 className="font-medium">System Actions</h4>
-                <div className="flex space-x-2">
+                <div className="flex gap-2">
                   <Button variant="outline">
                     Clear Cache
                   </Button>

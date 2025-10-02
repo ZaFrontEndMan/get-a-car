@@ -10,7 +10,7 @@ interface ClientsSearchProps {
 
 const ClientsSearch = ({ searchTerm, onSearchChange }: ClientsSearchProps) => {
   return (
-    <div className="flex items-center space-x-2 mb-4">
+    <div className="flex items-center gap-2 mb-4">
       <Search className="h-4 w-4 text-gray-400" />
       <Input
         placeholder="Search clients by name, email, or phone..."

@@ -12,11 +12,11 @@ const DashboardUserInfo = ({ userDisplayName, onLogout }: DashboardUserInfoProps
   const { t } = useLanguage();
 
   return (
-    <div className="flex items-center space-x-4 rtl:space-x-reverse">
+    <div className="flex items-center gap-4 rtl:gap-reverse">
       <span className="text-gray-700">Welcome, {userDisplayName}</span>
       <button 
         onClick={onLogout}
-        className="flex items-center space-x-2 rtl:space-x-reverse text-red hover:text-red/80"
+        className="flex items-center gap-2 rtl:gap-reverse text-red hover:text-red/80"
       >
         <LogOut className="h-5 w-5" />
         <span>{t('logout')}</span>

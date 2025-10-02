@@ -33,19 +33,19 @@ const CarDetailsMain = ({ car }: CarDetailsMainProps) => {
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4 mb-4 md:mb-6">
-            <div className="flex items-center space-x-1 md:space-x-2 p-2 md:p-3 bg-gray-50 rounded-lg">
+            <div className="flex items-center gap-1 md:gap-2 p-2 md:p-3 bg-gray-50 rounded-lg">
               <Users className="h-4 w-4 md:h-5 md:w-5 text-primary flex-shrink-0" />
               <span className="text-xs md:text-sm lg:text-base truncate">{car.seats} Seats</span>
             </div>
-            <div className="flex items-center space-x-1 md:space-x-2 p-2 md:p-3 bg-gray-50 rounded-lg">
+            <div className="flex items-center gap-1 md:gap-2 p-2 md:p-3 bg-gray-50 rounded-lg">
               <Fuel className="h-4 w-4 md:h-5 md:w-5 text-primary flex-shrink-0" />
               <span className="text-xs md:text-sm lg:text-base truncate">{car.fuel_type}</span>
             </div>
-            <div className="flex items-center space-x-1 md:space-x-2 p-2 md:p-3 bg-gray-50 rounded-lg">
+            <div className="flex items-center gap-1 md:gap-2 p-2 md:p-3 bg-gray-50 rounded-lg">
               <Settings className="h-4 w-4 md:h-5 md:w-5 text-primary flex-shrink-0" />
               <span className="text-xs md:text-sm lg:text-base truncate">{car.transmission}</span>
             </div>
-            <div className="flex items-center space-x-1 md:space-x-2 p-2 md:p-3 bg-gray-50 rounded-lg">
+            <div className="flex items-center gap-1 md:gap-2 p-2 md:p-3 bg-gray-50 rounded-lg">
               <Calendar className="h-4 w-4 md:h-5 md:w-5 text-primary flex-shrink-0" />
               <span className="text-xs md:text-sm lg:text-base">{car.year}</span>
             </div>

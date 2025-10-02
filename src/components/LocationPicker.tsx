@@ -22,7 +22,7 @@ const LocationPicker = ({
 
   return (
     <div className="bg-white rounded-2xl shadow-lg p-6">
-      <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center space-x-2 rtl:space-x-reverse">
+      <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2 rtl:gap-reverse">
         <MapPin className="h-5 w-5 text-primary" />
         <span>{t('pickupAndDropoff')}</span>
       </h3>

@@ -29,7 +29,7 @@ const OfferDetailsTerms = ({ policies, offer }: OfferDetailsTermsProps) => {
           
           <div className="space-y-3">
             {policies.map((policy, index) => (
-              <div key={index} className="flex items-start space-x-2 rtl:space-x-reverse">
+              <div key={index} className="flex items-start gap-2 rtl:gap-reverse">
                 <div className="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0"></div>
                 <span className="text-gray-700 text-sm">{policy}</span>
               </div>

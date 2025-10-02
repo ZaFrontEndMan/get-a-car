@@ -29,7 +29,7 @@ const FavoriteListView: React.FC<FavoriteListViewProps> = ({ favorites, onRemove
     <div className="space-y-4">
       {favorites.map((favorite) => (
         <div key={favorite.id} className="bg-white rounded-lg shadow p-6">
-          <div className="flex items-start space-x-4 rtl:space-x-reverse">
+          <div className="flex items-start gap-4 rtl:gap-reverse">
             <img
               src={favorite.carImage}
               alt={favorite.carTitle}
@@ -40,8 +40,8 @@ const FavoriteListView: React.FC<FavoriteListViewProps> = ({ favorites, onRemove
                 <div>
                   <h3 className="font-semibold text-lg text-gray-900">{favorite.carTitle}</h3>
                 </div>
-                <div className="text-right rtl:text-left flex items-center space-x-3 rtl:space-x-reverse">
-                  <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                <div className="text-right rtl:text-left flex items-center gap-3 rtl:gap-reverse">
+                  <div className="flex items-center gap-2 rtl:gap-reverse">
                     <img
                       src={favorite.vendorLogo}
                       alt={favorite.vendor}
@@ -65,11 +65,11 @@ const FavoriteListView: React.FC<FavoriteListViewProps> = ({ favorites, onRemove
               </div>
               
               <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-4 rtl:space-x-reverse">
+                <div className="flex items-center gap-4 rtl:gap-reverse">
                   {favorite.features.map((feature, index) => {
                     const IconComponent = feature.icon;
                     return (
-                      <div key={index} className="flex items-center space-x-1 rtl:space-x-reverse text-gray-500">
+                      <div key={index} className="flex items-center gap-1 rtl:gap-reverse text-gray-500">
                         <IconComponent className="h-4 w-4" />
                         <span className="text-xs">{feature.label}</span>
                       </div>
@@ -83,7 +83,7 @@ const FavoriteListView: React.FC<FavoriteListViewProps> = ({ favorites, onRemove
                     e.stopPropagation();
                     onBookNow(favorite.id);
                   }}
-                  className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors flex items-center space-x-1 rtl:space-x-reverse"
+                  className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors flex items-center gap-1 rtl:gap-reverse"
                 >
                   <ShoppingCart className="h-4 w-4" />
                   <span className="text-sm">{t('bookNow')}</span>

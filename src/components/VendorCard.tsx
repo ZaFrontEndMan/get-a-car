@@ -46,7 +46,7 @@ const VendorCard = ({ vendor }: VendorCardProps) => {
             )}
           </div>
 
-          <div className="flex items-center space-x-1 mb-3">
+          <div className="flex items-center gap-1 mb-3">
             <Star className="h-4 w-4 text-yellow-500 fill-current" />
             <span className="text-sm font-medium">{safeRating.toFixed(1)}</span>
           </div>

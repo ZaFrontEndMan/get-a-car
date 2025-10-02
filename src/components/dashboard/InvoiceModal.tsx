@@ -28,7 +28,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({ isOpen, onClose, payment })
           <DialogTitle className="text-2xl font-bold">{t('invoice')}</DialogTitle>
           <button
             onClick={handleDownloadPDF}
-            className="flex items-center space-x-2 rtl:space-x-reverse bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors duration-200"
+            className="flex items-center gap-2 rtl:gap-reverse bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors duration-200"
           >
             <Download className="h-4 w-4" />
             <span>{t('downloadPDF')}</span>
@@ -38,7 +38,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({ isOpen, onClose, payment })
         <div className="bg-white p-8 border border-gray-200 rounded-lg">
           {/* Invoice Header */}
           <div className="flex justify-between items-start mb-8">
-            <div className="flex items-center space-x-3 rtl:space-x-reverse">
+            <div className="flex items-center gap-3 rtl:gap-reverse">
               <div className="gradient-primary p-2 rounded-lg">
                 <Car className="h-6 w-6 text-white" />
               </div>
@@ -66,7 +66,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({ isOpen, onClose, payment })
             </div>
             <div>
               <h3 className="font-semibold text-gray-900 mb-2">{t('vendor')}</h3>
-              <div className="flex items-center space-x-2 rtl:space-x-reverse text-gray-600">
+              <div className="flex items-center gap-2 rtl:gap-reverse text-gray-600">
                 <img src={payment.vendorLogo} alt={payment.vendor} className="w-8 h-8 rounded-full" />
                 <div>
                   <p className="font-medium">{payment.vendor}</p>

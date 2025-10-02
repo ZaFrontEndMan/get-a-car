@@ -50,7 +50,7 @@ export const VendorCardSkeleton = () => {
       <div className="w-20 h-20 bg-gray-300 rounded-full mx-auto mb-4"></div>
       <div className="h-6 bg-gray-300 rounded mb-2"></div>
       <div className="h-4 bg-gray-300 rounded mb-4 w-3/4 mx-auto"></div>
-      <div className="flex justify-center space-x-1 mb-4">
+      <div className="flex justify-center gap-1 mb-4">
         {[...Array(5)].map((_, i) => (
           <div key={i} className="w-4 h-4 bg-gray-300 rounded-full"></div>
         ))}

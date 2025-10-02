@@ -311,7 +311,7 @@ const AdminBlogs = () => {
                 </p>
               </div>
 
-              <div className="flex space-x-2">
+              <div className="flex gap-2">
                 <Button type="submit" disabled={blogMutation.isPending}>
                   {editingBlog ? t('updatePost') : t('createPost')}
                 </Button>
@@ -330,7 +330,7 @@ const AdminBlogs = () => {
             <CardContent className="p-6">
               <div className="flex items-start justify-between">
                 <div className="flex-1">
-                  <div className="flex items-center space-x-2 mb-2">
+                  <div className="flex items-center gap-2 mb-2">
                     <h3 className="text-lg font-semibold">{blog.title}</h3>
                     <Badge variant={blog.status === 'published' ? 'default' : 'secondary'}>
                       {blog.status === 'published' ? (
@@ -363,14 +363,14 @@ const AdminBlogs = () => {
                       )}
                     </div>
                   )}
-                  <div className="flex items-center space-x-4 text-sm text-gray-500">
+                  <div className="flex items-center gap-4 text-sm text-gray-500">
                     <span>{t('updated')}: {new Date(blog.updated_at).toLocaleDateString()}</span>
                     {blog.published_at && (
                       <span>{t('publishedOn')}: {new Date(blog.published_at).toLocaleDateString()}</span>
                     )}
                   </div>
                 </div>
-                <div className="flex items-center space-x-2 ml-4">
+                <div className="flex items-center gap-2 ml-4">
                   <Button variant="outline" size="sm" onClick={() => handleEdit(blog)}>
                     <Edit className="h-4 w-4" />
                   </Button>

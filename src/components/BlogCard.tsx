@@ -39,15 +39,15 @@ const BlogCard = ({ post }: BlogCardProps) => {
         <p className="text-gray-600 text-sm mb-4 line-clamp-3 flex-1">{post.excerpt}</p>
 
         <div className="flex items-center justify-between text-xs text-gray-500 mb-4">
-          <div className="flex items-center space-x-1 rtl:space-x-reverse">
+          <div className="flex items-center gap-1 rtl:gap-reverse">
             <User className="h-3 w-3" />
             <span>{post.author}</span>
           </div>
-          <div className="flex items-center space-x-1 rtl:space-x-reverse">
+          <div className="flex items-center gap-1 rtl:gap-reverse">
             <Calendar className="h-3 w-3" />
             <span>{new Date(post.date).toLocaleDateString()}</span>
           </div>
-          <div className="flex items-center space-x-1 rtl:space-x-reverse">
+          <div className="flex items-center gap-1 rtl:gap-reverse">
             <Clock className="h-3 w-3" />
             <span>{post.readTime} {t('minRead')}</span>
           </div>

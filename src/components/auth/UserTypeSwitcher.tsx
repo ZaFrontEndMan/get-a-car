@@ -24,7 +24,7 @@ const UserTypeSwitcher = ({
         <button
           key={key}
           onClick={() => onUserTypeChange(key)}
-          className={`flex-1 flex items-center justify-center space-x-2 rtl:space-x-reverse py-2 px-4 rounded-md font-medium transition-all duration-300 ${
+          className={`flex-1 flex items-center justify-center gap-2 rtl:gap-reverse py-2 px-4 rounded-md font-medium transition-all duration-300 ${
             userType === key
               ? "bg-primary text-white shadow-md"
               : "text-gray-600 hover:text-primary"

@@ -45,7 +45,7 @@ const CarsListView = ({ cars, onEdit, onDelete, onDuplicate, onView, isDeleting 
       {cars.map((car) => (
         <Card key={car.id} className="overflow-hidden">
           <CardContent className="p-6">
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center gap-4">
               <div className="w-24 h-16 bg-gray-200 rounded-lg overflow-hidden flex-shrink-0">
                 {car.images && car.images.length > 0 ? (
                   <img 
@@ -74,27 +74,27 @@ const CarsListView = ({ cars, onEdit, onDelete, onDuplicate, onView, isDeleting 
                   )}
                 </div>
                 
-                <div className="flex items-center space-x-6 mt-2 text-sm text-gray-600">
-                  <div className="flex items-center space-x-1">
+                <div className="flex items-center gap-6 mt-2 text-sm text-gray-600">
+                  <div className="flex items-center gap-1">
                     <Calendar className="h-4 w-4" />
                     <span>{car.year}</span>
                   </div>
-                  <div className="flex items-center space-x-1">
+                  <div className="flex items-center gap-1">
                     <Users className="h-4 w-4" />
                     <span>{car.seats} seats</span>
                   </div>
-                  <div className="flex items-center space-x-1">
+                  <div className="flex items-center gap-1">
                     <Fuel className="h-4 w-4" />
                     <span className="capitalize">{car.fuel_type}</span>
                   </div>
-                  <div className="flex items-center space-x-1">
+                  <div className="flex items-center gap-1">
                     <Settings className="h-4 w-4" />
                     <span className="capitalize">{car.transmission}</span>
                   </div>
                 </div>
               </div>
               
-              <div className="flex items-center space-x-4">
+              <div className="flex items-center gap-4">
                 <div className="text-center">
                   <Badge variant={car.is_available ? 'default' : 'secondary'}>
                     {car.is_available ? 'Available' : 'Not Available'}
@@ -104,7 +104,7 @@ const CarsListView = ({ cars, onEdit, onDelete, onDuplicate, onView, isDeleting 
                   </p>
                 </div>
                 
-                <div className="flex space-x-2">
+                <div className="flex gap-2">
                   <Button
                     variant="outline"
                     size="sm"

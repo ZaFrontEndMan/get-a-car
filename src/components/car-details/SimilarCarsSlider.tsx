@@ -66,7 +66,7 @@ const SimilarCarsSlider = ({
   if (isLoading) {
     return <div className="bg-white rounded-2xl shadow-lg p-6">
         <h3 className="text-2xl font-bold text-gray-900 mb-6">Similar Cars</h3>
-        <div className="flex space-x-4">
+        <div className="flex gap-4">
           {[1, 2, 3].map(i => <div key={i} className="w-80 h-48 bg-gray-200 rounded-lg animate-pulse" />)}
         </div>
       </div>;

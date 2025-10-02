@@ -221,7 +221,7 @@ const BookingInvoice = ({
         <div className="bg-cream min-h-full w-full">
           {/* Header */}
           <div className="bg-white px-3 sm:px-4 md:px-6 py-3 sm:py-4 border-b flex items-center justify-between">
-            <div className="flex items-center space-x-2 sm:space-x-3">
+            <div className="flex items-center gap-2 sm:gap-3">
               <div className="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 gradient-primary rounded-lg flex items-center justify-center">
                 <Car className="h-3 w-3 sm:h-4 sm:w-4 md:h-5 md:w-5 text-white" />
               </div>

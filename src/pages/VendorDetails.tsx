@@ -120,7 +120,7 @@ const VendorDetailsContent = () => {
       {/* Breadcrumb */}
       <div className="mb-6">
         <nav className="flex" aria-label="Breadcrumb">
-          <ol className="flex items-center space-x-2 rtl:space-x-reverse">
+          <ol className="flex items-center gap-2 rtl:gap-reverse">
             <li>
               <Link
                 to="/"

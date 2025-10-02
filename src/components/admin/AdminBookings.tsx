@@ -124,7 +124,7 @@ const AdminBookings = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className={`flex items-center space-x-2 mb-4 ${isRTL ? 'space-x-reverse' : ''}`}>
+          <div className={`flex items-center gap-2 mb-4 ${isRTL ? 'gap-reverse' : ''}`}>
             <Search className="h-4 w-4 text-gray-400" />
             <Input
               placeholder={t('searchBookings')}
@@ -202,7 +202,7 @@ const AdminBookings = () => {
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        <div className={`flex space-x-2 ${isRTL ? 'space-x-reverse' : ''}`}>
+                        <div className={`flex gap-2 ${isRTL ? 'gap-reverse' : ''}`}>
                           <Button variant="outline" size="sm">
                             {t('view')}
                           </Button>

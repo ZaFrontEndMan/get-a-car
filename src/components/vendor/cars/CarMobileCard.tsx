@@ -62,7 +62,7 @@ const CarMobileCard = ({ car, onEdit, onDelete, onDuplicate, onView }: CarMobile
       <CardContent className="p-4">
         <div className="space-y-4">
           {/* Header with Image */}
-          <div className="flex space-x-3">
+          <div className="flex gap-3">
             <div className="w-20 h-16 bg-gray-200 rounded-lg overflow-hidden flex-shrink-0">
               {car.images && car.images.length > 0 ? (
                 <img 
@@ -84,7 +84,7 @@ const CarMobileCard = ({ car, onEdit, onDelete, onDuplicate, onView }: CarMobile
                     {car.brand} {car.model}
                   </h3>
                   <p className="text-sm text-gray-600">{car.name}</p>
-                  <div className="flex items-center space-x-2 mt-1">
+                  <div className="flex items-center gap-2 mt-1">
                     <Badge variant={car.is_available ? 'default' : 'secondary'}>
                       {car.is_available ? 'Available' : 'Not Available'}
                     </Badge>
@@ -126,15 +126,15 @@ const CarMobileCard = ({ car, onEdit, onDelete, onDuplicate, onView }: CarMobile
 
           {/* Basic Info */}
           <div className="grid grid-cols-3 gap-2 text-sm">
-            <div className="flex items-center space-x-1">
+            <div className="flex items-center gap-1">
               <Calendar className="h-3 w-3 text-gray-400" />
               <span>{car.year}</span>
             </div>
-            <div className="flex items-center space-x-1">
+            <div className="flex items-center gap-1">
               <Users className="h-3 w-3 text-gray-400" />
               <span>{car.seats} seats</span>
             </div>
-            <div className="flex items-center space-x-1">
+            <div className="flex items-center gap-1">
               <Fuel className="h-3 w-3 text-gray-400" />
               <span className="capitalize">{car.fuel_type}</span>
             </div>
@@ -174,7 +174,7 @@ const CarMobileCard = ({ car, onEdit, onDelete, onDuplicate, onView }: CarMobile
               {(car.weekly_rate || car.monthly_rate) && (
                 <div className="space-y-1 text-sm">
                   <p className="font-medium text-gray-700">Pricing</p>
-                  <div className="flex items-center space-x-4">
+                  <div className="flex items-center gap-4">
                     {car.weekly_rate && (
                       <span className="text-gray-600">SAR {car.weekly_rate}/week</span>
                     )}
@@ -206,7 +206,7 @@ const CarMobileCard = ({ car, onEdit, onDelete, onDuplicate, onView }: CarMobile
               {car.pickup_locations && car.pickup_locations.length > 0 && (
                 <div className="space-y-1 text-sm">
                   <p className="font-medium text-gray-700">Pickup Locations</p>
-                  <div className="flex items-center space-x-1">
+                  <div className="flex items-center gap-1">
                     <MapPin className="h-3 w-3 text-gray-400" />
                     <span className="text-gray-600">
                       {car.pickup_locations.slice(0, 2).join(', ')}
@@ -220,12 +220,12 @@ const CarMobileCard = ({ car, onEdit, onDelete, onDuplicate, onView }: CarMobile
 
           {/* Actions */}
           <div className="flex justify-between items-center pt-2 border-t">
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center gap-2">
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => onView(car)}
-                className="flex items-center space-x-1"
+                className="flex items-center gap-1"
               >
                 <Eye className="h-3 w-3" />
                 <span>View</span>
@@ -234,7 +234,7 @@ const CarMobileCard = ({ car, onEdit, onDelete, onDuplicate, onView }: CarMobile
                 variant="outline"
                 size="sm"
                 onClick={() => onEdit(car)}
-                className="flex items-center space-x-1"
+                className="flex items-center gap-1"
               >
                 <Edit className="h-3 w-3" />
                 <span>Edit</span>
@@ -243,7 +243,7 @@ const CarMobileCard = ({ car, onEdit, onDelete, onDuplicate, onView }: CarMobile
                 variant="outline"
                 size="sm"
                 onClick={() => onDuplicate(car)}
-                className="flex items-center space-x-1"
+                className="flex items-center gap-1"
               >
                 <Copy className="h-3 w-3" />
                 <span>Duplicate</span>
@@ -253,7 +253,7 @@ const CarMobileCard = ({ car, onEdit, onDelete, onDuplicate, onView }: CarMobile
               variant="outline"
               size="sm"
               onClick={() => onDelete(car.id)}
-              className="flex items-center space-x-1 text-red-600 border-red-200 hover:bg-red-50"
+              className="flex items-center gap-1 text-red-600 border-red-200 hover:bg-red-50"
             >
               <Trash2 className="h-3 w-3" />
               <span>Delete</span>

@@ -14,9 +14,9 @@ const CarsHeader = ({ viewMode, onViewModeChange, onAddCar, onImportCars }: Cars
   return (
     <div className="flex items-center justify-between">
       <h2 className="text-3xl font-bold text-gray-900">Cars</h2>
-      <div className="flex items-center space-x-4">
+      <div className="flex items-center gap-4">
         {/* View Mode Toggle */}
-        <div className="flex items-center space-x-2 bg-gray-100 rounded-lg p-1">
+        <div className="flex items-center gap-2 bg-gray-100 rounded-lg p-1">
           <Button
             variant={viewMode === 'grid' ? 'default' : 'ghost'}
             size="sm"
@@ -45,7 +45,7 @@ const CarsHeader = ({ viewMode, onViewModeChange, onAddCar, onImportCars }: Cars
           <Button 
             onClick={onImportCars} 
             variant="outline"
-            className="flex items-center space-x-2"
+            className="flex items-center gap-2"
           >
             <FileSpreadsheet className="h-4 w-4" />
             <span>Import Excel</span>
@@ -53,7 +53,7 @@ const CarsHeader = ({ viewMode, onViewModeChange, onAddCar, onImportCars }: Cars
         )}
         
         {/* Add Car Button */}
-        <Button onClick={onAddCar} className="flex items-center space-x-2">
+        <Button onClick={onAddCar} className="flex items-center gap-2">
           <Plus className="h-4 w-4" />
           <span>Add Car</span>
         </Button>
