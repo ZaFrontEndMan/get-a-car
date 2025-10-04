@@ -1,30 +1,31 @@
-
-import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Plus, X, MapPin } from 'lucide-react';
+import React from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Plus, X, MapPin } from "lucide-react";
 
 interface LocationsSectionProps {
   pickupLocations: string[];
   dropoffLocations: string[];
   setPickupLocations: (locations: string[]) => void;
   setDropoffLocations: (locations: string[]) => void;
+  t: (key: string, params?: Record<string, any>) => string;
 }
 
-const LocationsSection = ({ 
-  pickupLocations, 
-  dropoffLocations, 
-  setPickupLocations, 
-  setDropoffLocations 
+const LocationsSection = ({
+  pickupLocations,
+  dropoffLocations,
+  setPickupLocations,
+  setDropoffLocations,
+  t,
 }: LocationsSectionProps) => {
   const addPickupLocation = () => {
-    setPickupLocations([...pickupLocations, '']);
+    setPickupLocations([...pickupLocations, ""]);
   };
 
   const addDropoffLocation = () => {
-    setDropoffLocations([...dropoffLocations, '']);
+    setDropoffLocations([...dropoffLocations, ""]);
   };
 
   const updatePickupLocation = (index: number, value: string) => {
@@ -52,20 +53,25 @@ const LocationsSection = ({
   };
 
   return (
-    <Card>
+    <Card dir={t("language") === "ar" ? "rtl" : "ltr"}>
       <CardHeader>
         <CardTitle className="text-lg flex items-center gap-2">
           <MapPin className="h-5 w-5" />
-          Pickup & Dropoff Locations
+          {t("pickup_dropoff_locations")}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
         <div>
           <div className="flex items-center justify-between mb-3">
-            <Label>Pickup Locations</Label>
-            <Button type="button" onClick={addPickupLocation} size="sm" variant="outline">
+            <Label>{t("pickup_locations")}</Label>
+            <Button
+              type="button"
+              onClick={addPickupLocation}
+              size="sm"
+              variant="outline"
+            >
               <Plus className="h-4 w-4 mr-1" />
-              Add Location
+              {t("add_location")}
             </Button>
           </div>
           <div className="space-y-2">
@@ -74,7 +80,7 @@ const LocationsSection = ({
                 <Input
                   value={location}
                   onChange={(e) => updatePickupLocation(index, e.target.value)}
-                  placeholder="Enter pickup location (e.g., Airport Terminal 1)"
+                  placeholder={t("enter_pickup_location")}
                 />
                 {pickupLocations.length > 1 && (
                   <Button
@@ -94,10 +100,15 @@ const LocationsSection = ({
 
         <div>
           <div className="flex items-center justify-between mb-3">
-            <Label>Dropoff Locations</Label>
-            <Button type="button" onClick={addDropoffLocation} size="sm" variant="outline">
+            <Label>{t("dropoff_locations")}</Label>
+            <Button
+              type="button"
+              onClick={addDropoffLocation}
+              size="sm"
+              variant="outline"
+            >
               <Plus className="h-4 w-4 mr-1" />
-              Add Location
+              {t("add_location")}
             </Button>
           </div>
           <div className="space-y-2">
@@ -106,7 +117,7 @@ const LocationsSection = ({
                 <Input
                   value={location}
                   onChange={(e) => updateDropoffLocation(index, e.target.value)}
-                  placeholder="Enter dropoff location (e.g., City Center)"
+                  placeholder={t("enter_dropoff_location")}
                 />
                 {dropoffLocations.length > 1 && (
                   <Button
@@ -126,8 +137,7 @@ const LocationsSection = ({
 
         <div className="bg-blue-50 p-4 rounded-lg">
           <p className="text-sm text-blue-800">
-            <strong>Tip:</strong> Add multiple pickup and dropoff locations to give customers more flexibility. 
-            Popular locations include airports, hotels, city centers, and train stations.
+            <strong>{t("tip")}:</strong> {t("tip_locations")}
           </p>
         </div>
       </CardContent>

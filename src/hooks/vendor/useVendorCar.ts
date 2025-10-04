@@ -9,13 +9,15 @@ import {
   getAllCars,
   getCarById,
   getBranchCars,
+  duplicateCar,
 } from "../../api/vendor/vendorCarApi";
 
 // Query keys
 const VENDOR_CAR_QUERY_KEYS = {
   all: ["vendor", "cars"] as const,
   lists: () => [...VENDOR_CAR_QUERY_KEYS.all, "list"] as const,
-  list: (filters: string) => [...VENDOR_CAR_QUERY_KEYS.lists(), { filters }] as const,
+  list: (filters: string) =>
+    [...VENDOR_CAR_QUERY_KEYS.lists(), { filters }] as const,
   details: () => [...VENDOR_CAR_QUERY_KEYS.all, "detail"] as const,
   detail: (id: string) => [...VENDOR_CAR_QUERY_KEYS.details(), id] as const,
   branchCars: () => [...VENDOR_CAR_QUERY_KEYS.all, "branch"] as const,
@@ -49,7 +51,7 @@ export const useGetBranchCars = () => {
 // Create car mutation
 export const useCreateCar = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: createCar,
     onSuccess: () => {
@@ -61,7 +63,7 @@ export const useCreateCar = () => {
 // Update car mutation
 export const useUpdateCar = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: ({ carId, carData }: { carId: string; carData: FormData }) =>
       updateCar(carId, carData),
@@ -74,7 +76,7 @@ export const useUpdateCar = () => {
 // Delete car mutation
 export const useDeleteCar = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: deleteCar,
     onSuccess: () => {
@@ -86,7 +88,7 @@ export const useDeleteCar = () => {
 // Assign car to new branch mutation
 export const useAssignCarToNewBranch = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: ({ carId, branchData }: { carId: string; branchData: any }) =>
       assignCarToNewBranch(carId, branchData),
@@ -99,7 +101,7 @@ export const useAssignCarToNewBranch = () => {
 // Assign car to new main branch mutation
 export const useAssignCarToNewMainBranch = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: ({ carId, branchData }: { carId: string; branchData: any }) =>
       assignCarToNewMainBranch(carId, branchData),
@@ -112,10 +114,27 @@ export const useAssignCarToNewMainBranch = () => {
 // Update car availability mutation
 export const useUpdateCarAvailability = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
-    mutationFn: ({ carId, availabilityData }: { carId: string; availabilityData: any }) =>
-      updateCarAvailability(carId, availabilityData),
+    mutationFn: ({
+      carId,
+      availabilityData,
+    }: {
+      carId: string;
+      availabilityData: any;
+    }) => updateCarAvailability(carId, availabilityData),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: VENDOR_CAR_QUERY_KEYS.all });
+    },
+  });
+};
+
+// Duplicate car mutation
+export const useDuplicateCar = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (carId: string) => duplicateCar(carId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: VENDOR_CAR_QUERY_KEYS.all });
     },

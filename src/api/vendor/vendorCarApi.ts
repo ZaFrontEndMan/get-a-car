@@ -80,3 +80,11 @@ export const getBranchCars = async () => {
   const { data } = await axiosInstance.post("/Vendor/Car/GetBranchCars");
   return data;
 };
+
+// Duplicate car by ID
+export const duplicateCar = async (carId: string) => {
+  const { data } = await axiosInstance.post(
+    `/Vendor/Car/DuplicateCar/${carId}`
+  );
+  return data;
+};

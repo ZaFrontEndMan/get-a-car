@@ -1,8 +1,7 @@
-
-import React from 'react';
-import { Plus, Trash2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import React from "react";
+import { Plus, Trash2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 interface PaidFeature {
   title: string;
@@ -12,19 +11,28 @@ interface PaidFeature {
 interface PaidFeaturesSectionProps {
   paidFeatures: PaidFeature[];
   setPaidFeatures: React.Dispatch<React.SetStateAction<PaidFeature[]>>;
+  t: (key: string, params?: Record<string, any>) => string;
 }
 
-const PaidFeaturesSection = ({ paidFeatures, setPaidFeatures }: PaidFeaturesSectionProps) => {
+const PaidFeaturesSection = ({
+  paidFeatures,
+  setPaidFeatures,
+  t,
+}: PaidFeaturesSectionProps) => {
   const addPaidFeature = () => {
-    setPaidFeatures([...paidFeatures, { title: '', price: 0 }]);
+    setPaidFeatures([...paidFeatures, { title: "", price: 0 }]);
   };
 
   const removePaidFeature = (index: number) => {
     setPaidFeatures(paidFeatures.filter((_, i) => i !== index));
   };
 
-  const updatePaidFeature = (index: number, field: keyof PaidFeature, value: string | number) => {
-    const updated = paidFeatures.map((feature, i) => 
+  const updatePaidFeature = (
+    index: number,
+    field: keyof PaidFeature,
+    value: string | number
+  ) => {
+    const updated = paidFeatures.map((feature, i) =>
       i === index ? { ...feature, [field]: value } : feature
     );
     setPaidFeatures(updated);
@@ -33,26 +41,30 @@ const PaidFeaturesSection = ({ paidFeatures, setPaidFeatures }: PaidFeaturesSect
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold">Additional Paid Features</h3>
+        <h3 className="text-lg font-semibold">
+          {t("additional_paid_features")}
+        </h3>
         <Button type="button" onClick={addPaidFeature} size="sm">
           <Plus className="h-4 w-4 mr-2" />
-          Add Feature
+          {t("add_feature")}
         </Button>
       </div>
       {paidFeatures.map((feature, index) => (
         <div key={index} className="flex items-center gap-2 mb-2">
           <Input
-            placeholder="Feature title"
+            placeholder={t("feature_title")}
             value={feature.title}
-            onChange={(e) => updatePaidFeature(index, 'title', e.target.value)}
+            onChange={(e) => updatePaidFeature(index, "title", e.target.value)}
             className="flex-1"
           />
           <Input
             type="number"
             step="0.01"
-            placeholder="Price (SAR)"
+            placeholder={t("price_sar")}
             value={feature.price}
-            onChange={(e) => updatePaidFeature(index, 'price', parseFloat(e.target.value) || 0)}
+            onChange={(e) =>
+              updatePaidFeature(index, "price", parseFloat(e.target.value) || 0)
+            }
             className="w-32"
           />
           <Button

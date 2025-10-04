@@ -1,61 +1,67 @@
-
-import React from 'react';
-import { Plus, Grid3X3, List, Table, FileSpreadsheet } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import React from "react";
+import { Plus, Grid3X3, List, Table, FileSpreadsheet } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface CarsHeaderProps {
-  viewMode: 'grid' | 'list' | 'table';
-  onViewModeChange: (mode: 'grid' | 'list' | 'table') => void;
+  viewMode: "grid" | "list" | "table";
+  onViewModeChange: (mode: "grid" | "list" | "table") => void;
   onAddCar: () => void;
   onImportCars?: () => void;
+  t: (key: string, params?: Record<string, any>) => string; // Translation function
 }
 
-const CarsHeader = ({ viewMode, onViewModeChange, onAddCar, onImportCars }: CarsHeaderProps) => {
+const CarsHeader = ({
+  viewMode,
+  onViewModeChange,
+  onAddCar,
+  onImportCars,
+  t,
+}: CarsHeaderProps) => {
   return (
     <div className="flex items-center justify-between">
-      <h2 className="text-3xl font-bold text-gray-900">Cars</h2>
+      <h2 className="text-3xl font-bold text-gray-900">{t("cars")}</h2>
       <div className="flex items-center gap-4">
         {/* View Mode Toggle */}
         <div className="flex items-center gap-2 bg-gray-100 rounded-lg p-1">
           <Button
-            variant={viewMode === 'grid' ? 'default' : 'ghost'}
+            variant={viewMode === "grid" ? "default" : "ghost"}
             size="sm"
-            onClick={() => onViewModeChange('grid')}
+            onClick={() => onViewModeChange("grid")}
           >
             <Grid3X3 className="h-4 w-4" />
           </Button>
           <Button
-            variant={viewMode === 'list' ? 'default' : 'ghost'}
+            variant={viewMode === "list" ? "default" : "ghost"}
             size="sm"
-            onClick={() => onViewModeChange('list')}
+            onClick={() => onViewModeChange("list")}
           >
             <List className="h-4 w-4" />
           </Button>
           <Button
-            variant={viewMode === 'table' ? 'default' : 'ghost'}
+            variant={viewMode === "table" ? "default" : "ghost"}
             size="sm"
-            onClick={() => onViewModeChange('table')}
+            onClick={() => onViewModeChange("table")}
           >
             <Table className="h-4 w-4" />
           </Button>
         </div>
-        
+
         {/* Import Button */}
         {onImportCars && (
-          <Button 
-            onClick={onImportCars} 
+          <Button
+            onClick={onImportCars}
             variant="outline"
             className="flex items-center gap-2"
           >
             <FileSpreadsheet className="h-4 w-4" />
-            <span>Import Excel</span>
+            <span>{t("import_excel")}</span>
           </Button>
         )}
-        
+
         {/* Add Car Button */}
         <Button onClick={onAddCar} className="flex items-center gap-2">
           <Plus className="h-4 w-4" />
-          <span>Add Car</span>
+          <span>{t("add_car")}</span>
         </Button>
       </div>
     </div>

@@ -1,5 +1,4 @@
-
-import React from 'react';
+import React from "react";
 import {
   Table,
   TableBody,
@@ -7,10 +6,11 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Edit, Trash2, Eye, Star, Copy } from 'lucide-react';
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Edit, Trash2, Eye, Star, Copy } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface CarData {
   id: string;
@@ -46,21 +46,34 @@ interface CarsTableViewProps {
   isDeleting: boolean;
 }
 
-const CarsTableView = ({ cars, onEdit, onDelete, onDuplicate, onView, isDeleting }: CarsTableViewProps) => {
+const CarsTableView = ({
+  cars,
+  onEdit,
+  onDelete,
+  onDuplicate,
+  onView,
+  isDeleting,
+}: CarsTableViewProps) => {
+  const { t, language } = useLanguage();
+  const isRtl = language === "ar";
+
   return (
-    <div className="border rounded-lg overflow-hidden">
+    <div
+      className="border rounded-lg overflow-hidden"
+      dir={isRtl ? "rtl" : "ltr"}
+    >
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Car</TableHead>
-            <TableHead>Brand & Model</TableHead>
-            <TableHead>Year</TableHead>
-            <TableHead>Type</TableHead>
-            <TableHead>Seats</TableHead>
-            <TableHead>Fuel</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Daily Rate</TableHead>
-            <TableHead>Actions</TableHead>
+            <TableHead>{t("car")}</TableHead>
+            <TableHead>{t("brand_model")}</TableHead>
+            <TableHead>{t("year")}</TableHead>
+            <TableHead>{t("type")}</TableHead>
+            <TableHead>{t("seats")}</TableHead>
+            <TableHead>{t("fuel")}</TableHead>
+            <TableHead>{t("status")}</TableHead>
+            <TableHead>{t("daily_rate")}</TableHead>
+            <TableHead>{t("actions")}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -70,8 +83,8 @@ const CarsTableView = ({ cars, onEdit, onDelete, onDuplicate, onView, isDeleting
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-8 bg-gray-200 rounded overflow-hidden">
                     {car.images && car.images.length > 0 ? (
-                      <img 
-                        src={car.images[0]} 
+                      <img
+                        src={car.images[0]}
                         alt={car.name}
                         className="w-full h-full object-cover"
                       />
@@ -82,29 +95,34 @@ const CarsTableView = ({ cars, onEdit, onDelete, onDuplicate, onView, isDeleting
                   <div>
                     <p className="font-medium">{car.name}</p>
                     {car.is_featured && (
-                      <Badge variant="outline" className="text-xs text-yellow-600 border-yellow-600">
+                      <Badge
+                        variant="outline"
+                        className="text-xs text-yellow-600 border-yellow-600"
+                      >
                         <Star className="h-2 w-2 mr-1" />
-                        Featured
+                        {t("featured")}
                       </Badge>
                     )}
                   </div>
                 </div>
               </TableCell>
               <TableCell>
-                <span className="font-medium">{car.brand} {car.model}</span>
+                <span className="font-medium">
+                  {car.brand} {car.model}
+                </span>
               </TableCell>
               <TableCell>{car.year}</TableCell>
-              <TableCell className="capitalize">{car.type}</TableCell>
+              <TableCell className="capitalize">{t(car.type)}</TableCell>
               <TableCell>{car.seats}</TableCell>
-              <TableCell className="capitalize">{car.fuel_type}</TableCell>
+              <TableCell className="capitalize">{t(car.fuel_type)}</TableCell>
               <TableCell>
-                <Badge variant={car.is_available ? 'default' : 'secondary'}>
-                  {car.is_available ? 'Available' : 'Not Available'}
+                <Badge variant={car.is_available ? "default" : "secondary"}>
+                  {t(car.is_available ? "available" : "not_available")}
                 </Badge>
               </TableCell>
               <TableCell>
                 <span className="font-semibold text-green-600">
-                  SAR {car.daily_rate}/day
+                  {t("sar_per_day", { amount: car.daily_rate })}
                 </span>
               </TableCell>
               <TableCell>

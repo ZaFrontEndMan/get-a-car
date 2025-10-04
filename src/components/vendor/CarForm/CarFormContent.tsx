@@ -1,12 +1,11 @@
-
-import React from 'react';
-import BasicInformationSection from './BasicInformationSection';
-import PricingSection from './PricingSection';
-import PaidFeaturesSection from './PaidFeaturesSection';
-import ImageSection from './ImageSection';
-import FeaturesSection from './FeaturesSection';
-import LocationsSection from './LocationsSection';
-import OtherDetailsSection from './OtherDetailsSection';
+import React from "react";
+import BasicInformationSection from "./BasicInformationSection";
+import PricingSection from "./PricingSection";
+import PaidFeaturesSection from "./PaidFeaturesSection";
+import ImageSection from "./ImageSection";
+import FeaturesSection from "./FeaturesSection";
+import LocationsSection from "./LocationsSection";
+import OtherDetailsSection from "./OtherDetailsSection";
 
 interface PaidFeature {
   title: string;
@@ -24,6 +23,7 @@ interface CarFormContentProps {
   setDropoffLocations: React.Dispatch<React.SetStateAction<string[]>>;
   branches?: Array<{ id: string; name: string }>;
   branchesLoading?: boolean;
+  t: (key: string, params?: Record<string, any>) => string; // Translation function
 }
 
 const CarFormContent = ({
@@ -36,24 +36,35 @@ const CarFormContent = ({
   dropoffLocations,
   setDropoffLocations,
   branches,
-  branchesLoading
+  branchesLoading,
+  t,
 }: CarFormContentProps) => {
   return (
     <div className="space-y-6">
-      <BasicInformationSection formData={formData} handleChange={handleChange} />
-      <PricingSection formData={formData} handleChange={handleChange} />
-      <ImageSection formData={formData} handleChange={handleChange} />
-      <FeaturesSection formData={formData} handleChange={handleChange} />
-      <LocationsSection 
+      <BasicInformationSection
+        t={t}
+        formData={formData}
+        handleChange={handleChange}
+      />
+      <PricingSection t={t} formData={formData} handleChange={handleChange} />
+      <ImageSection t={t} formData={formData} handleChange={handleChange} />
+      <FeaturesSection t={t} formData={formData} handleChange={handleChange} />
+      <LocationsSection
+        t={t}
         pickupLocations={pickupLocations}
         dropoffLocations={dropoffLocations}
         setPickupLocations={setPickupLocations}
         setDropoffLocations={setDropoffLocations}
       />
-      <PaidFeaturesSection paidFeatures={paidFeatures} setPaidFeatures={setPaidFeatures} />
-      <OtherDetailsSection 
-        formData={formData} 
-        handleChange={handleChange} 
+      <PaidFeaturesSection
+        t={t}
+        paidFeatures={paidFeatures}
+        setPaidFeatures={setPaidFeatures}
+      />
+      <OtherDetailsSection
+        t={t}
+        formData={formData}
+        handleChange={handleChange}
         branches={branches}
         branchesLoading={branchesLoading}
       />
