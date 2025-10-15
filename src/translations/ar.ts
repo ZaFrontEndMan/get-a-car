@@ -1114,6 +1114,20 @@ export const arTranslations = {
   car_duplicated_successfully: "تم تكرار السيارة بنجاح",
   duplicate_error: "خطأ في التكرار",
   failed_to_duplicate_car: "فشل في تكرار السيارة",
+  user_id: "الهوية الوطنية",
+  license_id: "رقم الرخصة",
+  enter_user_id: "أدخل الهوية الوطنية",
+  enter_license_id: "أدخل رقم الرخصة",
+  user_id_required: "الهوية الوطنية مطلوب",
+  license_id_required: "رقم الرخصة مطلوب",
+  user_verified: "تم التحقق من المستخدم",
+  user_verified_description:
+    "تم التحقق من بياناتك بنجاح. يمكنك الآن متابعة الحجز.",
+  user_not_found: "لم يتم العثور على المستخدم",
+  user_not_found_description:
+    "لم يتم العثور على مستخدم ببياناتك. يرجى التسجيل.",
+  verify_and_continue: "تحقق وتابع",
+  verifying: "جاري التحقق...",
 };
 
 export default arTranslations;

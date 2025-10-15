@@ -1102,6 +1102,20 @@ export const enTranslations = {
   car_duplicated_successfully: "Car has been duplicated successfully",
   duplicate_error: "Duplicate Error",
   failed_to_duplicate_car: "Failed to duplicate the car",
+  user_id: "User ID",
+  license_id: "License ID",
+  enter_user_id: "Enter user ID",
+  enter_license_id: "Enter license ID",
+  user_id_required: "User ID is required",
+  license_id_required: "License ID is required",
+  user_verified: "User Verified",
+  user_verified_description:
+    "Your details have been verified successfully. You can now proceed with the booking.",
+  user_not_found: "User Not Found",
+  user_not_found_description:
+    "No user found with your details. Please sign up.",
+  verify_and_continue: "Verify and Continue",
+  verifying: "Verifying...",
 };
 
 export default enTranslations;

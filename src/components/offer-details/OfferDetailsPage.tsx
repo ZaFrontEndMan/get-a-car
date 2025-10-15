@@ -5,7 +5,6 @@ import { useRentalCarDetails } from "../../hooks/useRentalCarDetails";
 import { useOfferDetailsState } from "../../hooks/useOfferDetailsState";
 import SimilarCarsSlider from "../SimilarCarsSlider";
 import BookingForm from "../BookingForm";
-import LoginModal from "../LoginModal";
 import OfferDetailsHeader from "../OfferDetailsHeader";
 import OfferDetailsContent from "../OfferDetailsContent";
 import OfferDetailsSidebar from "../OfferDetailsSidebar";
@@ -15,7 +14,6 @@ import OfferDetailsLoading from "./OfferDetailsLoading";
 import OfferDetailsNotFound from "./OfferDetailsNotFound";
 
 const OfferDetailsPage = () => {
-  const { t } = useLanguage();
   const { id } = useParams();
   const [searchParams] = useSearchParams();
   const location = useLocation();
@@ -135,6 +133,7 @@ const OfferDetailsPage = () => {
 
           {isBookingOpen && (
             <BookingForm
+              isLoggedUser={!isLoginOpen}
               isOpen={isBookingOpen}
               onClose={() => setIsBookingOpen(false)}
               car={offer.car}
@@ -161,12 +160,6 @@ const OfferDetailsPage = () => {
           </div>
         </div>
       </div>
-
-      <LoginModal
-        isOpen={isLoginOpen}
-        onClose={() => setIsLoginOpen(false)}
-        onSuccess={handleLoginSuccess}
-      />
     </div>
   );
 };
