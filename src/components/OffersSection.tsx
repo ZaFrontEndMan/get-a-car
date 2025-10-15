@@ -13,7 +13,7 @@ const OffersSection = () => {
 
   // Transform API response to match the expected format for the UI
   const offers =
-    apiResponse?.data?.map((offer) => ({
+    apiResponse?.data?.slice(0, 8).map((offer) => ({
       id: offer.id.toString(),
       title: offer.offerTitle,
       title_ar: "", // API doesn't provide Arabic titles yet

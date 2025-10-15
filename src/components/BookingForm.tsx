@@ -1,12 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import { useToast } from "@/components/ui/use-toast";
@@ -47,7 +41,6 @@ const BookingForm = ({
   isOpen,
   onClose,
   car,
-
   selectedServices,
   pricingType,
   selectedPickup,
@@ -183,127 +176,127 @@ const BookingForm = ({
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="w-[95vw] max-w-4xl max-h-[95vh] overflow-y-auto p-0 bg-gradient-to-br from-slate-50 to-blue-50">
-        {/* Header */}
-        <div className="bg-white border-b border-gray-200 p-6 sm:p-8 sticky top-0 z-10">
-          <DialogHeader>
-            <DialogTitle className="text-2xl sm:text-3xl font-bold text-center bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-              {t("completeBooking")}
-            </DialogTitle>
-            <p className="text-gray-600 text-center mt-2 text-sm sm:text-base">
-              {t("secureVehicleRental")}
-            </p>
-          </DialogHeader>
-        </div>
+    <div
+      className={`bg-white rounded-2xl shadow-lg p-6 transform transition-all duration-500 ease-in-out mt-8 origin-top mx-auto${
+        isOpen ? "scale-y-100 opacity-100" : "scale-y-0 opacity-0"
+      }`}
+    >
+      {/* Header */}
+      <div className="border-b border-gray-200 pb-4 mb-6">
+        <h2 className="text-2xl sm:text-3xl font-bold text-center bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+          {t("completeBooking")}
+        </h2>
+        <p className="text-gray-600 text-center mt-2 text-sm sm:text-base">
+          {t("secureVehicleRental")}
+        </p>
+      </div>
 
-        <div className="p-6 sm:p-8 space-y-8">
-          {/* Car Info Card */}
-          <BookingCarInfo
-            car={car}
-            pricingType={pricingType}
-            rentalDays={rentalDays}
-            onAdjustDays={adjustDays}
-            t={t}
-          />
+      <div className="space-y-8">
+        {/* Car Info Card */}
+        <BookingCarInfo
+          car={car}
+          pricingType={pricingType}
+          rentalDays={rentalDays}
+          onAdjustDays={adjustDays}
+          t={t}
+        />
 
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-              {/* Date & Location Section */}
-              <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 sm:p-8">
-                <div className="flex items-center gap-3 mb-6">
-                  <h3 className="text-xl font-bold text-gray-900">
-                    {t("pickupAndDropoff")}
-                  </h3>
-                </div>
-
-                <BookingDateLocationStep
-                  control={form.control}
-                  watchedPickupDate={watchedPickupDate}
-                  selectedPickup={selectedPickup}
-                  selectedDropoff={selectedDropoff}
-                  pickupLocations={locations.pickupLocations}
-                  dropoffLocations={locations.dropoffLocations}
-                />
-
-                <BookingServicesDisplay
-                  selectedServices={selectedServices}
-                  getServiceDetails={getServiceDetails}
-                />
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            {/* Date & Location Section */}
+            <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 sm:p-8">
+              <div className="flex items-center gap-3 mb-6">
+                <h3 className="text-xl font-bold text-gray-900">
+                  {t("pickupAndDropoff")}
+                </h3>
               </div>
 
-              {/* Price Summary */}
-              <div className="bg-gradient-to-r from-primary to-secondary rounded-2xl shadow-xl p-6 sm:p-8 text-white">
-                <h4 className="text-xl font-bold mb-6 flex items-center gap-3">
-                  <Shield className="h-6 w-6" />
-                  {t("priceSummary")}
-                </h4>
-                <div className="space-y-4">
-                  {(() => {
-                    const pricingBreakdown = getPricingBreakdown();
-                    return (
-                      <>
+              <BookingDateLocationStep
+                control={form.control}
+                watchedPickupDate={watchedPickupDate}
+                selectedPickup={selectedPickup}
+                selectedDropoff={selectedDropoff}
+                pickupLocations={locations.pickupLocations}
+                dropoffLocations={locations.dropoffLocations}
+              />
+
+              <BookingServicesDisplay
+                selectedServices={selectedServices}
+                getServiceDetails={getServiceDetails}
+              />
+            </div>
+
+            {/* Price Summary */}
+            <div className="bg-gradient-to-r from-primary to-secondary rounded-2xl shadow-xl p-6 sm:p-8 text-white">
+              <h4 className="text-xl font-bold mb-6 flex items-center gap-3">
+                <Shield className="h-6 w-6" />
+                {t("priceSummary")}
+              </h4>
+              <div className="space-y-4">
+                {(() => {
+                  const pricingBreakdown = getPricingBreakdown();
+                  return (
+                    <>
+                      <div className="flex justify-between items-center text-lg">
+                        <span className="text-blue-100">
+                          {t("rentalDuration")} ({rentalDays}{" "}
+                          {rentalDays === 1 ? t("day") : t("days")}):
+                        </span>
+                        <span className="font-semibold">
+                          {t("currency")} {pricingBreakdown.basePrice}
+                        </span>
+                      </div>
+                      {pricingBreakdown.servicesPrice > 0 && (
                         <div className="flex justify-between items-center text-lg">
                           <span className="text-blue-100">
-                            {t("rentalDuration")} ({rentalDays}{" "}
-                            {rentalDays === 1 ? t("day") : t("days")}):
+                            {t("additionalServices")}:
                           </span>
                           <span className="font-semibold">
-                            {t("currency")} {pricingBreakdown.basePrice}
+                            {t("currency")} {pricingBreakdown.servicesPrice}
                           </span>
                         </div>
-                        {pricingBreakdown.servicesPrice > 0 && (
-                          <div className="flex justify-between items-center text-lg">
-                            <span className="text-blue-100">
-                              {t("additionalServices")}:
-                            </span>
-                            <span className="font-semibold">
-                              {t("currency")} {pricingBreakdown.servicesPrice}
-                            </span>
-                          </div>
-                        )}
-                        <div className="border-t border-blue-300 pt-4">
-                          <div className="flex justify-between items-center text-2xl font-bold">
-                            <span>{t("total")}:</span>
-                            <span className="text-yellow-300">
-                              {t("currency")} {pricingBreakdown.totalPrice}
-                            </span>
-                          </div>
+                      )}
+                      <div className="border-t border-blue-300 pt-4">
+                        <div className="flex justify-between items-center text-2xl font-bold">
+                          <span>{t("total")}:</span>
+                          <span className="text-yellow-300">
+                            {t("currency")} {pricingBreakdown.totalPrice}
+                          </span>
                         </div>
-                      </>
-                    );
-                  })()}
-                </div>
+                      </div>
+                    </>
+                  );
+                })()}
               </div>
+            </div>
 
-              {/* Submit Button */}
-              <div className="pt-6">
-                <Button
-                  type="submit"
-                  disabled={isLoading}
-                  className="w-full h-16 text-lg font-bold bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-300 rounded-xl"
-                >
-                  {isLoading ? (
-                    <>
-                      <Loader2 className="h-6 w-6 animate-spin mr-3" />
-                      {t("processingPayment")}
-                    </>
-                  ) : (
-                    <>
-                      <CreditCard className="h-6 w-6 mr-3" />
-                      {t("completePayment")}
-                    </>
-                  )}
-                </Button>
-                <p className="text-center text-sm text-gray-500 mt-4">
-                  🔒 {t("securePayment")}
-                </p>
-              </div>
-            </form>
-          </Form>
-        </div>
-      </DialogContent>
-    </Dialog>
+            {/* Submit Button */}
+            <div className="pt-6">
+              <Button
+                type="submit"
+                disabled={isLoading}
+                className="w-full h-16 text-lg font-bold bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-300 rounded-xl"
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="h-6 w-6 animate-spin mr-3" />
+                    {t("processingPayment")}
+                  </>
+                ) : (
+                  <>
+                    <CreditCard className="h-6 w-6 mr-3" />
+                    {t("completePayment")}
+                  </>
+                )}
+              </Button>
+              <p className="text-center text-sm text-gray-500 mt-4">
+                🔒 {t("securePayment")}
+              </p>
+            </div>
+          </form>
+        </Form>
+      </div>
+    </div>
   );
 };
 

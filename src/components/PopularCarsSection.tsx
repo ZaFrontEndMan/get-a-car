@@ -14,7 +14,7 @@ const PopularCarsSection = () => {
 
   // Transform API response to match the expected format for CarCard
   const cars =
-    apiResponse?.data?.map((car) => ({
+    apiResponse?.data?.slice(0, 8).map((car) => ({
       id: car.carID,
       name: car.name,
       brand: car.model,

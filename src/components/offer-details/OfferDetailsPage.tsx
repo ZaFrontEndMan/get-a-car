@@ -133,6 +133,23 @@ const OfferDetailsPage = () => {
             />
           </div>
 
+          {isBookingOpen && (
+            <BookingForm
+              isOpen={isBookingOpen}
+              onClose={() => setIsBookingOpen(false)}
+              car={offer.car}
+              locations={{
+                pickupLocations: offer.locations,
+                dropoffLocations: offer.dropoffLocations,
+              }}
+              totalPrice={pricingBreakdown.totalPrice}
+              selectedServices={selectedServices}
+              pricingType={selectedPricing}
+              selectedPickup={selectedPickup}
+              selectedDropoff={selectedDropoff}
+              rentalDays={rentalDays}
+            />
+          )}
           {/* Terms & Policies - Only offer-specific policies */}
           <div className="mt-8">
             <OfferDetailsTerms policies={offer.policies} offer={offer} />
@@ -144,23 +161,6 @@ const OfferDetailsPage = () => {
           </div>
         </div>
       </div>
-
-      {/* Modals */}
-      <BookingForm
-        isOpen={isBookingOpen}
-        onClose={() => setIsBookingOpen(false)}
-        car={offer.car}
-        locations={{
-          pickupLocations: offer.locations,
-          dropoffLocations: offer.dropoffLocations,
-        }}
-        totalPrice={pricingBreakdown.totalPrice}
-        selectedServices={selectedServices}
-        pricingType={selectedPricing}
-        selectedPickup={selectedPickup}
-        selectedDropoff={selectedDropoff}
-        rentalDays={rentalDays}
-      />
 
       <LoginModal
         isOpen={isLoginOpen}

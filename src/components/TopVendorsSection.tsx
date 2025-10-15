@@ -22,7 +22,7 @@ const TopVendorsSection = () => {
   // ✅ Transform vendors into props for VendorCard
   const processedVendors = vendors
     .filter((v) => v.availableCars > 0) // mimic active/verified filter
-    .slice(0, 10) // top 10
+    .slice(0, 8) // top 8
     .map((vendor) => ({
       id: vendor.id,
       name: vendor.companyName,

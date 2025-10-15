@@ -46,7 +46,6 @@ const BookingDateLocationStep = ({
 }: BookingDateLocationStepProps) => {
   const { t } = useLanguage();
 
-
   return (
     <div className="space-y-4 sm:space-y-6">
       <div className="grid grid-cols-1 gap-4 sm:gap-6">
@@ -149,7 +148,7 @@ const BookingDateLocationStep = ({
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {pickupLocations.map((location) => (
+                    {pickupLocations?.map((location) => (
                       <SelectItem key={location} value={location}>
                         {location}
                       </SelectItem>
