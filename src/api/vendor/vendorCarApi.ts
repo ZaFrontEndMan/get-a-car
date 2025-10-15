@@ -88,3 +88,25 @@ export const duplicateCar = async (carId: string) => {
   );
   return data;
 };
+
+// Bulk upload cars
+export const bulkUploadCars = async (fileData: FormData) => {
+  const { data } = await axiosInstance.post(
+    "/Vendor/Car/BulkUploadCars",
+    fileData,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    }
+  );
+  return data;
+};
+
+// Download car template
+export const downloadCarTemplate = async () => {
+  const { data } = await axiosInstance.get("/Vendor/Car/DownloadCarTemplate", {
+    responseType: "blob",
+  });
+  return data;
+};

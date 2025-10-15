@@ -10,6 +10,8 @@ import {
   getCarById,
   getBranchCars,
   duplicateCar,
+  downloadCarTemplate,
+  bulkUploadCars,
 } from "../../api/vendor/vendorCarApi";
 
 // Query keys
@@ -135,6 +137,27 @@ export const useDuplicateCar = () => {
 
   return useMutation({
     mutationFn: (carId: string) => duplicateCar(carId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: VENDOR_CAR_QUERY_KEYS.all });
+    },
+  });
+};
+// Bulk upload cars mutation
+export const useBulkUploadCars = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (fileData: FormData) => bulkUploadCars(fileData),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: VENDOR_CAR_QUERY_KEYS.all });
+    },
+  });
+};
+
+// Download car template mutation
+export const useDownloadCarTemplate = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: downloadCarTemplate,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: VENDOR_CAR_QUERY_KEYS.all });
     },
