@@ -16,7 +16,6 @@ import CarsSearchControls from "@/components/cars/CarsSearchControls";
 import { getImageUrl } from "@/utils/imageUtils";
 import { useDebouncedSearch } from "@/hooks/useDebounce";
 import CarsSkeleton, {
-  CarsFiltersSkeleton,
   CarsSearchControlsSkeleton,
 } from "@/components/cars/CarsSkeleton";
 import { VirtualScrolling } from "@/components/ui/VirtualScrolling";
@@ -31,38 +30,33 @@ import {
   updateUrlWithFilters,
 } from "@/utils/urlParams";
 import { useLocation } from "react-router-dom";
+import { debounce } from "lodash";
 
 const Cars = () => {
-  const { language, t } = useLanguage();
+  const { t } = useLanguage();
 
-  // Initialize filters from URL parameters
   const [serverFilters, setServerFilters] = useState<CarsFiltersType>(() => {
     const urlParams = new URLSearchParams(window.location.search);
     return parseUrlParamsToFilters(urlParams);
   });
 
   const [searchTerm, setSearchTerm] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(1); // Define currentPage state
 
-  // Sync filters when query string changes (e.g., navigating to /cars?vendor=...)
   const location = useLocation();
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const parsed = parseUrlParamsToFilters(params);
     setServerFilters(parsed);
-    setCurrentPage(1);
+    setCurrentPage(1); // Reset to page 1 on filter change
   }, [location.search]);
 
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const itemsPerPage = 12;
-  const VIRTUAL_SCROLL_THRESHOLD = 50; // Use virtual scrolling when more than 50 items
-  const CARD_HEIGHT = viewMode === "grid" ? 320 : 200; // Estimated heights for grid/list view
+  const VIRTUAL_SCROLL_THRESHOLD = 50;
+  const CARD_HEIGHT = viewMode === "grid" ? 320 : 200;
 
-  // Performance optimization: use refs to avoid unnecessary re-renders
   const containerRef = useRef<HTMLDivElement>(null);
-  const lastScrollPosition = useRef(0);
-
-  // Use debounced search to improve performance
   const { debouncedSearchTerm, isSearching } = useDebouncedSearch(
     searchTerm,
     300
@@ -73,81 +67,71 @@ const Cars = () => {
     isLoading,
     error,
     refetch,
-    prefetchNextPages,
-    prefetchPreviousPage,
   } = useOptimizedCars(currentPage, itemsPerPage, serverFilters);
 
-  // Enable background sync for fresh data
   useBackgroundSync();
 
-  // Memoize car data transformation with better performance
+  // Initialize currentPage from carsResponse.pageIndex
+  useEffect(() => {
+    if (carsResponse?.pageIndex) {
+      setCurrentPage(carsResponse.pageIndex);
+    }
+  }, [carsResponse?.pageIndex]);
+
   const cars = useMemo(() => {
     if (!carsResponse?.carSearchResult) return [];
-
-    return carsResponse.carSearchResult.map((car) => {
-      const carId = car?.carID?.toString();
-      const vendorId = car?.vendorId?.toString();
-      const vendorName = car?.vendorName || "Unknown Vendor";
-      const carImage = car?.image
+    return carsResponse.carSearchResult.map((car) => ({
+      id: car?.carID?.toString(),
+      title: car?.name || "No title",
+      brand: car?.model || "Unknown Brand",
+      image: car?.image
         ? getImageUrl(car.image)
-        : "https://images.unsplash.com/photo-1549924231-f129b911e442";
-      const logoUrl = car?.companyLogo ? getImageUrl(car.companyLogo) : null;
-
-      return {
-        id: carId,
-        title: car?.name || "No title",
-        brand: car?.model || "Unknown Brand",
-        image: carImage,
-        price: car?.pricePerDay || 0,
-        daily_rate: car?.pricePerDay || 0,
-        weeklyPrice: car?.pricePerWeek,
-        weekly_rate: car?.pricePerWeek,
-        monthlyPrice: car?.pricePerMonth,
-        monthly_rate: car?.pricePerMonth,
-        seats: 4, // Default seats, could be extracted from car data if available
-        fuel: car?.fuelType || "",
-        fuel_type: car?.fuelType || "",
-        transmission: car?.transmission || "",
-        vendor: {
-          id: vendorId,
-          name: vendorName,
-          logo_url: logoUrl,
-        },
-        vendors: {
-          id: vendorId,
-          name: vendorName,
-          logo_url: logoUrl,
-        },
-        isWishList: car?.isWishList,
-      };
-    });
+        : "https://images.unsplash.com/photo-1549924231-f129b911e442",
+      price: car?.pricePerDay || 0,
+      daily_rate: car?.pricePerDay || 0,
+      weeklyPrice: car?.pricePerWeek,
+      weekly_rate: car?.pricePerWeek,
+      monthlyPrice: car?.pricePerMonth,
+      monthly_rate: car?.pricePerMonth,
+      seats: 4,
+      fuel: car?.fuelType || "",
+      fuel_type: car?.fuelType || "",
+      transmission: car?.transmission || "",
+      vendor: {
+        id: car?.vendorId?.toString(),
+        name: car?.vendorName || "Unknown Vendor",
+        logo_url: car?.companyLogo ? getImageUrl(car.companyLogo) : null,
+      },
+      vendors: {
+        id: car?.vendorId?.toString(),
+        name: car?.vendorName || "Unknown Vendor",
+        logo_url: car?.companyLogo ? getImageUrl(car.companyLogo) : null,
+      },
+      isWishList: car?.isWishList,
+    }));
   }, [carsResponse?.carSearchResult]);
 
-  // Apply client-side search filter only (server handles other filters)
   const filteredCars = useMemo(() => {
     if (!debouncedSearchTerm) return cars;
-
     return cars.filter((car) =>
       car?.title.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
     );
   }, [cars, debouncedSearchTerm]);
 
-  // Use server-side pagination data
   const totalPages = carsResponse?.totalPages || 0;
-  const paginatedCars = filteredCars; // Server already handles pagination
+  const totalRecord = carsResponse?.totalRecord || 0; // Use totalRecord from response
+  const paginatedCars = filteredCars;
 
-  // Update server filters and URL when filters change
   const updateFilters = useCallback(
     (newFilters: Partial<CarsFiltersType>) => {
       const updatedFilters = { ...serverFilters, ...newFilters };
       setServerFilters(updatedFilters);
       updateUrlWithFilters(updatedFilters);
-      setCurrentPage(1); // Reset to first page when filters change
+      setCurrentPage(1);
     },
     [serverFilters]
   );
 
-  // Memoize callback functions to prevent unnecessary re-renders
   const clearAllFilters = useCallback(() => {
     const clearedFilters: CarsFiltersType = {};
     setServerFilters(clearedFilters);
@@ -156,40 +140,51 @@ const Cars = () => {
     setCurrentPage(1);
   }, []);
 
-  // Reset to first page when server filters change
   useEffect(() => {
     setCurrentPage(1);
   }, [serverFilters]);
 
-  const handlePageChange = useCallback(
-    (page: number) => {
-      setCurrentPage(page);
-      window.scrollTo({ top: 0, behavior: "smooth" });
+  // Use refs to track currentPage and totalPages
+  const currentPageRef = useRef(currentPage);
+  const totalPagesRef = useRef(totalPages);
 
-      // Prefetch adjacent pages for smoother navigation
-      setTimeout(() => {
-        if (page > currentPage) {
-          prefetchNextPages();
-        } else {
-          prefetchPreviousPage();
+  useEffect(() => {
+    currentPageRef.current = currentPage;
+  }, [currentPage]);
+
+  useEffect(() => {
+    totalPagesRef.current = totalPages;
+  }, [totalPages]);
+
+  // Stable debounced handlePageChange
+  const handlePageChange = useMemo(
+    () =>
+      debounce((page: number) => {
+        const current = currentPageRef.current;
+        const total = totalPagesRef.current;
+        if (page !== current && page >= 1 && page <= total) {
+          console.log(`Changing page from ${current} to ${page}`);
+          setCurrentPage(page);
+          window.scrollTo({ top: 0, behavior: "smooth" });
         }
-      }, 100);
-    },
-    [currentPage, prefetchNextPages, prefetchPreviousPage]
+      }, 300),
+    []
   );
 
-  // Memoize filter data with better performance
+  // Cleanup debounce on component unmount
+  useEffect(() => {
+    return () => {
+      handlePageChange.cancel();
+    };
+  }, [handlePageChange]);
+
   const filterData = useMemo(() => {
     if (!carsResponse?.carsCommonProp?.data) return {};
-
     const commonProps = carsResponse.carsCommonProp.data;
     const filterMap = new Map();
-
-    // Create a map for O(1) lookup instead of multiple find operations
     commonProps.forEach((item) => {
       filterMap.set(item.header, item.filterData);
     });
-
     return {
       vendorNames: filterMap.get("vendorNames"),
       branches: filterMap.get("branches"),
@@ -200,7 +195,6 @@ const Cars = () => {
     };
   }, [carsResponse?.carsCommonProp]);
 
-  // Convert server filters to component state format for backward compatibility
   const priceRange: [number, number] = serverFilters.priceRange
     ? [serverFilters.priceRange.min, serverFilters.priceRange.max]
     : [0, 2000];
@@ -219,11 +213,6 @@ const Cars = () => {
         <div className="pt-20 pb-8">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex gap-8">
-              {/* Filters Sidebar Skeleton */}
-              <div className="w-52 flex-shrink-0 hidden lg:block">
-                <CarsFiltersSkeleton />
-              </div>
-              {/* Main Content Skeleton */}
               <div className="flex-1 min-w-0">
                 <div className="mb-8">
                   <div className="h-12 bg-gray-200 rounded-lg animate-pulse mb-4"></div>
@@ -249,7 +238,7 @@ const Cars = () => {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50">
         <div className="pt-20 pb-8">
-          <ApiErrorBoundary onRetry={() => window.location.reload()}>
+          <ApiErrorBoundary onRetry={() => refetch()}>
             <div className="flex items-center justify-center py-12">
               <div className="text-center">
                 <h3 className="text-lg font-medium text-gray-900 mb-2">
@@ -257,10 +246,10 @@ const Cars = () => {
                 </h3>
                 <p className="text-gray-500 mb-6">{t("pleaseTryAgainLater")}</p>
                 <button
-                  onClick={() => window.location.reload()}
+                  onClick={() => refetch()}
                   className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                 >
-                  {t("reloadPage")}
+                  {t("retry")}
                 </button>
               </div>
             </div>
@@ -276,7 +265,6 @@ const Cars = () => {
         <div className="pt-20 pb-8">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex gap-8">
-              {/* Filters Sidebar */}
               <div className="w-52 flex-shrink-0 hidden lg:block">
                 <ErrorBoundary
                   fallback={
@@ -296,7 +284,6 @@ const Cars = () => {
                     }
                     selectedCategories={selectedCategories}
                     setSelectedCategories={(categories) => {
-                      // Extract different category types from the combined array
                       const types = categories.filter((cat) =>
                         filterData.types?.some((t) => t.name === cat)
                       );
@@ -309,7 +296,6 @@ const Cars = () => {
                       const transmissions = categories.filter((cat) =>
                         filterData.transmissions?.some((t) => t.name === cat)
                       );
-
                       updateFilters({
                         types: types.length > 0 ? types : undefined,
                         fuelTypes: fuelTypes.length > 0 ? fuelTypes : undefined,
@@ -332,10 +318,8 @@ const Cars = () => {
                 </ErrorBoundary>
               </div>
 
-              {/* Main Content */}
               <div className="flex-1 min-w-0">
                 <CarsHeader />
-
                 <ErrorBoundary
                   fallback={
                     <div className="p-4 border border-orange-200 rounded-lg bg-orange-50 mb-6">
@@ -350,14 +334,13 @@ const Cars = () => {
                     setSearchTerm={setSearchTerm}
                     viewMode={viewMode}
                     setViewMode={setViewMode}
-                    filteredCarsLength={filteredCars.length}
+                    filteredCarsLength={totalRecord} // Use totalRecord instead of filteredCars.length
                     currentPage={currentPage}
                     totalPages={totalPages}
                     isSearching={isSearching}
                   />
                 </ErrorBoundary>
 
-                {/* Cars Grid/List with Virtual Scrolling */}
                 <div className="mt-6" ref={containerRef}>
                   <ApiErrorBoundary>
                     {isSearching && searchTerm ? (
@@ -430,21 +413,11 @@ const Cars = () => {
                   </ApiErrorBoundary>
                 </div>
 
-                <ErrorBoundary
-                  fallback={
-                    <div className="mt-6 p-4 border border-orange-200 rounded-lg bg-orange-50">
-                      <p className="text-sm text-orange-700 text-center">
-                        {t("paginationUnavailable")}
-                      </p>
-                    </div>
-                  }
-                >
-                  <CarsPagination
-                    currentPage={currentPage}
-                    totalPages={totalPages}
-                    setCurrentPage={handlePageChange}
-                  />
-                </ErrorBoundary>
+                <CarsPagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  setCurrentPage={handlePageChange}
+                />
               </div>
             </div>
           </div>

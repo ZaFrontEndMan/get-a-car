@@ -44,22 +44,29 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({
     }
   }, [language, isInitialized]);
 
+  const loggedMissingKeys = new Set<string>();
+
   const t = (key: string, params?: Record<string, any>): string => {
     const translationKey = key as TranslationKey;
     let translation = translations[language]?.[translationKey];
 
+    // If missing translation
     if (!translation) {
-      console.warn(
-        `Missing translation for key: ${key} in language: ${language}`
-      );
+      const warningKey = `${language}:${key}`;
+      if (!loggedMissingKeys.has(warningKey)) {
+        console.warn(
+          `[i18n] Missing translation for "${key}" in language "${language}".`
+        );
+        loggedMissingKeys.add(warningKey);
+      }
       return key;
     }
 
-    // Replace placeholders with values from params
+    // Replace placeholders (e.g., "Hello {name}") safely
     if (params) {
-      Object.keys(params).forEach((param) => {
-        const placeholder = `{${param}}`;
-        translation = translation.replace(placeholder, String(params[param]));
+      Object.entries(params).forEach(([param, value]) => {
+        const regex = new RegExp(`\\{${param}\\}`, "g");
+        translation = translation.replace(regex, String(value));
       });
     }
 
