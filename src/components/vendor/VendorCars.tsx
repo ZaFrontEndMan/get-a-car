@@ -65,8 +65,8 @@ const VendorCars = () => {
       daily_rate: c?.pricePerDay ?? 0,
       weekly_rate: undefined, // Not provided in API
       monthly_rate: undefined, // Not provided in API
-      is_available: Boolean(c?.status),
-      is_featured: false, // Default, as not provided in API
+      is_available: Boolean(c?.availabilityVendor && c?.availabilityAdmin),
+      is_approved: Boolean(c?.availabilityAdmin),
       images: Array.isArray(c?.imageUrls)
         ? c.imageUrls.map(
             (url: string) => `${import.meta.env.VITE_UPLOADS_BASE_URL}${url}`

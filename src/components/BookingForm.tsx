@@ -13,10 +13,7 @@ import BookingDateLocationStep from "./booking/BookingDateLocationStep";
 import BookingServicesDisplay from "./booking/BookingServicesDisplay";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { calculateBookingPrice, Service } from "../utils/pricingCalculator";
-import { useNavigate } from "react-router-dom";
-import { z } from "zod";
-import { Input } from "@/components/ui/input";
-import { motion } from "framer-motion";
+import CheckUserBeforeBooking from "./CheckUserBeforeBooking";
 
 interface BookingFormProps {
   isOpen: boolean;
@@ -41,127 +38,6 @@ interface BookingFormProps {
   locations?: string[];
   isLoggedUser: boolean;
 }
-
-// Schema for user verification form
-const userVerificationSchema = z.object({
-  user_id: z.string().min(1, { message: "user_id_required" }),
-  license_id: z.string().min(1, { message: "license_id_required" }),
-});
-
-type UserVerificationFormData = z.infer<typeof userVerificationSchema>;
-
-// Component for user verification before booking
-const CheckUserBeforeBooking: React.FC<{
-  onUserVerified: () => void;
-  t: (key: string, params?: Record<string, any>) => string;
-}> = ({ onUserVerified, t }) => {
-  const { toast } = useToast();
-  const navigate = useNavigate();
-  const [isVerifying, setIsVerifying] = useState(false);
-
-  const form = useForm<UserVerificationFormData>({
-    resolver: zodResolver(userVerificationSchema),
-    defaultValues: {
-      user_id: "",
-      license_id: "",
-    },
-  });
-
-  const onSubmit = async (data: UserVerificationFormData) => {
-    setIsVerifying(true);
-
-    // Simulate API call with 0.5s delay
-    await new Promise((resolve) => setTimeout(resolve, 500));
-
-    // Mock user existence check (replace with actual API call in production)
-    const isUserValid = data.user_id.toLowerCase() === "existing_user";
-
-    if (isUserValid) {
-      toast({
-        title: t("user_verified"),
-        description: t("user_verified_description"),
-      });
-      onUserVerified();
-    } else {
-      // Construct query parameters
-      const params = new URLSearchParams({
-        user_id: data.user_id,
-        license_id: data.license_id,
-      });
-      toast({
-        title: t("user_not_found"),
-        description: t("user_not_found_description"),
-        variant: "destructive",
-      });
-      navigate(`/signup?${params.toString()}`);
-    }
-
-    setIsVerifying(false);
-  };
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className=""
-    >
-      <Form {...form}>
-        <form
-          onSubmit={form.handleSubmit(onSubmit)}
-          className="flex flex-col md:flex-row items-end w-full gap-2 justify-between my-4"
-        >
-          <div className="w-full md:w-5/12">
-            <label className="text-sm font-medium text-gray-700">
-              {t("nationalId")}
-            </label>
-            <Input
-              {...form.register("user_id")}
-              placeholder={t("enter_user_id")}
-              className="rounded-lg border-gray-300"
-              disabled={isVerifying}
-            />
-            {form.formState.errors.user_id && (
-              <p className="text-sm text-red">
-                {t(form.formState.errors.user_id.message!)}
-              </p>
-            )}
-          </div>
-          <div className="w-full md:w-5/12">
-            <label className="text-sm font-medium text-gray-700">
-              {t("license_id")}
-            </label>
-            <Input
-              {...form.register("license_id")}
-              placeholder={t("enter_license_id")}
-              className="rounded-lg border-gray-300"
-              disabled={isVerifying}
-            />
-            {form.formState.errors.license_id && (
-              <p className="text-sm text-red">
-                {t(form.formState.errors.license_id.message!)}
-              </p>
-            )}
-          </div>
-          <Button
-            className="w-full md:w-2/12"
-            type="submit"
-            disabled={isVerifying}
-          >
-            {isVerifying ? (
-              <>
-                <Loader2 className="h-6 w-6 animate-spin mr-3" />
-                {t("verifying")}
-              </>
-            ) : (
-              t("verify_and_continue")
-            )}
-          </Button>
-        </form>
-      </Form>
-    </motion.div>
-  );
-};
 
 const BookingForm = ({
   isOpen,
@@ -324,7 +200,13 @@ const BookingForm = ({
           t={t}
         />
       )}
-      <div className={`space-y-8 ${!isUserVerified ? "pointer-events-none animate-pulse duration-900 " : ""}`}>
+      <div
+        className={`space-y-8 ${
+          !isUserVerified
+            ? "pointer-events-none animate-pulse duration-900 "
+            : ""
+        }`}
+      >
         {/* Car Info Card */}
         <BookingCarInfo
           car={car}

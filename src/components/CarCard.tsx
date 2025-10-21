@@ -93,9 +93,9 @@ const CarCard = ({ car, viewMode = "grid" }: CarCardProps) => {
     return (
       <Link
         to={`/cars/${car.id}`}
-        className="block bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300 hover:scale-[1.02] flex-grow"
+        className="block bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300 hover:scale-[1.02] flex-grow h-full"
       >
-        <div className="flex gap-6 p-6">
+        <div className="flex gap-6 p-6 h-full">
           {/* Image Section */}
           <div className="relative w-48 h-32 flex-shrink-0">
             <LazyImage

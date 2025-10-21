@@ -8,8 +8,6 @@ import {
 } from "../hooks/useCountriesAndCities";
 import { useRegistration } from "../hooks/useRegistration";
 import UserTypeSwitcher from "../components/auth/UserTypeSwitcher";
-import AuthHeader from "../components/auth/AuthHeader";
-import AuthPageHeader from "../components/auth/AuthPageHeader";
 import DocumentUpload from "../components/auth/DocumentUpload";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -218,7 +216,7 @@ const SignUp: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col"> 
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
       <div className="flex-1 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
         <h2 className="text-2xl font-bold text-center text-primary">
           {t("createAccount")}
@@ -506,7 +504,7 @@ const SignUp: React.FC = () => {
                         onChange={(e) =>
                           handleInputChange("password", e.target.value)
                         }
-                        required 
+                        required
                         className=" text-end"
                       />
                       <button
@@ -534,7 +532,7 @@ const SignUp: React.FC = () => {
                         onChange={(e) =>
                           handleInputChange("confirmPassword", e.target.value)
                         }
-                        required 
+                        required
                         className=" text-end"
                       />
                       <button
