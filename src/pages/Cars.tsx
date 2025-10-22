@@ -31,24 +31,23 @@ import {
 } from "@/utils/urlParams";
 import { useLocation } from "react-router-dom";
 import { debounce } from "lodash";
+import SimilarCarsSlider from "@/components/SimilarCarsSlider";
 
 const Cars = () => {
   const { t } = useLanguage();
-
   const [serverFilters, setServerFilters] = useState<CarsFiltersType>(() => {
     const urlParams = new URLSearchParams(window.location.search);
     return parseUrlParamsToFilters(urlParams);
   });
-
   const [searchTerm, setSearchTerm] = useState("");
-  const [currentPage, setCurrentPage] = useState(1); // Define currentPage state
-
+  const [currentPage, setCurrentPage] = useState(1);
   const location = useLocation();
+
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const parsed = parseUrlParamsToFilters(params);
     setServerFilters(parsed);
-    setCurrentPage(1); // Reset to page 1 on filter change
+    setCurrentPage(1);
   }, [location.search]);
 
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
@@ -61,7 +60,6 @@ const Cars = () => {
     searchTerm,
     300
   );
-
   const {
     data: carsResponse,
     isLoading,
@@ -71,7 +69,6 @@ const Cars = () => {
 
   useBackgroundSync();
 
-  // Initialize currentPage from carsResponse.pageIndex
   useEffect(() => {
     if (carsResponse?.pageIndex) {
       setCurrentPage(carsResponse.pageIndex);
@@ -108,6 +105,13 @@ const Cars = () => {
         logo_url: car?.companyLogo ? getImageUrl(car.companyLogo) : null,
       },
       isWishList: car?.isWishList,
+      type: car?.type, // Added for SimilarCarsSlider
+      pickUpLocations: car?.pickUpLocations || [], // Added for SimilarCarsSlider
+      originalPricing: {
+        daily: car?.pricePerDay || 0,
+        weekly: car?.pricePerWeek || 0,
+        monthly: car?.pricePerMonth || 0,
+      }, // Added for SimilarCarsSlider
     }));
   }, [carsResponse?.carSearchResult]);
 
@@ -119,7 +123,8 @@ const Cars = () => {
   }, [cars, debouncedSearchTerm]);
 
   const totalPages = carsResponse?.totalPages || 0;
-  const totalRecord = carsResponse?.totalRecord || 0; // Use totalRecord from response
+  const totalRecord = carsResponse?.totalRecord || 0;
+
   const paginatedCars = filteredCars;
 
   const updateFilters = useCallback(
@@ -144,7 +149,6 @@ const Cars = () => {
     setCurrentPage(1);
   }, [serverFilters]);
 
-  // Use refs to track currentPage and totalPages
   const currentPageRef = useRef(currentPage);
   const totalPagesRef = useRef(totalPages);
 
@@ -156,7 +160,6 @@ const Cars = () => {
     totalPagesRef.current = totalPages;
   }, [totalPages]);
 
-  // Stable debounced handlePageChange
   const handlePageChange = useMemo(
     () =>
       debounce((page: number) => {
@@ -171,7 +174,6 @@ const Cars = () => {
     []
   );
 
-  // Cleanup debounce on component unmount
   useEffect(() => {
     return () => {
       handlePageChange.cancel();
@@ -206,6 +208,15 @@ const Cars = () => {
     ...(serverFilters.branches || []),
     ...(serverFilters.transmissions || []),
   ];
+
+  // Determine if SimilarCarsSlider should be shown
+  const showSimilarCarsSlider =
+    serverFilters.pickupLocation && serverFilters.dropOffLocation;
+
+  // Dynamic title for SimilarCarsSlider
+  const similarCarsTitle = showSimilarCarsSlider
+    ? t("carsNearLocation", { location: serverFilters.pickupLocation })
+    : t("similarCars");
 
   if (isLoading) {
     return (
@@ -334,7 +345,7 @@ const Cars = () => {
                     setSearchTerm={setSearchTerm}
                     viewMode={viewMode}
                     setViewMode={setViewMode}
-                    filteredCarsLength={totalRecord} // Use totalRecord instead of filteredCars.length
+                    filteredCarsLength={totalRecord}
                     currentPage={currentPage}
                     totalPages={totalPages}
                     isSearching={isSearching}
@@ -412,6 +423,12 @@ const Cars = () => {
                     )}
                   </ApiErrorBoundary>
                 </div>
+
+                {showSimilarCarsSlider && paginatedCars.length > 0 && (
+                  <div className="mt-8">
+                    <SimilarCarsSlider car={paginatedCars[0]} />
+                  </div>
+                )}
 
                 <CarsPagination
                   currentPage={currentPage}

@@ -1128,6 +1128,9 @@ export const arTranslations = {
     "لم يتم العثور على مستخدم ببياناتك. يرجى التسجيل.",
   verify_and_continue: "تحقق وتابع",
   verifying: "جاري التحقق...",
+  paymentInitiated: "تم بدء الدفع",
+  redirectingToPayment: "جاري التوجيه إلى بوابة الدفع...",
+  bookingFailed: "فشل الحجز",
 };
 
 export default arTranslations;

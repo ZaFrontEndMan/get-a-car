@@ -82,12 +82,18 @@ const OfferDetailsSidebar = ({
   const [dropoffExpanded, setDropoffExpanded] = useState(false);
 
   const visiblePickupLocations = useMemo(
-    () => (pickupExpanded || !pickupHasMore ? pickupLocations : pickupLocations.slice(0, 3)),
+    () =>
+      pickupExpanded || !pickupHasMore
+        ? pickupLocations
+        : pickupLocations.slice(0, 3),
     [pickupExpanded, pickupHasMore, pickupLocations]
   );
 
   const visibleDropoffLocations = useMemo(
-    () => (dropoffExpanded || !dropoffHasMore ? dropoffLocations : dropoffLocations.slice(0, 3)),
+    () =>
+      dropoffExpanded || !dropoffHasMore
+        ? dropoffLocations
+        : dropoffLocations.slice(0, 3),
     [dropoffExpanded, dropoffHasMore, dropoffLocations]
   );
 

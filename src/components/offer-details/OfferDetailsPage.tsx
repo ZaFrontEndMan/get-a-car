@@ -12,11 +12,13 @@ import OfferDetailsTerms from "../OfferDetailsTerms";
 import OfferVendorSection from "./OfferVendorSection";
 import OfferDetailsLoading from "./OfferDetailsLoading";
 import OfferDetailsNotFound from "./OfferDetailsNotFound";
+import { formatPricingBreakdown } from "@/utils/pricingCalculator";
 
 const OfferDetailsPage = () => {
   const { id } = useParams();
   const [searchParams] = useSearchParams();
   const location = useLocation();
+  const { t } = useLanguage();
 
   // Determine if current route is car details route (/cars/:id)
   const isCarRoute = location.pathname.startsWith("/cars/");
@@ -65,9 +67,12 @@ const OfferDetailsPage = () => {
   }
 
   const pricingBreakdown = calculateTotalPrice(offer, additionalServices);
-
+  const formattedPricing = formatPricingBreakdown(
+    pricingBreakdown,
+    t("currency")
+  );
   return (
-    <div className="min-h-screen bg-cream">
+    <div className="min-h-screen">
       <div className="pt-20 pb-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Conditionally hide header on /cars/:id route */}
@@ -147,6 +152,7 @@ const OfferDetailsPage = () => {
               selectedPickup={selectedPickup}
               selectedDropoff={selectedDropoff}
               rentalDays={rentalDays}
+              formattedPricing={formattedPricing}
             />
           )}
           {/* Terms & Policies - Only offer-specific policies */}

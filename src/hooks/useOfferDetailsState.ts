@@ -47,6 +47,7 @@ export const useOfferDetailsState = () => {
       price: service.price,
       selected: selectedServices.includes(service.id),
     }));
+    console.log(services);
 
     // Use dynamic pricing calculation based on rental days
     const dynamicPricing = calculateBookingPrice(

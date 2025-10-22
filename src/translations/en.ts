@@ -772,6 +772,10 @@ export const enTranslations = {
   driver: "Driver",
   delivery: "Delivery",
 
+  paymentInitiated: "Payment Initiated",
+  redirectingToPayment: "Redirecting to payment gateway...",
+  bookingFailed: "Booking Failed",
+
   // Contact page fallback values
   defaultAddress: "123 King Fahd Road, Riyadh 12345, Saudi Arabia",
   defaultPhone: "+966 11 123 4567",

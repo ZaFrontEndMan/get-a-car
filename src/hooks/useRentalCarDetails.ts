@@ -130,7 +130,7 @@ export const useRentalCarDetails = (carId: number, offerId: number) => {
   // Transform additional services from optional extras
   const additionalServices =
     apiResponse?.data?.optionalExtras?.map((extra, index) => ({
-      id: `service-${index}`,
+      id: extra.id,
       name: extra.name,
       description: extra.description,
       price: extra.price,

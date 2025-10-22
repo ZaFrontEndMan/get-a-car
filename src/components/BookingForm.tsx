@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import { useToast } from "@/components/ui/use-toast";
-import { Loader2, MapPin, CreditCard, Shield } from "lucide-react";
+import { Loader2, MapPin, CreditCard, Shield, X } from "lucide-react";
 import { differenceInDays, addDays } from "date-fns";
 import { createBookingSchema, BookingFormData } from "./booking/bookingSchema";
 import BookingInvoice from "./booking/BookingInvoice";
@@ -14,6 +14,14 @@ import BookingServicesDisplay from "./booking/BookingServicesDisplay";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { calculateBookingPrice, Service } from "../utils/pricingCalculator";
 import CheckUserBeforeBooking from "./CheckUserBeforeBooking";
+import { useClientBookings } from "@/hooks/client/useClientBookings";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogClose,
+} from "@/components/ui/dialog";
 
 interface BookingFormProps {
   isOpen: boolean;
@@ -56,8 +64,14 @@ const BookingForm = ({
   const [bookingId, setBookingId] = useState("");
   const [rentalDays, setRentalDays] = useState(initialRentalDays);
   const [isUserVerified, setIsUserVerified] = useState(isLoggedUser);
+  const [paymentUrl, setPaymentUrl] = useState("");
   const { toast } = useToast();
   const { t } = useLanguage();
+  const { useCreateBookingMutation, usePaymentCallbackMutation } =
+    useClientBookings();
+
+  const createBookingMutation = useCreateBookingMutation();
+  const paymentCallbackMutation = usePaymentCallbackMutation();
 
   // Sync internal rentalDays state with prop changes
   useEffect(() => {
@@ -98,7 +112,6 @@ const BookingForm = ({
   };
 
   const getPricingBreakdown = () => {
-    // Convert selected services to the format expected by pricing calculator
     const services: Service[] = selectedServices.map((serviceId) => {
       const serviceMap = {
         insurance: { name: t("insurance"), price: 50 },
@@ -116,7 +129,6 @@ const BookingForm = ({
       };
     });
 
-    // Use dynamic pricing calculator
     return calculateBookingPrice(rentalDays, car.pricing, services);
   };
 
@@ -126,36 +138,56 @@ const BookingForm = ({
 
   const getServiceDetails = () => {
     const serviceMap = {
-      insurance: { name: t("insurance"), price: 50 },
-      gps: { name: t("gps"), price: 25 },
-      driver: { name: t("driver"), price: 200 },
-      delivery: { name: t("delivery"), price: 75 },
+      insurance: { name: t("insurance"), price: 50, id: 19 },
+      gps: { name: t("gps"), price: 25, id: 20 },
+      driver: { name: t("driver"), price: 200, id: 21 },
+      delivery: { name: t("delivery"), price: 75, id: 22 },
     };
 
     return selectedServices.map((serviceId) => ({
       id: serviceId,
       name: serviceMap[serviceId as keyof typeof serviceMap]?.name || serviceId,
       price: serviceMap[serviceId as keyof typeof serviceMap]?.price || 0,
+      serviceId: serviceMap[serviceId as keyof typeof serviceMap]?.id || 0,
     }));
   };
 
   const onSubmit = async (data: BookingFormData) => {
+    console.log("Form submitted with data:", data); // Debug log
     setIsLoading(true);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      const bookingData = {
+        carId: parseInt(car.id),
+        fromDate: data.pickupDate.toISOString(),
+        toDate: data.dropoffDate.toISOString(),
+        offerId: 0,
+        services: getServiceDetails().map((service) => service.serviceId),
+        protection: ["7c4e7416-a173-4cb0-9dcf-51db365581cb"],
+      };
+
+      console.log("Sending booking data:", bookingData); // Debug log
+      const response = await createBookingMutation.mutateAsync(bookingData);
+      console.log("Booking response:", response); // Debug log
+
       const newBookingId =
+        response.bookingId ||
         "BKG-" + Math.random().toString(36).substr(2, 9).toUpperCase();
       setBookingId(newBookingId);
 
-      toast({
-        title: t("paymentSuccessful"),
-        description: t("bookingConfirmed"),
-      });
+      if (response.data) {
+        setPaymentUrl(response.data);
+        // await paymentCallbackMutation.mutateAsync(response.data);
+        console.log("Payment callback triggered for URL:", response.data); // Debug log
+      }
 
-      setShowInvoice(true);
-    } catch (error) {
       toast({
-        title: t("paymentFailed"),
+        title: t("paymentInitiated"),
+        description: t("redirectingToPayment"),
+      });
+    } catch (error) {
+      console.error("Booking error:", error); // Debug log
+      toast({
+        title: t("bookingFailed"),
         description: t("pleaseTryAgain"),
         variant: "destructive",
       });
@@ -163,6 +195,28 @@ const BookingForm = ({
       setIsLoading(false);
     }
   };
+
+  if (paymentUrl) {
+    return (
+      <Dialog open={true} onOpenChange={() => setPaymentUrl("")}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>{t("completePayment")}</DialogTitle>
+            <DialogClose className="absolute right-4 top-4">
+              <X className="h-5 w-5" />
+              <span className="sr-only">Close</span>
+            </DialogClose>
+          </DialogHeader>
+          <iframe
+            src={`https://accept.paymob.com/api/acceptance/iframes/877416?payment_token=${paymentUrl}`}
+            title="Payment Gateway"
+            className="w-full h-[500px] border-0"
+            sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
+          />
+        </DialogContent>
+      </Dialog>
+    );
+  }
 
   if (showInvoice) {
     return (
@@ -185,8 +239,7 @@ const BookingForm = ({
         isOpen ? "scale-y-100 opacity-100" : "scale-y-0 opacity-0"
       }`}
     >
-      {/* Header */}
-      <div className="border-b border-gray-200 pb-4 ">
+      <div className="border-b border-gray-200 pb-4">
         <h2 className="text-2xl sm:text-3xl font-bold text-center bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
           {t("completeBooking")}
         </h2>
@@ -203,11 +256,10 @@ const BookingForm = ({
       <div
         className={`space-y-8 ${
           !isUserVerified
-            ? "pointer-events-none animate-pulse duration-900 "
+            ? "pointer-events-none animate-pulse duration-900"
             : ""
         }`}
       >
-        {/* Car Info Card */}
         <BookingCarInfo
           car={car}
           pricingType={pricingType}
@@ -218,7 +270,6 @@ const BookingForm = ({
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-            {/* Date & Location Section */}
             <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 sm:p-8">
               <div className="flex items-center gap-3 mb-6">
                 <h3 className="text-xl font-bold text-gray-900">
@@ -236,12 +287,12 @@ const BookingForm = ({
               />
 
               <BookingServicesDisplay
+                formattedPricing={getPricingBreakdown()}
                 selectedServices={selectedServices}
                 getServiceDetails={getServiceDetails}
               />
             </div>
 
-            {/* Price Summary */}
             <div className="bg-gradient-to-r from-primary to-secondary rounded-2xl shadow-xl p-6 sm:p-8 text-white">
               <h4 className="text-xl font-bold mb-6 flex items-center gap-3">
                 <Shield className="h-6 w-6" />
@@ -285,14 +336,17 @@ const BookingForm = ({
               </div>
             </div>
 
-            {/* Submit Button */}
             <div className="pt-6">
               <Button
                 type="submit"
-                disabled={isLoading}
+                disabled={
+                  isLoading ||
+                  createBookingMutation.isLoading ||
+                  !isUserVerified
+                }
                 className="w-full h-16 text-lg font-bold bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-300 rounded-xl"
               >
-                {isLoading ? (
+                {isLoading || createBookingMutation.isLoading ? (
                   <>
                     <Loader2 className="h-6 w-6 animate-spin mr-3" />
                     {t("processingPayment")}
