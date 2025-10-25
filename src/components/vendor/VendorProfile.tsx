@@ -67,7 +67,6 @@ const VendorProfile = () => {
         address: data.location || "",
         email: data.email || "",
         phoneNumber: data.phoneNumber || "",
-        companyLogoIsDeleted: false,
       });
     }
     setLogoFile(null);
@@ -84,7 +83,7 @@ const VendorProfile = () => {
   };
 
   const confirmRemoveLogo = () => {
-    setEditForm((prev) => ({ ...prev, companyLogoIsDeleted: true }));
+    setEditForm((prev) => ({ ...prev }));
     setLogoFile(null);
     setIsConfirmDeleteOpen(false);
     handleEdit();
@@ -512,7 +511,9 @@ const VendorProfile = () => {
       <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle className=" text-start">{t("editProfile")}</DialogTitle>
+            <DialogTitle className=" text-start">
+              {t("editProfile")}
+            </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div>

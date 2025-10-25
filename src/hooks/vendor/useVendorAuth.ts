@@ -49,7 +49,6 @@ export const useVendorAuth = () => {
     address: "",
     email: "",
     phoneNumber: "",
-    companyLogoIsDeleted: false,
   });
   const [logoFile, setLogoFile] = useState<File | null>(null);
 
@@ -69,7 +68,6 @@ export const useVendorAuth = () => {
           address: response.data.location || "",
           email: response.data.email || "",
           phoneNumber: response.data.phoneNumber || "",
-          companyLogoIsDeleted: false,
         });
       } else {
         setState((prev) => ({
@@ -78,9 +76,9 @@ export const useVendorAuth = () => {
           loading: false,
         }));
       }
-    } catch (error: any) { 
-        console.log(error);
-        
+    } catch (error: any) {
+      console.log(error);
+
       const errorMessage =
         error?.response?.data?.error?.message ||
         error?.response?.data?.error?.customMessage ||

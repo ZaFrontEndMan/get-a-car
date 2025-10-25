@@ -4,7 +4,6 @@ interface EditVendorParams {
   nickName?: string;
   fullName?: string;
   address?: string;
-  companyLogoIsDeleted?: boolean;
   email?: string;
   phoneNumber?: string;
 }

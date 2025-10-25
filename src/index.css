@@ -1,6 +1,5 @@
-
-@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@100..900&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@100..900&display=swap");
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -69,60 +68,74 @@
   body {
     @apply bg-background text-foreground;
   }
-  
+
   /* Arabic font support */
   .font-arabic {
-    font-family: 'Noto Sans Arabic', system-ui, -apple-system, sans-serif;
+    font-family: "Noto Sans Arabic", system-ui, -apple-system, sans-serif;
     font-feature-settings: "kern" 1, "liga" 1, "calt" 1;
   }
-  
+
   /* RTL support improvements */
   [dir="rtl"] {
     text-align: right;
   }
-  
+
   [dir="rtl"] .font-arabic {
-    font-family: 'Noto Sans Arabic', 'Tahoma', 'Arial', sans-serif;
+    font-family: "Noto Sans Arabic", "Tahoma", "Arial", sans-serif;
     line-height: 1.6;
     letter-spacing: 0.01em;
   }
-  
+
   /* Custom scrollbar for RTL */
   [dir="rtl"] .custom-scrollbar::-webkit-scrollbar {
     width: 4px;
   }
-  
+
   /* Enhanced backdrop blur support */
   .backdrop-blur-sm {
     backdrop-filter: blur(4px);
     -webkit-backdrop-filter: blur(4px);
   }
-  
+
   .backdrop-blur-md {
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
   }
-  
+
   /* Smooth transitions for professional feel */
   .transition-all {
     transition-property: all;
     transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
     transition-duration: 200ms;
   }
-  
+
   /* Enhanced shadows for depth */
   .shadow-professional {
-    box-shadow: 
-      0 1px 3px 0 rgba(0, 0, 0, 0.1),
-      0 1px 2px 0 rgba(0, 0, 0, 0.06),
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06),
       0 0 0 1px rgba(0, 0, 0, 0.05);
   }
-  
+
   /* Gradient text support */
   .gradient-text {
     background: linear-gradient(135deg, #3b82f6, #6366f1, #8b5cf6);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+  }
+  .skeleton {
+    background: #e2e8f0;
+    animation: pulse 1.5s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.5;
+    }
+    100% {
+      opacity: 1;
+    }
   }
 }
