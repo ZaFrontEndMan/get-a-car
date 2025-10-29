@@ -5,11 +5,33 @@ import PaidFeaturesSection from "./PaidFeaturesSection";
 import ImageSection from "./ImageSection";
 import FeaturesSection from "./FeaturesSection";
 import LocationsSection from "./LocationsSection";
+import ProtectionsSection from "./ProtectionsSection";
 import OtherDetailsSection from "./OtherDetailsSection";
 
 interface PaidFeature {
+  id?: number;
   title: string;
+  titleAr?: string;
+  titleEn?: string;
   price: number;
+  description?: string;
+  descriptionAr?: string;
+  descriptionEn?: string;
+  serviceTypeId?: number;
+}
+
+interface Location {
+  id?: number;
+  address: string;
+  isActive: boolean;
+}
+
+interface Protection {
+  id?: string;
+  nameAr: string;
+  nameEn: string;
+  descriptionAr: string;
+  descriptionEn: string;
 }
 
 interface CarFormContentProps {
@@ -17,13 +39,15 @@ interface CarFormContentProps {
   handleChange: (field: string, value: any) => void;
   paidFeatures: PaidFeature[];
   setPaidFeatures: React.Dispatch<React.SetStateAction<PaidFeature[]>>;
-  pickupLocations: string[];
-  setPickupLocations: React.Dispatch<React.SetStateAction<string[]>>;
-  dropoffLocations: string[];
-  setDropoffLocations: React.Dispatch<React.SetStateAction<string[]>>;
+  pickupLocations: Location[];
+  setPickupLocations: React.Dispatch<React.SetStateAction<Location[]>>;
+  dropoffLocations: Location[];
+  setDropoffLocations: React.Dispatch<React.SetStateAction<Location[]>>;
+  protections: Protection[];
+  setProtections: React.Dispatch<React.SetStateAction<Protection[]>>;
   branches?: Array<{ id: string; name: string }>;
   branchesLoading?: boolean;
-  t: (key: string, params?: Record<string, any>) => string; // Translation function
+  t: (key: string, params?: Record<string, any>) => string;
 }
 
 const CarFormContent = ({
@@ -35,6 +59,8 @@ const CarFormContent = ({
   setPickupLocations,
   dropoffLocations,
   setDropoffLocations,
+  protections,
+  setProtections,
   branches,
   branchesLoading,
   t,
@@ -60,6 +86,11 @@ const CarFormContent = ({
         t={t}
         paidFeatures={paidFeatures}
         setPaidFeatures={setPaidFeatures}
+      />
+      <ProtectionsSection
+        t={t}
+        protections={protections}
+        setProtections={setProtections}
       />
       <OtherDetailsSection
         t={t}

@@ -1,10 +1,9 @@
-import React, { useState } from "react";
+import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Plus, X } from "lucide-react";
+import { X } from "lucide-react";
 
 interface FeaturesSectionProps {
   formData: {
@@ -19,40 +18,24 @@ const FeaturesSection = ({
   handleChange,
   t,
 }: FeaturesSectionProps) => {
-  const [newFeature, setNewFeature] = useState("");
-
-  const commonFeatures = [
-    "air_conditioning",
-    "bluetooth",
-    "gps_navigation",
-    "backup_camera",
-    "leather_seats",
-    "sunroof",
-    "cruise_control",
-    "usb_charging",
-    "apple_carplay",
-    "android_auto",
-    "heated_seats",
-    "parking_sensors",
-    "keyless_entry",
-    "premium_sound_system",
-    "all_wheel_drive",
-  ];
-
-  const addFeature = (feature: string) => {
-    if (feature.trim() && !formData.features.includes(feature.trim())) {
-      const updatedFeatures = [...formData.features, feature.trim()];
-      handleChange("features", updatedFeatures);
-      setNewFeature("");
+  const toggleFeature = (apiField: string) => {
+    if (formData.features.includes(apiField)) {
+      const updated = formData.features.filter((f) => f !== apiField);
+      handleChange("features", updated);
+    } else {
+      handleChange("features", [...formData.features, apiField]);
     }
   };
 
-  const removeFeature = (featureToRemove: string) => {
-    const updatedFeatures = formData.features.filter(
-      (feature) => feature !== featureToRemove
-    );
-    handleChange("features", updatedFeatures);
+  const isFeatureSelected = (apiField: string): boolean => {
+    return formData.features.includes(apiField);
   };
+
+  const removeFeature = (apiField: string) => {
+    const updated = formData.features.filter((f) => f !== apiField);
+    handleChange("features", updated);
+  };
+  console.log(formData);
 
   return (
     <Card dir={t("language") === "ar" ? "rtl" : "ltr"}>
@@ -60,65 +43,105 @@ const FeaturesSection = ({
         <CardTitle className="text-lg">{t("car_features")}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="flex gap-2">
-          <div className="flex-1">
-            <Label htmlFor="new-feature">{t("add_custom_feature")}</Label>
-            <Input
-              id="new-feature"
-              value={newFeature}
-              onChange={(e) => setNewFeature(e.target.value)}
-              placeholder={t("enter_feature_name")}
-            />
-          </div>
-          <Button
-            type="button"
-            onClick={() => addFeature(newFeature)}
-            className="mt-6"
-            disabled={!newFeature.trim()}
-          >
-            <Plus className="h-4 w-4 mr-1" />
-            {t("add")}
-          </Button>
-        </div>
-
         <div>
-          <Label>{t("quick_add_common_features")}</Label>
-          <div className="flex flex-wrap gap-2 mt-2">
-            {commonFeatures.map((featureKey) => (
-              <Button
-                key={featureKey}
-                type="button"
-                variant={
-                  formData.features.includes(t(featureKey))
-                    ? "default"
-                    : "outline"
-                }
-                size="sm"
-                onClick={() =>
-                  formData.features.includes(t(featureKey))
-                    ? removeFeature(t(featureKey))
-                    : addFeature(t(featureKey))
-                }
-              >
-                {t(featureKey)}
-              </Button>
-            ))}
+          {/* Safety Features */}
+          <div className="mt-3">
+            <p className="text-sm font-medium text-gray-700 mb-2">
+              {t("safety_features")}
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {["airbag", "absBrakes", "ebdBrakes", "fogLights", "sensors"].map(
+                (feature) => (
+                  <Button
+                    key={feature}
+                    type="button"
+                    variant={isFeatureSelected(feature) ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => toggleFeature(feature)}
+                  >
+                    {t(feature)}
+                  </Button>
+                )
+              )}
+            </div>
+          </div>
+
+          {/* Comfort Features */}
+          <div className="mt-3">
+            <p className="text-sm font-medium text-gray-700 mb-2">
+              {t("comfort_features")}
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {["cruiseControl", "electricMirrors", "power"].map((feature) => (
+                <Button
+                  key={feature}
+                  type="button"
+                  variant={isFeatureSelected(feature) ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => toggleFeature(feature)}
+                >
+                  {t(feature)}
+                </Button>
+              ))}
+            </div>
+          </div>
+
+          {/* Entertainment & Connectivity */}
+          <div className="mt-3">
+            <p className="text-sm font-medium text-gray-700 mb-2">
+              {t("entertainment_connectivity")}
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {["bluetooth", "gps", "usbInput", "audioInput", "cdPlayer"].map(
+                (feature) => (
+                  <Button
+                    key={feature}
+                    type="button"
+                    variant={isFeatureSelected(feature) ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => toggleFeature(feature)}
+                  >
+                    {t(feature)}
+                  </Button>
+                )
+              )}
+            </div>
+          </div>
+
+          {/* Additional Features */}
+          <div className="mt-3">
+            <p className="text-sm font-medium text-gray-700 mb-2">
+              {t("additional_features")}
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {["roofBox", "remoteControl"].map((feature) => (
+                <Button
+                  key={feature}
+                  type="button"
+                  variant={isFeatureSelected(feature) ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => toggleFeature(feature)}
+                >
+                  {t(feature)}
+                </Button>
+              ))}
+            </div>
           </div>
         </div>
 
-        {formData.features.length > 0 && (
+        {formData.features.length > 0 ? (
           <div>
             <Label>
               {t("selected_features")} ({formData.features.length})
             </Label>
             <div className="flex flex-wrap gap-2 mt-2">
-              {formData.features.map((feature) => (
+              {formData.features.map((feature, index) => (
                 <Badge
-                  key={feature}
+                  key={`${feature}-${index}`}
                   variant="secondary"
                   className="flex items-center gap-1"
                 >
-                  {feature}
+                  {t(feature)}
                   <Button
                     type="button"
                     variant="ghost"
@@ -132,7 +155,7 @@ const FeaturesSection = ({
               ))}
             </div>
           </div>
-        )}
+        ) : null}
       </CardContent>
     </Card>
   );

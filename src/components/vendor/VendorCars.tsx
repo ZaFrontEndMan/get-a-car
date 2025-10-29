@@ -193,7 +193,7 @@ const VendorCars = () => {
       {showForm && (
         <CarForm
           t={t}
-          car={editingCar}
+          carId={editingCar?.id}
           onClose={handleFormClose}
           onSuccess={() => {
             queryClient.invalidateQueries({ queryKey: ["vendor", "cars"] });

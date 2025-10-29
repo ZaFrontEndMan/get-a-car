@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import {
@@ -8,6 +8,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  useGetCarTypes,
+  useGetFuelTypes,
+  useGetTransmissionTypes,
+  useGetCarBrands,
+  useGetCarModels,
+} from "@/hooks/vendor/useCarDetails";
 
 interface BasicInformationSectionProps {
   formData: any;
@@ -20,6 +27,31 @@ const BasicInformationSection = ({
   handleChange,
   t,
 }: BasicInformationSectionProps) => {
+  const { data: carTypes, isLoading: carTypesLoading } = useGetCarTypes();
+  const { data: fuelTypes, isLoading: fuelTypesLoading } = useGetFuelTypes();
+  const { data: transmissionTypes, isLoading: transmissionTypesLoading } =
+    useGetTransmissionTypes();
+  const { data: carBrands, isLoading: carBrandsLoading } = useGetCarBrands();
+  const { data: carModels, isLoading: carModelsLoading } = useGetCarModels();
+
+  // Filter models by selected brand's tradeMarkId
+  const filteredModels =
+    carModels?.filter((model) => model.tradeMarkId === formData.tradeMarkId) ||
+    [];
+
+  // Reset modelId when tradeMarkId changes if the current model is invalid
+  useEffect(() => {
+    if (formData.tradeMarkId && carModels && formData.modelId) {
+      const isValidModel = filteredModels.some(
+        (model) => model.id === formData.modelId
+      );
+      if (!isValidModel) {
+        handleChange("modelId", "");
+        handleChange("model", "");
+      }
+    }
+  }, [formData.tradeMarkId, carModels, filteredModels, handleChange]);
+
   return (
     <div dir={t("language") === "ar" ? "rtl" : "ltr"}>
       <h3 className="text-lg font-semibold mb-4">{t("basic_information")}</h3>
@@ -35,23 +67,67 @@ const BasicInformationSection = ({
         </div>
 
         <div>
-          <Label htmlFor="brand">{t("brand")} *</Label>
-          <Input
-            id="brand"
-            value={formData.brand || ""}
-            onChange={(e) => handleChange("brand", e.target.value)}
-            required
-          />
+          <Label htmlFor="tradeMarkId">{t("brand")} *</Label>
+          <Select
+            value={formData.tradeMarkId?.toString() || ""}
+            onValueChange={(value) => {
+              const selectedBrand = carBrands?.find(
+                (brand) => brand.id.toString() === value
+              );
+              handleChange("tradeMarkId", value ? parseInt(value) : "");
+              handleChange("brand", selectedBrand?.name || "");
+            }}
+            disabled={carBrandsLoading}
+          >
+            <SelectTrigger>
+              <SelectValue
+                placeholder={
+                  carBrandsLoading ? t("loading") : t("select_brand")
+                }
+              />
+            </SelectTrigger>
+            <SelectContent>
+              {carBrands?.map((brand) => (
+                <SelectItem key={brand.id} value={brand.id.toString()}>
+                  {t(brand.name)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         <div>
-          <Label htmlFor="model">{t("model")} *</Label>
-          <Input
-            id="model"
-            value={formData.model || ""}
-            onChange={(e) => handleChange("model", e.target.value)}
-            required
-          />
+          <Label htmlFor="modelId">{t("model")} *</Label>
+          <Select
+            value={formData.modelId?.toString() || ""}
+            onValueChange={(value) => {
+              const selectedModel = filteredModels?.find(
+                (model) => model.id.toString() === value
+              );
+              handleChange("modelId", value ? parseInt(value) : "");
+              handleChange("model", selectedModel?.name || "");
+            }}
+            disabled={carModelsLoading || !formData.tradeMarkId}
+          >
+            <SelectTrigger>
+              <SelectValue
+                placeholder={
+                  carModelsLoading
+                    ? t("loading")
+                    : !formData.tradeMarkId
+                    ? t("select_brand_first")
+                    : t("select_model")
+                }
+              />
+            </SelectTrigger>
+            <SelectContent>
+              {filteredModels?.map((model) => (
+                <SelectItem key={model.id} value={model.id.toString()}>
+                  {t(model.name)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         <div>
@@ -70,20 +146,29 @@ const BasicInformationSection = ({
         <div>
           <Label htmlFor="type">{t("type")} *</Label>
           <Select
-            value={formData.type}
-            onValueChange={(value) => handleChange("type", value)}
+            value={formData.type?.toString() || ""}
+            onValueChange={(value) => {
+              const selectedType = carTypes?.find(
+                (type) => type.id.toString() === value
+              );
+              handleChange("type", value ? parseInt(value) : "");
+              handleChange("typeName", selectedType?.name || "");
+            }}
+            disabled={carTypesLoading}
           >
             <SelectTrigger>
-              <SelectValue placeholder={t("select_car_type")} />
+              <SelectValue
+                placeholder={
+                  carTypesLoading ? t("loading") : t("select_car_type")
+                }
+              />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="sedan">{t("sedan")}</SelectItem>
-              <SelectItem value="suv">{t("suv")}</SelectItem>
-              <SelectItem value="hatchback">{t("hatchback")}</SelectItem>
-              <SelectItem value="coupe">{t("coupe")}</SelectItem>
-              <SelectItem value="convertible">{t("convertible")}</SelectItem>
-              <SelectItem value="wagon">{t("wagon")}</SelectItem>
-              <SelectItem value="pickup">{t("pickup")}</SelectItem>
+              {carTypes?.map((type) => (
+                <SelectItem key={type.id} value={type.id.toString()}>
+                  {t(type.name)}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
@@ -91,17 +176,29 @@ const BasicInformationSection = ({
         <div>
           <Label htmlFor="fuel_type">{t("fuel_type")} *</Label>
           <Select
-            value={formData.fuel_type}
-            onValueChange={(value) => handleChange("fuel_type", value)}
+            value={formData.fuel_type?.toString() || ""}
+            onValueChange={(value) => {
+              const selectedFuel = fuelTypes?.find(
+                (fuel) => fuel.id.toString() === value
+              );
+              handleChange("fuel_type", value ? parseInt(value) : "");
+              handleChange("fuelTypeName", selectedFuel?.name || "");
+            }}
+            disabled={fuelTypesLoading}
           >
             <SelectTrigger>
-              <SelectValue placeholder={t("select_fuel_type")} />
+              <SelectValue
+                placeholder={
+                  fuelTypesLoading ? t("loading") : t("select_fuel_type")
+                }
+              />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="petrol">{t("petrol")}</SelectItem>
-              <SelectItem value="diesel">{t("diesel")}</SelectItem>
-              <SelectItem value="electric">{t("electric")}</SelectItem>
-              <SelectItem value="hybrid">{t("hybrid")}</SelectItem>
+              {fuelTypes?.map((fuel) => (
+                <SelectItem key={fuel.id} value={fuel.id.toString()}>
+                  {t(fuel.name)}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
@@ -109,15 +206,31 @@ const BasicInformationSection = ({
         <div>
           <Label htmlFor="transmission">{t("transmission")} *</Label>
           <Select
-            value={formData.transmission}
-            onValueChange={(value) => handleChange("transmission", value)}
+            value={formData.transmission?.toString() || ""}
+            onValueChange={(value) => {
+              const selectedTrans = transmissionTypes?.find(
+                (trans) => trans.id.toString() === value
+              );
+              handleChange("transmission", value ? parseInt(value) : "");
+              handleChange("transmissionName", selectedTrans?.name || "");
+            }}
+            disabled={transmissionTypesLoading}
           >
             <SelectTrigger>
-              <SelectValue placeholder={t("select_transmission")} />
+              <SelectValue
+                placeholder={
+                  transmissionTypesLoading
+                    ? t("loading")
+                    : t("select_transmission")
+                }
+              />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="manual">{t("manual")}</SelectItem>
-              <SelectItem value="automatic">{t("automatic")}</SelectItem>
+              {transmissionTypes?.map((trans) => (
+                <SelectItem key={trans.id} value={trans.id.toString()}>
+                  {t(trans.name)}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>

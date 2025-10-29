@@ -9,6 +9,27 @@ interface PricingSectionProps {
 }
 
 const PricingSection = ({ formData, handleChange, t }: PricingSectionProps) => {
+  // Handle number input with validation
+  const handleNumberChange = (field: string, value: string) => {
+    // Allow empty string
+    if (value === "") {
+      handleChange(field, "");
+      return;
+    }
+
+    // Allow only numbers and decimal point
+    const regex = /^\d*\.?\d*$/;
+    if (regex.test(value)) {
+      const numValue = parseFloat(value);
+      handleChange(field, isNaN(numValue) ? "" : numValue);
+    }
+  };
+
+  // Prevent scroll on wheel event
+  const handleWheel = (e: React.WheelEvent<HTMLInputElement>) => {
+    e.currentTarget.blur();
+  };
+
   return (
     <div dir={t("language") === "ar" ? "rtl" : "ltr"}>
       <h3 className="text-lg font-semibold mb-4">{t("pricing")}</h3>
@@ -17,12 +38,12 @@ const PricingSection = ({ formData, handleChange, t }: PricingSectionProps) => {
           <Label htmlFor="daily_rate">{t("daily_rate")} *</Label>
           <Input
             id="daily_rate"
-            type="number"
-            step="0.01"
+            type="text"
+            inputMode="decimal"
             value={formData.daily_rate || ""}
-            onChange={(e) =>
-              handleChange("daily_rate", parseFloat(e.target.value))
-            }
+            onChange={(e) => handleNumberChange("daily_rate", e.target.value)}
+            onWheel={handleWheel}
+            placeholder="0.00"
             required
           />
         </div>
@@ -31,12 +52,12 @@ const PricingSection = ({ formData, handleChange, t }: PricingSectionProps) => {
           <Label htmlFor="weekly_rate">{t("weekly_rate")}</Label>
           <Input
             id="weekly_rate"
-            type="number"
-            step="0.01"
+            type="text"
+            inputMode="decimal"
             value={formData.weekly_rate || ""}
-            onChange={(e) =>
-              handleChange("weekly_rate", parseFloat(e.target.value))
-            }
+            onChange={(e) => handleNumberChange("weekly_rate", e.target.value)}
+            onWheel={handleWheel}
+            placeholder="0.00"
           />
         </div>
 
@@ -44,12 +65,12 @@ const PricingSection = ({ formData, handleChange, t }: PricingSectionProps) => {
           <Label htmlFor="monthly_rate">{t("monthly_rate")}</Label>
           <Input
             id="monthly_rate"
-            type="number"
-            step="0.01"
+            type="text"
+            inputMode="decimal"
             value={formData.monthly_rate || ""}
-            onChange={(e) =>
-              handleChange("monthly_rate", parseFloat(e.target.value))
-            }
+            onChange={(e) => handleNumberChange("monthly_rate", e.target.value)}
+            onWheel={handleWheel}
+            placeholder="0.00"
           />
         </div>
 
@@ -57,12 +78,14 @@ const PricingSection = ({ formData, handleChange, t }: PricingSectionProps) => {
           <Label htmlFor="deposit_amount">{t("deposit_amount")}</Label>
           <Input
             id="deposit_amount"
-            type="number"
-            step="0.01"
+            type="text"
+            inputMode="decimal"
             value={formData.deposit_amount || ""}
             onChange={(e) =>
-              handleChange("deposit_amount", parseFloat(e.target.value))
+              handleNumberChange("deposit_amount", e.target.value)
             }
+            onWheel={handleWheel}
+            placeholder="0.00"
           />
         </div>
       </div>

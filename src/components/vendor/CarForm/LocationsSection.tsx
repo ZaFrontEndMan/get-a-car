@@ -3,13 +3,20 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { Plus, X, MapPin } from "lucide-react";
 
+interface Location {
+  id?: number;
+  address: string;
+  isActive: boolean;
+}
+
 interface LocationsSectionProps {
-  pickupLocations: string[];
-  dropoffLocations: string[];
-  setPickupLocations: (locations: string[]) => void;
-  setDropoffLocations: (locations: string[]) => void;
+  pickupLocations: Location[];
+  dropoffLocations: Location[];
+  setPickupLocations: (locations: Location[]) => void;
+  setDropoffLocations: (locations: Location[]) => void;
   t: (key: string, params?: Record<string, any>) => string;
 }
 
@@ -21,22 +28,32 @@ const LocationsSection = ({
   t,
 }: LocationsSectionProps) => {
   const addPickupLocation = () => {
-    setPickupLocations([...pickupLocations, ""]);
+    setPickupLocations([...pickupLocations, { address: "", isActive: true }]);
   };
 
   const addDropoffLocation = () => {
-    setDropoffLocations([...dropoffLocations, ""]);
+    setDropoffLocations([...dropoffLocations, { address: "", isActive: true }]);
   };
 
-  const updatePickupLocation = (index: number, value: string) => {
-    const updated = [...pickupLocations];
-    updated[index] = value;
+  const updatePickupLocation = (
+    index: number,
+    field: keyof Location,
+    value: any
+  ) => {
+    const updated = pickupLocations.map((loc, i) =>
+      i === index ? { ...loc, [field]: value } : loc
+    );
     setPickupLocations(updated);
   };
 
-  const updateDropoffLocation = (index: number, value: string) => {
-    const updated = [...dropoffLocations];
-    updated[index] = value;
+  const updateDropoffLocation = (
+    index: number,
+    field: keyof Location,
+    value: any
+  ) => {
+    const updated = dropoffLocations.map((loc, i) =>
+      i === index ? { ...loc, [field]: value } : loc
+    );
     setDropoffLocations(updated);
   };
 
@@ -76,23 +93,36 @@ const LocationsSection = ({
           </div>
           <div className="space-y-2">
             {pickupLocations.map((location, index) => (
-              <div key={index} className="flex gap-2">
-                <Input
-                  value={location}
-                  onChange={(e) => updatePickupLocation(index, e.target.value)}
-                  placeholder={t("enter_pickup_location")}
-                />
-                {pickupLocations.length > 1 && (
+              <div key={index} className="flex gap-2 items-start">
+                <div className="flex-1 space-y-2">
+                  <Input
+                    value={location.address}
+                    onChange={(e) =>
+                      updatePickupLocation(index, "address", e.target.value)
+                    }
+                    placeholder={t("enter_pickup_location")}
+                  />
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      checked={location.isActive}
+                      onCheckedChange={(checked) =>
+                        updatePickupLocation(index, "isActive", checked)
+                      }
+                    />
+                    <Label className="text-sm">{t("active")}</Label>
+                  </div>
+                </div>
+                {pickupLocations.length > 1 ? (
                   <Button
                     type="button"
                     variant="ghost"
                     size="sm"
                     onClick={() => removePickupLocation(index)}
-                    className="text-red-600 hover:text-red-700"
+                    className="text-red-600 hover:text-red-700 mt-2"
                   >
                     <X className="h-4 w-4" />
                   </Button>
-                )}
+                ) : null}
               </div>
             ))}
           </div>
@@ -113,23 +143,36 @@ const LocationsSection = ({
           </div>
           <div className="space-y-2">
             {dropoffLocations.map((location, index) => (
-              <div key={index} className="flex gap-2">
-                <Input
-                  value={location}
-                  onChange={(e) => updateDropoffLocation(index, e.target.value)}
-                  placeholder={t("enter_dropoff_location")}
-                />
-                {dropoffLocations.length > 1 && (
+              <div key={index} className="flex gap-2 items-start">
+                <div className="flex-1 space-y-2">
+                  <Input
+                    value={location.address}
+                    onChange={(e) =>
+                      updateDropoffLocation(index, "address", e.target.value)
+                    }
+                    placeholder={t("enter_dropoff_location")}
+                  />
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      checked={location.isActive}
+                      onCheckedChange={(checked) =>
+                        updateDropoffLocation(index, "isActive", checked)
+                      }
+                    />
+                    <Label className="text-sm">{t("active")}</Label>
+                  </div>
+                </div>
+                {dropoffLocations.length > 1 ? (
                   <Button
                     type="button"
                     variant="ghost"
                     size="sm"
                     onClick={() => removeDropoffLocation(index)}
-                    className="text-red-600 hover:text-red-700"
+                    className="text-red-600 hover:text-red-700 mt-2"
                   >
                     <X className="h-4 w-4" />
                   </Button>
-                )}
+                ) : null}
               </div>
             ))}
           </div>

@@ -1,25 +1,57 @@
+import { useState, useEffect } from "react";
 
-import { useState, useEffect } from 'react';
+interface Location {
+  id?: number;
+  address: string;
+  isActive: boolean;
+}
 
-export const useLocations = (car: any) => {
-  const [pickupLocations, setPickupLocations] = useState<string[]>(['']);
-  const [dropoffLocations, setDropoffLocations] = useState<string[]>(['']);
+export const useLocations = (car?: any) => {
+  const [pickupLocations, setPickupLocations] = useState<Location[]>([
+    { address: "", isActive: true },
+  ]);
+  const [dropoffLocations, setDropoffLocations] = useState<Location[]>([
+    { address: "", isActive: true },
+  ]);
 
   useEffect(() => {
     if (car) {
-      if (car.pickup_locations) {
-        setPickupLocations(Array.isArray(car.pickup_locations) ? car.pickup_locations : [car.pickup_locations]);
+      // Pickup locations
+      if (
+        car.pickUpLocations &&
+        Array.isArray(car.pickUpLocations) &&
+        car.pickUpLocations.length > 0
+      ) {
+        setPickupLocations(
+          car.pickUpLocations.map((loc: any) => ({
+            id: loc.id,
+            address: loc.address || loc.Address || "",
+            isActive: loc.isActive ?? loc.IsActive ?? true,
+          }))
+        );
       }
-      if (car.dropoff_locations) {
-        setDropoffLocations(Array.isArray(car.dropoff_locations) ? car.dropoff_locations : [car.dropoff_locations]);
+
+      // Dropoff locations
+      if (
+        car.dropOffLocations &&
+        Array.isArray(car.dropOffLocations) &&
+        car.dropOffLocations.length > 0
+      ) {
+        setDropoffLocations(
+          car.dropOffLocations.map((loc: any) => ({
+            id: loc.id,
+            address: loc.address || loc.Address || "",
+            isActive: loc.isActive ?? loc.IsActive ?? true,
+          }))
+        );
       }
     }
   }, [car]);
 
-  return { 
-    pickupLocations, 
-    setPickupLocations, 
-    dropoffLocations, 
-    setDropoffLocations 
+  return {
+    pickupLocations,
+    setPickupLocations,
+    dropoffLocations,
+    setDropoffLocations,
   };
 };
