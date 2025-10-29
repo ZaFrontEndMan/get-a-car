@@ -1269,6 +1269,10 @@ export const arTranslations = {
   monthly_rate_not_set: "Not Set",
   no_features: "No features added",
   no_locations: "No locations added",
+  faq: "الأسئلة الشائعة",
+  termsOfService: "شروط الخدمة",
+  privacyPolicy: "سياسة الخصوصية",
+  allRightsReserved: "جميع الحقوق محفوظة",
 };
 
 export default arTranslations;

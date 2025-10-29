@@ -1258,6 +1258,10 @@ export const enTranslations = {
   monthly_rate_not_set: "Not Set",
   no_features: "No features added",
   no_locations: "No locations added",
+  faq: "FAQ",
+  termsOfService: "Terms of Service",
+  privacyPolicy: "Privacy Policy",
+  allRightsReserved: "All rights reserved",
 };
 
 export default enTranslations;
