@@ -80,36 +80,11 @@ const VendorBookingListView = ({
     switch (status) {
       case "pending":
         return (
-          <div className="flex flex-col sm:flex-row gap-2">
-            <Button
-              onClick={() => onAcceptBooking(booking.id)}
-              disabled={isAcceptLoading}
-              size="sm"
-              className="flex-1 bg-green-600 hover:bg-green-700 text-white font-medium"
-            >
-              {t("acceptBooking")}
-            </Button>
-            <Button
-              onClick={() => onRejectBooking(booking.id)}
-              disabled={isRejectLoading}
-              variant="destructive"
-              size="sm"
-              className="flex-1 font-medium"
-            >
-              {t("rejectBooking")}
-            </Button>
-          </div>
+        <></>
         );
       case "active":
         return (
-          <Button
-            onClick={() => onStartProgress(booking.id)}
-            disabled={isStartLoading}
-            size="sm"
-            className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-medium"
-          >
-            {t("startTrip")}
-          </Button>
+         <></>
         );
       case "return_requested":
         return (

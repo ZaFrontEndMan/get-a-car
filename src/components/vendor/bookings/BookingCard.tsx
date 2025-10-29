@@ -259,7 +259,7 @@ const BookingCard = ({
           <div className="mt-auto pt-4 border-t border-slate-100">
             <div className="flex flex-col gap-2">
               <div className="flex flex-col sm:flex-row gap-2">
-                {booking.booking_status === "pending" && (
+                {/* {booking.booking_status === "pending" && (
                   <>
                     <Button
                       onClick={() => onAcceptBooking(booking.id)}
@@ -290,7 +290,7 @@ const BookingCard = ({
                     <PlayCircle className="h-4 w-4 me-2" />
                     {t("startTrip")}
                   </Button>
-                )}
+                )} */}
 
                 {booking.booking_status === "return_requested" && (
                   <Button
