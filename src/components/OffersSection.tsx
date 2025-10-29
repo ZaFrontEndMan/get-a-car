@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { useLanguage } from '../contexts/LanguageContext';
+import { useLanguage } from "../contexts/LanguageContext";
 import { ChevronRight, ChevronLeft } from "lucide-react";
 import { useMostPopularOffers } from "@/hooks/website/useWebsiteOffers";
 import { SectionSkeleton } from "./ui/SkeletonLoaders";
@@ -49,15 +49,15 @@ const OffersSection = () => {
   return (
     <section className="py-16 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <SectionHeader 
-          title={t("specialOffers")} 
-          viewAllLink="/offers" 
+        <SectionHeader
+          title={t("specialOffers")}
+          viewAllLink="/offers"
           showViewAll={true}
         />
 
         {offers.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-gray-600">No offers available at the moment</p>
+            <p className="text-gray-600">{t("noOffersFound")}</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -100,7 +100,7 @@ const OffersSection = () => {
                     {getLocalizedDescription(offer)}
                   </p>
                   <p className="text-sm text-secondary font-medium mb-4 text-center">
-                    {t("validUntil")} {" "}
+                    {t("validUntil")}{" "}
                     {new Date(offer.validUntil).toLocaleDateString()}
                   </p>
 
