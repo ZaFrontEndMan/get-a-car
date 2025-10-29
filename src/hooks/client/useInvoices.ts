@@ -1,26 +1,42 @@
-// src/hooks/client/useInvoices.ts
 import { invoiceApi } from "@/api/client/clientInvoiceApi";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, UseQueryOptions } from "@tanstack/react-query";
 
-// Fetch all invoices
-export const useGetAllInvoices = () => {
+interface GetAllInvoicesParams {
+  pageNumber?: number;
+  pageSize?: number;
+  startDate?: string;
+  endDate?: string;
+  status?: string;
+}
+
+export const useGetAllInvoices = (
+  params: GetAllInvoicesParams = {},
+  options?: UseQueryOptions<any, Error>
+) => {
   return useQuery({
-    queryKey: ["invoices"],
+    queryKey: ["invoices", params],
     queryFn: async () => {
-      const res = await invoiceApi.getAllInvoices();
+      const res = await invoiceApi.getAllInvoices(params);
       return res.data;
     },
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+    ...options,
   });
 };
 
-// Fetch single invoice by id
-export const useGetInvoiceById = (id: string | number, enabled = true) => {
+export const useGetInvoiceById = (
+  id: string | number,
+  enabled = true,
+  options?: UseQueryOptions<any, Error>
+) => {
   return useQuery({
     queryKey: ["invoice", id],
     queryFn: async () => {
       const res = await invoiceApi.getInvoiceById(id);
       return res.data;
     },
-    enabled: Boolean(id) && enabled, // only run if id is provided
+    enabled: Boolean(id) && enabled,
+    ...options,
   });
 };

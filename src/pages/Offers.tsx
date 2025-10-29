@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { useLanguage } from "../contexts/LanguageContext";
 import OfferCard from "../components/OfferCard";
 import OffersHeader from "../components/offers/OffersHeader";
 import OffersSearchControls from "../components/offers/OffersSearchControls";

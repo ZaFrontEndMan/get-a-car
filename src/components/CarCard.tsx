@@ -34,6 +34,7 @@ interface CarCardProps {
       name: string;
       logo_url?: string;
     };
+    isWishList?: boolean;
   };
   viewMode?: "grid" | "list";
 }
@@ -49,7 +50,7 @@ const CarCard = ({ car, viewMode = "grid" }: CarCardProps) => {
     const wishlistItem = {
       id: car.id,
       name: car.title,
-      image: car.image || (car.images && car.images[0]) || "",
+      image: car.image || (car.images ? car.images[0] : "") || "",
       price: car.price || car.daily_rate || 0,
       brand: car.brand,
     };
@@ -64,56 +65,43 @@ const CarCard = ({ car, viewMode = "grid" }: CarCardProps) => {
   const handleBookClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    // Navigate to car details page for booking
     window.location.href = `/cars/${car.id}`;
   };
 
-  const isCarFavorite = car?.isWishList;
-
-  // Get the correct image source
+  const isCarFavorite = car?.isWishList || false;
   const imageSource =
-    car.image || (car.images && car.images[0]) || "/placeholder.svg";
-
-  // Get the correct price
+    car.image || (car.images ? car.images[0] : "") || "/placeholder.svg";
   const dailyPrice = car.price || car.daily_rate || 0;
-  const weeklyPrice = car.weeklyPrice || car.weekly_rate;
-  const monthlyPrice = car.monthlyPrice || car.monthly_rate;
-
-  // Get vendor info (support both vendor and vendors structure)
-  const vendor = car.vendor || car.vendors;
-
-  // Get fuel type and transmission with safety checks
-  const fuelType = car.fuel || car.fuel_type || "";
-  const transmissionType = car.transmission || "";
-
-  // Get rating with fallback
+  const weeklyPrice = car.weeklyPrice || car.weekly_rate || null;
+  const monthlyPrice = car.monthlyPrice || car.monthly_rate || null;
+  const vendor = car.vendor || car.vendors || null;
+  const fuelType = car.fuel || car.fuel_type || "gasoline";
+  const transmissionType = car.transmission || "automatic";
   const rating = car.rating || 4.5;
 
   if (viewMode === "list") {
     return (
       <Link
         to={`/cars/${car.id}`}
-        className="block bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300 hover:scale-[1.02] flex-grow h-full"
+        className="block bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300 hover:scale-[1.02]"
       >
-        <div className="flex gap-6 p-6 h-full">
-          {/* Image Section */}
+        <div className="flex gap-6 p-6">
           <div className="relative w-48 h-32 flex-shrink-0">
             <LazyImage
               src={imageSource}
               alt={car.title}
-              className="w-full h-full rounded-xl"
+              className="w-full h-full rounded-xl object-cover"
             />
 
-            {/* Vendor Logo */}
-            {vendor?.logo_url && (
+            {vendor?.logo_url ? (
               <div className="absolute bottom-2 left-2 w-8 h-8 rounded-full bg-white shadow-md overflow-hidden border-2 border-white">
                 <LazyImage
                   src={vendor.logo_url}
                   alt={vendor.name}
-                  className="w-full h-full"
+                  className="w-full h-full object-cover"
                 />
               </div>
-            )}
+            ) : null}
 
             <button
               onClick={handleFavoriteClick}
@@ -130,7 +118,6 @@ const CarCard = ({ car, viewMode = "grid" }: CarCardProps) => {
             </button>
           </div>
 
-          {/* Content Section */}
           <div className="flex-1 flex flex-col justify-between">
             <div>
               <div className="flex justify-between items-start mb-2">
@@ -153,17 +140,11 @@ const CarCard = ({ car, viewMode = "grid" }: CarCardProps) => {
                 </div>
                 <div className="flex items-center gap-1 rtl:gap-reverse">
                   <Fuel className="h-4 w-4" />
-                  <span>
-                    {fuelType ? t(fuelType.toLowerCase()) : t("gasoline")}
-                  </span>
+                  <span>{t(fuelType.toLowerCase())}</span>
                 </div>
                 <div className="flex items-center gap-1 rtl:gap-reverse">
                   <Settings className="h-4 w-4" />
-                  <span>
-                    {transmissionType
-                      ? t(transmissionType.toLowerCase())
-                      : t("automatic")}
-                  </span>
+                  <span>{t(transmissionType.toLowerCase())}</span>
                 </div>
               </div>
             </div>
@@ -191,21 +172,24 @@ const CarCard = ({ car, viewMode = "grid" }: CarCardProps) => {
   return (
     <Link
       to={`/cars/${car.id}`}
-      className="block bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300 hover:scale-[1.02]"
+      className="block bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300 hover:scale-[1.02] flex flex-col h-full"
     >
-      <div className="relative">
-        <LazyImage src={imageSource} alt={car.title} className="w-full h-48" />
+      <div className="relative flex-shrink-0">
+        <LazyImage
+          src={imageSource}
+          alt={car.title}
+          className="w-full h-48 object-cover"
+        />
 
-        {/* Vendor Logo */}
-        {vendor?.logo_url && (
+        {vendor?.logo_url ? (
           <div className="absolute bottom-3 left-3 w-10 h-10 rounded-full bg-white shadow-md overflow-hidden border-2 border-white">
             <LazyImage
               src={vendor.logo_url}
               alt={vendor.name}
-              className="w-full h-full"
+              className="w-full h-full object-cover"
             />
           </div>
-        )}
+        ) : null}
 
         <button
           onClick={handleFavoriteClick}
@@ -222,7 +206,7 @@ const CarCard = ({ car, viewMode = "grid" }: CarCardProps) => {
         </button>
       </div>
 
-      <div className="p-4">
+      <div className="p-4 flex flex-col flex-grow">
         <div className="flex justify-between items-start mb-2">
           <div>
             <h3 className="font-bold text-lg text-gray-900">{car.title}</h3>
@@ -241,19 +225,15 @@ const CarCard = ({ car, viewMode = "grid" }: CarCardProps) => {
           </div>
           <div className="flex items-center gap-1 rtl:gap-reverse">
             <Fuel className="h-4 w-4" />
-            <span>{fuelType ? t(fuelType.toLowerCase()) : t("gasoline")}</span>
+            <span>{t(fuelType.toLowerCase())}</span>
           </div>
           <div className="flex items-center gap-1 rtl:gap-reverse">
             <Settings className="h-4 w-4" />
-            <span>
-              {transmissionType
-                ? t(transmissionType.toLowerCase())
-                : t("automatic")}
-            </span>
+            <span>{t(transmissionType.toLowerCase())}</span>
           </div>
         </div>
 
-        <div className="space-y-2 mb-4">
+        <div className="space-y-2 mb-4 flex-grow">
           <div className="flex justify-between items-center">
             <span className="text-sm text-gray-600 font-bold">
               {t("daily")}
@@ -262,27 +242,37 @@ const CarCard = ({ car, viewMode = "grid" }: CarCardProps) => {
               {t("currency")} {dailyPrice}
             </span>
           </div>
-          {weeklyPrice && (
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-gray-600">{t("weekly")}</span>
-              <span className="text-sm font-semibold text-gray-800">
-                {t("currency")} {weeklyPrice}
-              </span>
-            </div>
-          )}
-          {monthlyPrice && (
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-gray-600">{t("monthly")}</span>
-              <span className="text-sm font-semibold text-gray-800">
-                {t("currency")} {monthlyPrice}
-              </span>
-            </div>
-          )}
+
+          <div className="flex justify-between items-center min-h-[20px]">
+            {weeklyPrice ? (
+              <>
+                <span className="text-sm text-gray-600">{t("weekly")}</span>
+                <span className="text-sm font-semibold text-gray-800">
+                  {t("currency")} {weeklyPrice}
+                </span>
+              </>
+            ) : (
+              <div className="h-5"></div>
+            )}
+          </div>
+
+          <div className="flex justify-between items-center min-h-[20px]">
+            {monthlyPrice ? (
+              <>
+                <span className="text-sm text-gray-600">{t("monthly")}</span>
+                <span className="text-sm font-semibold text-gray-800">
+                  {t("currency")} {monthlyPrice}
+                </span>
+              </>
+            ) : (
+              <div className="h-5"></div>
+            )}
+          </div>
         </div>
 
         <div
           onClick={handleBookClick}
-          className="w-full bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors duration-200 text-center cursor-pointer"
+          className="w-full bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors duration-200 text-center cursor-pointer mt-auto"
         >
           {t("bookNow")}
         </div>

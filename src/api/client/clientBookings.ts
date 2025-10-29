@@ -1,7 +1,6 @@
 import axiosInstance from "../../utils/axiosInstance";
 
-
-export const createBooking = async (payload) => {
+export const createBooking = async (payload: any) => {
     const { data } = await axiosInstance.post(
         "/Client/Booking/CreateBooking",
         payload
@@ -9,8 +8,7 @@ export const createBooking = async (payload) => {
     return data;
 };
 
-
-export const paymentCallback = async (payload) => {
+export const paymentCallback = async (payload: any) => {
     const { data } = await axiosInstance.post(
         "/Client/Booking/PaymentCallback",
         payload
@@ -18,25 +16,27 @@ export const paymentCallback = async (payload) => {
     return data;
 };
 
-
-export const getBookingById = async (bookingId) => {
-    const { data } = await axiosInstance.get(
-        `/Client/Booking/GetBookingById`,
-        { params: { id: bookingId } }
-    );
+export const getBookingById = async (bookingId: string) => {
+    const { data } = await axiosInstance.get(`/Client/Booking/GetBookingById`, {
+        params: { id: bookingId },
+    });
     return data;
 };
 
-
-export const getAllBooking = async (params) => {
+export const getAllBooking = async (params: {
+    startDate?: string;
+    endDate?: string;
+    pageNumber?: number;
+    pageSize?: number;
+    bookingStatus?: string;
+}) => {
     const { data } = await axiosInstance.get("/Client/Booking/GetAllBooking", {
         params,
     });
     return data;
 };
 
-
-export const getCustomerBookingCar = async (carId) => {
+export const getCustomerBookingCar = async (carId: string) => {
     const { data } = await axiosInstance.post(
         `/Client/Booking/GetCustomerBookingCar`,
         { carId }
@@ -44,9 +44,9 @@ export const getCustomerBookingCar = async (carId) => {
     return data;
 };
 
-// Generate Invoice PDF
-// Example endpoint: Booking/GenerateInvoicePdf?InvoiceId=22418337
-export const generateInvoicePdf = async (invoiceId) => {
+export const generateInvoicePdf = async (
+    invoiceId: number | string
+): Promise<Blob> => {
     const response = await axiosInstance.get(
         `/Client/Booking/GenerateInvoicePdf`,
         {
@@ -57,25 +57,32 @@ export const generateInvoicePdf = async (invoiceId) => {
     return response.data;
 };
 
-// Accept Return Car
-// Example endpoint: Client/Booking/AcceptReturnCar/4
-export const acceptReturnCar = async (bookingId) => {
+export const acceptReturnCar = async (bookingId: string | number) => {
     try {
         const { data } = await axiosInstance.put(
             `/Client/Booking/AcceptReturnCar/${bookingId}`
         );
-        // unwrap common API envelope if present
         const env = data;
-        if (env && typeof env === "object" && ("isSuccess" in env || "data" in env)) {
+        if (
+            env &&
+            typeof env === "object" &&
+            ("isSuccess" in env || "data" in env)
+        ) {
             if (env.isSuccess === false) {
-                const msg = env.customMessage || env.message || "Failed to accept car return";
+                const msg =
+                    env.customMessage ||
+                    env.message ||
+                    "Failed to accept car return";
                 throw new Error(msg);
             }
             return env.data ?? data;
         }
         return data;
-    } catch (error) {
-        const msg = error?.response?.data?.customMessage || error?.message || "Failed to accept car return";
+    } catch (error: any) {
+        const msg =
+            error?.response?.data?.customMessage ||
+            error?.message ||
+            "Failed to accept car return";
         throw new Error(msg);
     }
 };

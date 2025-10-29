@@ -56,18 +56,32 @@ interface GetUserInfoResponse {
  * @returns Promise with the API response.
  */
 export const editVendor = async (
-  params: EditVendorParams,
-  formData?: FormData
+  params: EditVendorParams
 ): Promise<EditVendorResponse> => {
   try {
+    // Create a new FormData object
+    const formData = new FormData();
+
+    // Append all keys from params into formData
+    Object.entries(params).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        // If the value is an object or array, convert it to JSON string
+        if (typeof value === "object") {
+          formData.append(key, JSON.stringify(value));
+        } else {
+          formData.append(key, value as any);
+        }
+      }
+    });
+
     const response = await axiosInstance.put(
       "Vendor/Auth/EditVendor",
       formData,
       {
-        params,
-        headers: formData ? { "Content-Type": "multipart/form-data" } : {},
+        headers: { "Content-Type": "multipart/form-data" },
       }
     );
+
     return response.data;
   } catch (error: any) {
     throw new Error(

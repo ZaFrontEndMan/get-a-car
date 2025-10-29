@@ -5,14 +5,15 @@ import React, {
   useCallback,
   useRef,
 } from "react";
+import { useLocation } from "react-router-dom";
+import { Search } from "lucide-react";
 import { useLanguage } from "../contexts/LanguageContext";
 import OptimizedCarCard from "../components/cars/OptimizedCarCard";
 import CarsHeader from "../components/cars/CarsHeader";
 import MemoizedCarsFilters from "../components/cars/MemoizedCarsFilters";
-import CarsPagination from "../components/cars/CarsPagination";
-import { Search } from "lucide-react";
-import { useOptimizedCars, useBackgroundSync } from "@/hooks/useOptimizedCars";
 import CarsSearchControls from "@/components/cars/CarsSearchControls";
+import SimilarCarsSlider from "@/components/SimilarCarsSlider";
+import { useOptimizedCars, useBackgroundSync } from "@/hooks/useOptimizedCars";
 import { getImageUrl } from "@/utils/imageUtils";
 import { useDebouncedSearch } from "@/hooks/useDebounce";
 import CarsSkeleton, {
@@ -28,29 +29,22 @@ import { CarsFilters as CarsFiltersType } from "@/api/website/websiteCars";
 import {
   parseUrlParamsToFilters,
   updateUrlWithFilters,
+  areFiltersEqual,
 } from "@/utils/urlParams";
-import { useLocation } from "react-router-dom";
-import { debounce } from "lodash";
-import SimilarCarsSlider from "@/components/SimilarCarsSlider";
 
 const Cars = () => {
   const { t } = useLanguage();
+  const location = useLocation();
+
   const [serverFilters, setServerFilters] = useState<CarsFiltersType>(() => {
     const urlParams = new URLSearchParams(window.location.search);
     return parseUrlParamsToFilters(urlParams);
   });
+
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const location = useLocation();
-
-  useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const parsed = parseUrlParamsToFilters(params);
-    setServerFilters(parsed);
-    setCurrentPage(1);
-  }, [location.search]);
-
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+
   const itemsPerPage = 12;
   const VIRTUAL_SCROLL_THRESHOLD = 50;
   const CARD_HEIGHT = viewMode === "grid" ? 320 : 200;
@@ -60,27 +54,40 @@ const Cars = () => {
     searchTerm,
     300
   );
+  const previousFiltersRef = useRef<CarsFiltersType>(serverFilters);
+  const isInitialMount = useRef(true);
+
+  useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+
+    const params = new URLSearchParams(location.search);
+    const parsed = parseUrlParamsToFilters(params);
+
+    if (!areFiltersEqual(parsed, serverFilters)) {
+      setServerFilters(parsed);
+      setCurrentPage(1);
+    }
+  }, [location.search]);
+
   const {
     data: carsResponse,
     isLoading,
     error,
     refetch,
+    isFetching,
   } = useOptimizedCars(currentPage, itemsPerPage, serverFilters);
 
   useBackgroundSync();
-
-  useEffect(() => {
-    if (carsResponse?.pageIndex) {
-      setCurrentPage(carsResponse.pageIndex);
-    }
-  }, [carsResponse?.pageIndex]);
 
   const cars = useMemo(() => {
     if (!carsResponse?.carSearchResult) return [];
     return carsResponse.carSearchResult.map((car) => ({
       id: car?.carID?.toString(),
-      title: car?.name || "No title",
-      brand: car?.model || "Unknown Brand",
+      title: car?.name || "",
+      brand: car?.model || "",
       image: car?.image
         ? getImageUrl(car.image)
         : "https://images.unsplash.com/photo-1549924231-f129b911e442",
@@ -96,22 +103,22 @@ const Cars = () => {
       transmission: car?.transmission || "",
       vendor: {
         id: car?.vendorId?.toString(),
-        name: car?.vendorName || "Unknown Vendor",
+        name: car?.vendorName || "",
         logo_url: car?.companyLogo ? getImageUrl(car.companyLogo) : null,
       },
       vendors: {
         id: car?.vendorId?.toString(),
-        name: car?.vendorName || "Unknown Vendor",
+        name: car?.vendorName || "",
         logo_url: car?.companyLogo ? getImageUrl(car.companyLogo) : null,
       },
       isWishList: car?.isWishList,
-      type: car?.type, // Added for SimilarCarsSlider
-      pickUpLocations: car?.pickUpLocations || [], // Added for SimilarCarsSlider
+      type: car?.type,
+      pickUpLocations: car?.pickUpLocations || [],
       originalPricing: {
         daily: car?.pricePerDay || 0,
         weekly: car?.pricePerWeek || 0,
         monthly: car?.pricePerMonth || 0,
-      }, // Added for SimilarCarsSlider
+      },
     }));
   }, [carsResponse?.carSearchResult]);
 
@@ -125,14 +132,15 @@ const Cars = () => {
   const totalPages = carsResponse?.totalPages || 0;
   const totalRecord = carsResponse?.totalRecord || 0;
 
-  const paginatedCars = filteredCars;
-
   const updateFilters = useCallback(
     (newFilters: Partial<CarsFiltersType>) => {
       const updatedFilters = { ...serverFilters, ...newFilters };
-      setServerFilters(updatedFilters);
-      updateUrlWithFilters(updatedFilters);
-      setCurrentPage(1);
+
+      if (!areFiltersEqual(updatedFilters, serverFilters)) {
+        setServerFilters(updatedFilters);
+        updateUrlWithFilters(updatedFilters);
+        setCurrentPage(1);
+      }
     },
     [serverFilters]
   );
@@ -146,39 +154,28 @@ const Cars = () => {
   }, []);
 
   useEffect(() => {
-    setCurrentPage(1);
-  }, [serverFilters]);
+    const hasChanged = !areFiltersEqual(
+      serverFilters,
+      previousFiltersRef.current
+    );
 
-  const currentPageRef = useRef(currentPage);
-  const totalPagesRef = useRef(totalPages);
+    if (hasChanged) {
+      previousFiltersRef.current = serverFilters;
+      if (currentPage !== 1) {
+        setCurrentPage(1);
+      }
+    }
+  }, [serverFilters, currentPage]);
 
-  useEffect(() => {
-    currentPageRef.current = currentPage;
-  }, [currentPage]);
-
-  useEffect(() => {
-    totalPagesRef.current = totalPages;
-  }, [totalPages]);
-
-  const handlePageChange = useMemo(
-    () =>
-      debounce((page: number) => {
-        const current = currentPageRef.current;
-        const total = totalPagesRef.current;
-        if (page !== current && page >= 1 && page <= total) {
-          console.log(`Changing page from ${current} to ${page}`);
-          setCurrentPage(page);
-          window.scrollTo({ top: 0, behavior: "smooth" });
-        }
-      }, 300),
-    []
+  const handlePageChange = useCallback(
+    (page: number) => {
+      if (page >= 1 && page <= totalPages && page !== currentPage) {
+        setCurrentPage(page);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+    },
+    [currentPage, totalPages]
   );
-
-  useEffect(() => {
-    return () => {
-      handlePageChange.cancel();
-    };
-  }, [handlePageChange]);
 
   const filterData = useMemo(() => {
     if (!carsResponse?.carsCommonProp?.data) return {};
@@ -209,14 +206,8 @@ const Cars = () => {
     ...(serverFilters.transmissions || []),
   ];
 
-  // Determine if SimilarCarsSlider should be shown
   const showSimilarCarsSlider =
     serverFilters.pickupLocation && serverFilters.dropOffLocation;
-
-  // Dynamic title for SimilarCarsSlider
-  const similarCarsTitle = showSimilarCarsSlider
-    ? t("carsNearLocation", { location: serverFilters.pickupLocation })
-    : t("similarCars");
 
   if (isLoading) {
     return (
@@ -245,7 +236,6 @@ const Cars = () => {
   }
 
   if (error) {
-    console.error("Error in cars page:", error);
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50">
         <div className="pt-20 pb-8">
@@ -331,6 +321,7 @@ const Cars = () => {
 
               <div className="flex-1 min-w-0">
                 <CarsHeader />
+
                 <ErrorBoundary
                   fallback={
                     <div className="p-4 border border-orange-200 rounded-lg bg-orange-50 mb-6">
@@ -348,7 +339,9 @@ const Cars = () => {
                     filteredCarsLength={totalRecord}
                     currentPage={currentPage}
                     totalPages={totalPages}
+                    onPageChange={handlePageChange}
                     isSearching={isSearching}
+                    isLoading={isLoading || isFetching}
                   />
                 </ErrorBoundary>
 
@@ -359,34 +352,32 @@ const Cars = () => {
                         viewMode={viewMode}
                         itemsPerPage={Math.min(itemsPerPage, 6)}
                       />
-                    ) : paginatedCars.length > 0 ? (
+                    ) : filteredCars.length > 0 ? (
                       filteredCars.length > VIRTUAL_SCROLL_THRESHOLD ? (
                         <VirtualScrolling
-                          items={paginatedCars}
+                          items={filteredCars}
                           itemHeight={CARD_HEIGHT}
                           containerHeight={800}
-                          className={`${
+                          className={
                             viewMode === "grid"
-                              ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+                              ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
                               : "space-y-4"
-                          }`}
+                          }
                           renderItem={(car, index) => (
                             <CarErrorBoundary key={car?.id}>
-                              <div className="flex-grow">
-                                <OptimizedCarCard
-                                  car={car}
-                                  viewMode={
-                                    viewMode === "list" ? "list" : undefined
-                                  }
-                                  animationDelay={index * 0.05}
-                                />
-                              </div>
+                              <OptimizedCarCard
+                                car={car}
+                                viewMode={
+                                  viewMode === "list" ? "list" : undefined
+                                }
+                                animationDelay={index * 0.05}
+                              />
                             </CarErrorBoundary>
                           )}
                         />
                       ) : viewMode === "grid" ? (
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                          {paginatedCars.map((car, index) => (
+                          {filteredCars.map((car, index) => (
                             <CarErrorBoundary key={car?.id}>
                               <OptimizedCarCard
                                 car={car}
@@ -397,7 +388,7 @@ const Cars = () => {
                         </div>
                       ) : (
                         <div className="space-y-4">
-                          {paginatedCars.map((car, index) => (
+                          {filteredCars.map((car, index) => (
                             <CarErrorBoundary key={car?.id}>
                               <OptimizedCarCard
                                 car={car}
@@ -424,17 +415,11 @@ const Cars = () => {
                   </ApiErrorBoundary>
                 </div>
 
-                {showSimilarCarsSlider && paginatedCars.length > 0 && (
+                {showSimilarCarsSlider && filteredCars.length > 0 && (
                   <div className="mt-8">
-                    <SimilarCarsSlider car={paginatedCars[0]} />
+                    <SimilarCarsSlider car={filteredCars[0]} />
                   </div>
                 )}
-
-                <CarsPagination
-                  currentPage={currentPage}
-                  totalPages={totalPages}
-                  setCurrentPage={handlePageChange}
-                />
               </div>
             </div>
           </div>

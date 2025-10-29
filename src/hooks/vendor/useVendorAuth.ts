@@ -99,7 +99,7 @@ export const useVendorAuth = () => {
           title: t("success"),
           description: t("profileUpdatedSuccess"),
         });
-        fetchUserInfo(); // Refresh data after successful edit
+        fetchUserInfo();
       } else {
         toast({
           title: t("error"),

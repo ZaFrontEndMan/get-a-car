@@ -1,8 +1,5 @@
 import axiosInstance from "./../../utils/axiosInstance";
 
-// ---------- Types ----------
-
-// Car object
 export interface Car {
   carID: number;
   name: string;
@@ -25,9 +22,9 @@ export interface Car {
   type: string;
   companyLogo: string;
   isGoodRating: number;
+  pickUpLocations?: string[];
 }
 
-// Rental Car Details Response Types
 export interface CancellationPolicy {
   name: string;
   description: string;
@@ -93,19 +90,16 @@ export interface RentalCarDetailsResponse {
   data: RentalCarDetails;
 }
 
-// Filter option
 export interface FilterOption {
   name: string;
   quantity: number;
 }
 
-// Filter group (vendorNames, branches, types, transmissions, fuelTypes)
 export interface CarFilter {
   header: "vendorNames" | "branches" | "types" | "transmissions" | "fuelTypes";
   filterData: FilterOption[];
 }
 
-// API response for all cars
 export interface AllCarsResponse {
   carSearchResult: Car[];
   carsCommonProp: {
@@ -114,11 +108,9 @@ export interface AllCarsResponse {
   };
   totalRecord: number;
   totalPages: number;
+  pageIndex: number;
 }
 
-// ---------- API Functions ----------
-
-// Server-side filter interface
 export interface CarsFilters {
   vendorNames?: string[];
   types?: string[];
@@ -136,30 +128,27 @@ export interface CarsFilters {
   withDriver?: boolean;
 }
 
-// Get all cars with server-side filtering (POST request)
 export const getAllCars = async (
   pageIndex: number,
   pageSize: number,
   filters?: CarsFilters
 ): Promise<AllCarsResponse> => {
-  // Prepare request body with only filters
   const requestBody: Record<string, unknown> = {};
 
-  // Add filters to body if provided
   if (filters) {
-    if (filters.vendorNames && filters.vendorNames.length > 0) {
+    if (filters.vendorNames?.length) {
       requestBody.vendorNames = filters.vendorNames;
     }
-    if (filters.types && filters.types.length > 0) {
+    if (filters.types?.length) {
       requestBody.types = filters.types;
     }
-    if (filters.transmissions && filters.transmissions.length > 0) {
+    if (filters.transmissions?.length) {
       requestBody.transmissions = filters.transmissions;
     }
-    if (filters.fuelTypes && filters.fuelTypes.length > 0) {
+    if (filters.fuelTypes?.length) {
       requestBody.fuelTypes = filters.fuelTypes;
     }
-    if (filters.branches && filters.branches.length > 0) {
+    if (filters.branches?.length) {
       requestBody.branches = filters.branches;
     }
     if (filters.priceRange) {
@@ -182,21 +171,20 @@ export const getAllCars = async (
     }
   }
 
-  // Add pagination as query parameters
   const params = {
     pageIndex,
     pageSize,
   };
 
-  const { data } = await axiosInstance.post("/Client/Website/FilterGetAllCars", requestBody, {
-    params,
-  });
+  const { data } = await axiosInstance.post(
+    "/Client/Website/FilterGetAllCars",
+    requestBody,
+    { params }
+  );
 
-  // API wraps inside `data`
   return data.data;
 };
 
-// Get most popular cars (short list, e.g. top 6)
 export const getMostPopularCars = async (
   pageIndex: number,
   pageSize: number
@@ -205,38 +193,44 @@ export const getMostPopularCars = async (
     params: { pageIndex, pageSize },
   });
 
-  return data.data.carSearchResult; // ✅ make sure we return array of cars
+  return data.data.carSearchResult;
 };
 
-// Get rental car details by ID
 export const getRentalCarDetailsById = async (
   carId: number,
   offerId: number
 ): Promise<RentalCarDetailsResponse> => {
-  const { data } = await axiosInstance.get("/Client/Website/GetRentalCarDetaisById", {
-    params: { carId, offerId },
-  });
+  const { data } = await axiosInstance.get(
+    "/Client/Website/GetRentalCarDetaisById",
+    {
+      params: { carId, offerId },
+    }
+  );
 
   return data;
 };
 
-// Get car details by ID only (without offerId)
 export const getCarDetailsById = async (
   carId: number
 ): Promise<RentalCarDetailsResponse> => {
-  const { data } = await axiosInstance.get("/Client/Website/GetRentalCarDetaisById", {
-    params: { carId, offerId: carId }, // Use carId as offerId for backward compatibility
-  });
+  const { data } = await axiosInstance.get(
+    "/Client/Website/GetRentalCarDetaisById",
+    {
+      params: { carId, offerId: carId },
+    }
+  );
 
   return data;
 };
 
-// Get similar cars
 export const getSimilarCars = async (requestBody: {
   types: string[];
   pickUpLocations: string[];
   maxPrice: number;
 }): Promise<{ isSuccess: boolean; customMessage: string; data: Car[] }> => {
-  const { data } = await axiosInstance.post("/Client/Website/GetSimilarCars", requestBody);
+  const { data } = await axiosInstance.post(
+    "/Client/Website/GetSimilarCars",
+    requestBody
+  );
   return data;
 };

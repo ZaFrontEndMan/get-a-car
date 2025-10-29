@@ -41,7 +41,6 @@ const ClientBookingGridView = ({
       status === "InProgress"
     );
   };
-  console.log(bookings);
 
   const canAcceptReturn = (status: string) => {
     return status.toLowerCase() === "return_requested";

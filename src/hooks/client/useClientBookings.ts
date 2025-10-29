@@ -18,7 +18,6 @@ import { Booking, ClientBookingsResponse } from "@/types/clientBookings";
 import { InvoiceResponse } from "@/types/invoiceDetails";
 import { useToast } from "@/components/ui/use-toast";
 
-// Query params for fetching bookings
 interface GetAllBookingsParams {
   startDate?: string;
   endDate?: string;
@@ -27,7 +26,6 @@ interface GetAllBookingsParams {
   bookingStatus?: string;
 }
 
-// Payload when creating a booking
 interface BookingPayload {
   [key: string]: unknown;
 }
@@ -35,7 +33,7 @@ interface BookingPayload {
 export const useClientBookings = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  // 🔹 Create Booking
+
   const useCreateBookingMutation = (
     options?: UseMutationOptions<Booking, Error, BookingPayload>
   ) =>
@@ -44,7 +42,6 @@ export const useClientBookings = () => {
       ...options,
     });
 
-  // 🔹 Payment Callback
   const usePaymentCallbackMutation = (
     options?: UseMutationOptions<unknown, Error, BookingPayload>
   ) =>
@@ -53,7 +50,6 @@ export const useClientBookings = () => {
       ...options,
     });
 
-  // 🔹 Get Booking By ID
   const useGetBookingById = (
     bookingId: string,
     options?: UseQueryOptions<Booking, Error>
@@ -65,7 +61,6 @@ export const useClientBookings = () => {
       ...options,
     });
 
-  // 🔹 Get Invoice Details By Booking ID
   const useGetInvoiceDetails = (
     bookingId: string,
     options?: UseQueryOptions<InvoiceResponse, Error>
@@ -77,7 +72,6 @@ export const useClientBookings = () => {
       ...options,
     });
 
-  // 🔹 Get All Bookings (paged response)
   const useGetAllBookings = (
     params: GetAllBookingsParams = {},
     options?: UseQueryOptions<ClientBookingsResponse, Error>
@@ -85,10 +79,11 @@ export const useClientBookings = () => {
     useQuery({
       queryKey: ["bookings", params],
       queryFn: () => getAllBooking(params),
+      staleTime: 5 * 60 * 1000,
+      gcTime: 10 * 60 * 1000,
       ...options,
     });
 
-  // 🔹 Get Bookings for a Customer's Car
   const useGetCustomerBookingCar = (
     carId: string,
     options?: UseQueryOptions<Booking[], Error>
@@ -100,7 +95,6 @@ export const useClientBookings = () => {
       ...options,
     });
 
-  // 🔹 Generate Invoice PDF
   const useGenerateInvoicePdf = (
     options?: UseMutationOptions<Blob, Error, { invoiceId: number | string }>
   ) =>
@@ -109,15 +103,16 @@ export const useClientBookings = () => {
       ...options,
     });
 
-  // 🔹 Accept Return Car
   const useAcceptReturnCar = (
     options?: UseMutationOptions<any, Error, { bookingId: string | number }>
   ) =>
     useMutation({
       mutationFn: ({ bookingId }) => acceptReturnCar(bookingId),
-      onSuccess: (data) => {
-        toast({ title: "تم القبول", description: "تم قبول استرجاع السيارة بنجاح" });
-        // Refresh bookings and related queries
+      onSuccess: () => {
+        toast({
+          title: "تم القبول",
+          description: "تم قبول استرجاع السيارة بنجاح",
+        });
         queryClient.invalidateQueries({ queryKey: ["bookings"] });
         queryClient.invalidateQueries({ queryKey: ["booking"] });
       },

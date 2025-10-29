@@ -1156,6 +1156,20 @@ export const arTranslations = {
   delete_button: "حذف",
   deleting_button: "جارٍ الحذف...",
   user_remove_failed: "فشل في حذف المستخدم",
+  select_brand: "اختر العلامة التجارية",
+  select_model: "اختر الطراز",
+  select_brand_first: "اختر العلامة التجارية أولاً",
+  Kia: "كيا",
+  BMW: "بي إم دبليو",
+  Cerato: "سيراتو",
+  i7: "بي ام دبليو i7",
+  invoices: "الفواتير",
+  noInvoices: "لا توجد فواتير",
+  noInvoicesMessage: "ليس لديك أي فواتير حتى الآن",
+  noCar: "لا توجد سيارة",
+  goToPreviousPage: "الانتقال إلى الصفحة السابقة",
+  goToNextPage: "الانتقال إلى الصفحة التالية",
+  morePages: "المزيد من الصفحات",
 };
 
 export default arTranslations;

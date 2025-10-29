@@ -1145,6 +1145,20 @@ export const enTranslations = {
   delete_button: "Delete",
   deleting_button: "Deleting...",
   user_remove_failed: "Failed to remove user",
+  select_brand: "Select brand",
+  select_model: "Select model",
+  select_brand_first: "Select a brand first",
+  Kia: "Kia",
+  BMW: "BMW",
+  Cerato: "Cerato",
+  i7: "i7",
+  invoices: "Invoices",
+  noInvoices: "No Invoices",
+  noInvoicesMessage: "You don't have any invoices yet",
+  noCar: "No Car",
+  goToPreviousPage: "Go to previous page",
+  goToNextPage: "Go to next page",
+  morePages: "More pages",
 };
 
 export default enTranslations;
