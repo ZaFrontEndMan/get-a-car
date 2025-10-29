@@ -1273,6 +1273,14 @@ export const arTranslations = {
   termsOfService: "شروط الخدمة",
   privacyPolicy: "سياسة الخصوصية",
   allRightsReserved: "جميع الحقوق محفوظة",
+  noTitle: "بدون عنوان",
+  noDescription: "بدون وصف",
+  unknownVendor: "مورد غير معروف",
+  validForLimitedTime: "صالح لفترة محدودة فقط",
+  cannotBeCombined: "لا يمكن دمجه مع عروض أخرى",
+  subjectToAvailability: "يخضع للتوفر",
+  errorLoadingOffers: "خطأ في تحميل العروض",
+  tryAdjustingFilters: "حاول تعديل معايير البحث أو التصفية",
 };
 
 export default arTranslations;

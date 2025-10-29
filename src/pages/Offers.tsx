@@ -6,8 +6,10 @@ import OffersFilters from "../components/offers/OffersFilters";
 import OffersPagination from "../components/offers/OffersPagination";
 import { Search } from "lucide-react";
 import { useAllOffers } from "@/hooks/website/useWebsiteOffers";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const Offers = () => {
+  const { t } = useLanguage();
   const [searchTerm, setSearchTerm] = useState("");
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 2000]);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
@@ -16,7 +18,6 @@ const Offers = () => {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const itemsPerPage = 12;
 
-  // Use the API hook for offers without filter parameters (we'll filter locally)
   const {
     data: offersResponse,
     isLoading,
@@ -24,14 +25,13 @@ const Offers = () => {
     refetch,
   } = useAllOffers(currentPage, itemsPerPage);
 
-  // Transform API response to match the expected format for the UI
   const offers =
     offersResponse?.carSearchResult.map((offer) => ({
       id: offer.id.toString(),
-      title: offer.offerTitle || "No title",
-      title_ar: "", // API doesn't provide Arabic titles yet
-      description: offer.offerDescription || "No description",
-      description_ar: "", // API doesn't provide Arabic descriptions yet
+      title: offer.offerTitle || t("noTitle"),
+      title_ar: "",
+      description: offer.offerDescription || t("noDescription"),
+      description_ar: "",
       discount: `${Math.round(
         ((offer.oldPricePerDay - offer.totalPrice) / offer.oldPricePerDay) * 100
       )}%`,
@@ -43,15 +43,15 @@ const Offers = () => {
           )}`
         : "https://images.unsplash.com/photo-1549924231-f129b911e442",
       price: offer.totalPrice || 0,
-      vendorName: offer.vendorName || "Unknown Vendor",
+      vendorName: offer.vendorName || t("unknownVendor"),
       terms: [
-        "Valid for limited time only",
-        "Cannot be combined with other offers",
-        "Subject to availability",
+        t("validForLimitedTime"),
+        t("cannotBeCombined"),
+        t("subjectToAvailability"),
       ],
       vendor: {
         id: offer.carId.toString(),
-        name: offer.vendorName || "Unknown Vendor",
+        name: offer.vendorName || t("unknownVendor"),
         logo_url: offer.companyLogo
           ? `${"https://test.get2cars.com"}/${offer.companyLogo.replace(
               /\\/g,
@@ -62,10 +62,7 @@ const Offers = () => {
       carId: offer?.carId,
     })) || [];
 
-  // Implement local filtering
-
   const filteredOffers = offers.filter((offer) => {
-    // Filter by search term
     if (
       searchTerm &&
       !offer.title.toLowerCase().includes(searchTerm.toLowerCase())
@@ -73,12 +70,8 @@ const Offers = () => {
       return false;
     }
 
-    // Filter by price range
-    // Only filter if price range is not at default values
     const isDefaultPriceRange = priceRange[0] === 0 && priceRange[1] === 2000;
     if (!isDefaultPriceRange) {
-      // Make sure we're working with numbers
-      // Use the price from the transformed offer object
       const offerPrice = offer.price;
       const minPrice = priceRange[0];
       const maxPrice = priceRange[1];
@@ -88,7 +81,6 @@ const Offers = () => {
       }
     }
 
-    // Filter by selected vendors
     if (
       selectedVendors.length > 0 &&
       !selectedVendors.includes(offer.vendor.name)
@@ -96,15 +88,7 @@ const Offers = () => {
       return false;
     }
 
-    // Filter by selected categories
     if (selectedCategories.length > 0) {
-      // For debugging
-
-      // We need to check the original API response fields
-      // The original offer data is in offersResponse.carSearchResult
-      // But we're working with the transformed offer object
-
-      // Find the original offer data
       const originalOffer = offersResponse?.carSearchResult.find(
         (o) => o.id.toString() === offer.id
       );
@@ -113,11 +97,9 @@ const Offers = () => {
         return false;
       }
 
-      // Check if any selected category matches this offer
       const matchesCategory = selectedCategories.some((category) => {
         const categoryLower = category.toLowerCase();
 
-        // Check against the actual fields in the original offer
         const matchesFuelType =
           originalOffer.fuelType &&
           originalOffer.fuelType.toLowerCase() === categoryLower;
@@ -131,7 +113,6 @@ const Offers = () => {
           originalOffer.branch &&
           originalOffer.branch.toLowerCase() === categoryLower;
 
-        // Check if any of the fields match
         const isMatch =
           matchesFuelType ||
           matchesTransmission ||
@@ -149,7 +130,6 @@ const Offers = () => {
     return true;
   });
 
-  // Local pagination logic
   const totalItems = filteredOffers.length;
   const totalPages = Math.ceil(totalItems / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -159,7 +139,6 @@ const Offers = () => {
   );
 
   const clearAllFilters = () => {
-    console.log("Clearing all filters");
     setPriceRange([0, 2000]);
     setSelectedCategories([]);
     setSelectedVendors([]);
@@ -167,22 +146,20 @@ const Offers = () => {
     setCurrentPage(1);
   };
 
-  // Reset to first page when filters change
   useEffect(() => {
     setCurrentPage(1);
   }, [priceRange, selectedCategories, selectedVendors, searchTerm]);
 
   if (error) {
-    console.error("Error in offers page:", error);
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50">
         <div className="pt-20 pb-8">
           <div className="flex items-center justify-center py-12">
             <div className="text-center">
               <h3 className="text-lg font-medium text-gray-900 mb-2">
-                Error loading offers
+                {t("errorLoadingOffers")}
               </h3>
-              <p className="text-gray-500">Please try again later</p>
+              <p className="text-gray-500">{t("pleaseTryAgainLater")}</p>
             </div>
           </div>
         </div>
@@ -195,7 +172,6 @@ const Offers = () => {
       <div className="pt-20 pb-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex gap-8">
-            {/* Filters Sidebar */}
             <div className="w-52 flex-shrink-0 hidden lg:block">
               <OffersFilters
                 priceRange={priceRange}
@@ -228,7 +204,6 @@ const Offers = () => {
               />
             </div>
 
-            {/* Main Content */}
             <div className="flex-1 min-w-0">
               <OffersHeader />
 
@@ -242,7 +217,6 @@ const Offers = () => {
                 totalPages={totalPages}
               />
 
-              {/* Offers Grid */}
               <div
                 className={`grid gap-6 mb-8 ${
                   viewMode === "grid"
@@ -273,11 +247,9 @@ const Offers = () => {
                     <Search className="h-8 w-8 text-gray-400" />
                   </div>
                   <h3 className="text-lg font-medium text-gray-900 mb-2">
-                    No offers found
+                    {t("noOffersFound")}
                   </h3>
-                  <p className="text-gray-500">
-                    Try adjusting your search or filter criteria
-                  </p>
+                  <p className="text-gray-500">{t("tryAdjustingFilters")}</p>
                 </div>
               )}
             </div>

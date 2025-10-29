@@ -1262,6 +1262,14 @@ export const enTranslations = {
   termsOfService: "Terms of Service",
   privacyPolicy: "Privacy Policy",
   allRightsReserved: "All rights reserved",
+  noTitle: "No title",
+  noDescription: "No description",
+  unknownVendor: "Unknown Vendor",
+  validForLimitedTime: "Valid for limited time only",
+  cannotBeCombined: "Cannot be combined with other offers",
+  subjectToAvailability: "Subject to availability",
+  errorLoadingOffers: "Error loading offers",
+  tryAdjustingFilters: "Try adjusting your search or filter criteria",
 };
 
 export default enTranslations;
