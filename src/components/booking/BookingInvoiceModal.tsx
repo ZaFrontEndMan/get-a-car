@@ -17,6 +17,7 @@ import { useClientBookings } from "../../hooks/client/useClientBookings";
 import { Booking } from "../../types/clientBookings";
 import { toast } from "sonner";
 import { useGetBookingById } from "@/hooks/vendor/useVendorBooking";
+import Barcode from "react-barcode";
 
 interface BookingInvoiceModalProps {
   isOpen: boolean;
@@ -35,7 +36,6 @@ const BookingInvoiceModal: React.FC<BookingInvoiceModalProps> = ({
   const { useGetInvoiceDetails, useGenerateInvoicePdf } = useClientBookings();
   const bookingId = booking?.id?.toString();
 
-  // Conditionally select the appropriate hook based on type
   const {
     data: invoiceResponse,
     isLoading,
@@ -46,7 +46,6 @@ const BookingInvoiceModal: React.FC<BookingInvoiceModalProps> = ({
 
   const generateInvoicePdfMutation = useGenerateInvoicePdf();
 
-  // Handle loading state
   if (isLoading) {
     return (
       <Dialog open={isOpen} onOpenChange={onClose}>
@@ -62,7 +61,6 @@ const BookingInvoiceModal: React.FC<BookingInvoiceModalProps> = ({
     );
   }
 
-  // Handle error state
   if (isError || !invoiceResponse?.data) {
     return (
       <Dialog open={isOpen} onOpenChange={onClose}>
@@ -82,7 +80,6 @@ const BookingInvoiceModal: React.FC<BookingInvoiceModalProps> = ({
     );
   }
 
-  // Destructure the invoice data
   const {
     invoiceDetails,
     customerDetails,
@@ -125,7 +122,7 @@ const BookingInvoiceModal: React.FC<BookingInvoiceModalProps> = ({
           <DialogTitle className="text-2xl font-bold">
             {t("invoice")}
           </DialogTitle>
-          {type === "client" && (
+          {type === "client" ? (
             <Button
               onClick={handleDownloadPDF}
               className="flex items-center gap-2"
@@ -134,11 +131,11 @@ const BookingInvoiceModal: React.FC<BookingInvoiceModalProps> = ({
               <Download className="h-4 w-4" />
               <span>{t("downloadPdf")}</span>
             </Button>
-          )}
+          ) : null}
         </DialogHeader>
 
         <div className="bg-white p-8 border border-gray-200 rounded-lg print:shadow-none print:border-none">
-          {/* Invoice Header */}
+          {/* Invoice Header with Barcode */}
           <div className="flex justify-between items-start mb-8">
             <div className="flex items-center gap-2">
               <div className="flex flex-col">
@@ -154,12 +151,25 @@ const BookingInvoiceModal: React.FC<BookingInvoiceModalProps> = ({
                 <p className="text-sm text-gray-500">{vendorDetails.name}</p>
               </div>
             </div>
+            
+            {/* Barcode Section */}
             <div className="text-right">
-              <h2 className="text-2xl font-bold text-gray-900 uppercase">
+              <h2 className="text-2xl font-bold text-gray-900 uppercase mb-2">
                 {t("invoice")}
               </h2>
-              <p className="text-gray-600">#{orderDetails.bookingNumber}</p>
-              <p className="text-gray-600">
+              <div className="mb-2">
+                <Barcode
+                  value={invoiceDetails.id.toString()}
+                  width={1.5}
+                  height={50}
+                  fontSize={12}
+                  background="#ffffff"
+                  lineColor="#000000"
+                  margin={0}
+                />
+              </div>
+              <p className="text-gray-600 text-sm">#{orderDetails.bookingNumber}</p>
+              <p className="text-gray-600 text-sm">
                 {format(new Date(orderDetails.creationdate), "MMM dd, yyyy")}
               </p>
             </div>
@@ -248,7 +258,7 @@ const BookingInvoiceModal: React.FC<BookingInvoiceModalProps> = ({
               {t("vehicleInformation")}
             </h3>
             <div className="flex items-center gap-2">
-              {carDetails.imageURLsCar?.[0] && (
+              {carDetails.imageURLsCar?.[0] ? (
                 <img
                   src={`${import.meta.env.VITE_UPLOADS_BASE_URL}${
                     carDetails.imageURLsCar[0]
@@ -256,7 +266,7 @@ const BookingInvoiceModal: React.FC<BookingInvoiceModalProps> = ({
                   alt={carDetails.carName}
                   className="h-16 w-24 object-cover rounded-lg"
                 />
-              )}
+              ) : null}
               <div className="flex-1">
                 <p className="font-medium text-gray-900">
                   {carDetails.carName}
@@ -302,7 +312,6 @@ const BookingInvoiceModal: React.FC<BookingInvoiceModalProps> = ({
                 </tr>
               </thead>
               <tbody>
-                {/* Car Rental */}
                 <tr>
                   <td className="px-4 py-3 text-sm text-gray-900 border-b border-gray-200">
                     {carDetails.carName} {t("rentalLabel")}
@@ -321,7 +330,6 @@ const BookingInvoiceModal: React.FC<BookingInvoiceModalProps> = ({
                   </td>
                 </tr>
 
-                {/* Protection Fee */}
                 <tr>
                   <td className="px-4 py-3 text-sm text-gray-900 border-b border-gray-200">
                     {t("protectionFee")}
@@ -337,25 +345,25 @@ const BookingInvoiceModal: React.FC<BookingInvoiceModalProps> = ({
                   </td>
                 </tr>
 
-                {/* Additional Services */}
                 {invoiceDetails.paymentInfoDetalis &&
-                  invoiceDetails.paymentInfoDetalis.length > 0 &&
-                  invoiceDetails.paymentInfoDetalis.map((service, index) => (
-                    <tr key={index}>
-                      <td className="px-4 py-3 text-sm text-gray-900 border-b border-gray-200">
-                        {service.carServiceName}
-                      </td>
-                      <td className="px-4 py-3 text-sm text-gray-900 text-center border-b border-gray-200">
-                        1
-                      </td>
-                      <td className="px-4 py-3 text-sm text-gray-900 text-right border-b border-gray-200">
-                        {formatCurrency(service.carServicePrice)}
-                      </td>
-                      <td className="px-4 py-3 text-sm text-gray-900 text-right border-b border-gray-200">
-                        {formatCurrency(service.carServicePrice)}
-                      </td>
-                    </tr>
-                  ))}
+                  invoiceDetails.paymentInfoDetalis.length > 0
+                  ? invoiceDetails.paymentInfoDetalis.map((service, index) => (
+                      <tr key={index}>
+                        <td className="px-4 py-3 text-sm text-gray-900 border-b border-gray-200">
+                          {service.carServiceName}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-gray-900 text-center border-b border-gray-200">
+                          1
+                        </td>
+                        <td className="px-4 py-3 text-sm text-gray-900 text-right border-b border-gray-200">
+                          {formatCurrency(service.carServicePrice)}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-gray-900 text-right border-b border-gray-200">
+                          {formatCurrency(service.carServicePrice)}
+                        </td>
+                      </tr>
+                    ))
+                  : null}
               </tbody>
             </table>
           </div>
@@ -376,21 +384,21 @@ const BookingInvoiceModal: React.FC<BookingInvoiceModalProps> = ({
                 </span>
               </div>
               {invoiceDetails.paymentInfoDetalis &&
-                invoiceDetails.paymentInfoDetalis.length > 0 && (
-                  <div className="flex justify-between py-2">
-                    <span className="text-gray-600">
-                      {t("additionalServices")}
-                    </span>
-                    <span className="text-gray-900">
-                      {formatCurrency(
-                        invoiceDetails.paymentInfoDetalis.reduce(
-                          (sum, service) => sum + service.carServicePrice,
-                          0
-                        )
-                      )}
-                    </span>
-                  </div>
-                )}
+              invoiceDetails.paymentInfoDetalis.length > 0 ? (
+                <div className="flex justify-between py-2">
+                  <span className="text-gray-600">
+                    {t("additionalServices")}
+                  </span>
+                  <span className="text-gray-900">
+                    {formatCurrency(
+                      invoiceDetails.paymentInfoDetalis.reduce(
+                        (sum, service) => sum + service.carServicePrice,
+                        0
+                      )
+                    )}
+                  </span>
+                </div>
+              ) : null}
               <div className="flex justify-between py-2 border-t border-gray-200 w-full">
                 <span className="font-semibold text-gray-900">
                   {t("totalAmount")}
@@ -403,7 +411,7 @@ const BookingInvoiceModal: React.FC<BookingInvoiceModalProps> = ({
           </div>
 
           {/* Footer */}
-          {type === "client" && (
+          {type === "client" ? (
             <div className="mt-8 pt-8 border-t border-gray-200 text-center text-gray-600">
               <p className="text-lg font-medium">
                 {t("thankYouChoosingGetCar")}
@@ -417,7 +425,7 @@ const BookingInvoiceModal: React.FC<BookingInvoiceModalProps> = ({
                 <p>{t("visitUs")}: www.getcar.sa</p>
               </div>
             </div>
-          )}
+          ) : null}
         </div>
       </DialogContent>
     </Dialog>
