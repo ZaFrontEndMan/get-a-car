@@ -1,8 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { useLanguage } from "../contexts/LanguageContext";
-import { Car, ArrowLeft, Mail, Lock, Check } from "lucide-react";
+import {
+  Car,
+  ArrowLeft,
+  Mail,
+  Lock,
+  Check,
+  AlertCircle,
+  CheckCircle,
+} from "lucide-react";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { authApi } from "@/api/auth/authApi";
 import { motion, AnimatePresence } from "framer-motion";
@@ -24,6 +31,10 @@ const ForgotPassword = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoadingStep2, setIsLoadingStep2] = useState(false);
 
+  // Error and success states
+  const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+
   const isRTL = language === "ar";
 
   useEffect(() => {
@@ -32,9 +43,17 @@ const ForgotPassword = () => {
     }
   }, [emailFromParams]);
 
+  // Clear messages when step changes
+  useEffect(() => {
+    setErrorMessage("");
+    setSuccessMessage("");
+  }, [step]);
+
   const handleRequestCode = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoadingStep1(true);
+    setErrorMessage("");
+    setSuccessMessage("");
 
     try {
       await authApi.forgotPassword({
@@ -42,11 +61,13 @@ const ForgotPassword = () => {
         userName: email,
       });
 
-      toast.success(t("resetCodeSent"));
-      setSearchParams({ step: "2", email });
+      setSuccessMessage(t("resetCodeSent"));
+      setTimeout(() => {
+        setSearchParams({ step: "2", email });
+      }, 1000);
     } catch (error: any) {
       console.error("Forgot password error:", error);
-      toast.error(
+      setErrorMessage(
         error?.response?.data?.customMessage || t("errorSendingCode")
       );
     } finally {
@@ -56,14 +77,16 @@ const ForgotPassword = () => {
 
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMessage("");
+    setSuccessMessage("");
 
     if (newPassword !== confirmPassword) {
-      toast.error(t("passwordsDoNotMatch"));
+      setErrorMessage(t("passwordsDoNotMatch"));
       return;
     }
 
     if (newPassword.length < 6) {
-      toast.error(t("passwordTooShort"));
+      setErrorMessage(t("passwordTooShort"));
       return;
     }
 
@@ -76,14 +99,14 @@ const ForgotPassword = () => {
         token: resetCode,
       });
 
-      toast.success(t("passwordResetSuccess"));
+      setSuccessMessage(t("passwordResetSuccess"));
 
       setTimeout(() => {
         navigate("/signin");
       }, 2000);
     } catch (error: any) {
       console.error("Reset password error:", error);
-      toast.error(
+      setErrorMessage(
         error?.response?.data?.customMessage || t("errorResettingPassword")
       );
     } finally {
@@ -96,6 +119,8 @@ const ForgotPassword = () => {
     setResetCode("");
     setNewPassword("");
     setConfirmPassword("");
+    setErrorMessage("");
+    setSuccessMessage("");
   };
 
   // Animation variants
@@ -140,10 +165,26 @@ const ForgotPassword = () => {
     },
   };
 
+  const messageVariants = {
+    hidden: { opacity: 0, y: -10, scale: 0.95 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      transition: { duration: 0.3, type: "spring" },
+    },
+    exit: {
+      opacity: 0,
+      y: -10,
+      scale: 0.95,
+      transition: { duration: 0.2 },
+    },
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary to-secondary flex items-center justify-center p-4 sm:p-6">
       <motion.div
-        className="w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden"
+        className="w-full md:max-w-md  bg-white rounded-2xl shadow-2xl overflow-hidden"
         dir={isRTL ? "rtl" : "ltr"}
         variants={containerVariants}
         initial="hidden"
@@ -179,7 +220,46 @@ const ForgotPassword = () => {
 
         {/* Content */}
         <div className="p-6 sm:p-8">
-          {/* Step Indicator - Mobile optimized */}
+          {/* Error/Success Messages */}
+          <AnimatePresence mode="wait">
+            {errorMessage && (
+              <motion.div
+                key="error"
+                variants={messageVariants}
+                initial="hidden"
+                animate="visible"
+                exit="exit"
+                className="mb-4 p-4 bg-rose-50 border border-rose-200 rounded-lg flex items-start gap-3"
+              >
+                <AlertCircle className="h-5 w-5 text-red flex-shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  <p className="text-sm text-red font-medium">
+                    {errorMessage}
+                  </p>
+                </div>
+              </motion.div>
+            )}
+
+            {successMessage && (
+              <motion.div
+                key="success"
+                variants={messageVariants}
+                initial="hidden"
+                animate="visible"
+                exit="exit"
+                className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg flex items-start gap-3"
+              >
+                <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  <p className="text-sm text-green-800 font-medium">
+                    {successMessage}
+                  </p>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Step Indicator */}
           <motion.div
             className="flex items-center justify-center mb-6 sm:mb-8"
             variants={itemVariants}
@@ -234,7 +314,7 @@ const ForgotPassword = () => {
             </div>
           </motion.div>
 
-          {/* Step Forms with AnimatePresence */}
+          {/* Step Forms */}
           <AnimatePresence mode="wait">
             {step === "1" && (
               <motion.form
