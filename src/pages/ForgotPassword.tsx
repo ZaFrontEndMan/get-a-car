@@ -1,114 +1,470 @@
-
-import React, { useState } from 'react';
-import { useLanguage } from '../contexts/LanguageContext';
-import { Car, ArrowLeft } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
+import React, { useState, useEffect } from "react";
+import { useLanguage } from "../contexts/LanguageContext";
+import { Car, ArrowLeft, Mail, Lock, Check } from "lucide-react";
+import { Link, useSearchParams, useNavigate } from "react-router-dom";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { authApi } from "@/api/auth/authApi";
+import { motion, AnimatePresence } from "framer-motion";
 
 const ForgotPassword = () => {
-  const { t } = useLanguage();
-  const [email, setEmail] = useState('');
-  const [isSubmitted, setIsSubmitted] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const { t, language } = useLanguage();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const step = searchParams.get("step") || "1";
+  const emailFromParams = searchParams.get("email") || "";
+
+  const [email, setEmail] = useState(emailFromParams);
+  const [isPhone, setIsPhone] = useState(false);
+  const [isLoadingStep1, setIsLoadingStep1] = useState(false);
+
+  const [resetCode, setResetCode] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [isLoadingStep2, setIsLoadingStep2] = useState(false);
+
+  const isRTL = language === "ar";
+
+  useEffect(() => {
+    if (emailFromParams) {
+      setEmail(emailFromParams);
+    }
+  }, [emailFromParams]);
+
+  const handleRequestCode = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
+    setIsLoadingStep1(true);
 
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password`,
+      await authApi.forgotPassword({
+        isPhone,
+        userName: email,
       });
 
-      if (error) {
-        toast.error(error.message);
-        return;
-      }
-
-      setIsSubmitted(true);
-      toast.success('Password reset link sent to your email');
-    } catch (error) {
-      console.error('Password reset error:', error);
-      toast.error('An unexpected error occurred');
+      toast.success(t("resetCodeSent"));
+      setSearchParams({ step: "2", email });
+    } catch (error: any) {
+      console.error("Forgot password error:", error);
+      toast.error(
+        error?.response?.data?.customMessage || t("errorSendingCode")
+      );
     } finally {
-      setIsLoading(false);
+      setIsLoadingStep1(false);
     }
   };
 
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (newPassword !== confirmPassword) {
+      toast.error(t("passwordsDoNotMatch"));
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      toast.error(t("passwordTooShort"));
+      return;
+    }
+
+    setIsLoadingStep2(true);
+
+    try {
+      await authApi.resetPassword({
+        email: emailFromParams,
+        newPassword,
+        token: resetCode,
+      });
+
+      toast.success(t("passwordResetSuccess"));
+
+      setTimeout(() => {
+        navigate("/signin");
+      }, 2000);
+    } catch (error: any) {
+      console.error("Reset password error:", error);
+      toast.error(
+        error?.response?.data?.customMessage || t("errorResettingPassword")
+      );
+    } finally {
+      setIsLoadingStep2(false);
+    }
+  };
+
+  const handleBackToStep1 = () => {
+    setSearchParams({});
+    setResetCode("");
+    setNewPassword("");
+    setConfirmPassword("");
+  };
+
+  // Animation variants
+  const containerVariants = {
+    hidden: { opacity: 0, scale: 0.95 },
+    visible: {
+      opacity: 1,
+      scale: 1,
+      transition: {
+        duration: 0.4,
+        ease: "easeOut",
+        staggerChildren: 0.1,
+      },
+    },
+    exit: {
+      opacity: 0,
+      scale: 0.95,
+      transition: { duration: 0.3 },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.3, ease: "easeOut" },
+    },
+  };
+
+  const stepVariants = {
+    hidden: { opacity: 0, x: isRTL ? -50 : 50 },
+    visible: {
+      opacity: 1,
+      x: 0,
+      transition: { duration: 0.4, ease: "easeOut" },
+    },
+    exit: {
+      opacity: 0,
+      x: isRTL ? 50 : -50,
+      transition: { duration: 0.3 },
+    },
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary to-secondary flex items-center justify-center px-4">
-      <div className="max-w-md w-full bg-white rounded-2xl shadow-2xl p-8">
-        {/* Logo */}
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <div className="gradient-primary p-3 rounded-lg">
-              <Car className="h-8 w-8 text-white" />
-            </div>
-            <span className="text-3xl font-bold text-gradient">Get Car</span>
-          </div>
-          <h2 className="text-2xl font-bold text-gray-900">
-            {isSubmitted ? 'Check Your Email' : 'Forgot Password?'}
-          </h2>
-          <p className="text-gray-600">
-            {isSubmitted 
-              ? 'We have sent you a password reset link'
-              : 'Enter your email to reset your password'
-            }
-          </p>
-        </div>
-
-        {!isSubmitted ? (
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Email Address
-              </label>
-              <input
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
-                placeholder="Enter your email"
-              />
-            </div>
-
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full gradient-primary text-white py-3 rounded-lg font-semibold hover:shadow-lg transform hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-            >
-              {isLoading ? 'Sending...' : 'Send Reset Link'}
-            </button>
-          </form>
-        ) : (
-          <div className="text-center space-y-4">
-            <div className="bg-green-100 text-green-800 p-4 rounded-lg">
-              Password reset link has been sent to {email}
-            </div>
-            <p className="text-gray-600">
-              Didn't receive the email? Check your spam folder or{' '}
-              <button 
-                onClick={() => setIsSubmitted(false)}
-                className="text-primary hover:text-primary/80 font-medium"
-              >
-                try again
-              </button>
-            </p>
-          </div>
-        )}
-
-        <div className="mt-6 text-center">
-          <Link 
-            to="/signin" 
-            className="inline-flex items-center text-primary hover:text-primary/80 font-medium"
+    <div className="min-h-screen bg-gradient-to-br from-primary to-secondary flex items-center justify-center p-4 sm:p-6">
+      <motion.div
+        className="w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden"
+        dir={isRTL ? "rtl" : "ltr"}
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+        exit="exit"
+      >
+        {/* Header with gradient background */}
+        <motion.div
+          className="bg-gradient-to-r from-primary to-secondary text-white p-6 sm:p-8"
+          variants={itemVariants}
+        >
+          <motion.h2
+            className="text-xl sm:text-2xl font-bold text-center mb-2"
+            key={`title-${step}`}
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
           >
-            <ArrowLeft className="h-4 w-4 mr-1" />
-            Back to Sign In
-          </Link>
+            {step === "1" ? t("forgotPassword") : t("resetPassword")}
+          </motion.h2>
+          <motion.p
+            className="text-white/90 text-sm text-center"
+            key={`subtitle-${step}`}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.3, delay: 0.1 }}
+          >
+            {step === "1"
+              ? t("enterEmailOrPhoneToGetCode")
+              : t("enterCodeAndNewPassword")}
+          </motion.p>
+        </motion.div>
+
+        {/* Content */}
+        <div className="p-6 sm:p-8">
+          {/* Step Indicator - Mobile optimized */}
+          <motion.div
+            className="flex items-center justify-center mb-6 sm:mb-8"
+            variants={itemVariants}
+          >
+            <div className="flex items-center gap-2 sm:gap-3">
+              <motion.div
+                className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center font-semibold text-sm sm:text-base ${
+                  step === "1"
+                    ? "bg-primary text-white shadow-lg"
+                    : "bg-green-500 text-white"
+                }`}
+                animate={{
+                  scale: step === "1" ? [1, 1.1, 1] : 1,
+                }}
+                transition={{ duration: 0.3 }}
+              >
+                {step === "1" ? (
+                  "1"
+                ) : (
+                  <motion.div
+                    initial={{ scale: 0, rotate: -180 }}
+                    animate={{ scale: 1, rotate: 0 }}
+                    transition={{ duration: 0.4, type: "spring" }}
+                  >
+                    <Check className="h-5 w-5 sm:h-6 sm:w-6" />
+                  </motion.div>
+                )}
+              </motion.div>
+
+              <div className="w-12 sm:w-16 h-1 bg-gray-200 rounded-full overflow-hidden">
+                <motion.div
+                  className="h-full bg-primary"
+                  initial={{ width: "0%" }}
+                  animate={{ width: step === "2" ? "100%" : "0%" }}
+                  transition={{ duration: 0.5, ease: "easeInOut" }}
+                />
+              </div>
+
+              <motion.div
+                className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center font-semibold text-sm sm:text-base ${
+                  step === "2"
+                    ? "bg-primary text-white shadow-lg"
+                    : "bg-gray-200 text-gray-500"
+                }`}
+                animate={{
+                  scale: step === "2" ? [1, 1.1, 1] : 1,
+                }}
+                transition={{ duration: 0.3 }}
+              >
+                2
+              </motion.div>
+            </div>
+          </motion.div>
+
+          {/* Step Forms with AnimatePresence */}
+          <AnimatePresence mode="wait">
+            {step === "1" && (
+              <motion.form
+                key="step1"
+                onSubmit={handleRequestCode}
+                className="space-y-4 sm:space-y-5"
+                variants={stepVariants}
+                initial="hidden"
+                animate="visible"
+                exit="exit"
+              >
+                <motion.div variants={itemVariants}>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    {t("emailOrPhone")}
+                  </label>
+                  <div className="relative">
+                    <Mail
+                      className={`absolute top-1/2 -translate-y-1/2 ${
+                        isRTL ? "right-3" : "left-3"
+                      } h-5 w-5 text-gray-400`}
+                    />
+                    <input
+                      type="text"
+                      required
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className={`w-full ${
+                        isRTL ? "pr-10 pl-4" : "pl-10 pr-4"
+                      } py-3 sm:py-3.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 text-base`}
+                      placeholder={t("enterEmailOrPhone")}
+                      dir={isRTL ? "rtl" : "ltr"}
+                    />
+                  </div>
+                </motion.div>
+
+                <motion.div
+                  className="flex items-center gap-2 bg-gray-50 p-3 rounded-lg"
+                  variants={itemVariants}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <input
+                    type="checkbox"
+                    id="isPhone"
+                    checked={isPhone}
+                    onChange={(e) => setIsPhone(e.target.checked)}
+                    className="w-5 h-5 text-primary border-gray-300 rounded focus:ring-primary"
+                  />
+                  <label
+                    htmlFor="isPhone"
+                    className="text-sm text-gray-700 cursor-pointer select-none"
+                  >
+                    {t("thisIsPhoneNumber")}
+                  </label>
+                </motion.div>
+
+                <motion.div variants={itemVariants}>
+                  <Button
+                    type="submit"
+                    disabled={isLoadingStep1}
+                    className="w-full bg-gradient-to-r from-primary to-secondary text-white py-3 sm:py-3.5 rounded-lg font-semibold text-base hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isLoadingStep1 ? (
+                      <span className="flex items-center justify-center gap-2">
+                        <motion.div
+                          className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"
+                          animate={{ rotate: 360 }}
+                          transition={{
+                            duration: 1,
+                            repeat: Infinity,
+                            ease: "linear",
+                          }}
+                        />
+                        {t("sending")}
+                      </span>
+                    ) : (
+                      t("sendResetCode")
+                    )}
+                  </Button>
+                </motion.div>
+              </motion.form>
+            )}
+
+            {step === "2" && (
+              <motion.form
+                key="step2"
+                onSubmit={handleResetPassword}
+                className="space-y-4 sm:space-y-5"
+                variants={stepVariants}
+                initial="hidden"
+                animate="visible"
+                exit="exit"
+              >
+                <motion.div
+                  className="bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4"
+                  variants={itemVariants}
+                  initial={{ scale: 0.9, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <p className="text-xs sm:text-sm text-blue-800 flex items-center gap-2">
+                    <Check className="h-4 w-4 flex-shrink-0" />
+                    <span>
+                      {t("codeSentTo")}:{" "}
+                      <strong className="break-all">{emailFromParams}</strong>
+                    </span>
+                  </p>
+                </motion.div>
+
+                <motion.div variants={itemVariants}>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    {t("resetCode")}
+                  </label>
+                  <motion.input
+                    type="text"
+                    required
+                    value={resetCode}
+                    onChange={(e) =>
+                      setResetCode(e.target.value.replace(/\D/g, ""))
+                    }
+                    className="w-full px-4 py-3 sm:py-4 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 text-center text-xl sm:text-2xl tracking-[0.5em] font-mono font-bold"
+                    placeholder="● ● ● ● ● ●"
+                    maxLength={6}
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    whileFocus={{ scale: 1.02 }}
+                  />
+                </motion.div>
+
+                <motion.div variants={itemVariants}>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    {t("newPassword")}
+                  </label>
+                  <div className="relative">
+                    <Lock
+                      className={`absolute top-1/2 -translate-y-1/2 ${
+                        isRTL ? "right-3" : "left-3"
+                      } h-5 w-5 text-gray-400`}
+                    />
+                    <input
+                      type="password"
+                      required
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      className={`w-full ${
+                        isRTL ? "pr-10 pl-4" : "pl-10 pr-4"
+                      } py-3 sm:py-3.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 text-base`}
+                      placeholder={t("enterNewPassword")}
+                      minLength={6}
+                    />
+                  </div>
+                </motion.div>
+
+                <motion.div variants={itemVariants}>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    {t("confirmPassword")}
+                  </label>
+                  <div className="relative">
+                    <Lock
+                      className={`absolute top-1/2 -translate-y-1/2 ${
+                        isRTL ? "right-3" : "left-3"
+                      } h-5 w-5 text-gray-400`}
+                    />
+                    <input
+                      type="password"
+                      required
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      className={`w-full ${
+                        isRTL ? "pr-10 pl-4" : "pl-10 pr-4"
+                      } py-3 sm:py-3.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 text-base`}
+                      placeholder={t("confirmNewPassword")}
+                      minLength={6}
+                    />
+                  </div>
+                </motion.div>
+
+                <motion.div variants={itemVariants}>
+                  <Button
+                    type="submit"
+                    disabled={isLoadingStep2}
+                    className="w-full bg-gradient-to-r from-primary to-secondary text-white py-3 sm:py-3.5 rounded-lg font-semibold text-base hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isLoadingStep2 ? (
+                      <span className="flex items-center justify-center gap-2">
+                        <motion.div
+                          className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"
+                          animate={{ rotate: 360 }}
+                          transition={{
+                            duration: 1,
+                            repeat: Infinity,
+                            ease: "linear",
+                          }}
+                        />
+                        {t("resetting")}
+                      </span>
+                    ) : (
+                      t("resetPassword")
+                    )}
+                  </Button>
+                </motion.div>
+
+                <motion.button
+                  type="button"
+                  onClick={handleBackToStep1}
+                  className="w-full text-primary hover:text-primary/80 font-medium text-sm py-2"
+                  variants={itemVariants}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  {t("didNotReceiveCode")}
+                </motion.button>
+              </motion.form>
+            )}
+          </AnimatePresence>
+
+          <motion.div
+            className="mt-6 pt-6 border-t border-gray-200 text-center"
+            variants={itemVariants}
+          >
+            <Link
+              to="/signin"
+              className="inline-flex items-center justify-center text-primary hover:text-primary/80 font-medium text-sm"
+            >
+              <ArrowLeft className={`h-4 w-4 ${isRTL ? "ml-2" : "mr-2"}`} />
+              {t("backToSignIn")}
+            </Link>
+          </motion.div>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 };

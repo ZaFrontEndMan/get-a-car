@@ -3,7 +3,12 @@ import axiosInstance from "./../../utils/axiosInstance";
 
 export const authApi = {
   // Accept either `username` or `userName` from callers and normalize to backend's expected `userName`
-  login: (data: { username?: string; userName?: string; password: string; isPhone: boolean }) =>
+  login: (data: {
+    username?: string;
+    userName?: string;
+    password: string;
+    isPhone: boolean;
+  }) =>
     axiosInstance.post("/Auth/Login", {
       userName: data.userName ?? data.username ?? "",
       password: data.password,
@@ -25,11 +30,14 @@ export const authApi = {
   changePassword: (data: { currentPassword: string; newPassword: string }) =>
     axiosInstance.post("/Auth/change-password", data),
 
-  forgotPassword: (data: { email: string }) =>
+  forgotPassword: (data: { userName: string; isPhone: boolean }) =>
     axiosInstance.post("/Auth/forgot-password", data),
 
-  resetPassword: (data: { token: string; newPassword: string }) =>
-    axiosInstance.post("/Auth/reset-password", data),
+  resetPassword: (data: {
+    token: string;
+    newPassword: string;
+    email: string;
+  }) => axiosInstance.post("/Auth/reset-password", data),
 
   healthCheck: () => axiosInstance.get("/Auth/healthCheck"),
 

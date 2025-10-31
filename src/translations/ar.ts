@@ -1281,6 +1281,40 @@ export const arTranslations = {
   subjectToAvailability: "يخضع للتوفر",
   errorLoadingOffers: "خطأ في تحميل العروض",
   tryAdjustingFilters: "حاول تعديل معايير البحث أو التصفية",
+  checkYourEmail: "تحقق من بريدك الإلكتروني",
+  passwordResetLinkSentMessage: "لقد أرسلنا لك رابط إعادة تعيين كلمة المرور",
+  enterEmailToReset: "أدخل بريدك الإلكتروني لإعادة تعيين كلمة المرور",
+  enterYourEmail: "أدخل بريدك الإلكتروني",
+  sending: "جاري الإرسال...",
+  sendResetLink: "إرسال رابط إعادة التعيين",
+  passwordResetLinkSent:
+    "تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني",
+  unexpectedError: "حدث خطأ غير متوقع",
+  passwordResetLinkSentTo: "تم إرسال رابط إعادة تعيين كلمة المرور إلى",
+  didNotReceiveEmail:
+    "لم تستلم البريد الإلكتروني؟ تحقق من مجلد الرسائل غير المرغوب فيها أو",
+  tryAgain: "حاول مرة أخرى",
+  backToSignIn: "العودة إلى تسجيل الدخول",
+  enterEmailOrPhoneToGetCode:
+    "أدخل بريدك الإلكتروني أو رقم هاتفك لتلقي رمز إعادة التعيين",
+  enterCodeAndNewPassword: "أدخل الرمز المرسل إليك وكلمة المرور الجديدة",
+  emailOrPhone: "البريد الإلكتروني أو رقم الهاتف",
+  enterEmailOrPhone: "أدخل بريدك الإلكتروني أو رقم هاتفك",
+  thisIsPhoneNumber: "هذا رقم هاتف",
+  sendResetCode: "إرسال رمز إعادة التعيين",
+  resetCodeSent: "تم إرسال رمز إعادة التعيين بنجاح",
+  errorSendingCode: "خطأ في إرسال رمز إعادة التعيين",
+  codeSentTo: "تم إرسال الرمز إلى",
+  resetCode: "رمز إعادة التعيين",
+  newPassword: "كلمة المرور الجديدة",
+  enterNewPassword: "أدخل كلمة المرور الجديدة",
+  confirmNewPassword: "أكد كلمة المرور الجديدة",
+  resetting: "جاري إعادة التعيين...",
+  passwordsDoNotMatch: "كلمات المرور غير متطابقة",
+  passwordResetSuccess:
+    "تم إعادة تعيين كلمة المرور بنجاح! جاري التوجيه إلى تسجيل الدخول...",
+  errorResettingPassword: "خطأ في إعادة تعيين كلمة المرور",
+  didNotReceiveCode: "لم تستلم الرمز؟ حاول مرة أخرى",
 };
 
 export default arTranslations;
