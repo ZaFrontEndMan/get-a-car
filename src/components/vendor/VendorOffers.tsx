@@ -44,7 +44,7 @@ import {
   useEditCarOffer,
   useDeleteCarOffer,
 } from "@/hooks/vendor/useVendorCarOffer";
-import { useGetAllCars } from "@/hooks/vendor/useVendorCar";
+import { useGetAllCarsOffers } from "@/hooks/vendor/useVendorCar";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 interface Offer {
@@ -232,8 +232,7 @@ const OfferForm: React.FC<{
                 <SelectContent>
                   {cars.map((car) => (
                     <SelectItem key={car.id} value={car.id}>
-                      {car.brand} {car.model} - {car.name} ({t("sarPerDay")}{" "}
-                      {car.daily_rate})
+                      {car.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -448,7 +447,7 @@ const VendorOffers: React.FC = () => {
     data: carsData,
     isLoading: carsLoading,
     error: carsError,
-  } = useGetAllCars();
+  } = useGetAllCarsOffers();
   const {
     data: offersData,
     isLoading: offersLoading,
@@ -706,12 +705,14 @@ const VendorOffers: React.FC = () => {
       <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle className=" text-start">{t("confirmDeleteOffer")}</DialogTitle>
+            <DialogTitle className=" text-start">
+              {t("confirmDeleteOffer")}
+            </DialogTitle>
             <DialogDescription className=" text-start">
               {t("deleteOfferDescription")} {t("actionCannotBeUndone")}
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter className="gap-2  justify-start w-full"  >
+          <DialogFooter className="gap-2  justify-start w-full">
             <Button
               variant="outline"
               onClick={handleCloseDeleteModal}

@@ -12,6 +12,7 @@ import {
   duplicateCar,
   downloadCarTemplate,
   bulkUploadCars,
+  getAllCarsOffers,
 } from "../../api/vendor/vendorCarApi";
 
 // Query keys
@@ -30,6 +31,13 @@ export const useGetAllCars = () => {
   return useQuery({
     queryKey: VENDOR_CAR_QUERY_KEYS.lists(),
     queryFn: getAllCars,
+  });
+};
+// Get all cars
+export const useGetAllCarsOffers = () => {
+  return useQuery({
+    queryKey: VENDOR_CAR_QUERY_KEYS.lists(),
+    queryFn: getAllCarsOffers,
   });
 };
 

@@ -68,6 +68,11 @@ export const getAllCars = async () => {
   const { data } = await axiosInstance.get("/Vendor/Car/GetAll");
   return data;
 };
+// Get all cars
+export const getAllCarsOffers = async () => {
+  const { data } = await axiosInstance.get("/Vendor/CarOffer/GetAllCarForOffers");
+  return data;
+};
 
 // Get car by ID
 export const getCarById = async (carId: string) => {
