@@ -16,6 +16,15 @@ export const getVendorBranches = async () => {
   return data;
 };
 
+// Create vendor branch
+export const createVendorBranch = async (branchData: any) => {
+  const { data } = await axiosInstance.post(
+    "/Vendor/Auth/CreateBranch",
+    branchData
+  );
+  return data;
+};
+
 // Update employee
 export const updateEmployee = async (employeeId: string, employeeData: any) => {
   const { data } = await axiosInstance.put(

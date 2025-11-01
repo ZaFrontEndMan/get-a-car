@@ -10,16 +10,23 @@ interface BranchFormProps {
   onClose: () => void;
   onSuccess: () => void;
   t: any;
+  isEditing?: boolean; // Added for conditional rendering
 }
 
-const BranchForm = ({ branch, onClose, onSuccess, t }: BranchFormProps) => {
+const BranchForm = ({
+  branch,
+  onClose,
+  onSuccess,
+  t,
+  isEditing,
+}: BranchFormProps) => {
   const { formData, errors, mutation, handleChange, handleSubmit } =
-    useBranchForm(branch, onSuccess);
+    useBranchForm(branch, onSuccess, t, isEditing);
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <Card className="w-full max-w-md max-h-[90vh] overflow-y-auto">
-        <BranchFormHeader isEditing={!!branch} onClose={onClose} t={t} />
+        <BranchFormHeader isEditing={isEditing} onClose={onClose} t={t} />
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <BranchFormFields
@@ -27,10 +34,11 @@ const BranchForm = ({ branch, onClose, onSuccess, t }: BranchFormProps) => {
               errors={errors}
               onFieldChange={handleChange}
               t={t}
+              isEditing={isEditing}
             />
 
             <BranchFormActions
-              isEditing={!!branch}
+              isEditing={isEditing}
               isLoading={mutation.isPending}
               isUserAuthenticated={true}
               onCancel={onClose}

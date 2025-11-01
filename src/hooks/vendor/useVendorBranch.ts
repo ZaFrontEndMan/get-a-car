@@ -4,6 +4,7 @@ import {
   getVendorBranches,
   updateEmployee,
   updateVendorBranch,
+  createVendorBranch, // New import
 } from "../../api/vendor/vendorBranchApi";
 
 // Query keys
@@ -33,6 +34,18 @@ export const useGetVendorBranchById = (
     queryKey: VENDOR_BRANCH_QUERY_KEYS.detail(branchId),
     queryFn: () => getVendorBranchById(branchId),
     enabled: enabled && !!branchId,
+  });
+};
+
+// Create vendor branch mutation
+export const useCreateVendorBranch = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (branchData: any) => createVendorBranch(branchData),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: VENDOR_BRANCH_QUERY_KEYS.all });
+    },
   });
 };
 

@@ -24,11 +24,13 @@ const VendorBranches = () => {
   const { toast } = useToast();
   const { data, isLoading, error } = useGetVendorBranches();
   const branches = data?.data?.vendorBranches;
+
   const handleEdit = (branch: any) => {
     setEditingBranch(branch);
     setShowForm(true);
   };
-console.log(data);
+
+  console.log(data);
 
   const handleDelete = (branchId: string) => {
     toast({
@@ -48,11 +50,9 @@ console.log(data);
   };
 
   const onAddBranch = () => {
-    // Creation endpoint not available yet; prevent opening the form
-    toast({
-      title: t("comingSoon"),
-      description: t("underMaintenance"),
-    });
+    // Now we can open the form for creation
+    setEditingBranch(null);
+    setShowForm(true);
   };
 
   if (isLoading) {
@@ -136,6 +136,7 @@ console.log(data);
           branch={editingBranch}
           onClose={handleFormClose}
           onSuccess={handleFormSuccess}
+          isEditing={!!editingBranch}
         />
       )}
     </div>
