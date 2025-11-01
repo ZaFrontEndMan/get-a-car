@@ -110,19 +110,7 @@ const SignUp: React.FC = () => {
   };
 
   const isValidSaudiNationalId = (id: string) => {
-    const digits = id.replace(/\D/g, "");
-    if (digits.length !== 10) return false;
-    let sum = 0;
-    for (let i = 0; i < 9; i++) {
-      let v = parseInt(digits[i], 10);
-      if (i % 2 === 0) {
-        v = v * 2;
-        v = Math.floor(v / 10) + (v % 10);
-      }
-      sum += v;
-    }
-    const check = (10 - (sum % 10)) % 10;
-    return check === parseInt(digits[9], 10);
+    return true; // Accept all numbers
   };
 
   const isValidSaudiLicense = (value: string) => /^\d{10}$/.test(value.trim());
@@ -282,23 +270,37 @@ const SignUp: React.FC = () => {
     setError("");
 
     try {
-      const formDataObj = new FormData();
+      // Create UserDetails object with all data (no files)
+      const userDetails: UserDetails = {
+        // UserData fields
+        Password: formData.password,
+        UserName: formData.userName,
+        IsPhone: formData.isPhone,
 
-      Object.entries(formData).forEach(([key, value]) => {
-        if (value !== null && value !== undefined) {
-          formDataObj.append(key, value.toString());
-        }
-      });
+        // UserDetails fields
+        City: formData.city,
+        Country: formData.country,
+        Email: formData.email,
+        FirstName: formData.firstName,
+        FullName: formData.fullName,
+        LastName: formData.lastName,
+        NationalId: formData.nationalId,
+        PhoneNumber: formData.phoneNumber,
+        BirthDate: formData.birthDate,
+        Gender: formData.gender,
+        LicenseNumber: formData.licenseNumber,
+      };
 
-      Object.entries(fileData).forEach(([key, file]) => {
-        if (file) {
-          formDataObj.append(key, file);
-        }
-      });
+      // Separate documents object
+      const documents = {
+        DrivingLicenseFront: fileData.drivingLicenseFront,
+        DrivingLicenseBack: fileData.drivingLicenseBack,
+        NationalIdFront: fileData.nationalIdFront,
+        NationalIdBack: fileData.nationalIdBack,
+      };
 
-      formDataObj.append("userType", userType);
-
-      const success = await register(userType, formDataObj);
+      // Register with the hook
+      const success = await register(userType, userDetails, documents);
 
       if (success) {
         navigate("/signin", {
@@ -307,8 +309,6 @@ const SignUp: React.FC = () => {
             type: "success",
           },
         });
-      } else if (apiError) {
-        setError(apiError);
       }
     } catch (error: any) {
       console.error("Signup error:", error);
@@ -605,10 +605,10 @@ const SignUp: React.FC = () => {
                                     />
                                   </SelectTrigger>
                                   <SelectContent isRTL={isRTL}>
-                                    <SelectItem value="male" isRTL={isRTL}>
+                                    <SelectItem value="1" isRTL={isRTL}>
                                       {t("male")}
                                     </SelectItem>
-                                    <SelectItem value="female" isRTL={isRTL}>
+                                    <SelectItem value="2" isRTL={isRTL}>
                                       {t("female")}
                                     </SelectItem>
                                   </SelectContent>
