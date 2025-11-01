@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useLanguage } from "../contexts/LanguageContext";
 import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
 
 import {
   useCountries,
@@ -29,6 +30,53 @@ import {
   AccordionContent,
 } from "@/components/ui/accordion";
 import { Eye, EyeOff, AlertCircle } from "lucide-react";
+
+// Animation variants
+const fadeIn = {
+  initial: { opacity: 0 },
+  animate: { opacity: 1 },
+  transition: { duration: 0.6 },
+};
+
+const slideDown = {
+  initial: { opacity: 0, y: -30 },
+  animate: { opacity: 1, y: 0 },
+  transition: { duration: 0.6, delay: 0.1 },
+};
+
+const slideUp = {
+  initial: { opacity: 0, y: 50 },
+  animate: { opacity: 1, y: 0 },
+  transition: { duration: 0.6, delay: 0.2 },
+};
+
+const scaleIn = {
+  initial: { opacity: 0, scale: 0.95 },
+  animate: { opacity: 1, scale: 1 },
+  transition: { duration: 0.5, delay: 0.2 },
+};
+
+const staggerContainer = {
+  animate: {
+    transition: {
+      staggerChildren: 0.1,
+      delayChildren: 0.1,
+    },
+  },
+};
+
+const staggerItem = {
+  initial: { opacity: 0, y: 10 },
+  animate: { opacity: 1, y: 0 },
+  transition: { duration: 0.4 },
+};
+
+const errorAnimation = {
+  initial: { opacity: 0, height: 0 },
+  animate: { opacity: 1, height: "auto" },
+  exit: { opacity: 0, height: 0 },
+  transition: { duration: 0.3 },
+};
 
 const SignUp: React.FC = () => {
   const { t, language } = useLanguage();
@@ -269,567 +317,805 @@ const SignUp: React.FC = () => {
   };
 
   return (
-    <div
+    <motion.div
       className="min-h-screen bg-gradient-to-br from-primary to-secondary flex flex-col"
       dir={isRTL ? "rtl" : "ltr"}
+      initial="initial"
+      animate="animate"
+      variants={fadeIn}
     >
-      <div className="flex-1 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-        <h2 className="text-2xl font-bold text-center text-white drop-shadow-sm">
+      {/* Header with Logo */}
+      <motion.div
+        className="py-8 px-4 flex flex-col items-center justify-center"
+        variants={slideDown}
+        initial="initial"
+        animate="animate"
+      >
+        <motion.img
+          src="/logo.png"
+          alt="Logo"
+          className="h-14 w-auto mb-4"
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.6, delay: 0.1 }}
+        />
+        <motion.h2
+          className="text-3xl font-bold text-center text-white drop-shadow-sm"
+          variants={staggerItem}
+          initial="initial"
+          animate="animate"
+        >
           {t("createAccount")}
-        </h2>
+        </motion.h2>
+      </motion.div>
 
-        <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-3xl">
-          <Card className=" shadow-2xl border-0">
-            <CardHeader>
-              <CardTitle className="text-center">
-                <UserTypeSwitcher
-                  userType={userType}
-                  onUserTypeChange={setUserType}
-                />
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-6">
-                {(error || apiError) && (
-                  <div className="bg-red-50 border border-red-200 rounded-md p-4 flex items-center gap-2">
-                    <AlertCircle className="h-5 w-5 text-red-500 flex-shrink-0" />
-                    <span className="text-sm text-red-700">
-                      {error || apiError}
-                    </span>
-                  </div>
-                )}
+      <motion.div
+        className="flex-1 flex flex-col justify-center pb-12 sm:px-6 lg:px-8"
+        variants={slideUp}
+        initial="initial"
+        animate="animate"
+      >
+        <div className="sm:mx-auto sm:w-full sm:max-w-3xl">
+          <motion.div variants={scaleIn} initial="initial" animate="animate">
+            <Card className="shadow-2xl border-0">
+              <CardHeader>
+                <motion.div variants={staggerItem}>
+                  <CardTitle className="text-center">
+                    <UserTypeSwitcher
+                      userType={userType}
+                      onUserTypeChange={setUserType}
+                    />
+                  </CardTitle>
+                </motion.div>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleSubmit} className="space-y-6">
+                  {/* Error Alert */}
+                  {(error || apiError) && (
+                    <motion.div
+                      variants={errorAnimation}
+                      initial="initial"
+                      animate="animate"
+                      exit="exit"
+                      className="bg-red-50 border border-red-200 rounded-md p-4 flex items-center gap-2"
+                    >
+                      <AlertCircle className="h-5 w-5 text-red-500 flex-shrink-0" />
+                      <span className="text-sm text-red-700">
+                        {error || apiError}
+                      </span>
+                    </motion.div>
+                  )}
 
-                <Accordion
-                  type="single"
-                  collapsible
-                  value={expandedSection}
-                  onValueChange={setExpandedSection}
-                  className="w-full"
-                >
-                  {/* Section 1: Basic Information */}
-                  <AccordionItem value="section1">
-                    <AccordionTrigger className="text-lg font-semibold hover:no-underline">
-                      <span className={isRTL ? "mr-2" : "ml-2"}>📋</span>
-                      {t("basicInformation")}
-                    </AccordionTrigger>
-                    <AccordionContent>
-                      <div className="space-y-4">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div>
-                            <Label htmlFor="firstName">{t("firstName")}</Label>
-                            <Input
-                              id="firstName"
-                              type="text"
-                              placeholder={t("firstNamePlaceholder")}
-                              value={formData.firstName}
-                              onChange={(e) =>
-                                handleInputChange("firstName", e.target.value)
-                              }
-                              isRTL={isRTL}
-                              required
-                            />
-                            {fieldErrors.name && (
-                              <p className="text-xs text-red-600 mt-1">
-                                {fieldErrors.name}
-                              </p>
-                            )}
-                          </div>
-                          <div>
-                            <Label htmlFor="lastName">{t("lastName")}</Label>
-                            <Input
-                              id="lastName"
-                              type="text"
-                              placeholder={t("lastNamePlaceholder")}
-                              value={formData.lastName}
-                              onChange={(e) =>
-                                handleInputChange("lastName", e.target.value)
-                              }
-                              isRTL={isRTL}
-                              required
-                            />
-                          </div>
-                        </div>
-
-                        <div>
-                          <Label htmlFor="email">{t("emailAddress")}</Label>
-                          <Input
-                            id="email"
-                            type="email"
-                            placeholder={t("emailPlaceholder")}
-                            value={formData.email}
-                            onChange={(e) =>
-                              handleInputChange("email", e.target.value)
-                            }
-                            isRTL={isRTL}
-                            required
-                          />
-                          {fieldErrors.email && (
-                            <p className="text-xs text-red-600 mt-1">
-                              {fieldErrors.email}
-                            </p>
-                          )}
-                        </div>
-
-                        <div>
-                          <Label htmlFor="phone">{t("phoneNumber")}</Label>
-                          <Input
-                            id="phone"
-                            type="tel"
-                            placeholder={t("phonePlaceholder")}
-                            value={formData.phone}
-                            onChange={(e) =>
-                              handleInputChange("phone", e.target.value)
-                            }
-                            isRTL={isRTL}
-                          />
-                          {fieldErrors.phone && (
-                            <p className="text-xs text-red-600 mt-1">
-                              {fieldErrors.phone}
-                            </p>
-                          )}
-                        </div>
-
-                        {userType === "vendor" && (
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                              <Label htmlFor="companyName">
-                                {t("companyName")}
-                              </Label>
-                              <Input
-                                id="companyName"
-                                type="text"
-                                placeholder={t("companyNamePlaceholder")}
-                                value={formData.companyName}
-                                onChange={(e) =>
-                                  handleInputChange(
-                                    "companyName",
-                                    e.target.value
-                                  )
-                                }
-                                isRTL={isRTL}
-                                required
-                              />
-                              {fieldErrors.companyName && (
-                                <p className="text-xs text-red-600 mt-1">
-                                  {fieldErrors.companyName}
-                                </p>
-                              )}
-                            </div>
-                            <div>
-                              <Label htmlFor="businessLicense">
-                                {t("businessLicense")}
-                              </Label>
-                              <Input
-                                id="businessLicense"
-                                type="text"
-                                placeholder={t("businessLicensePlaceholder")}
-                                value={formData.businessLicense}
-                                onChange={(e) =>
-                                  handleInputChange(
-                                    "businessLicense",
-                                    e.target.value
-                                  )
-                                }
-                                isRTL={isRTL}
-                                required
-                              />
-                              {fieldErrors.businessLicense && (
-                                <p className="text-xs text-red-600 mt-1">
-                                  {fieldErrors.businessLicense}
-                                </p>
-                              )}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    </AccordionContent>
-                  </AccordionItem>
-
-                  {/* Section 2: Personal Details */}
-                  <AccordionItem value="section2">
-                    <AccordionTrigger className="text-lg font-semibold hover:no-underline">
-                      <span className={isRTL ? "mr-2" : "ml-2"}>👤</span>
-                      {t("personalDetails")}
-                    </AccordionTrigger>
-                    <AccordionContent>
-                      <div className="space-y-4">
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                          <div>
-                            <Label htmlFor="gender">{t("gender")}</Label>
-                            <Select
-                              value={formData.gender}
-                              onValueChange={(value) =>
-                                handleInputChange("gender", value)
-                              }
-                            >
-                              <SelectTrigger isRTL={isRTL}>
-                                <SelectValue placeholder={t("selectGender")} />
-                              </SelectTrigger>
-                              <SelectContent isRTL={isRTL}>
-                                <SelectItem value="male" isRTL={isRTL}>
-                                  {t("male")}
-                                </SelectItem>
-                                <SelectItem value="female" isRTL={isRTL}>
-                                  {t("female")}
-                                </SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          <div>
-                            <Label htmlFor="dateOfBirth">
-                              {t("dateOfBirth")}
-                            </Label>
-                            <Input
-                              id="dateOfBirth"
-                              type="date"
-                              placeholder={t("dateOfBirthPlaceholder")}
-                              value={formData.dateOfBirth}
-                              onChange={(e) =>
-                                handleInputChange("dateOfBirth", e.target.value)
-                              }
-                              isRTL={isRTL}
-                            />
-                            {fieldErrors.dateOfBirth && (
-                              <p className="text-xs text-red-600 mt-1">
-                                {fieldErrors.dateOfBirth}
-                              </p>
-                            )}
-                          </div>
-                          <div>
-                            <Label htmlFor="nationalId">
-                              {t("nationalId")}
-                            </Label>
-                            <Input
-                              id="nationalId"
-                              type="text"
-                              placeholder={t("nationalIdPlaceholder")}
-                              value={formData.nationalId}
-                              onChange={(e) =>
-                                handleInputChange("nationalId", e.target.value)
-                              }
-                              isRTL={isRTL}
-                            />
-                            {fieldErrors.nationalId && (
-                              <p className="text-xs text-red-600 mt-1">
-                                {fieldErrors.nationalId}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div>
-                            <Label htmlFor="country">{t("country")}</Label>
-                            <Select
-                              value={formData.country}
-                              onValueChange={(value) =>
-                                handleInputChange("country", value)
-                              }
-                            >
-                              <SelectTrigger isRTL={isRTL}>
-                                <SelectValue placeholder={t("selectCountry")} />
-                              </SelectTrigger>
-                              <SelectContent isRTL={isRTL}>
-                                {countries?.map((country) => (
-                                  <SelectItem
-                                    key={country.id}
-                                    value={country.id}
-                                    isRTL={isRTL}
-                                  >
-                                    {language === "ar"
-                                      ? country.name_ar
-                                      : country.name_en}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          <div>
-                            <Label htmlFor="city">{t("city")}</Label>
-                            <Select
-                              value={formData.city}
-                              onValueChange={(value) =>
-                                handleInputChange("city", value)
-                              }
-                            >
-                              <SelectTrigger isRTL={isRTL}>
-                                <SelectValue placeholder={t("selectCity")} />
-                              </SelectTrigger>
-                              <SelectContent isRTL={isRTL}>
-                                {cities?.map((city) => (
-                                  <SelectItem
-                                    key={city.id}
-                                    value={city.id}
-                                    isRTL={isRTL}
-                                  >
-                                    {language === "ar"
-                                      ? city.name_ar
-                                      : city.name_en}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </div>
-                        </div>
-
-                        {userType !== "vendor" && (
-                          <div>
-                            <Label htmlFor="licenseId">
-                              {t("drivingLicenseNumber")}
-                            </Label>
-                            <Input
-                              id="licenseId"
-                              type="text"
-                              placeholder={t("licenseIdPlaceholder")}
-                              value={formData.licenseId}
-                              onChange={(e) =>
-                                handleInputChange("licenseId", e.target.value)
-                              }
-                              isRTL={isRTL}
-                            />
-                            {fieldErrors.licenseId && (
-                              <p className="text-xs text-red-600 mt-1">
-                                {fieldErrors.licenseId}
-                              </p>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    </AccordionContent>
-                  </AccordionItem>
-
-                  {/* Section 3: Documents */}
-                  <AccordionItem value="section3">
-                    <AccordionTrigger className="text-lg font-semibold hover:no-underline">
-                      <span className={isRTL ? "mr-2" : "ml-2"}>📄</span>
-                      {t("documentUploads")}
-                    </AccordionTrigger>
-                    <AccordionContent>
-                      <div className="space-y-6">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                          <DocumentUpload
-                            title={t("nationalIdFront")}
-                            documentType="national_id"
-                            side="front"
-                            onImageUpdate={(file) =>
-                              handleFileUpdate("nationalIdFront", file)
-                            }
-                            currentImageFile={fileData.nationalIdFront}
-                          />
-                          <DocumentUpload
-                            title={t("nationalIdBack")}
-                            documentType="national_id"
-                            side="back"
-                            onImageUpdate={(file) =>
-                              handleFileUpdate("nationalIdBack", file)
-                            }
-                            currentImageFile={fileData.nationalIdBack}
-                          />
-                        </div>
-
-                        {userType === "vendor" ? (
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <DocumentUpload
-                              title={t("licenseIdFront")}
-                              documentType="license_id"
-                              side="front"
-                              onImageUpdate={(file) =>
-                                handleFileUpdate("licenseIdFront", file)
-                              }
-                              currentImageFile={fileData.licenseIdFront}
-                            />
-                            <DocumentUpload
-                              title={t("licenseIdBack")}
-                              documentType="license_id"
-                              side="back"
-                              onImageUpdate={(file) =>
-                                handleFileUpdate("licenseIdBack", file)
-                              }
-                              currentImageFile={fileData.licenseIdBack}
-                            />
-                          </div>
-                        ) : (
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <DocumentUpload
-                              title={t("drivingLicenseFront")}
-                              documentType="driving_license"
-                              side="front"
-                              onImageUpdate={(file) =>
-                                handleFileUpdate("drivingLicenseFront", file)
-                              }
-                              currentImageFile={fileData.drivingLicenseFront}
-                            />
-                            <DocumentUpload
-                              title={t("drivingLicenseBack")}
-                              documentType="driving_license"
-                              side="back"
-                              onImageUpdate={(file) =>
-                                handleFileUpdate("drivingLicenseBack", file)
-                              }
-                              currentImageFile={fileData.drivingLicenseBack}
-                            />
-                          </div>
-                        )}
-
-                        {/* File-level errors */}
-                        {fieldErrors.nationalIdFiles && (
-                          <p className="text-xs text-red-600">
-                            {fieldErrors.nationalIdFiles}
-                          </p>
-                        )}
-                        {userType === "vendor" &&
-                          fieldErrors.vendorLicenseFiles && (
-                            <p className="text-xs text-red-600">
-                              {fieldErrors.vendorLicenseFiles}
-                            </p>
-                          )}
-                        {userType !== "vendor" &&
-                          fieldErrors.drivingLicenseFiles && (
-                            <p className="text-xs text-red-600">
-                              {fieldErrors.drivingLicenseFiles}
-                            </p>
-                          )}
-                      </div>
-                    </AccordionContent>
-                  </AccordionItem>
-
-                  {/* Section 4: Security */}
-                  <AccordionItem value="section4">
-                    <AccordionTrigger className="text-lg font-semibold hover:no-underline">
-                      <span className={isRTL ? "mr-2" : "ml-2"}>🔐</span>
-                      {t("security")}
-                    </AccordionTrigger>
-                    <AccordionContent>
-                      <div className="space-y-4">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div>
-                            <Label htmlFor="password">{t("password")}</Label>
-                            <div className="relative">
-                              <Input
-                                id="password"
-                                type={showPassword ? "text" : "password"}
-                                placeholder={t("passwordPlaceholder")}
-                                value={formData.password}
-                                onChange={(e) =>
-                                  handleInputChange("password", e.target.value)
-                                }
-                                isRTL={isRTL}
-                                required
-                              />
-                              <button
-                                type="button"
-                                className={cn(
-                                  "absolute inset-y-0 flex items-center pr-3",
-                                  isRTL && "left-0 pl-3 pr-0"
-                                )}
-                                onClick={() => setShowPassword(!showPassword)}
-                              >
-                                {showPassword ? (
-                                  <EyeOff className="h-5 w-5 text-gray-400" />
-                                ) : (
-                                  <Eye className="h-5 w-5 text-gray-400" />
-                                )}
-                              </button>
-                              {fieldErrors.password && (
-                                <p className="text-xs text-red-600 mt-1">
-                                  {fieldErrors.password}
-                                </p>
-                              )}
-                            </div>
-                          </div>
-                          <div>
-                            <Label htmlFor="confirmPassword">
-                              {t("confirmPassword")}
-                            </Label>
-                            <div className="relative">
-                              <Input
-                                id="confirmPassword"
-                                type={showConfirmPassword ? "text" : "password"}
-                                placeholder={t("confirmPasswordPlaceholder")}
-                                value={formData.confirmPassword}
-                                onChange={(e) =>
-                                  handleInputChange(
-                                    "confirmPassword",
-                                    e.target.value
-                                  )
-                                }
-                                isRTL={isRTL}
-                                required
-                              />
-                              <button
-                                type="button"
-                                className={cn(
-                                  "absolute inset-y-0 flex items-center pr-3",
-                                  isRTL && "left-0 pl-3 pr-0"
-                                )}
-                                onClick={() =>
-                                  setShowConfirmPassword(!showConfirmPassword)
-                                }
-                              >
-                                {showConfirmPassword ? (
-                                  <EyeOff className="h-5 w-5 text-gray-400" />
-                                ) : (
-                                  <Eye className="h-5 w-5 text-gray-400" />
-                                )}
-                              </button>
-                              {fieldErrors.confirmPassword && (
-                                <p className="text-xs text-red-600 mt-1">
-                                  {fieldErrors.confirmPassword}
-                                </p>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </AccordionContent>
-                  </AccordionItem>
-                </Accordion>
-
-                {/* Terms and Conditions */}
-                <div className="flex items-start gap-2 pt-2">
-                  <input
-                    id="acceptTerms"
-                    type="checkbox"
-                    checked={formData.acceptTerms}
-                    onChange={(e) =>
-                      handleInputChange("acceptTerms", e.target.checked)
-                    }
-                    className="h-4 w-4 text-primary border-gray-300 rounded mt-1"
-                  />
-                  <label
-                    htmlFor="acceptTerms"
-                    className="text-sm text-gray-700 dark:text-gray-800"
+                  <Accordion
+                    type="single"
+                    collapsible
+                    value={expandedSection}
+                    onValueChange={setExpandedSection}
+                    className="w-full"
                   >
-                    {t("agreeToTerms")}{" "}
-                    <Link to="/terms" className="text-primary hover:underline">
-                      {t("termsConditions")}
+                    {/* Section 1: Basic Information */}
+                    <motion.div variants={staggerItem}>
+                      <AccordionItem value="section1">
+                        <AccordionTrigger className="text-lg font-semibold hover:no-underline">
+                          <span className={isRTL ? "mr-2" : "ml-2"}>📋</span>
+                          {t("basicInformation")}
+                        </AccordionTrigger>
+                        <AccordionContent>
+                          <motion.div
+                            className="space-y-4"
+                            variants={staggerContainer}
+                            initial="initial"
+                            animate="animate"
+                          >
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <motion.div variants={staggerItem}>
+                                <Label htmlFor="firstName">
+                                  {t("firstName")}
+                                </Label>
+                                <Input
+                                  id="firstName"
+                                  type="text"
+                                  placeholder={t("firstNamePlaceholder")}
+                                  value={formData.firstName}
+                                  onChange={(e) =>
+                                    handleInputChange(
+                                      "firstName",
+                                      e.target.value
+                                    )
+                                  }
+                                  isRTL={isRTL}
+                                  required
+                                />
+                                {fieldErrors.name && (
+                                  <motion.p
+                                    className="text-xs text-red-600 mt-1"
+                                    variants={errorAnimation}
+                                    initial="initial"
+                                    animate="animate"
+                                  >
+                                    {fieldErrors.name}
+                                  </motion.p>
+                                )}
+                              </motion.div>
+                              <motion.div variants={staggerItem}>
+                                <Label htmlFor="lastName">
+                                  {t("lastName")}
+                                </Label>
+                                <Input
+                                  id="lastName"
+                                  type="text"
+                                  placeholder={t("lastNamePlaceholder")}
+                                  value={formData.lastName}
+                                  onChange={(e) =>
+                                    handleInputChange(
+                                      "lastName",
+                                      e.target.value
+                                    )
+                                  }
+                                  isRTL={isRTL}
+                                  required
+                                />
+                              </motion.div>
+                            </div>
+
+                            <motion.div variants={staggerItem}>
+                              <Label htmlFor="email">{t("emailAddress")}</Label>
+                              <Input
+                                id="email"
+                                type="email"
+                                placeholder={t("emailPlaceholder")}
+                                value={formData.email}
+                                onChange={(e) =>
+                                  handleInputChange("email", e.target.value)
+                                }
+                                isRTL={isRTL}
+                                required
+                              />
+                              {fieldErrors.email && (
+                                <motion.p
+                                  className="text-xs text-red-600 mt-1"
+                                  variants={errorAnimation}
+                                  initial="initial"
+                                  animate="animate"
+                                >
+                                  {fieldErrors.email}
+                                </motion.p>
+                              )}
+                            </motion.div>
+
+                            <motion.div variants={staggerItem}>
+                              <Label htmlFor="phone">{t("phoneNumber")}</Label>
+                              <Input
+                                id="phone"
+                                type="tel"
+                                placeholder={t("phonePlaceholder")}
+                                value={formData.phone}
+                                onChange={(e) =>
+                                  handleInputChange("phone", e.target.value)
+                                }
+                                isRTL={isRTL}
+                              />
+                              {fieldErrors.phone && (
+                                <motion.p
+                                  className="text-xs text-red-600 mt-1"
+                                  variants={errorAnimation}
+                                  initial="initial"
+                                  animate="animate"
+                                >
+                                  {fieldErrors.phone}
+                                </motion.p>
+                              )}
+                            </motion.div>
+
+                            {userType === "vendor" && (
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <motion.div variants={staggerItem}>
+                                  <Label htmlFor="companyName">
+                                    {t("companyName")}
+                                  </Label>
+                                  <Input
+                                    id="companyName"
+                                    type="text"
+                                    placeholder={t("companyNamePlaceholder")}
+                                    value={formData.companyName}
+                                    onChange={(e) =>
+                                      handleInputChange(
+                                        "companyName",
+                                        e.target.value
+                                      )
+                                    }
+                                    isRTL={isRTL}
+                                    required
+                                  />
+                                  {fieldErrors.companyName && (
+                                    <motion.p
+                                      className="text-xs text-red-600 mt-1"
+                                      variants={errorAnimation}
+                                      initial="initial"
+                                      animate="animate"
+                                    >
+                                      {fieldErrors.companyName}
+                                    </motion.p>
+                                  )}
+                                </motion.div>
+                                <motion.div variants={staggerItem}>
+                                  <Label htmlFor="businessLicense">
+                                    {t("businessLicense")}
+                                  </Label>
+                                  <Input
+                                    id="businessLicense"
+                                    type="text"
+                                    placeholder={t(
+                                      "businessLicensePlaceholder"
+                                    )}
+                                    value={formData.businessLicense}
+                                    onChange={(e) =>
+                                      handleInputChange(
+                                        "businessLicense",
+                                        e.target.value
+                                      )
+                                    }
+                                    isRTL={isRTL}
+                                    required
+                                  />
+                                  {fieldErrors.businessLicense && (
+                                    <motion.p
+                                      className="text-xs text-red-600 mt-1"
+                                      variants={errorAnimation}
+                                      initial="initial"
+                                      animate="animate"
+                                    >
+                                      {fieldErrors.businessLicense}
+                                    </motion.p>
+                                  )}
+                                </motion.div>
+                              </div>
+                            )}
+                          </motion.div>
+                        </AccordionContent>
+                      </AccordionItem>
+                    </motion.div>
+
+                    {/* Section 2: Personal Details */}
+                    <motion.div variants={staggerItem}>
+                      <AccordionItem value="section2">
+                        <AccordionTrigger className="text-lg font-semibold hover:no-underline">
+                          <span className={isRTL ? "mr-2" : "ml-2"}>👤</span>
+                          {t("personalDetails")}
+                        </AccordionTrigger>
+                        <AccordionContent>
+                          <motion.div
+                            className="space-y-4"
+                            variants={staggerContainer}
+                            initial="initial"
+                            animate="animate"
+                          >
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                              <motion.div variants={staggerItem}>
+                                <Label htmlFor="gender">{t("gender")}</Label>
+                                <Select
+                                  value={formData.gender}
+                                  onValueChange={(value) =>
+                                    handleInputChange("gender", value)
+                                  }
+                                >
+                                  <SelectTrigger isRTL={isRTL}>
+                                    <SelectValue
+                                      placeholder={t("selectGender")}
+                                    />
+                                  </SelectTrigger>
+                                  <SelectContent isRTL={isRTL}>
+                                    <SelectItem value="male" isRTL={isRTL}>
+                                      {t("male")}
+                                    </SelectItem>
+                                    <SelectItem value="female" isRTL={isRTL}>
+                                      {t("female")}
+                                    </SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </motion.div>
+                              <motion.div variants={staggerItem}>
+                                <Label htmlFor="dateOfBirth">
+                                  {t("dateOfBirth")}
+                                </Label>
+                                <Input
+                                  id="dateOfBirth"
+                                  type="date"
+                                  placeholder={t("dateOfBirthPlaceholder")}
+                                  value={formData.dateOfBirth}
+                                  onChange={(e) =>
+                                    handleInputChange(
+                                      "dateOfBirth",
+                                      e.target.value
+                                    )
+                                  }
+                                  isRTL={isRTL}
+                                />
+                                {fieldErrors.dateOfBirth && (
+                                  <motion.p
+                                    className="text-xs text-red-600 mt-1"
+                                    variants={errorAnimation}
+                                    initial="initial"
+                                    animate="animate"
+                                  >
+                                    {fieldErrors.dateOfBirth}
+                                  </motion.p>
+                                )}
+                              </motion.div>
+                              <motion.div variants={staggerItem}>
+                                <Label htmlFor="nationalId">
+                                  {t("nationalId")}
+                                </Label>
+                                <Input
+                                  id="nationalId"
+                                  type="text"
+                                  placeholder={t("nationalIdPlaceholder")}
+                                  value={formData.nationalId}
+                                  onChange={(e) =>
+                                    handleInputChange(
+                                      "nationalId",
+                                      e.target.value
+                                    )
+                                  }
+                                  isRTL={isRTL}
+                                />
+                                {fieldErrors.nationalId && (
+                                  <motion.p
+                                    className="text-xs text-red-600 mt-1"
+                                    variants={errorAnimation}
+                                    initial="initial"
+                                    animate="animate"
+                                  >
+                                    {fieldErrors.nationalId}
+                                  </motion.p>
+                                )}
+                              </motion.div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <motion.div variants={staggerItem}>
+                                <Label htmlFor="country">{t("country")}</Label>
+                                <Select
+                                  value={formData.country}
+                                  onValueChange={(value) =>
+                                    handleInputChange("country", value)
+                                  }
+                                >
+                                  <SelectTrigger isRTL={isRTL}>
+                                    <SelectValue
+                                      placeholder={t("selectCountry")}
+                                    />
+                                  </SelectTrigger>
+                                  <SelectContent isRTL={isRTL}>
+                                    {countries?.map((country) => (
+                                      <SelectItem
+                                        key={country.id}
+                                        value={country.id}
+                                        isRTL={isRTL}
+                                      >
+                                        {language === "ar"
+                                          ? country.name_ar
+                                          : country.name_en}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </motion.div>
+                              <motion.div variants={staggerItem}>
+                                <Label htmlFor="city">{t("city")}</Label>
+                                <Select
+                                  value={formData.city}
+                                  onValueChange={(value) =>
+                                    handleInputChange("city", value)
+                                  }
+                                >
+                                  <SelectTrigger isRTL={isRTL}>
+                                    <SelectValue
+                                      placeholder={t("selectCity")}
+                                    />
+                                  </SelectTrigger>
+                                  <SelectContent isRTL={isRTL}>
+                                    {cities?.map((city) => (
+                                      <SelectItem
+                                        key={city.id}
+                                        value={city.id}
+                                        isRTL={isRTL}
+                                      >
+                                        {language === "ar"
+                                          ? city.name_ar
+                                          : city.name_en}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </motion.div>
+                            </div>
+
+                            {userType !== "vendor" && (
+                              <motion.div variants={staggerItem}>
+                                <Label htmlFor="licenseId">
+                                  {t("drivingLicenseNumber")}
+                                </Label>
+                                <Input
+                                  id="licenseId"
+                                  type="text"
+                                  placeholder={t("licenseIdPlaceholder")}
+                                  value={formData.licenseId}
+                                  onChange={(e) =>
+                                    handleInputChange(
+                                      "licenseId",
+                                      e.target.value
+                                    )
+                                  }
+                                  isRTL={isRTL}
+                                />
+                                {fieldErrors.licenseId && (
+                                  <motion.p
+                                    className="text-xs text-red-600 mt-1"
+                                    variants={errorAnimation}
+                                    initial="initial"
+                                    animate="animate"
+                                  >
+                                    {fieldErrors.licenseId}
+                                  </motion.p>
+                                )}
+                              </motion.div>
+                            )}
+                          </motion.div>
+                        </AccordionContent>
+                      </AccordionItem>
+                    </motion.div>
+
+                    {/* Section 3: Documents */}
+                    <motion.div variants={staggerItem}>
+                      <AccordionItem value="section3">
+                        <AccordionTrigger className="text-lg font-semibold hover:no-underline">
+                          <span className={isRTL ? "mr-2" : "ml-2"}>📄</span>
+                          {t("documentUploads")}
+                        </AccordionTrigger>
+                        <AccordionContent>
+                          <motion.div
+                            className="space-y-6"
+                            variants={staggerContainer}
+                            initial="initial"
+                            animate="animate"
+                          >
+                            <motion.div
+                              className="grid grid-cols-1 md:grid-cols-2 gap-6"
+                              variants={staggerContainer}
+                              initial="initial"
+                              animate="animate"
+                            >
+                              <motion.div variants={staggerItem}>
+                                <DocumentUpload
+                                  title={t("nationalIdFront")}
+                                  documentType="national_id"
+                                  side="front"
+                                  onImageUpdate={(file) =>
+                                    handleFileUpdate("nationalIdFront", file)
+                                  }
+                                  currentImageFile={fileData.nationalIdFront}
+                                />
+                              </motion.div>
+                              <motion.div variants={staggerItem}>
+                                <DocumentUpload
+                                  title={t("nationalIdBack")}
+                                  documentType="national_id"
+                                  side="back"
+                                  onImageUpdate={(file) =>
+                                    handleFileUpdate("nationalIdBack", file)
+                                  }
+                                  currentImageFile={fileData.nationalIdBack}
+                                />
+                              </motion.div>
+                            </motion.div>
+
+                            {userType === "vendor" ? (
+                              <motion.div
+                                className="grid grid-cols-1 md:grid-cols-2 gap-6"
+                                variants={staggerContainer}
+                                initial="initial"
+                                animate="animate"
+                              >
+                                <motion.div variants={staggerItem}>
+                                  <DocumentUpload
+                                    title={t("licenseIdFront")}
+                                    documentType="license_id"
+                                    side="front"
+                                    onImageUpdate={(file) =>
+                                      handleFileUpdate("licenseIdFront", file)
+                                    }
+                                    currentImageFile={fileData.licenseIdFront}
+                                  />
+                                </motion.div>
+                                <motion.div variants={staggerItem}>
+                                  <DocumentUpload
+                                    title={t("licenseIdBack")}
+                                    documentType="license_id"
+                                    side="back"
+                                    onImageUpdate={(file) =>
+                                      handleFileUpdate("licenseIdBack", file)
+                                    }
+                                    currentImageFile={fileData.licenseIdBack}
+                                  />
+                                </motion.div>
+                              </motion.div>
+                            ) : (
+                              <motion.div
+                                className="grid grid-cols-1 md:grid-cols-2 gap-6"
+                                variants={staggerContainer}
+                                initial="initial"
+                                animate="animate"
+                              >
+                                <motion.div variants={staggerItem}>
+                                  <DocumentUpload
+                                    title={t("drivingLicenseFront")}
+                                    documentType="driving_license"
+                                    side="front"
+                                    onImageUpdate={(file) =>
+                                      handleFileUpdate(
+                                        "drivingLicenseFront",
+                                        file
+                                      )
+                                    }
+                                    currentImageFile={
+                                      fileData.drivingLicenseFront
+                                    }
+                                  />
+                                </motion.div>
+                                <motion.div variants={staggerItem}>
+                                  <DocumentUpload
+                                    title={t("drivingLicenseBack")}
+                                    documentType="driving_license"
+                                    side="back"
+                                    onImageUpdate={(file) =>
+                                      handleFileUpdate(
+                                        "drivingLicenseBack",
+                                        file
+                                      )
+                                    }
+                                    currentImageFile={
+                                      fileData.drivingLicenseBack
+                                    }
+                                  />
+                                </motion.div>
+                              </motion.div>
+                            )}
+
+                            {/* File-level errors */}
+                            {fieldErrors.nationalIdFiles && (
+                              <motion.p
+                                className="text-xs text-red-600"
+                                variants={errorAnimation}
+                                initial="initial"
+                                animate="animate"
+                              >
+                                {fieldErrors.nationalIdFiles}
+                              </motion.p>
+                            )}
+                            {userType === "vendor" &&
+                              fieldErrors.vendorLicenseFiles && (
+                                <motion.p
+                                  className="text-xs text-red-600"
+                                  variants={errorAnimation}
+                                  initial="initial"
+                                  animate="animate"
+                                >
+                                  {fieldErrors.vendorLicenseFiles}
+                                </motion.p>
+                              )}
+                            {userType !== "vendor" &&
+                              fieldErrors.drivingLicenseFiles && (
+                                <motion.p
+                                  className="text-xs text-red-600"
+                                  variants={errorAnimation}
+                                  initial="initial"
+                                  animate="animate"
+                                >
+                                  {fieldErrors.drivingLicenseFiles}
+                                </motion.p>
+                              )}
+                          </motion.div>
+                        </AccordionContent>
+                      </AccordionItem>
+                    </motion.div>
+
+                    {/* Section 4: Security */}
+                    <motion.div variants={staggerItem}>
+                      <AccordionItem value="section4">
+                        <AccordionTrigger className="text-lg font-semibold hover:no-underline">
+                          <span className={isRTL ? "mr-2" : "ml-2"}>🔐</span>
+                          {t("security")}
+                        </AccordionTrigger>
+                        <AccordionContent>
+                          <motion.div
+                            className="space-y-4"
+                            variants={staggerContainer}
+                            initial="initial"
+                            animate="animate"
+                          >
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <motion.div variants={staggerItem}>
+                                <Label htmlFor="password">
+                                  {t("password")}
+                                </Label>
+                                <div className="relative">
+                                  <Input
+                                    id="password"
+                                    type={showPassword ? "text" : "password"}
+                                    placeholder={t("passwordPlaceholder")}
+                                    value={formData.password}
+                                    onChange={(e) =>
+                                      handleInputChange(
+                                        "password",
+                                        e.target.value
+                                      )
+                                    }
+                                    isRTL={isRTL}
+                                    required
+                                  />
+                                  <motion.button
+                                    type="button"
+                                    className={cn(
+                                      "absolute inset-y-0 flex items-center pr-3",
+                                      isRTL && "left-0 pl-3 pr-0"
+                                    )}
+                                    onClick={() =>
+                                      setShowPassword(!showPassword)
+                                    }
+                                    whileHover={{ scale: 1.1 }}
+                                    whileTap={{ scale: 0.95 }}
+                                  >
+                                    {showPassword ? (
+                                      <EyeOff className="h-5 w-5 text-gray-400" />
+                                    ) : (
+                                      <Eye className="h-5 w-5 text-gray-400" />
+                                    )}
+                                  </motion.button>
+                                  {fieldErrors.password && (
+                                    <motion.p
+                                      className="text-xs text-red-600 mt-1"
+                                      variants={errorAnimation}
+                                      initial="initial"
+                                      animate="animate"
+                                    >
+                                      {fieldErrors.password}
+                                    </motion.p>
+                                  )}
+                                </div>
+                              </motion.div>
+                              <motion.div variants={staggerItem}>
+                                <Label htmlFor="confirmPassword">
+                                  {t("confirmPassword")}
+                                </Label>
+                                <div className="relative">
+                                  <Input
+                                    id="confirmPassword"
+                                    type={
+                                      showConfirmPassword ? "text" : "password"
+                                    }
+                                    placeholder={t(
+                                      "confirmPasswordPlaceholder"
+                                    )}
+                                    value={formData.confirmPassword}
+                                    onChange={(e) =>
+                                      handleInputChange(
+                                        "confirmPassword",
+                                        e.target.value
+                                      )
+                                    }
+                                    isRTL={isRTL}
+                                    required
+                                  />
+                                  <motion.button
+                                    type="button"
+                                    className={cn(
+                                      "absolute inset-y-0 flex items-center pr-3",
+                                      isRTL && "left-0 pl-3 pr-0"
+                                    )}
+                                    onClick={() =>
+                                      setShowConfirmPassword(
+                                        !showConfirmPassword
+                                      )
+                                    }
+                                    whileHover={{ scale: 1.1 }}
+                                    whileTap={{ scale: 0.95 }}
+                                  >
+                                    {showConfirmPassword ? (
+                                      <EyeOff className="h-5 w-5 text-gray-400" />
+                                    ) : (
+                                      <Eye className="h-5 w-5 text-gray-400" />
+                                    )}
+                                  </motion.button>
+                                  {fieldErrors.confirmPassword && (
+                                    <motion.p
+                                      className="text-xs text-red-600 mt-1"
+                                      variants={errorAnimation}
+                                      initial="initial"
+                                      animate="animate"
+                                    >
+                                      {fieldErrors.confirmPassword}
+                                    </motion.p>
+                                  )}
+                                </div>
+                              </motion.div>
+                            </div>
+                          </motion.div>
+                        </AccordionContent>
+                      </AccordionItem>
+                    </motion.div>
+                  </Accordion>
+
+                  {/* Terms and Conditions */}
+                  <motion.div
+                    className="flex items-start gap-2 pt-2"
+                    variants={staggerItem}
+                  >
+                    <input
+                      id="acceptTerms"
+                      type="checkbox"
+                      checked={formData.acceptTerms}
+                      onChange={(e) =>
+                        handleInputChange("acceptTerms", e.target.checked)
+                      }
+                      className="h-4 w-4 text-primary border-gray-300 rounded mt-1"
+                    />
+                    <label
+                      htmlFor="acceptTerms"
+                      className="text-sm text-gray-700 dark:text-gray-800"
+                    >
+                      {t("agreeToTerms")}{" "}
+                      <Link
+                        to="/terms"
+                        className="text-primary hover:underline"
+                      >
+                        {t("termsConditions")}
+                      </Link>
+                    </label>
+                  </motion.div>
+                  {fieldErrors.acceptTerms && (
+                    <motion.p
+                      className="text-xs text-red-600 -mt-2"
+                      variants={errorAnimation}
+                      initial="initial"
+                      animate="animate"
+                    >
+                      {fieldErrors.acceptTerms}
+                    </motion.p>
+                  )}
+
+                  {/* Submit Button */}
+                  <motion.div
+                    variants={staggerItem}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <Button
+                      type="submit"
+                      disabled={isLoading}
+                      className="w-full"
+                    >
+                      {isLoading ? t("creatingAccount") : t("createAccount")}
+                    </Button>
+                  </motion.div>
+
+                  {/* Sign In Link */}
+                  <motion.div
+                    className="text-center text-sm text-gray-700"
+                    variants={staggerItem}
+                  >
+                    {t("alreadyHaveAccount")}{" "}
+                    <Link to="/signin" className="text-primary hover:underline">
+                      {t("signInHere")}
                     </Link>
-                  </label>
-                </div>
-                {fieldErrors.acceptTerms && (
-                  <p className="text-xs text-red-600 -mt-2">
-                    {fieldErrors.acceptTerms}
-                  </p>
-                )}
-
-                {/* Submit Button */}
-                <Button type="submit" disabled={isLoading} className="w-full">
-                  {isLoading ? t("creatingAccount") : t("createAccount")}
-                </Button>
-
-                {/* Sign In Link */}
-                <div className="text-center text-sm text-gray-700">
-                  {t("alreadyHaveAccount")}{" "}
-                  <Link to="/signin" className="text-primary hover:underline">
-                    {t("signInHere")}
-                  </Link>
-                </div>
-              </form>
-            </CardContent>
-          </Card>
+                  </motion.div>
+                </form>
+              </CardContent>
+            </Card>
+          </motion.div>
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 };
 

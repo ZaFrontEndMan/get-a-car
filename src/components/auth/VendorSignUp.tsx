@@ -28,8 +28,11 @@ import {
 } from "@/hooks/useCountriesAndCities";
 
 import DocumentUpload from "./DocumentUpload";
-
-const VendorSignUp: React.FC = () => {
+import { toast } from "sonner";
+interface VendorSignUpProps {
+  onSuccess?: () => void;
+}
+const VendorSignUp: React.FC<VendorSignUpProps> = ({ onSuccess }) => {
   const { t, language } = useLanguage();
   const navigate = useNavigate();
   const isRTL = language === "ar";
@@ -180,12 +183,21 @@ const VendorSignUp: React.FC = () => {
       const success = await register("vendor", formDataObj);
 
       if (success) {
-        navigate("/signin", {
-          state: {
-            message: t("registrationSuccessful"),
-            type: "success",
-          },
-        });
+        toast.success(t("registrationSuccessful"));
+        // Call onSuccess callback if provided (from dialog)
+        if (onSuccess) {
+          onSuccess();
+          setTimeout(() => {
+            navigate("/signin");
+          }, 1000);
+        } else {
+          navigate("/signin", {
+            state: {
+              message: t("registrationSuccessful"),
+              type: "success",
+            },
+          });
+        }
       } else if (apiError) {
         setError(apiError);
       }
@@ -194,427 +206,409 @@ const VendorSignUp: React.FC = () => {
       setError(error.message || t("signupError"));
     }
   };
-
   return (
     <div
       className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col"
       dir={isRTL ? "rtl" : "ltr"}
     >
-      <div className="flex-1 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-        <h2 className="text-2xl font-bold text-center text-primary">
-          {t("createAccount")}
-        </h2>
+      <Card>
+        <CardContent className="pt-6">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {(error || apiError) && (
+              <div className="bg-red-50 border border-red-200 rounded-md p-4 flex items-center gap-2">
+                <AlertCircle className="h-5 w-5 text-red-500 flex-shrink-0" />
+                <span className="text-sm text-red-700">
+                  {error || apiError}
+                </span>
+              </div>
+            )}
 
-        <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-3xl">
-          <Card>
-            <CardContent className="pt-6">
-              <form onSubmit={handleSubmit} className="space-y-6">
-                {(error || apiError) && (
-                  <div className="bg-red-50 border border-red-200 rounded-md p-4 flex items-center gap-2">
-                    <AlertCircle className="h-5 w-5 text-red-500 flex-shrink-0" />
-                    <span className="text-sm text-red-700">
-                      {error || apiError}
-                    </span>
+            <Accordion
+              type="single"
+              collapsible
+              value={expandedSection}
+              onValueChange={setExpandedSection}
+              className="w-full"
+            >
+              {/* Section 1: Basic Information */}
+              <AccordionItem value="section1">
+                <AccordionTrigger className="text-lg font-semibold hover:no-underline">
+                  <span className={isRTL ? "mr-2" : "ml-2"}>📋</span>
+                  {t("basicInformation")}
+                </AccordionTrigger>
+                <AccordionContent>
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="firstName">{t("firstName")}</Label>
+                        <Input
+                          id="firstName"
+                          type="text"
+                          value={formData.firstName}
+                          onChange={(e) =>
+                            handleInputChange("firstName", e.target.value)
+                          }
+                          isRTL={isRTL}
+                          required
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="lastName">{t("lastName")}</Label>
+                        <Input
+                          id="lastName"
+                          type="text"
+                          value={formData.lastName}
+                          onChange={(e) =>
+                            handleInputChange("lastName", e.target.value)
+                          }
+                          isRTL={isRTL}
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="companyName">{t("companyName")}</Label>
+                        <Input
+                          id="companyName"
+                          type="text"
+                          value={formData.companyName}
+                          onChange={(e) =>
+                            handleInputChange("companyName", e.target.value)
+                          }
+                          isRTL={isRTL}
+                          required
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="businessLicense">
+                          {t("businessLicense")}
+                        </Label>
+                        <Input
+                          id="businessLicense"
+                          type="text"
+                          value={formData.businessLicense}
+                          onChange={(e) =>
+                            handleInputChange("businessLicense", e.target.value)
+                          }
+                          isRTL={isRTL}
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label htmlFor="email">{t("emailAddress")}</Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        value={formData.email}
+                        onChange={(e) =>
+                          handleInputChange("email", e.target.value)
+                        }
+                        isRTL={isRTL}
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="phone">{t("phoneNumber")}</Label>
+                      <Input
+                        id="phone"
+                        type="tel"
+                        value={formData.phone}
+                        onChange={(e) =>
+                          handleInputChange("phone", e.target.value)
+                        }
+                        isRTL={isRTL}
+                      />
+                    </div>
                   </div>
-                )}
+                </AccordionContent>
+              </AccordionItem>
 
-                <Accordion
-                  type="single"
-                  collapsible
-                  value={expandedSection}
-                  onValueChange={setExpandedSection}
-                  className="w-full"
-                >
-                  {/* Section 1: Basic Information */}
-                  <AccordionItem value="section1">
-                    <AccordionTrigger className="text-lg font-semibold hover:no-underline">
-                      <span className={isRTL ? "mr-2" : "ml-2"}>📋</span>
-                      {t("basicInformation")}
-                    </AccordionTrigger>
-                    <AccordionContent>
-                      <div className="space-y-4">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div>
-                            <Label htmlFor="firstName">{t("firstName")}</Label>
-                            <Input
-                              id="firstName"
-                              type="text"
-                              value={formData.firstName}
-                              onChange={(e) =>
-                                handleInputChange("firstName", e.target.value)
-                              }
-                              isRTL={isRTL}
-                              required
-                            />
-                          </div>
-                          <div>
-                            <Label htmlFor="lastName">{t("lastName")}</Label>
-                            <Input
-                              id="lastName"
-                              type="text"
-                              value={formData.lastName}
-                              onChange={(e) =>
-                                handleInputChange("lastName", e.target.value)
-                              }
-                              isRTL={isRTL}
-                              required
-                            />
-                          </div>
-                        </div>
+              {/* Section 2: Personal Details */}
+              <AccordionItem value="section2">
+                <AccordionTrigger className="text-lg font-semibold hover:no-underline">
+                  <span className={isRTL ? "mr-2" : "ml-2"}>👤</span>
+                  {t("personalDetails")}
+                </AccordionTrigger>
+                <AccordionContent>
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div>
+                        <Label htmlFor="gender">{t("gender")}</Label>
+                        <Select
+                          value={formData.gender}
+                          onValueChange={(value) =>
+                            handleInputChange("gender", value)
+                          }
+                        >
+                          <SelectTrigger isRTL={isRTL}>
+                            <SelectValue placeholder={t("selectGender")} />
+                          </SelectTrigger>
+                          <SelectContent isRTL={isRTL}>
+                            <SelectItem value="male" isRTL={isRTL}>
+                              {t("male")}
+                            </SelectItem>
+                            <SelectItem value="female" isRTL={isRTL}>
+                              {t("female")}
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label htmlFor="dateOfBirth">{t("dateOfBirth")}</Label>
+                        <Input
+                          id="dateOfBirth"
+                          type="date"
+                          value={formData.dateOfBirth}
+                          onChange={(e) =>
+                            handleInputChange("dateOfBirth", e.target.value)
+                          }
+                          isRTL={isRTL}
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="nationalId">{t("nationalId")}</Label>
+                        <Input
+                          id="nationalId"
+                          type="text"
+                          value={formData.nationalId}
+                          onChange={(e) =>
+                            handleInputChange("nationalId", e.target.value)
+                          }
+                          isRTL={isRTL}
+                        />
+                      </div>
+                    </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div>
-                            <Label htmlFor="companyName">
-                              {t("companyName")}
-                            </Label>
-                            <Input
-                              id="companyName"
-                              type="text"
-                              value={formData.companyName}
-                              onChange={(e) =>
-                                handleInputChange("companyName", e.target.value)
-                              }
-                              isRTL={isRTL}
-                              required
-                            />
-                          </div>
-                          <div>
-                            <Label htmlFor="businessLicense">
-                              {t("businessLicense")}
-                            </Label>
-                            <Input
-                              id="businessLicense"
-                              type="text"
-                              value={formData.businessLicense}
-                              onChange={(e) =>
-                                handleInputChange(
-                                  "businessLicense",
-                                  e.target.value
-                                )
-                              }
-                              isRTL={isRTL}
-                              required
-                            />
-                          </div>
-                        </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="country">{t("country")}</Label>
+                        <Select
+                          value={formData.country}
+                          onValueChange={(value) =>
+                            handleInputChange("country", value)
+                          }
+                        >
+                          <SelectTrigger isRTL={isRTL}>
+                            <SelectValue placeholder={t("selectCountry")} />
+                          </SelectTrigger>
+                          <SelectContent isRTL={isRTL}>
+                            {countries?.map((country) => (
+                              <SelectItem
+                                key={country.id}
+                                value={country.id}
+                                isRTL={isRTL}
+                              >
+                                {language === "ar"
+                                  ? country.name_ar
+                                  : country.name_en}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label htmlFor="city">{t("city")}</Label>
+                        <Select
+                          value={formData.city}
+                          onValueChange={(value) =>
+                            handleInputChange("city", value)
+                          }
+                        >
+                          <SelectTrigger isRTL={isRTL}>
+                            <SelectValue placeholder={t("selectCity")} />
+                          </SelectTrigger>
+                          <SelectContent isRTL={isRTL}>
+                            {cities?.map((city) => (
+                              <SelectItem
+                                key={city.id}
+                                value={city.id}
+                                isRTL={isRTL}
+                              >
+                                {language === "ar"
+                                  ? city.name_ar
+                                  : city.name_en}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
 
-                        <div>
-                          <Label htmlFor="email">{t("emailAddress")}</Label>
+              {/* Section 3: Documents */}
+              <AccordionItem value="section3">
+                <AccordionTrigger className="text-lg font-semibold hover:no-underline">
+                  <span className={isRTL ? "mr-2" : "ml-2"}>📄</span>
+                  {t("documentUploads")}
+                </AccordionTrigger>
+                <AccordionContent>
+                  <div className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <DocumentUpload
+                        title={t("nationalIdFront")}
+                        documentType="national_id"
+                        side="front"
+                        onImageUpdate={(file) =>
+                          handleFileUpdate("nationalIdFront", file)
+                        }
+                        currentImageFile={fileData.nationalIdFront}
+                      />
+                      <DocumentUpload
+                        title={t("nationalIdBack")}
+                        documentType="national_id"
+                        side="back"
+                        onImageUpdate={(file) =>
+                          handleFileUpdate("nationalIdBack", file)
+                        }
+                        currentImageFile={fileData.nationalIdBack}
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <DocumentUpload
+                        title={t("licenseIdFront")}
+                        documentType="license_id"
+                        side="front"
+                        onImageUpdate={(file) =>
+                          handleFileUpdate("licenseIdFront", file)
+                        }
+                        currentImageFile={fileData.licenseIdFront}
+                      />
+                      <DocumentUpload
+                        title={t("licenseIdBack")}
+                        documentType="license_id"
+                        side="back"
+                        onImageUpdate={(file) =>
+                          handleFileUpdate("licenseIdBack", file)
+                        }
+                        currentImageFile={fileData.licenseIdBack}
+                      />
+                    </div>
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+
+              {/* Section 4: Security */}
+              <AccordionItem value="section4">
+                <AccordionTrigger className="text-lg font-semibold hover:no-underline">
+                  <span className={isRTL ? "mr-2" : "ml-2"}>🔐</span>
+                  {t("security")}
+                </AccordionTrigger>
+                <AccordionContent>
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="password">{t("password")}</Label>
+                        <div className="relative">
                           <Input
-                            id="email"
-                            type="email"
-                            value={formData.email}
+                            id="password"
+                            type={showPassword ? "text" : "password"}
+                            value={formData.password}
                             onChange={(e) =>
-                              handleInputChange("email", e.target.value)
+                              handleInputChange("password", e.target.value)
                             }
                             isRTL={isRTL}
                             required
                           />
+                          <button
+                            type="button"
+                            className={cn(
+                              "absolute inset-y-0 flex items-center pr-3",
+                              isRTL && "left-0 pl-3 pr-0"
+                            )}
+                            onClick={() => setShowPassword(!showPassword)}
+                          >
+                            {showPassword ? (
+                              <EyeOff className="h-5 w-5 text-gray-400" />
+                            ) : (
+                              <Eye className="h-5 w-5 text-gray-400" />
+                            )}
+                          </button>
                         </div>
-
-                        <div>
-                          <Label htmlFor="phone">{t("phoneNumber")}</Label>
+                      </div>
+                      <div>
+                        <Label htmlFor="confirmPassword">
+                          {t("confirmPassword")}
+                        </Label>
+                        <div className="relative">
                           <Input
-                            id="phone"
-                            type="tel"
-                            value={formData.phone}
+                            id="confirmPassword"
+                            type={showConfirmPassword ? "text" : "password"}
+                            value={formData.confirmPassword}
                             onChange={(e) =>
-                              handleInputChange("phone", e.target.value)
+                              handleInputChange(
+                                "confirmPassword",
+                                e.target.value
+                              )
                             }
                             isRTL={isRTL}
+                            required
                           />
+                          <button
+                            type="button"
+                            className={cn(
+                              "absolute inset-y-0 flex items-center pr-3",
+                              isRTL && "left-0 pl-3 pr-0"
+                            )}
+                            onClick={() =>
+                              setShowConfirmPassword(!showConfirmPassword)
+                            }
+                          >
+                            {showConfirmPassword ? (
+                              <EyeOff className="h-5 w-5 text-gray-400" />
+                            ) : (
+                              <Eye className="h-5 w-5 text-gray-400" />
+                            )}
+                          </button>
                         </div>
                       </div>
-                    </AccordionContent>
-                  </AccordionItem>
+                    </div>
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
 
-                  {/* Section 2: Personal Details */}
-                  <AccordionItem value="section2">
-                    <AccordionTrigger className="text-lg font-semibold hover:no-underline">
-                      <span className={isRTL ? "mr-2" : "ml-2"}>👤</span>
-                      {t("personalDetails")}
-                    </AccordionTrigger>
-                    <AccordionContent>
-                      <div className="space-y-4">
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                          <div>
-                            <Label htmlFor="gender">{t("gender")}</Label>
-                            <Select
-                              value={formData.gender}
-                              onValueChange={(value) =>
-                                handleInputChange("gender", value)
-                              }
-                            >
-                              <SelectTrigger isRTL={isRTL}>
-                                <SelectValue placeholder={t("selectGender")} />
-                              </SelectTrigger>
-                              <SelectContent isRTL={isRTL}>
-                                <SelectItem value="male" isRTL={isRTL}>
-                                  {t("male")}
-                                </SelectItem>
-                                <SelectItem value="female" isRTL={isRTL}>
-                                  {t("female")}
-                                </SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          <div>
-                            <Label htmlFor="dateOfBirth">
-                              {t("dateOfBirth")}
-                            </Label>
-                            <Input
-                              id="dateOfBirth"
-                              type="date"
-                              value={formData.dateOfBirth}
-                              onChange={(e) =>
-                                handleInputChange("dateOfBirth", e.target.value)
-                              }
-                              isRTL={isRTL}
-                            />
-                          </div>
-                          <div>
-                            <Label htmlFor="nationalId">
-                              {t("nationalId")}
-                            </Label>
-                            <Input
-                              id="nationalId"
-                              type="text"
-                              value={formData.nationalId}
-                              onChange={(e) =>
-                                handleInputChange("nationalId", e.target.value)
-                              }
-                              isRTL={isRTL}
-                            />
-                          </div>
-                        </div>
+            <div className="flex items-start gap-2 pt-4">
+              <input
+                id="acceptTerms"
+                type="checkbox"
+                checked={formData.acceptTerms}
+                onChange={(e) =>
+                  handleInputChange("acceptTerms", e.target.checked)
+                }
+                className="h-4 w-4 text-primary border-gray-300 rounded mt-1"
+              />
+              <label
+                htmlFor="acceptTerms"
+                className="text-sm text-gray-700 dark:text-gray-300"
+              >
+                {t("agreeToTerms")}{" "}
+                <Link to="/terms" className="text-primary hover:underline">
+                  {t("termsConditions")}
+                </Link>
+              </label>
+            </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div>
-                            <Label htmlFor="country">{t("country")}</Label>
-                            <Select
-                              value={formData.country}
-                              onValueChange={(value) =>
-                                handleInputChange("country", value)
-                              }
-                            >
-                              <SelectTrigger isRTL={isRTL}>
-                                <SelectValue placeholder={t("selectCountry")} />
-                              </SelectTrigger>
-                              <SelectContent isRTL={isRTL}>
-                                {countries?.map((country) => (
-                                  <SelectItem
-                                    key={country.id}
-                                    value={country.id}
-                                    isRTL={isRTL}
-                                  >
-                                    {language === "ar"
-                                      ? country.name_ar
-                                      : country.name_en}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          <div>
-                            <Label htmlFor="city">{t("city")}</Label>
-                            <Select
-                              value={formData.city}
-                              onValueChange={(value) =>
-                                handleInputChange("city", value)
-                              }
-                            >
-                              <SelectTrigger isRTL={isRTL}>
-                                <SelectValue placeholder={t("selectCity")} />
-                              </SelectTrigger>
-                              <SelectContent isRTL={isRTL}>
-                                {cities?.map((city) => (
-                                  <SelectItem
-                                    key={city.id}
-                                    value={city.id}
-                                    isRTL={isRTL}
-                                  >
-                                    {language === "ar"
-                                      ? city.name_ar
-                                      : city.name_en}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </div>
-                        </div>
-                      </div>
-                    </AccordionContent>
-                  </AccordionItem>
+            <Button type="submit" disabled={isLoading} className="w-full">
+              {isLoading ? t("creatingAccount") : t("createAccount")}
+            </Button>
 
-                  {/* Section 3: Documents */}
-                  <AccordionItem value="section3">
-                    <AccordionTrigger className="text-lg font-semibold hover:no-underline">
-                      <span className={isRTL ? "mr-2" : "ml-2"}>📄</span>
-                      {t("documentUploads")}
-                    </AccordionTrigger>
-                    <AccordionContent>
-                      <div className="space-y-6">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                          <DocumentUpload
-                            title={t("nationalIdFront")}
-                            documentType="national_id"
-                            side="front"
-                            onImageUpdate={(file) =>
-                              handleFileUpdate("nationalIdFront", file)
-                            }
-                            currentImageFile={fileData.nationalIdFront}
-                          />
-                          <DocumentUpload
-                            title={t("nationalIdBack")}
-                            documentType="national_id"
-                            side="back"
-                            onImageUpdate={(file) =>
-                              handleFileUpdate("nationalIdBack", file)
-                            }
-                            currentImageFile={fileData.nationalIdBack}
-                          />
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                          <DocumentUpload
-                            title={t("licenseIdFront")}
-                            documentType="license_id"
-                            side="front"
-                            onImageUpdate={(file) =>
-                              handleFileUpdate("licenseIdFront", file)
-                            }
-                            currentImageFile={fileData.licenseIdFront}
-                          />
-                          <DocumentUpload
-                            title={t("licenseIdBack")}
-                            documentType="license_id"
-                            side="back"
-                            onImageUpdate={(file) =>
-                              handleFileUpdate("licenseIdBack", file)
-                            }
-                            currentImageFile={fileData.licenseIdBack}
-                          />
-                        </div>
-                      </div>
-                    </AccordionContent>
-                  </AccordionItem>
-
-                  {/* Section 4: Security */}
-                  <AccordionItem value="section4">
-                    <AccordionTrigger className="text-lg font-semibold hover:no-underline">
-                      <span className={isRTL ? "mr-2" : "ml-2"}>🔐</span>
-                      {t("security")}
-                    </AccordionTrigger>
-                    <AccordionContent>
-                      <div className="space-y-4">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div>
-                            <Label htmlFor="password">{t("password")}</Label>
-                            <div className="relative">
-                              <Input
-                                id="password"
-                                type={showPassword ? "text" : "password"}
-                                value={formData.password}
-                                onChange={(e) =>
-                                  handleInputChange("password", e.target.value)
-                                }
-                                isRTL={isRTL}
-                                required
-                              />
-                              <button
-                                type="button"
-                                className={cn(
-                                  "absolute inset-y-0 flex items-center pr-3",
-                                  isRTL && "left-0 pl-3 pr-0"
-                                )}
-                                onClick={() => setShowPassword(!showPassword)}
-                              >
-                                {showPassword ? (
-                                  <EyeOff className="h-5 w-5 text-gray-400" />
-                                ) : (
-                                  <Eye className="h-5 w-5 text-gray-400" />
-                                )}
-                              </button>
-                            </div>
-                          </div>
-                          <div>
-                            <Label htmlFor="confirmPassword">
-                              {t("confirmPassword")}
-                            </Label>
-                            <div className="relative">
-                              <Input
-                                id="confirmPassword"
-                                type={showConfirmPassword ? "text" : "password"}
-                                value={formData.confirmPassword}
-                                onChange={(e) =>
-                                  handleInputChange(
-                                    "confirmPassword",
-                                    e.target.value
-                                  )
-                                }
-                                isRTL={isRTL}
-                                required
-                              />
-                              <button
-                                type="button"
-                                className={cn(
-                                  "absolute inset-y-0 flex items-center pr-3",
-                                  isRTL && "left-0 pl-3 pr-0"
-                                )}
-                                onClick={() =>
-                                  setShowConfirmPassword(!showConfirmPassword)
-                                }
-                              >
-                                {showConfirmPassword ? (
-                                  <EyeOff className="h-5 w-5 text-gray-400" />
-                                ) : (
-                                  <Eye className="h-5 w-5 text-gray-400" />
-                                )}
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </AccordionContent>
-                  </AccordionItem>
-                </Accordion>
-
-                <div className="flex items-start gap-2 pt-4">
-                  <input
-                    id="acceptTerms"
-                    type="checkbox"
-                    checked={formData.acceptTerms}
-                    onChange={(e) =>
-                      handleInputChange("acceptTerms", e.target.checked)
-                    }
-                    className="h-4 w-4 text-primary border-gray-300 rounded mt-1"
-                  />
-                  <label
-                    htmlFor="acceptTerms"
-                    className="text-sm text-gray-700 dark:text-gray-300"
-                  >
-                    {t("agreeToTerms")}{" "}
-                    <Link to="/terms" className="text-primary hover:underline">
-                      {t("termsConditions")}
-                    </Link>
-                  </label>
-                </div>
-
-                <Button type="submit" disabled={isLoading} className="w-full">
-                  {isLoading ? t("creatingAccount") : t("createAccount")}
-                </Button>
-
-                <div className="text-center text-sm text-gray-600 dark:text-gray-400">
-                  {t("alreadyHaveAccount")}{" "}
-                  <Link to="/signin" className="text-primary hover:underline">
-                    {t("signInHere")}
-                  </Link>
-                </div>
-              </form>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
+            <div className="text-center text-sm text-gray-600 dark:text-gray-400">
+              {t("alreadyHaveAccount")}{" "}
+              <Link to="/signin" className="text-primary hover:underline">
+                {t("signInHere")}
+              </Link>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
     </div>
   );
 };

@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { Menu, X, User } from "lucide-react";
 import { toast } from "sonner";
 import { useUser } from "@/contexts/UserContext";
+import { motion } from "framer-motion";
 
 import NavbarLogo from "./NavbarLogo";
 import NavbarLinks from "./NavbarLinks";
@@ -24,7 +25,6 @@ const Navbar = () => {
     try {
       await signOut();
       toast.success(t("logoutSuccess"));
-      // signOut already handles navigation to "/" - no need for manual navigation or reload
     } catch (error) {
       console.error("Logout error:", error);
       toast.error(t("logoutError"));
@@ -45,82 +45,152 @@ const Navbar = () => {
     setShowUserMenu(false);
   }, [location.pathname]);
 
+  const containerVariants = {
+    animate: {
+      transition: {
+        staggerChildren: 0.05,
+        delayChildren: 0.1,
+      },
+    },
+  };
+
+  const itemVariants = {
+    initial: { opacity: 0, y: -10 },
+    animate: { opacity: 1, y: 0 },
+    transition: { duration: 0.3 },
+  };
+
   return (
-    <nav className="bg-white/95 backdrop-blur-md shadow-lg border-b border-gray-100/50 fixed w-full top-0 z-50 transition-all duration-300">
+    <motion.nav
+      className="bg-white/95 backdrop-blur-md shadow-lg border-b border-gray-100/50 fixed w-full top-0 z-50 transition-all duration-300"
+      initial={{ y: -100 }}
+      animate={{ y: 0 }}
+      transition={{ duration: 0.5, type: "spring", stiffness: 100 }}
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          <NavbarLogo />
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+          >
+            <NavbarLogo />
+          </motion.div>
 
-          <div className="hidden md:block">
+          <motion.div
+            className="hidden md:block"
+            variants={containerVariants}
+            initial="initial"
+            animate="animate"
+          >
             <NavbarLinks navigation={navigation} isRTL={isRTL} />
-          </div>
+          </motion.div>
 
-          <div className="hidden md:block">
+          <motion.div
+            className="hidden md:block"
+            variants={containerVariants}
+            initial="initial"
+            animate="animate"
+          >
             <div
               className={`flex items-center gap-4 ${
                 isRTL ? "gap-reverse" : ""
               }`}
             >
-              <LanguageSwitcher />
+              <motion.div variants={itemVariants}>
+                <LanguageSwitcher />
+              </motion.div>
               {!user ? (
                 <>
-                  <a
+                  <motion.a
                     href="/signin"
                     className="text-gray-700 hover:text-primary px-4 py-2 rounded-lg text-sm"
+                    variants={itemVariants}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
                   >
                     {t("signIn")}
-                  </a>
-                  <a
+                  </motion.a>
+                  <motion.a
                     href="/signup"
                     className="bg-gradient-to-r from-primary to-secondary text-white px-6 py-2.5 rounded-lg text-sm"
+                    variants={itemVariants}
+                    whileHover={{
+                      scale: 1.05,
+                      boxShadow: "0 10px 20px rgba(0,0,0,0.2)",
+                    }}
+                    whileTap={{ scale: 0.95 }}
                   >
                     {t("signUp")}
-                  </a>
+                  </motion.a>
                 </>
               ) : (
-                <div className="relative">
-                  <button
+                <motion.div
+                  className="relative"
+                  variants={itemVariants}
+                  whileHover={{ scale: 1.05 }}
+                >
+                  <motion.button
                     type="button"
                     onClick={() => setShowUserMenu(!showUserMenu)}
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="relative"
                   >
-                    <img
+                    <motion.img
                       src={`${import.meta.env.VITE_UPLOADS_BASE_URL}${
                         user?.data?.profilePicture
                       }`}
-                      className="h-7 w-7 rounded-full object-cover"
+                      className="h-10 w-10 rounded-full object-cover border-2 border-primary/20 hover:border-primary"
+                      whileHover={{ borderColor: "rgba(var(--primary), 1)" }}
                     />
-                  </button>
+                    <motion.div
+                      className="absolute inset-0 rounded-full bg-primary/10"
+                      animate={{ scale: showUserMenu ? 1.2 : 1 }}
+                      transition={{ duration: 0.3 }}
+                    />
+                  </motion.button>
                   {showUserMenu && (
                     <UserMenu isRTL={isRTL} onLogout={handleLogout} t={t} />
                   )}
-                </div>
+                </motion.div>
               )}
             </div>
-          </div>
+          </motion.div>
 
-          <div
+          <motion.div
             className={`md:hidden flex items-center gap-3 ${
               isRTL ? "gap-reverse" : ""
             }`}
+            variants={containerVariants}
+            initial="initial"
+            animate="animate"
           >
-            <LanguageSwitcher />
-            <button
+            <motion.div variants={itemVariants}>
+              <LanguageSwitcher />
+            </motion.div>
+            <motion.button
               onClick={(e) => {
                 e.stopPropagation();
                 setIsOpen(!isOpen);
               }}
               type="button"
-              className="p-2 bg-gray-100 rounded-lg"
+              className="p-2 bg-gray-100 rounded-lg hover:bg-gray-200"
               aria-expanded={isOpen}
               aria-controls="mobile-menu"
+              variants={itemVariants}
+              whileHover={{ scale: 1.1, backgroundColor: "#e5e7eb" }}
+              whileTap={{ scale: 0.95 }}
+              animate={{ rotate: isOpen ? 90 : 0 }}
+              transition={{ duration: 0.3 }}
             >
               {isOpen ? (
                 <X className="h-6 w-6" />
               ) : (
                 <Menu className="h-6 w-6" />
               )}
-            </button>
-          </div>
+            </motion.button>
+          </motion.div>
         </div>
       </div>
 
@@ -134,7 +204,7 @@ const Navbar = () => {
         t={t}
         location={location}
       />
-    </nav>
+    </motion.nav>
   );
 };
 

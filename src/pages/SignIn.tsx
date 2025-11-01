@@ -1,48 +1,34 @@
 import React from "react";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useLanguage } from "../contexts/LanguageContext";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { authApi } from "@/api/auth/authApi";
 import { useUserData } from "@/hooks/useUserData";
 import { useUser } from "@/contexts/UserContext";
+import { useLanguage } from "../contexts/LanguageContext";
+import { motion } from "framer-motion";
+import SignInForm from "@/components/auth/SignInForm";
+import { fadeIn } from "@/utils/animations";
 
-const loginSchema = z.object({
-  username: z.string().email("Invalid username address"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
-});
-
-type LoginFormData = z.infer<typeof loginSchema>;
+interface LoginFormData {
+  username: string;
+  password: string;
+}
 
 const SignIn = () => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const navigate = useNavigate();
   const { handleLoginResponse } = useUserData();
   const { getDefaultRoute } = useUser();
-
-  const {
-    register,
-    handleSubmit,
-    formState: { errors, isSubmitting },
-    setValue,
-  } = useForm<LoginFormData>({
-    resolver: zodResolver(loginSchema),
-    defaultValues: {
-      username: "abdokader184@gmail.com",
-      password: "LEESQgMOD4p23/7tUFsGHQ==",
-    },
-  });
+  const isRTL = language === "ar";
 
   const onSubmit = async (data: LoginFormData) => {
     try {
       const res = await authApi.login({
-        ...(data as { username: string; password: string }),
+        userName: data.username,
+        password: data.password,
         isPhone: false,
       });
 
-      // Use hardcoded user data instead of API response
       const mockUserData = {
         id: "787ca46b-0d02-4cf1-9266-021983964f19",
         roles: "Client",
@@ -52,26 +38,27 @@ const SignIn = () => {
         isConfirmed: true,
       };
 
-      // Always use mock data regardless of API response
       const userData = handleLoginResponse({
         ...res.data,
         userData: mockUserData,
       });
 
       if (userData) {
-        toast.success("Login successful");
+        toast.success(t("loginSuccessful"));
         const defaultRoute = getDefaultRoute();
         navigate(defaultRoute);
       } else {
-        toast.error("Failed to process login data");
+        toast.error(t("loginFailed"));
       }
     } catch (err: any) {
-      toast.error(err?.response?.data?.customMessage);
+      toast.error(
+        err?.response?.data?.customMessage || t("invalidCredentials")
+      );
     }
   };
 
-  const handleQuickLogin = (role: "client" | "vendor" | "admin") => {
-    const credentials = {
+  const handleQuickLogin = (role: "client" | "vendor") => {
+    const encryptedCredentials = {
       client: {
         username: "abdokader184@gmail.com",
         password: "LEESQgMOD4p23/7tUFsGHQ==",
@@ -80,18 +67,22 @@ const SignIn = () => {
         username: "mahmoud7@gmail.com",
         password: "LEESQgMOD4p23/7tUFsGHQ==",
       },
-      admin: {
-        username: "mahmoud@gmail.com",
-        password: "LEESQgMOD4p23/7tUFsGHQ==",
-      },
     };
 
-    setValue("username", credentials[role].username);
-    setValue("password", credentials[role].password);
+    const creds = encryptedCredentials[role];
+
+    // Simulate form submission with quick login credentials
+    onSubmit({
+      username: creds.username,
+      password: creds.password,
+    });
   };
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center">
+    <div
+      className="relative min-h-screen flex items-center justify-center"
+      dir={isRTL ? "rtl" : "ltr"}
+    >
       {/* Background Video */}
       <video
         autoPlay
@@ -103,96 +94,36 @@ const SignIn = () => {
         <source src="/revving.mp4" type="video/mp4" />
       </video>
 
-      {/* Gradient Overlay with 50% opacity */}
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/50 to-secondary/50 z-10"></div>
+      {/* Gradient Overlay */}
+      <motion.div
+        className="absolute inset-0 bg-gradient-to-br from-primary/60 to-secondary/60 z-10"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.8 }}
+      />
 
       {/* Content */}
-      <div className="relative z-20 pt-20 px-4 min-h-screen flex items-center justify-center w-full">
-        <div className="max-w-xl w-full bg-white rounded-2xl shadow-2xl p-8">
-          <h2 className="text-2xl font-bold text-center text-primary">
-            {t("signIn")}
-          </h2>
+      <motion.div
+        className="relative z-20 px-4 min-h-screen flex items-center justify-center w-full"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.6, delay: 0.2 }}
+      >
+        <div className="w-full max-w-md">
+          <SignInForm onSubmit={onSubmit} onQuickLogin={handleQuickLogin} />
 
-          {/* Login Form */}
-          <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                {t("email")}
-              </label>
-              <input
-                type="text"
-                {...register("username")}
-                className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
-              />
-              {errors.username && (
-                <p className="text-red-500 text-sm mt-1">
-                  {errors.username.message}
-                </p>
-              )}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                {t("password")}
-              </label>
-              <input
-                type="password"
-                {...register("password")}
-                className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
-              />
-              {errors.password && (
-                <p className="text-red-500 text-sm mt-1">
-                  {errors.password.message}
-                </p>
-              )}
-            </div>
-
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="w-full flex justify-center rounded-lg bg-primary px-4 py-2 text-white font-medium shadow-md hover:bg-primary/90 disabled:opacity-50"
-            >
-              {isSubmitting ? t("loading") : t("login")}
-            </button>
-
-            <div className="flex justify-between gap-2">
-              <button
-                type="button"
-                onClick={() => handleQuickLogin("client")}
-                className="flex-1 rounded-lg bg-secondary px-4 py-2 text-white font-medium shadow-md hover:bg-secondary/90"
-              >
-                {t("quickLoginClient")}
-              </button>
-              <button
-                type="button"
-                onClick={() => handleQuickLogin("vendor")}
-                className="flex-1 rounded-lg bg-secondary px-4 py-2 text-white font-medium shadow-md hover:bg-secondary/90"
-              >
-                {t("quickLoginVendor")}
-              </button>
-              <button
-                type="button"
-                onClick={() => handleQuickLogin("admin")}
-                className="flex-1 rounded-lg bg-secondary px-4 py-2 text-white font-medium shadow-md hover:bg-secondary/90"
-              >
-                {t("quickLoginAdmin")}
-              </button>
-            </div>
-          </form>
-
-          <div className="mt-6 text-center">
-            <p className="text-gray-600">
-              {t("dontHaveAccount")}{" "}
-              <Link
-                to="/signup"
-                className="text-primary hover:text-primary/80 font-medium"
-              >
-                {t("signUpHere")}
-              </Link>
-            </p>
-          </div>
+          {/* Footer Text */}
+          <motion.div
+            className="text-center mt-6 text-white/80 text-xs"
+            variants={fadeIn}
+            initial="initial"
+            animate="animate"
+            transition={{ delay: 0.8 }}
+          >
+            <p>© 2025 GETCAR. All rights reserved.</p>
+          </motion.div>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 };

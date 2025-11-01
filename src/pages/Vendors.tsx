@@ -1,11 +1,12 @@
-// src/pages/Vendors.tsx
 import React, { useState } from "react";
 import { LanguageProvider, useLanguage } from "../contexts/LanguageContext";
 import VendorCard from "../components/VendorCard";
+import JoinUsCard from "../components/JoinUsCard";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
 import { useWebsiteVendors } from "@/hooks/website/useWebsiteVendors";
+import { motion } from "framer-motion";
 
 const VendorsContent = () => {
   const { t } = useLanguage();
@@ -13,30 +14,26 @@ const VendorsContent = () => {
 
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const vendorsPerPage = 9;
+  const vendorsPerPage = 8; // Changed to 8 to account for join us card on last page
 
-  // ✅ Extract vendors safely from API response
   const vendors = data?.data.vendorsOwners ?? [];
 
-  // ✅ Apply search filter
   const filteredVendors = vendors.filter((vendor) =>
     vendor.companyName.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // ✅ Process vendors into props for VendorCard
   const processedVendors = filteredVendors.map((vendor) => ({
     id: vendor.id,
     name: vendor.companyName,
-    rating: 0, // API doesn’t provide rating, keep default
+    rating: 0,
     image:
       vendor.companyLogo || "/uploads/984c47f8-006e-44f4-8059-24f7f00bc865.png",
-    verified: false, // API doesn’t provide this field
+    verified: false,
     carsCount: vendor.availableCars,
     branchCount: vendor.totalBranches,
     location: vendor.mainBranchAddress,
   }));
 
-  // ✅ Pagination logic
   const indexOfLastVendor = currentPage * vendorsPerPage;
   const indexOfFirstVendor = indexOfLastVendor - vendorsPerPage;
   const currentVendors = processedVendors.slice(
@@ -52,9 +49,9 @@ const VendorsContent = () => {
 
   const handlePageChange = (pageNumber: number) => {
     setCurrentPage(pageNumber);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // ✅ Loading state
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50">
@@ -68,7 +65,6 @@ const VendorsContent = () => {
     );
   }
 
-  // ✅ Error state
   if (error) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -77,12 +73,36 @@ const VendorsContent = () => {
     );
   }
 
+  // Determine if we should show join us card on this page
+  const shouldShowJoinUs =
+    currentPage === totalPages ||
+    (currentVendors.length < vendorsPerPage && currentPage === totalPages);
+  const vendorsToShow = shouldShowJoinUs
+    ? currentVendors
+    : currentVendors.slice(0, vendorsPerPage - 1);
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+        delayChildren: 0.2,
+      },
+    },
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="pt-20 pb-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Search Bar */}
-          <div className="mb-8 flex items-center">
+          <motion.div
+            className="mb-8 flex items-center"
+            initial={{ y: -20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.4 }}
+          >
             <Input
               type="text"
               placeholder={t("searchVendors")}
@@ -97,34 +117,65 @@ const VendorsContent = () => {
             >
               <Search className="h-5 w-5 text-gray-500" />
             </Button>
-          </div>
+          </motion.div>
 
           {/* Vendors Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {currentVendors.map((vendor) => (
+          <motion.div
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+          >
+            {vendorsToShow.map((vendor) => (
               <VendorCard key={vendor.id} vendor={vendor} />
             ))}
-          </div>
+            {shouldShowJoinUs && <JoinUsCard />}
+          </motion.div>
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="flex justify-center mt-8">
-              <Button
-                variant="outline"
+            <motion.div
+              className="flex justify-center mt-8 gap-2"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.3 }}
+            >
+              <motion.button
                 disabled={currentPage === 1}
                 onClick={() => handlePageChange(currentPage - 1)}
-                className="mr-2"
+                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
               >
                 {t("previous")}
-              </Button>
-              <Button
-                variant="outline"
+              </motion.button>
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                (page) => (
+                  <motion.button
+                    key={page}
+                    onClick={() => handlePageChange(page)}
+                    className={`px-3 py-2 rounded-lg border transition-colors ${
+                      currentPage === page
+                        ? "bg-primary text-white border-primary"
+                        : "border-gray-300 hover:bg-gray-100"
+                    }`}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    {page}
+                  </motion.button>
+                )
+              )}
+              <motion.button
                 disabled={currentPage === totalPages}
                 onClick={() => handlePageChange(currentPage + 1)}
+                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
               >
                 {t("next")}
-              </Button>
-            </div>
+              </motion.button>
+            </motion.div>
           )}
         </div>
       </div>
