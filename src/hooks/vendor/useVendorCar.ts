@@ -19,18 +19,21 @@ import {
 const VENDOR_CAR_QUERY_KEYS = {
   all: ["vendor", "cars"] as const,
   lists: () => [...VENDOR_CAR_QUERY_KEYS.all, "list"] as const,
-  list: (filters: string) =>
-    [...VENDOR_CAR_QUERY_KEYS.lists(), { filters }] as const,
+  list: (pageNumber: number, pageSize: number) =>
+    [...VENDOR_CAR_QUERY_KEYS.lists(), { pageNumber, pageSize }] as const,
   details: () => [...VENDOR_CAR_QUERY_KEYS.all, "detail"] as const,
   detail: (id: string) => [...VENDOR_CAR_QUERY_KEYS.details(), id] as const,
   branchCars: () => [...VENDOR_CAR_QUERY_KEYS.all, "branch"] as const,
 };
 
 // Get all cars
-export const useGetAllCars = () => {
+export const useGetAllCars = (
+  pageNumber: number = 1,
+  pageSize: number = 10
+) => {
   return useQuery({
-    queryKey: VENDOR_CAR_QUERY_KEYS.lists(),
-    queryFn: getAllCars,
+    queryKey: VENDOR_CAR_QUERY_KEYS.list(pageNumber, pageSize),
+    queryFn: () => getAllCars(pageNumber, pageSize),
   });
 };
 // Get all cars

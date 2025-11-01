@@ -64,13 +64,23 @@ export const updateCarAvailability = async (
 };
 
 // Get all cars
-export const getAllCars = async () => {
-  const { data } = await axiosInstance.get("/Vendor/Car/GetAll");
+export const getAllCars = async (
+  pageNumber: number = 1,
+  pageSize: number = 10
+) => {
+  const { data } = await axiosInstance.get("/Vendor/Car/GetAll", {
+    params: {
+      pageNumber,
+      pageSize,
+    },
+  });
   return data;
 };
 // Get all cars
 export const getAllCarsOffers = async () => {
-  const { data } = await axiosInstance.get("/Vendor/CarOffer/GetAllCarForOffers");
+  const { data } = await axiosInstance.get(
+    "/Vendor/CarOffer/GetAllCarForOffers"
+  );
   return data;
 };
 
