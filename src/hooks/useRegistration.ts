@@ -15,6 +15,8 @@ interface UseRegistrationReturn {
       DrivingLicenseBack?: File;
       NationalIdFront?: File;
       NationalIdBack?: File;
+      LicenseIdFront?: File;
+      LicenseIdBack?: File;
     }
   ) => Promise<boolean>;
 }
@@ -31,6 +33,8 @@ export const useRegistration = (): UseRegistrationReturn => {
       DrivingLicenseBack?: File;
       NationalIdFront?: File;
       NationalIdBack?: File;
+      LicenseIdFront?: File;
+      LicenseIdBack?: File;
     }
   ): Promise<boolean> => {
     setIsLoading(true);
@@ -40,39 +44,58 @@ export const useRegistration = (): UseRegistrationReturn => {
       // Encrypt password
       const encryptedPassword = encryptPassword(userDetails.Password);
 
-      // Create a copy of userDetails without the File objects
-      const userDetailsWithoutFiles = { ...userDetails };
-      delete (userDetailsWithoutFiles as any).DrivingLicenseFront;
-      delete (userDetailsWithoutFiles as any).DrivingLicenseBack;
-      delete (userDetailsWithoutFiles as any).NationalIdFront;
-      delete (userDetailsWithoutFiles as any).NationalIdBack;
-
-      // Update password with encrypted version
-      userDetailsWithoutFiles.Password = encryptedPassword;
-
-      // Build FormData
+      // Create FormData
       const formData = new FormData();
 
-      // Add UserDetails as JSON object (single entry)
-      formData.append("UserDetails", JSON.stringify(userDetailsWithoutFiles));
+      // Create UserDetails object with encrypted password
+      const userDetailsWithEncryptedPassword = {
+        ...userDetails,
+        Password: encryptedPassword,
+      };
 
-      // Add document files as separate key-value pairs
+      // Add UserDetails as JSON string
+      formData.append(
+        "UserDetails",
+        JSON.stringify(userDetailsWithEncryptedPassword)
+      );
+
+      // Add only the relevant document files (don't send null/undefined files)
       if (documents) {
-        if (documents.DrivingLicenseFront) {
-          formData.append("DrivingLicenseFront", documents.DrivingLicenseFront);
-        }
-        if (documents.DrivingLicenseBack) {
-          formData.append("DrivingLicenseBack", documents.DrivingLicenseBack);
-        }
-        if (documents.NationalIdFront) {
-          formData.append("NationalIdFront", documents.NationalIdFront);
-        }
-        if (documents.NationalIdBack) {
-          formData.append("NationalIdBack", documents.NationalIdBack);
+        if (userType === "client") {
+          // Client: send driving license files and national ID
+          if (documents.DrivingLicenseFront) {
+            formData.append(
+              "DrivingLicenseFront",
+              documents.DrivingLicenseFront
+            );
+          }
+          if (documents.DrivingLicenseBack) {
+            formData.append("DrivingLicenseBack", documents.DrivingLicenseBack);
+          }
+          if (documents.NationalIdFront) {
+            formData.append("NationalIdFront", documents.NationalIdFront);
+          }
+          if (documents.NationalIdBack) {
+            formData.append("NationalIdBack", documents.NationalIdBack);
+          }
+        } else {
+          // Vendor: send business license files and national ID
+          if (documents.LicenseIdFront) {
+            formData.append("LicenseIdFront", documents.LicenseIdFront);
+          }
+          if (documents.LicenseIdBack) {
+            formData.append("LicenseIdBack", documents.LicenseIdBack);
+          }
+          if (documents.NationalIdFront) {
+            formData.append("NationalIdFront", documents.NationalIdFront);
+          }
+          if (documents.NationalIdBack) {
+            formData.append("NationalIdBack", documents.NationalIdBack);
+          }
         }
       }
 
-      // Route to appropriate API based on user type
+      // Route to appropriate API
       if (userType === "client") {
         await registerClient(formData);
       } else {

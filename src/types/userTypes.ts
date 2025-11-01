@@ -1,38 +1,54 @@
 /**
- * Consolidated User Details Interface
- * Contains both authentication and personal information
+ * Base User Data (Common for Client & Vendor)
  */
-export interface UserDetails {
-  // UserData fields
+export interface BaseUserDetails {
   Password: string;
   UserName: string;
+  ConfirmPassword: string;
   IsPhone: boolean;
-
-  // UserDetails fields
-  City: number;
-  Country: number;
-  Email: string;
   FirstName: string;
-  FullName: string;
   LastName: string;
-  NationalId: number;
+  FullName: string;
+  Email: string;
   PhoneNumber: string;
-  BirthDate: string; // ISO 8601 format: YYYY-MM-DD
-  Gender: number; // 0 = Male, 1 = Female
-  LicenseNumber: string;
+  Gender: number;
+  Country: number;
+  City: number;
+  DateOfBirth: string;
+  NationalId: string;
+  AcceptTerms: boolean;
+  UserType: "client" | "vendor";
+}
 
-  // Document uploads
+/**
+ * Client Specific Details
+ */
+export interface ClientUserDetails extends BaseUserDetails {
+  LicenseId: string;
+}
+
+/**
+ * Vendor Specific Details
+ */
+export interface VendorUserDetails extends BaseUserDetails {
+  CompanyName: string;
+  BusinessLicense: string;
+}
+
+/**
+ * Combined User Details Type (discriminated union)
+ */
+export type UserDetails = ClientUserDetails | VendorUserDetails;
+
+/**
+ * Registration Payload with Documents
+ */
+export interface RegistrationPayload {
+  UserDetails: UserDetails;
   DrivingLicenseFront?: File;
   DrivingLicenseBack?: File;
   NationalIdFront?: File;
   NationalIdBack?: File;
+  LicenseIdFront?: File;
+  LicenseIdBack?: File;
 }
-
-/**
- * Registration Payload Type
- */
-export type RegistrationPayload = UserDetails & {
-  userType: "client" | "vendor";
-  acceptTerms: boolean;
-  confirmPassword?: string;
-};

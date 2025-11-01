@@ -270,34 +270,56 @@ const SignUp: React.FC = () => {
     setError("");
 
     try {
-      // Create UserDetails object with all data (no files)
-      const userDetails: UserDetails = {
-        // UserData fields
+      // Create UserDetails object based on user type
+      const baseDetails = {
         Password: formData.password,
-        UserName: formData.userName,
-        IsPhone: formData.isPhone,
-
-        // UserDetails fields
-        City: formData.city,
-        Country: formData.country,
-        Email: formData.email,
+        UserName: formData.email,
+        ConfirmPassword: formData.confirmPassword,
+        IsPhone: formData.phone ? true : false,
         FirstName: formData.firstName,
-        FullName: formData.fullName,
         LastName: formData.lastName,
+        FullName: `${formData.firstName} ${formData.lastName}`,
+        Email: formData.email,
+        PhoneNumber: formData.phone,
+        Gender: parseInt(formData.gender),
+        Country: parseInt(formData.country),
+        City: parseInt(formData.city),
+        DateOfBirth: formData.dateOfBirth,
         NationalId: formData.nationalId,
-        PhoneNumber: formData.phoneNumber,
-        BirthDate: formData.birthDate,
-        Gender: formData.gender,
-        LicenseNumber: formData.licenseNumber,
+        AcceptTerms: formData.acceptTerms,
+        UserType: userType,
       };
 
-      // Separate documents object
-      const documents = {
-        DrivingLicenseFront: fileData.drivingLicenseFront,
-        DrivingLicenseBack: fileData.drivingLicenseBack,
-        NationalIdFront: fileData.nationalIdFront,
-        NationalIdBack: fileData.nationalIdBack,
-      };
+      let userDetails: UserDetails;
+
+      if (userType === "client") {
+        userDetails = {
+          ...baseDetails,
+          LicenseId: formData.licenseId,
+        } as ClientUserDetails;
+      } else {
+        userDetails = {
+          ...baseDetails,
+          CompanyName: formData.companyName,
+          BusinessLicense: formData.businessLicense,
+        } as VendorUserDetails;
+      }
+
+      // Prepare documents based on user type
+      const documents =
+        userType === "client"
+          ? {
+              DrivingLicenseFront: fileData.drivingLicenseFront,
+              DrivingLicenseBack: fileData.drivingLicenseBack,
+              NationalIdFront: fileData.nationalIdFront,
+              NationalIdBack: fileData.nationalIdBack,
+            }
+          : {
+              LicenseIdFront: fileData.licenseIdFront,
+              LicenseIdBack: fileData.licenseIdBack,
+              NationalIdFront: fileData.nationalIdFront,
+              NationalIdBack: fileData.nationalIdBack,
+            };
 
       // Register with the hook
       const success = await register(userType, userDetails, documents);
