@@ -63,20 +63,20 @@ const CarForm = ({ carId, onClose, onSuccess, t }: CarFormProps) => {
         seats: parseInt(car.doors) || 4,
         color: car.color || "",
         license_plate: car.licenseNumber || "",
-        daily_rate: car.pricePerDay || 0,
-        weekly_rate: car.pricePerWeek || 0,
-        monthly_rate: car.pricePerMonth || 0,
+        daily_rate: car.pricePerDay || 1,
+        weekly_rate: car.pricePerWeek || 1,
+        monthly_rate: car.pricePerMonth || 1,
         deposit_amount: 0,
         images: car.images?.map((img: any) => img.imageUrl) || [],
         features: extractFeatures(car),
         is_available: car.availabilityVendor ?? true,
         branch_id: car.branchId || "",
-        mileage_limit: parseInt(car.liter) || 0,
+        mileage_limit: parseInt(car.liter) || 1,
         cancellation_policies: "",
         description: car.description || "",
         liter: car.liter || "",
         withDriver: car.withDriver || false,
-        protectionPrice: car.protectionPrice || 0,
+        protectionPrice: car.protectionPrice || 1,
       });
     }
   }, [car, isEditMode, setFormData]);
@@ -127,17 +127,17 @@ const CarForm = ({ carId, onClose, onSuccess, t }: CarFormProps) => {
     append("pricePerMonth", formData.monthly_rate ?? 0);
 
     // IDs and meta
-    append("tradeMarkId", formData.tradeMarkId || 0);
-    append("modelId", formData.modelId || 0);
-    append("carTypeId", formData.carTypeId || 0);
+    append("tradeMarkId", formData.tradeMarkId || 1);
+    append("modelId", formData.modelId || 1);
+    append("carTypeId", formData.carTypeId || 1);
     append("modelYear", formData.year ?? new Date().getFullYear());
 
     // License
     append("licenseNumber", formData.license_plate || "");
 
     // Fuel and transmission
-    append("fuelTypeId", formData.fuelTypeId || 0);
-    append("transmissionTypeId", formData.transmissionTypeId || 0);
+    append("fuelTypeId", formData.fuelTypeId || 1);
+    append("transmissionTypeId", formData.transmissionTypeId || 1);
 
     // Availability / driver option
     append("availability", !!formData.is_available);
@@ -233,7 +233,7 @@ const CarForm = ({ carId, onClose, onSuccess, t }: CarFormProps) => {
     append("sensors", hasFeature("sensors"));
     append("usbinput", hasFeature("usbInput"));
 
-    const protectionPrice = formData.protectionPrice || 0;
+    const protectionPrice = formData.protectionPrice || 1;
     append("isProtection", protectionPrice > 0);
     append("protectionPrice", protectionPrice);
 
