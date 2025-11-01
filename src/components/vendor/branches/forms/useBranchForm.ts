@@ -25,6 +25,10 @@ interface BranchFormData {
 }
 
 interface FormErrors {
+  nickName?: string;
+  address?: string;
+  managerName?: string;
+  fullName?: string;
   password?: string;
   userName?: string;
   email?: string;
@@ -46,7 +50,6 @@ export const useBranchForm = (
     managerName: "",
     fullName: "",
     password: "",
-    // Creation fields initialized
     userName: "",
     email: "",
     phoneNumber: "",
@@ -59,10 +62,8 @@ export const useBranchForm = (
   });
 
   const [errors, setErrors] = useState<FormErrors>({});
-
   const { toast } = useToast();
 
-  // Use different mutations based on editing mode
   const updateBranchMutation = useUpdateVendorBranch();
   const createBranchMutation = useCreateVendorBranch();
 
@@ -74,7 +75,6 @@ export const useBranchForm = (
         managerName: branch.managerName || "",
         fullName: branch.fullName || "",
         password: "",
-        // Creation fields remain empty for editing
         userName: "",
         email: "",
         phoneNumber: "",
@@ -86,7 +86,6 @@ export const useBranchForm = (
         isPhone: false,
       });
     } else if (!isEditing) {
-      // Reset for creation
       setFormData({
         nickName: "",
         address: "",
@@ -109,7 +108,6 @@ export const useBranchForm = (
   const mutation = useMutation({
     mutationFn: async () => {
       if (isEditing && branch?.id) {
-        // Edit mode - keep existing logic
         const payload: any = {
           id: branch.id,
         };
@@ -127,7 +125,6 @@ export const useBranchForm = (
 
         return updateBranchMutation.mutateAsync(payload);
       } else {
-        // Create mode - new branch structure
         const createPayload = {
           userData: {
             password: formData.password,
@@ -136,8 +133,8 @@ export const useBranchForm = (
           },
           userDetails: {
             address: formData.address,
-            city: formData.city || 0, // Ensure number, fallback to 0
-            country: formData.country || 0, // Ensure number, fallback to 0
+            city: formData.city || 0,
+            country: formData.country || 0,
             email: formData.email,
             fullName: formData.fullName,
             managerName: formData.managerName,
@@ -171,29 +168,12 @@ export const useBranchForm = (
     },
   });
 
+  // Simplified password validation - minimum 6 characters
   const validatePassword = (password: string): string | undefined => {
-    if (!password) return undefined;
-
-    if (password.length < 8) {
+    if (!password) return t("passwordRequired");
+    if (password.length < 6) {
       return t("passwordMinLength");
     }
-
-    if (!/[A-Z]/.test(password)) {
-      return t("passwordUppercase");
-    }
-
-    if (!/[a-z]/.test(password)) {
-      return t("passwordLowercase");
-    }
-
-    if (!/\d/.test(password)) {
-      return t("passwordDigit");
-    }
-
-    if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
-      return t("passwordSpecialChar");
-    }
-
     return undefined;
   };
 
@@ -208,7 +188,6 @@ export const useBranchForm = (
 
   const validatePhone = (phone: string): string | undefined => {
     if (!phone) return t("phoneRequired");
-    // Basic phone validation (adjust pattern as needed)
     const phoneRegex = /^[\d\s\-\+\(\)]{10,15}$/;
     if (!phoneRegex.test(phone.replace(/\s/g, ""))) {
       return t("invalidPhone");
@@ -234,7 +213,7 @@ export const useBranchForm = (
       setErrors((prev) => ({ ...prev, [field]: undefined }));
     }
 
-    // Validate on change
+    // Real-time validation
     if (field === "password") {
       const passwordError = validatePassword(value);
       setErrors((prev) => ({ ...prev, password: passwordError }));
@@ -250,11 +229,20 @@ export const useBranchForm = (
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validation based on mode
     let validationErrors: FormErrors = {};
 
+    // Common validations for all modes
+    validationErrors.nickName = validateRequired(formData.nickName, "nickName");
+    validationErrors.address = validateRequired(formData.address, "address");
+    validationErrors.managerName = validateRequired(
+      formData.managerName,
+      "managerName"
+    );
+    validationErrors.fullName = validateRequired(formData.fullName, "fullName");
+    validationErrors.password = validatePassword(formData.password);
+
     if (!isEditing) {
-      // Creation validation
+      // Creation-only validation
       validationErrors.userName = validateRequired(
         formData.userName,
         "userName"
@@ -266,7 +254,6 @@ export const useBranchForm = (
         "nationalId"
       );
 
-      // Handle country and city validation properly
       if (
         !formData.country ||
         formData.country === 0 ||
@@ -279,26 +266,19 @@ export const useBranchForm = (
       }
     }
 
-    // Common validations
-    validationErrors.nickName = validateRequired(formData.nickName, "nickName");
-    validationErrors.address = validateRequired(formData.address, "address");
-    validationErrors.managerName = validateRequired(
-      formData.managerName,
-      "managerName"
-    );
-    validationErrors.fullName = validateRequired(formData.fullName, "fullName");
-    validationErrors.password = validatePassword(formData.password);
+    // Filter out undefined errors
+    const filteredErrors = Object.fromEntries(
+      Object.entries(validationErrors).filter(
+        ([, value]) => value !== undefined
+      )
+    ) as FormErrors;
 
-    // Check if there are any errors
-    const hasErrors = Object.values(validationErrors).some(
-      (error) => error !== undefined
-    );
+    const hasErrors = Object.keys(filteredErrors).length > 0;
 
     if (hasErrors) {
-      setErrors(validationErrors);
+      setErrors(filteredErrors);
 
-      // Show toast for the first error found
-      const firstError = Object.values(validationErrors).find(
+      const firstError = Object.values(filteredErrors).find(
         (error) => error !== undefined
       );
       if (firstError) {
