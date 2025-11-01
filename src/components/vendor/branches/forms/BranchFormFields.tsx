@@ -15,8 +15,9 @@ import {
   Country,
   City,
 } from "@/hooks/useCountriesAndCities";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { encryptPassword } from "@/utils/encryptPassword";
 
 interface BranchFormFieldsProps {
   formData: any;
@@ -36,31 +37,45 @@ export function BranchFormFields({
   const { language } = useLanguage();
   const isRTL = language === "ar";
 
-  // Countries and cities queries - use string values directly from formData
+  // Local state to store the plain text password for display
+  const [plainPassword, setPlainPassword] = useState("");
+
+  // Countries and cities queries
   const countryValue = formData.country ? String(formData.country) : "";
   const cityValue = formData.city ? String(formData.city) : "";
-  
+
   const { data: countries, isLoading: countriesLoading } = useCountries();
   const { data: cities, isLoading: citiesLoading } = useCitiesByCountry(
     countryValue || null
   );
 
   const handleCountryChange = (value: string) => {
-    // Convert string to number for parent
     const numericValue = value ? parseInt(value) : null;
     onFieldChange("country", numericValue);
-    // Reset city when country changes
     onFieldChange("city", null);
   };
 
   const handleCityChange = (value: string) => {
-    // Convert string to number for parent
     const numericValue = value ? parseInt(value) : null;
     onFieldChange("city", numericValue);
   };
 
   const handleSimpleInputChange = (field: string, value: string) => {
     onFieldChange(field, value);
+  };
+
+  // Handle password change with encryption
+  const handlePasswordChange = (value: string) => {
+    setPlainPassword(value); // Store plain text for the input field
+
+    if (value.trim() === "") {
+      // If password is empty, pass empty string
+      onFieldChange("password", "");
+    } else {
+      // Encrypt the password before passing to parent
+      const encrypted = encryptPassword(value);
+      onFieldChange("password", encrypted);
+    }
   };
 
   return (
@@ -130,8 +145,8 @@ export function BranchFormFields({
           id="password"
           type="password"
           placeholder={t("enterPassword")}
-          value={formData.password || ""}
-          onChange={(e) => handleSimpleInputChange("password", e.target.value)}
+          value={plainPassword}
+          onChange={(e) => handlePasswordChange(e.target.value)}
           className={errors?.password ? "border-destructive" : ""}
         />
         {errors?.password && (
@@ -254,9 +269,7 @@ export function BranchFormFields({
                 >
                   <SelectValue
                     placeholder={
-                      !countryValue
-                        ? t("selectCountryFirst")
-                        : t("selectCity")
+                      !countryValue ? t("selectCountryFirst") : t("selectCity")
                     }
                   />
                 </SelectTrigger>
@@ -315,9 +328,7 @@ export function BranchFormFields({
             <Checkbox
               id="isPhone"
               checked={!!formData.isPhone}
-              onCheckedChange={(checked) =>
-                onFieldChange("isPhone", !!checked)
-              }
+              onCheckedChange={(checked) => onFieldChange("isPhone", !!checked)}
             />
             <Label htmlFor="isPhone" className="cursor-pointer">
               {t("isPhoneLabel")}
