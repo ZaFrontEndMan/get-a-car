@@ -377,10 +377,10 @@ const SignUp: React.FC = () => {
                       initial="initial"
                       animate="animate"
                       exit="exit"
-                      className="bg-red-50 border border-red-200 rounded-md p-4 flex items-center gap-2"
+                      className="bg-rose-50 border border-rose-200 rounded-md p-4 flex items-center gap-2"
                     >
-                      <AlertCircle className="h-5 w-5 text-red-500 flex-shrink-0" />
-                      <span className="text-sm text-red-700">
+                      <AlertCircle className="h-5 w-5 text-red flex-shrink-0" />
+                      <span className="text-sm text-red">
                         {error || apiError}
                       </span>
                     </motion.div>
@@ -428,7 +428,7 @@ const SignUp: React.FC = () => {
                                 />
                                 {fieldErrors.name && (
                                   <motion.p
-                                    className="text-xs text-red-600 mt-1"
+                                    className="text-xs text-rose-600 mt-1"
                                     variants={errorAnimation}
                                     initial="initial"
                                     animate="animate"
@@ -473,7 +473,7 @@ const SignUp: React.FC = () => {
                               />
                               {fieldErrors.email && (
                                 <motion.p
-                                  className="text-xs text-red-600 mt-1"
+                                  className="text-xs text-rose-600 mt-1"
                                   variants={errorAnimation}
                                   initial="initial"
                                   animate="animate"
@@ -497,7 +497,7 @@ const SignUp: React.FC = () => {
                               />
                               {fieldErrors.phone && (
                                 <motion.p
-                                  className="text-xs text-red-600 mt-1"
+                                  className="text-xs text-rose-600 mt-1"
                                   variants={errorAnimation}
                                   initial="initial"
                                   animate="animate"
@@ -529,7 +529,7 @@ const SignUp: React.FC = () => {
                                   />
                                   {fieldErrors.companyName && (
                                     <motion.p
-                                      className="text-xs text-red-600 mt-1"
+                                      className="text-xs text-rose-600 mt-1"
                                       variants={errorAnimation}
                                       initial="initial"
                                       animate="animate"
@@ -560,7 +560,7 @@ const SignUp: React.FC = () => {
                                   />
                                   {fieldErrors.businessLicense && (
                                     <motion.p
-                                      className="text-xs text-red-600 mt-1"
+                                      className="text-xs text-rose-600 mt-1"
                                       variants={errorAnimation}
                                       initial="initial"
                                       animate="animate"
@@ -633,7 +633,7 @@ const SignUp: React.FC = () => {
                                 />
                                 {fieldErrors.dateOfBirth && (
                                   <motion.p
-                                    className="text-xs text-red-600 mt-1"
+                                    className="text-xs text-rose-600 mt-1"
                                     variants={errorAnimation}
                                     initial="initial"
                                     animate="animate"
@@ -661,7 +661,7 @@ const SignUp: React.FC = () => {
                                 />
                                 {fieldErrors.nationalId && (
                                   <motion.p
-                                    className="text-xs text-red-600 mt-1"
+                                    className="text-xs text-rose-600 mt-1"
                                     variants={errorAnimation}
                                     initial="initial"
                                     animate="animate"
@@ -751,7 +751,7 @@ const SignUp: React.FC = () => {
                                 />
                                 {fieldErrors.licenseId && (
                                   <motion.p
-                                    className="text-xs text-red-600 mt-1"
+                                    className="text-xs text-rose-600 mt-1"
                                     variants={errorAnimation}
                                     initial="initial"
                                     animate="animate"
@@ -885,7 +885,7 @@ const SignUp: React.FC = () => {
                             {/* File-level errors */}
                             {fieldErrors.nationalIdFiles && (
                               <motion.p
-                                className="text-xs text-red-600"
+                                className="text-xs text-rose-600"
                                 variants={errorAnimation}
                                 initial="initial"
                                 animate="animate"
@@ -896,7 +896,7 @@ const SignUp: React.FC = () => {
                             {userType === "vendor" &&
                               fieldErrors.vendorLicenseFiles && (
                                 <motion.p
-                                  className="text-xs text-red-600"
+                                  className="text-xs text-rose-600"
                                   variants={errorAnimation}
                                   initial="initial"
                                   animate="animate"
@@ -907,7 +907,7 @@ const SignUp: React.FC = () => {
                             {userType !== "vendor" &&
                               fieldErrors.drivingLicenseFiles && (
                                 <motion.p
-                                  className="text-xs text-red-600"
+                                  className="text-xs text-rose-600"
                                   variants={errorAnimation}
                                   initial="initial"
                                   animate="animate"
@@ -974,7 +974,7 @@ const SignUp: React.FC = () => {
                                   </motion.button>
                                   {fieldErrors.password && (
                                     <motion.p
-                                      className="text-xs text-red-600 mt-1"
+                                      className="text-xs text-rose-600 mt-1"
                                       variants={errorAnimation}
                                       initial="initial"
                                       animate="animate"
@@ -1029,7 +1029,7 @@ const SignUp: React.FC = () => {
                                   </motion.button>
                                   {fieldErrors.confirmPassword && (
                                     <motion.p
-                                      className="text-xs text-red-600 mt-1"
+                                      className="text-xs text-rose-600 mt-1"
                                       variants={errorAnimation}
                                       initial="initial"
                                       animate="animate"
@@ -1075,7 +1075,7 @@ const SignUp: React.FC = () => {
                   </motion.div>
                   {fieldErrors.acceptTerms && (
                     <motion.p
-                      className="text-xs text-red-600 -mt-2"
+                      className="text-xs text-rose-600 -mt-2"
                       variants={errorAnimation}
                       initial="initial"
                       animate="animate"

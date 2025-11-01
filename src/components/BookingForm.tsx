@@ -250,7 +250,6 @@ const BookingForm = ({
       {!isUserVerified && (
         <CheckUserBeforeBooking
           onUserVerified={() => setIsUserVerified(true)}
-          t={t}
         />
       )}
       <div

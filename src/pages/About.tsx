@@ -12,35 +12,54 @@ import {
   Heart,
   Target,
   Lightbulb,
+  CheckCircle,
 } from "lucide-react";
 import PageLayout from "../components/layout/PageLayout";
-import { ApiAboutUs, constantsApi } from "@/api/website/constantsApi";
+import {
+  ApiAboutUs,
+  ApiHowToWork,
+  ApiPartner,
+  constantsApi,
+} from "@/api/website/constantsApi";
 
 const About: React.FC = () => {
   const { data: teamMembers, isLoading, error } = useTeamData();
   const { t } = useLanguage();
   const [aboutData, setAboutData] = useState<ApiAboutUs | null>(null);
-  const [aboutLoading, setAboutLoading] = useState(true);
+  const [howToWorks, setHowToWorks] = useState<ApiHowToWork[]>([]);
+  const [partners, setPartners] = useState<ApiPartner[]>([]);
+  const [isLoading2, setIsLoading2] = useState(true);
 
   useEffect(() => {
-    const fetchAboutData = async () => {
+    const fetchData = async () => {
       try {
-        const data = await constantsApi.getAllAboutUs();
-        // Get the first active about us entry
-        const activeAbout = data?.find((item) => item.isActive) || data?.[0];
+        // Fetch about us data
+        const aboutUsData = await constantsApi.getAllAboutUs();
+        const activeAbout =
+          aboutUsData?.find((item) => item.isActive) || aboutUsData?.[0];
         setAboutData(activeAbout || null);
+
+        // Fetch how to works data
+        const howToWorksData = await constantsApi.getAllHowToWorks();
+        setHowToWorks(howToWorksData || []);
+
+        // Fetch partners data
+        const partnersData = await constantsApi.getAllPartners();
+        setPartners(partnersData || []);
       } catch (err) {
-        console.error("Failed to fetch about us data:", err);
+        console.error("Failed to fetch data:", err);
         setAboutData(null);
+        setHowToWorks([]);
+        setPartners([]);
       } finally {
-        setAboutLoading(false);
+        setIsLoading2(false);
       }
     };
 
-    fetchAboutData();
+    fetchData();
   }, []);
 
-  if (isLoading || aboutLoading) {
+  if (isLoading || isLoading2) {
     return (
       <>
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
@@ -106,17 +125,24 @@ const About: React.FC = () => {
 
   return (
     <>
-      <AboutContent teamMembers={teamMembers} aboutData={aboutData} t={t} />
+      <AboutContent
+        teamMembers={teamMembers}
+        aboutData={aboutData}
+        howToWorks={howToWorks}
+        partners={partners}
+        t={t}
+      />
     </>
   );
 };
 
-// Separate component that receives translations as props to avoid useLanguage conflicts
 const AboutContent: React.FC<{
   teamMembers: any[] | undefined;
   aboutData: ApiAboutUs | null;
+  howToWorks: ApiHowToWork[];
+  partners: ApiPartner[];
   t: (key: string) => string;
-}> = ({ teamMembers, aboutData, t }) => {
+}> = ({ teamMembers, aboutData, howToWorks, partners, t }) => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       {/* Hero Section */}
@@ -186,8 +212,53 @@ const AboutContent: React.FC<{
         </div>
       </div>
 
-      {/* Values Section - STATIC */}
-      <div className="py-20 bg-gradient-to-br from-gray-50 to-gray-100">
+      {/* How It Works Section */}
+      {howToWorks.length > 0 && (
+        <div className="py-20 bg-gradient-to-br from-gray-50 to-gray-100">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-16">
+              <h2 className="text-4xl font-bold text-gray-900 mb-6">
+                {t("howItWorks")}
+              </h2>
+              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+                {t("howItWorksDescription")}
+              </p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {howToWorks.map((work, index) => (
+                <div
+                  key={work.id}
+                  className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+                >
+                  <div className="relative h-64 bg-gradient-to-br from-primary/10 to-secondary/10 overflow-hidden">
+                    <img
+                      src={`${import.meta.env.VITE_UPLOADS_BASE_URL}${
+                        work.image
+                      }`}
+                      alt={work.title}
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute top-4 right-4 w-12 h-12 bg-primary text-white rounded-full flex items-center justify-center font-bold text-lg">
+                      {index + 1}
+                    </div>
+                  </div>
+                  <div className="p-8">
+                    <h3 className="text-2xl font-bold text-gray-900 mb-4">
+                      {work.title}
+                    </h3>
+                    <p className="text-gray-600 leading-relaxed">
+                      {work.description}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Values Section */}
+      <div className="py-20 bg-white">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-gray-900 mb-6">
@@ -198,7 +269,7 @@ const AboutContent: React.FC<{
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow">
+            <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow border border-gray-100">
               <div className="w-16 h-16 bg-primary/10 rounded-xl flex items-center justify-center mb-6">
                 <Award className="w-8 h-8 text-primary" />
               </div>
@@ -209,7 +280,7 @@ const AboutContent: React.FC<{
                 {t("qualityDescription")}
               </p>
             </div>
-            <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow">
+            <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow border border-gray-100">
               <div className="w-16 h-16 bg-secondary/10 rounded-xl flex items-center justify-center mb-6">
                 <Heart className="w-8 h-8 text-secondary" />
               </div>
@@ -220,7 +291,7 @@ const AboutContent: React.FC<{
                 {t("serviceDescription")}
               </p>
             </div>
-            <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow">
+            <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow border border-gray-100">
               <div className="w-16 h-16 bg-primary/10 rounded-xl flex items-center justify-center mb-6">
                 <Lightbulb className="w-8 h-8 text-primary" />
               </div>
@@ -235,102 +306,44 @@ const AboutContent: React.FC<{
         </div>
       </div>
 
-      {/* Team Section */}
-      <div className="py-20 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <div className="flex items-center justify-center mb-6">
-              <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mr-4">
-                <Users className="w-6 h-6 text-primary" />
+     
+
+      {/* Partners Section */}
+      {partners.length > 0 && (
+        <div className="py-20 bg-white">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-16">
+              <div className="flex items-center justify-center mb-6">
+                <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mr-4">
+                  <Globe className="w-6 h-6 text-primary" />
+                </div>
+                <h2 className="text-4xl font-bold text-gray-900">
+                  {t("ourPartners")}
+                </h2>
               </div>
-              <h2 className="text-4xl font-bold text-gray-900">
-                {t("ourTeam")}
-              </h2>
+              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+                {t("partnersDescription")}
+              </p>
             </div>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              {t("teamDescription")}
-            </p>
-          </div>
-
-          {teamMembers && teamMembers.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {teamMembers.map((member) => (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+              {partners.map((partner) => (
                 <div
-                  key={member.id}
-                  className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+                  key={partner.id}
+                  className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 flex items-center justify-center"
                 >
-                  <div className="p-8">
-                    <div className="text-center mb-6">
-                      <div className="w-24 h-24 mx-auto mb-4 rounded-full overflow-hidden bg-gradient-to-br from-primary/10 to-secondary/10 p-1">
-                        {member.image_url ? (
-                          <img
-                            src={member.image_url}
-                            alt={member.name}
-                            className="w-full h-full object-cover rounded-full"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center bg-gray-100 rounded-full">
-                            <Users className="h-10 w-10 text-gray-400" />
-                          </div>
-                        )}
-                      </div>
-                      <h3 className="text-xl font-bold text-gray-900 mb-2">
-                        {member.name}
-                      </h3>
-                      <p className="text-primary font-semibold mb-4 text-sm uppercase tracking-wide">
-                        {member.position}
-                      </p>
-                      {member.bio && (
-                        <p className="text-gray-600 text-sm leading-relaxed">
-                          {member.bio}
-                        </p>
-                      )}
-                    </div>
-
-                    <div className="flex justify-center gap-4 pt-6 border-t border-gray-100">
-                      {member.email && (
-                        <a
-                          href={`mailto:${member.email}`}
-                          className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 hover:bg-primary hover:text-white transition-colors"
-                        >
-                          <Mail className="h-4 w-4" />
-                        </a>
-                      )}
-                      {member.linkedin_url && (
-                        <a
-                          href={member.linkedin_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 hover:bg-primary hover:text-white transition-colors"
-                        >
-                          <Linkedin className="h-4 w-4" />
-                        </a>
-                      )}
-                      {member.twitter_url && (
-                        <a
-                          href={member.twitter_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 hover:bg-primary hover:text-white transition-colors"
-                        >
-                          <Twitter className="h-4 w-4" />
-                        </a>
-                      )}
-                    </div>
-                  </div>
+                  <img
+                    src={`${import.meta.env.VITE_UPLOADS_BASE_URL}${
+                      partner.partnerLogo
+                    }`}
+                    alt={partner.partnerName}
+                    className="w-full h-32 object-contain"
+                  />
                 </div>
               ))}
             </div>
-          ) : (
-            <div className="text-center py-16 bg-gray-50 rounded-2xl">
-              <Users className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-600 text-lg">{t("noTeamMembersFound")}</p>
-            </div>
-          )}
+          </div>
         </div>
-      </div>
-
-      {/* Contact Section */}
+      )}
     </div>
   );
 };

@@ -18,6 +18,19 @@ export type ApiContactUs = {
   subject: string;
   description: string;
 };
+export type ApiHowToWork = {
+  id: number;
+  title: string;
+  description: string;
+  image: string;
+  isActive: boolean;
+};
+export type ApiPartner = {
+  id: number;
+  partnerName: string;
+  partnerLogo: string;
+  isActive: boolean;
+};
 
 type ApiListResponse<T> = {
   isSuccess: boolean;
@@ -27,6 +40,12 @@ type ApiListResponse<T> = {
     isSuccess: boolean;
     customMessage: any;
   };
+};
+
+type ApiPartnerResponse = {
+  isSuccess: boolean;
+  customMessage: any;
+  data: ApiPartner[];
 };
 
 export const constantsApi = {
@@ -57,5 +76,19 @@ export const constantsApi = {
     );
     if (!res.data?.data?.data) return [];
     return res.data.data.data;
+  },
+  getAllHowToWorks: async (): Promise<ApiHowToWork[]> => {
+    const res = await axiosInstance.get<ApiListResponse<ApiHowToWork>>(
+      "/Admin/HowToWorks/GetAllHowToWorks"
+    );
+    if (!res.data?.data?.data) return [];
+    return res.data.data.data;
+  },
+  getAllPartners: async (): Promise<ApiPartner[]> => {
+    const res = await axiosInstance.get<ApiPartnerResponse>(
+      "/Admin/Partners/GetAllPartners"
+    );
+    if (!res.data?.data) return [];
+    return res.data.data;
   },
 };

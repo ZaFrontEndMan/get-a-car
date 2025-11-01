@@ -99,12 +99,11 @@ const Footer = () => {
           {/* Brand Section */}
           <div className="space-y-4">
             <div className="flex items-center gap-2">
-              <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-2 rounded-lg">
-                <Car className="h-6 w-6 text-white" />
-              </div>
-              <h3 className="text-xl font-bold">
-                {settings?.siteName || "GetCar Rental"}
-              </h3>
+              <img
+                src="/logo.png"
+                alt="GetCar Logo"
+                className="w-60 object-contain"
+              />
             </div>
             <p className="text-gray-400 text-sm leading-relaxed">
               {settings?.siteDescription || t("premiumCarRentalService")}

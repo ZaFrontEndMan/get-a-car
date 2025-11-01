@@ -24,15 +24,15 @@ const loginSchema = z.object({
 type LoginFormData = z.infer<typeof loginSchema>;
 
 interface SignInFormProps {
-  onSubmit: (data: LoginFormData) => Promise<void>;
+  onSubmit: (data: LoginFormData) => Promise<void> | void;
+  onQuickLogin: (role: "client" | "vendor") => Promise<void> | void;
   isLoading?: boolean;
-  onQuickLogin?: (role: "client" | "vendor") => void;
 }
 
 const SignInForm: React.FC<SignInFormProps> = ({
   onSubmit,
-  isLoading = false,
   onQuickLogin,
+  isLoading = false,
 }) => {
   const { t, language } = useLanguage();
   const isRTL = language === "ar";

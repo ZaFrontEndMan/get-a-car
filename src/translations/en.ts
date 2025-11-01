@@ -1391,6 +1391,16 @@ export const enTranslations = {
   addressRequired: "Address is required",
   managerNameRequired: "Manager name is required",
   fullNameRequired: "Full name is required",
+  invalidSaudiPhone: "Invalid Saudi phone number",
+  invalidSaudiNationalId: "Invalid Saudi National ID",
+  invalidSaudiLicense: "Invalid Saudi driving license number",
+  nationalIdFiles: "National ID front and back images are required",
+  vendorLicenseFiles: "Business license front and back images are required",
+  drivingLicenseFiles: "Driving license front and back images are required",
+  howItWorks: "How It Works",
+  howItWorksDescription: "Follow our simple process to get started",
+  ourPartners: "Our Partners",
+  partnersDescription: "We partner with leading brands and organizations",
 };
 
 export default enTranslations;

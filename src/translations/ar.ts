@@ -1403,6 +1403,16 @@ export const arTranslations = {
   addressRequired: "العنوان مطلوب",
   managerNameRequired: "اسم المدير مطلوب",
   fullNameRequired: "الاسم الكامل مطلوب",
+  invalidSaudiPhone: "رقم الهاتف السعودي غير صحيح",
+  invalidSaudiNationalId: "رقم الهوية الوطنية السعودية غير صحيح",
+  invalidSaudiLicense: "رقم رخصة القيادة السعودية غير صحيح",
+  nationalIdFiles: "صور الهوية الوطنية (الأمام والخلف) مطلوبة",
+  vendorLicenseFiles: "صور الترخيص التجاري (الأمام والخلف) مطلوبة",
+  drivingLicenseFiles: "صور رخصة القيادة (الأمام والخلف) مطلوبة",
+  howItWorks: "كيفية العمل",
+  howItWorksDescription: "اتبع عملنا البسيطة للبدء",
+  ourPartners: "شركاؤنا",
+  partnersDescription: "نحن نتعاون مع العلامات التجارية والمنظمات الرائدة",
 };
 
 export default arTranslations;
