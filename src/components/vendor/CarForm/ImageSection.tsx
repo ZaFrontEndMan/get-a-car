@@ -55,7 +55,7 @@ const ImageSection = ({ formData, handleChange, t }: ImageSectionProps) => {
 
   const getImagePreview = (image: string | File): string => {
     if (typeof image === "string") {
-      return image;
+      return `${import.meta.env.VITE_UPLOADS_BASE_URL}${image}`;
     }
     return URL.createObjectURL(image);
   };

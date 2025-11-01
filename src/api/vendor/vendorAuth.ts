@@ -22,6 +22,13 @@ interface UploadLogoResponse {
   error?: string;
 }
 
+interface UpdateDocumentsResponse {
+  isSuccess: boolean;
+  data?: any;
+  message?: string;
+  error?: string;
+}
+
 interface GetUserInfoResponse {
   isSuccess: boolean;
   data?: {
@@ -50,43 +57,44 @@ interface GetUserInfoResponse {
 }
 
 /**
- * Edits a vendor profile with the provided parameters and optional company logo.
- * @param params Editable vendor fields as query parameters.
- * @param formData FormData object containing the company logo file (optional).
+ * Edits a vendor profile with the provided parameters and optional files.
+ * @param params Editable vendor fields.
+ * @param formData FormData object containing company logo and/or documents (optional).
  * @returns Promise with the API response.
  */
 export const editVendor = async (
-  params: EditVendorParams
+  params: EditVendorParams,
+  formData?: FormData
 ): Promise<EditVendorResponse> => {
   try {
-    // Create a new FormData object
-    const formData = new FormData();
+    // If no formData provided, create a new one
+    const data = formData || new FormData();
 
     // Append all keys from params into formData
     Object.entries(params).forEach(([key, value]) => {
       if (value !== undefined && value !== null) {
         // If the value is an object or array, convert it to JSON string
         if (typeof value === "object") {
-          formData.append(key, JSON.stringify(value));
+          data.append(key, JSON.stringify(value));
         } else {
-          formData.append(key, value as any);
+          data.append(key, value as any);
         }
       }
     });
 
-    const response = await axiosInstance.put(
-      "Vendor/Auth/EditVendor",
-      formData,
-      {
-        headers: { "Content-Type": "multipart/form-data" },
-      }
-    );
+    const response = await axiosInstance.put("Vendor/Auth/EditVendor", data, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
 
     return response.data;
   } catch (error: any) {
-    throw new Error(
-      error.response?.data?.error || "Failed to edit vendor profile"
-    );
+    return {
+      isSuccess: false,
+      error:
+        error.response?.data?.error?.message ||
+        error.response?.data?.error ||
+        "Failed to edit vendor profile",
+    };
   }
 };
 
@@ -108,9 +116,41 @@ export const uploadCompanyLogo = async (
     );
     return response.data;
   } catch (error: any) {
-    throw new Error(
-      error.response?.data?.error || "Failed to upload company logo"
+    return {
+      isSuccess: false,
+      error:
+        error.response?.data?.error?.message ||
+        error.response?.data?.error ||
+        "Failed to upload company logo",
+    };
+  }
+};
+
+/**
+ * Updates vendor documents (business license, tax type, insurance).
+ * @param formData FormData object containing the document files.
+ * @returns Promise with the API response.
+ */
+export const updateVendorDocuments = async (
+  formData: FormData
+): Promise<UpdateDocumentsResponse> => {
+  try {
+    const response = await axiosInstance.post(
+      "Vendor/Auth/UpdateDocuments",
+      formData,
+      {
+        headers: { "Content-Type": "multipart/form-data" },
+      }
     );
+    return response.data;
+  } catch (error: any) {
+    return {
+      isSuccess: false,
+      error:
+        error.response?.data?.error?.message ||
+        error.response?.data?.error ||
+        "Failed to update documents",
+    };
   }
 };
 
@@ -123,9 +163,21 @@ export const getUserInfo = async (): Promise<GetUserInfoResponse> => {
     const response = await axiosInstance.get("Vendor/Auth/GetUserInfo");
     return response.data;
   } catch (error: any) {
-    throw new Error(error.response?.data?.error || "Failed to fetch user info");
+    return {
+      isSuccess: false,
+      error:
+        error.response?.data?.error?.message ||
+        error.response?.data?.error ||
+        "Failed to fetch user info",
+    };
   }
 };
+
+/**
+ * Registers a new vendor.
+ * @param formData FormData object containing registration data.
+ * @returns Promise with the API response.
+ */
 export const registerVendor = async (formData: FormData) => {
   const { data } = await axiosInstance.post("/Vendor/Auth/Register", formData, {
     headers: {

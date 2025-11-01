@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Image, CreditCard, MapPin, Globe2 } from "lucide-react";
+import { Image, CreditCard, MapPin, Globe2, X } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
@@ -14,6 +14,11 @@ import { Label } from "@/components/ui/label";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useVendorAuth } from "@/hooks/vendor/useVendorAuth";
 
+interface DocumentFile {
+  file: File | null;
+  preview: string | null;
+}
+
 const VendorProfile = () => {
   const { t, language } = useLanguage();
   const {
@@ -27,11 +32,24 @@ const VendorProfile = () => {
     fetchUserInfo,
     handleEdit,
   } = useVendorAuth();
+
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDocumentModalOpen, setIsDocumentModalOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [selectedDocumentType, setSelectedDocumentType] = useState<string>("");
   const [isConfirmDeleteOpen, setIsConfirmDeleteOpen] = useState(false);
+  const [deleteDocumentType, setDeleteDocumentType] = useState<string>("");
+
+  // Document files state for editing - track only the File objects
+  const [documentFiles, setDocumentFiles] = useState<{
+    businessLicense: DocumentFile;
+    taxType: DocumentFile;
+    insurance: DocumentFile;
+  }>({
+    businessLicense: { file: null, preview: null },
+    taxType: { file: null, preview: null },
+    insurance: { file: null, preview: null },
+  });
 
   const handleImageClick = (imageUrl: string, documentType: string) => {
     if (imageUrl && documentType === "companyLogo") {
@@ -50,12 +68,33 @@ const VendorProfile = () => {
   };
 
   const handleEditClick = () => {
+    // Reset document files when opening edit modal
+    setDocumentFiles({
+      businessLicense: { file: null, preview: null },
+      taxType: { file: null, preview: null },
+      insurance: { file: null, preview: null },
+    });
     setIsEditModalOpen(true);
   };
 
   const handleSaveEdit = async () => {
-    await handleEdit();
+    // Extract only the File objects from documentFiles
+    const filesToUpload = {
+      businessLicense: documentFiles.businessLicense.file,
+      taxType: documentFiles.taxType.file,
+      insurance: documentFiles.insurance.file,
+    };
+
+    await handleEdit(filesToUpload);
     setIsEditModalOpen(false);
+
+    // Reset files after save
+    setDocumentFiles({
+      businessLicense: { file: null, preview: null },
+      taxType: { file: null, preview: null },
+      insurance: { file: null, preview: null },
+    });
+    setLogoFile(null);
   };
 
   const handleCancelEdit = () => {
@@ -70,6 +109,11 @@ const VendorProfile = () => {
       });
     }
     setLogoFile(null);
+    setDocumentFiles({
+      businessLicense: { file: null, preview: null },
+      taxType: { file: null, preview: null },
+      insurance: { file: null, preview: null },
+    });
   };
 
   const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -78,19 +122,67 @@ const VendorProfile = () => {
     }
   };
 
-  const handleRemoveLogo = () => {
+  const handleDocumentChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    documentType: "businessLicense" | "taxType" | "insurance"
+  ) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      const preview = URL.createObjectURL(file);
+      setDocumentFiles((prev) => ({
+        ...prev,
+        [documentType]: { file, preview },
+      }));
+    }
+  };
+
+  const handleRemoveDocument = (
+    documentType: "businessLicense" | "taxType" | "insurance"
+  ) => {
+    setDeleteDocumentType(documentType);
     setIsConfirmDeleteOpen(true);
   };
 
-  const confirmRemoveLogo = () => {
-    setEditForm((prev) => ({ ...prev }));
-    setLogoFile(null);
+  const confirmRemoveDocument = () => {
+    if (deleteDocumentType) {
+      setDocumentFiles((prev) => ({
+        ...prev,
+        [deleteDocumentType]: { file: null, preview: null },
+      }));
+    }
     setIsConfirmDeleteOpen(false);
-    handleEdit();
+    setDeleteDocumentType("");
   };
 
   const cancelRemoveLogo = () => {
     setIsConfirmDeleteOpen(false);
+    setDeleteDocumentType("");
+  };
+
+  const getDocumentDisplayImage = (
+    documentType: "businessLicense" | "taxType" | "insurance"
+  ) => {
+    const edited = documentFiles[documentType];
+    if (edited.preview) {
+      return edited.preview;
+    }
+
+    const originalData: Record<string, string | undefined> = {
+      businessLicense: data?.businessLicense,
+      taxType: data?.taxType,
+      insurance: data?.insurance,
+    };
+
+    const original = originalData[documentType];
+    return original
+      ? `${import.meta.env.VITE_UPLOADS_BASE_URL}${original}`
+      : null;
+  };
+
+  const isDocumentEdited = (
+    documentType: "businessLicense" | "taxType" | "insurance"
+  ) => {
+    return documentFiles[documentType].file !== null;
   };
 
   if (loading) {
@@ -165,6 +257,7 @@ const VendorProfile = () => {
       </div>
     );
   }
+
   if (error) return <div className="text-red-500">{error}</div>;
 
   return (
@@ -203,12 +296,6 @@ const VendorProfile = () => {
                             handleImageClick(data.companyLogo, "companyLogo")
                           }
                         />
-                        <button
-                          onClick={handleRemoveLogo}
-                          className="absolute top-0 right-0 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center hover:bg-red-600 transition-colors"
-                        >
-                          X
-                        </button>
                       </>
                     ) : (
                       <div className="w-20 h-20 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center">
@@ -509,69 +596,317 @@ const VendorProfile = () => {
 
       {/* Edit Profile Modal */}
       <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className=" text-start">
-              {t("editProfile")}
-            </DialogTitle>
+            <DialogTitle className="text-start">{t("editProfile")}</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4 py-4">
+
+          <div className="space-y-6 py-4">
+            {/* Basic Information */}
             <div>
-              <Label htmlFor="fullName">{t("companyName")}</Label>
-              <Input
-                id="fullName"
-                value={editForm.fullName}
-                onChange={(e) =>
-                  setEditForm((prev) => ({ ...prev, fullName: e.target.value }))
-                }
-              />
+              <h3 className="text-lg font-semibold mb-4">
+                {t("basicInformation")}
+              </h3>
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="fullName">{t("companyName")}</Label>
+                  <Input
+                    id="fullName"
+                    value={editForm.fullName}
+                    onChange={(e) =>
+                      setEditForm((prev) => ({
+                        ...prev,
+                        fullName: e.target.value,
+                      }))
+                    }
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="nickName">{t("nickName")}</Label>
+                  <Input
+                    id="nickName"
+                    value={editForm.nickName}
+                    onChange={(e) =>
+                      setEditForm((prev) => ({
+                        ...prev,
+                        nickName: e.target.value,
+                      }))
+                    }
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="address">{t("location")}</Label>
+                  <Input
+                    id="address"
+                    value={editForm.address}
+                    onChange={(e) =>
+                      setEditForm((prev) => ({
+                        ...prev,
+                        address: e.target.value,
+                      }))
+                    }
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="email">{t("email")}</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={editForm.email}
+                    onChange={(e) =>
+                      setEditForm((prev) => ({
+                        ...prev,
+                        email: e.target.value,
+                      }))
+                    }
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="phoneNumber">{t("phone")}</Label>
+                  <Input
+                    id="phoneNumber"
+                    value={editForm.phoneNumber}
+                    onChange={(e) =>
+                      setEditForm((prev) => ({
+                        ...prev,
+                        phoneNumber: e.target.value,
+                      }))
+                    }
+                  />
+                </div>
+              </div>
             </div>
-            <div>
-              <Label htmlFor="nickName">{t("nickName")}</Label>
-              <Input
-                id="nickName"
-                value={editForm.nickName}
-                onChange={(e) =>
-                  setEditForm((prev) => ({ ...prev, nickName: e.target.value }))
-                }
-              />
+
+            {/* Logo Upload */}
+            <div className="border-t pt-4">
+              <h3 className="text-lg font-semibold mb-4">{t("companyLogo")}</h3>
+              <div className="space-y-4">
+                <div className="relative w-fit">
+                  {logoFile ? (
+                    <>
+                      <img
+                        src={URL.createObjectURL(logoFile)}
+                        alt="Logo preview"
+                        className="w-24 h-24 object-cover rounded-lg border"
+                      />
+                      <button
+                        onClick={() => setLogoFile(null)}
+                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600 transition-colors"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    </>
+                  ) : data?.companyLogo ? (
+                    <>
+                      <img
+                        src={`${import.meta.env.VITE_UPLOADS_BASE_URL}${
+                          data.companyLogo
+                        }`}
+                        alt="Current logo"
+                        className="w-24 h-24 object-cover rounded-lg border"
+                      />
+                      <button
+                        onClick={() => setLogoFile(null)}
+                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600 transition-colors"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    </>
+                  ) : (
+                    <div className="w-24 h-24 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center">
+                      <Image className="h-6 w-6 text-gray-400" />
+                    </div>
+                  )}
+                </div>
+                <Button
+                  variant="outline"
+                  onClick={() =>
+                    document.getElementById("logoEditInput")?.click()
+                  }
+                >
+                  {t("changeLogo")}
+                </Button>
+                <input
+                  id="logoEditInput"
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleLogoChange}
+                />
+              </div>
             </div>
-            <div>
-              <Label htmlFor="address">{t("location")}</Label>
-              <Input
-                id="address"
-                value={editForm.address}
-                onChange={(e) =>
-                  setEditForm((prev) => ({ ...prev, address: e.target.value }))
-                }
-              />
-            </div>
-            <div>
-              <Label htmlFor="email">{t("email")}</Label>
-              <Input
-                id="email"
-                type="email"
-                value={editForm.email}
-                onChange={(e) =>
-                  setEditForm((prev) => ({ ...prev, email: e.target.value }))
-                }
-              />
-            </div>
-            <div>
-              <Label htmlFor="phoneNumber">{t("phone")}</Label>
-              <Input
-                id="phoneNumber"
-                value={editForm.phoneNumber}
-                onChange={(e) =>
-                  setEditForm((prev) => ({
-                    ...prev,
-                    phoneNumber: e.target.value,
-                  }))
-                }
-              />
+
+            {/* Documents Upload */}
+            <div className="border-t pt-4">
+              <h3 className="text-lg font-semibold mb-4">
+                {t("documentInformation")}
+              </h3>
+              <div className="space-y-6">
+                {/* Business License */}
+                <div>
+                  <label className="text-sm font-medium text-gray-600 block mb-2">
+                    {t("businessLicense")}
+                  </label>
+                  <div className="flex items-end gap-4">
+                    <div className="relative">
+                      {getDocumentDisplayImage("businessLicense") ? (
+                        <>
+                          <img
+                            src={getDocumentDisplayImage("businessLicense")}
+                            alt="Business License preview"
+                            className="w-24 h-24 object-cover rounded-lg border"
+                          />
+                          {isDocumentEdited("businessLicense") && (
+                            <button
+                              onClick={() =>
+                                setDocumentFiles((prev) => ({
+                                  ...prev,
+                                  businessLicense: {
+                                    file: null,
+                                    preview: null,
+                                  },
+                                }))
+                              }
+                              className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600 transition-colors"
+                            >
+                              <X className="h-4 w-4" />
+                            </button>
+                          )}
+                        </>
+                      ) : (
+                        <div className="w-24 h-24 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center">
+                          <Image className="h-6 w-6 text-gray-400" />
+                        </div>
+                      )}
+                    </div>
+                    <Button
+                      variant="outline"
+                      onClick={() =>
+                        document.getElementById("businessLicenseInput")?.click()
+                      }
+                    >
+                      {t("upload")}
+                    </Button>
+                    <input
+                      id="businessLicenseInput"
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) =>
+                        handleDocumentChange(e, "businessLicense")
+                      }
+                    />
+                  </div>
+                </div>
+
+                {/* Tax Type */}
+                <div>
+                  <label className="text-sm font-medium text-gray-600 block mb-2">
+                    {t("taxType")}
+                  </label>
+                  <div className="flex items-end gap-4">
+                    <div className="relative">
+                      {getDocumentDisplayImage("taxType") ? (
+                        <>
+                          <img
+                            src={getDocumentDisplayImage("taxType")}
+                            alt="Tax Type preview"
+                            className="w-24 h-24 object-cover rounded-lg border"
+                          />
+                          {isDocumentEdited("taxType") && (
+                            <button
+                              onClick={() =>
+                                setDocumentFiles((prev) => ({
+                                  ...prev,
+                                  taxType: { file: null, preview: null },
+                                }))
+                              }
+                              className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600 transition-colors"
+                            >
+                              <X className="h-4 w-4" />
+                            </button>
+                          )}
+                        </>
+                      ) : (
+                        <div className="w-24 h-24 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center">
+                          <Image className="h-6 w-6 text-gray-400" />
+                        </div>
+                      )}
+                    </div>
+                    <Button
+                      variant="outline"
+                      onClick={() =>
+                        document.getElementById("taxTypeInput")?.click()
+                      }
+                    >
+                      {t("upload")}
+                    </Button>
+                    <input
+                      id="taxTypeInput"
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => handleDocumentChange(e, "taxType")}
+                    />
+                  </div>
+                </div>
+
+                {/* Insurance */}
+                <div>
+                  <label className="text-sm font-medium text-gray-600 block mb-2">
+                    {t("insurance")}
+                  </label>
+                  <div className="flex items-end gap-4">
+                    <div className="relative">
+                      {getDocumentDisplayImage("insurance") ? (
+                        <>
+                          <img
+                            src={getDocumentDisplayImage("insurance")}
+                            alt="Insurance preview"
+                            className="w-24 h-24 object-cover rounded-lg border"
+                          />
+                          {isDocumentEdited("insurance") && (
+                            <button
+                              onClick={() =>
+                                setDocumentFiles((prev) => ({
+                                  ...prev,
+                                  insurance: { file: null, preview: null },
+                                }))
+                              }
+                              className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600 transition-colors"
+                            >
+                              <X className="h-4 w-4" />
+                            </button>
+                          )}
+                        </>
+                      ) : (
+                        <div className="w-24 h-24 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center">
+                          <Image className="h-6 w-6 text-gray-400" />
+                        </div>
+                      )}
+                    </div>
+                    <Button
+                      variant="outline"
+                      onClick={() =>
+                        document.getElementById("insuranceInput")?.click()
+                      }
+                    >
+                      {t("upload")}
+                    </Button>
+                    <input
+                      id="insuranceInput"
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => handleDocumentChange(e, "insurance")}
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
-          <div className="flex justify-end gap-2">
+
+          <div className="flex justify-end gap-2 border-t pt-4">
             <Button variant="outline" onClick={handleCancelEdit}>
               {t("cancel")}
             </Button>
@@ -586,12 +921,12 @@ const VendorProfile = () => {
           <DialogHeader>
             <DialogTitle>{t("confirmDelete")}</DialogTitle>
           </DialogHeader>
-          <div className="py-4">{t("confirmDeleteMessage")}</div>
+          <div className="py-4">{t("confirmDeleteDocumentMessage")}</div>
           <div className="flex justify-end gap-2">
             <Button variant="outline" onClick={cancelRemoveLogo}>
               {t("cancel")}
             </Button>
-            <Button variant="destructive" onClick={confirmRemoveLogo}>
+            <Button variant="destructive" onClick={confirmRemoveDocument}>
               {t("confirm")}
             </Button>
           </div>

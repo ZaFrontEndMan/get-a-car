@@ -3,6 +3,7 @@ import {
   editVendor,
   uploadCompanyLogo,
   getUserInfo,
+  updateVendorDocuments,
 } from "../../api/vendor/vendorAuth";
 import { useToast } from "@/components/ui/use-toast";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -52,6 +53,17 @@ export const useVendorAuth = () => {
   });
   const [logoFile, setLogoFile] = useState<File | null>(null);
 
+  // Document files state
+  const [documentFiles, setDocumentFiles] = useState<{
+    businessLicense: File | null;
+    taxType: File | null;
+    insurance: File | null;
+  }>({
+    businessLicense: null,
+    taxType: null,
+    insurance: null,
+  });
+
   useEffect(() => {
     fetchUserInfo();
   }, []);
@@ -87,26 +99,63 @@ export const useVendorAuth = () => {
     }
   };
 
-  const handleEdit = async () => {
-    const formData = new FormData();
-    if (logoFile) formData.append("companyLogo", logoFile);
-
+  // Updated handleEdit to accept documentFiles as parameter
+  const handleEdit = async (docs?: {
+    businessLicense: File | null;
+    taxType: File | null;
+    insurance: File | null;
+  }) => {
     try {
       setState((prev) => ({ ...prev, loading: true }));
-      const response = await editVendor(editForm, formData);
-      if (response.isSuccess) {
-        toast({
-          title: t("success"),
-          description: t("profileUpdatedSuccess"),
-        });
-        fetchUserInfo();
-      } else {
+
+      // Create FormData for files
+      const formData = new FormData();
+
+      // Add logo if changed
+      if (logoFile) {
+        formData.append("companyLogo", logoFile);
+      }
+
+      // Add documents ONLY if they have been changed (not null)
+      if (docs?.businessLicense) {
+        formData.append("businessLicense", docs.businessLicense);
+      }
+      if (docs?.taxType) {
+        formData.append("taxType", docs.taxType);
+      }
+      if (docs?.insurance) {
+        formData.append("insurance", docs.insurance);
+      }
+
+      // Edit vendor with basic info and files
+      const editResponse = await editVendor(editForm, formData);
+
+      if (!editResponse.isSuccess) {
         toast({
           title: t("error"),
-          description: response.error || t("updateProfileError"),
+          description: editResponse.error || t("updateProfileError"),
           variant: "destructive",
         });
+        setState((prev) => ({ ...prev, loading: false }));
+        return;
       }
+
+      // Success - show message and refresh data
+      toast({
+        title: t("success"),
+        description: t("profileUpdatedSuccess"),
+      });
+
+      // Clear file states
+      setLogoFile(null);
+      setDocumentFiles({
+        businessLicense: null,
+        taxType: null,
+        insurance: null,
+      });
+
+      // Refresh user data
+      await fetchUserInfo();
     } catch (error: any) {
       const errorMessage =
         error?.response?.data?.error?.message ||
@@ -126,21 +175,24 @@ export const useVendorAuth = () => {
 
     try {
       setState((prev) => ({ ...prev, loading: true }));
-      const response = await uploadCompanyLogo(
-        new FormData().append("companyLogo", logoFile)
-      );
+      const formData = new FormData();
+      formData.append("companyLogo", logoFile);
+
+      const response = await uploadCompanyLogo(formData);
       if (response.isSuccess && response.data?.logoUrl) {
         toast({
           title: t("success"),
           description: t("logoUploadSuccess"),
         });
-        fetchUserInfo(); // Refresh data after upload
+        setLogoFile(null);
+        fetchUserInfo();
       } else {
         toast({
           title: t("error"),
           description: response.error || t("logoUploadError"),
           variant: "destructive",
         });
+        setState((prev) => ({ ...prev, loading: false }));
       }
     } catch (error: any) {
       const errorMessage =
@@ -162,6 +214,8 @@ export const useVendorAuth = () => {
     setEditForm,
     logoFile,
     setLogoFile,
+    documentFiles,
+    setDocumentFiles,
     fetchUserInfo,
     handleEdit,
     handleUploadLogo,
