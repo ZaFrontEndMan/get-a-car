@@ -1369,6 +1369,12 @@ export const arTranslations = {
   vendorNotFound: "البائع غير موجود",
   vendorPolicies: "سياسات البائع",
   workingHours: "ساعات العمل",
+  errorSendingMessage: "خطأ في إرسال الرسالة",
+  errorWhatsAppPhoneNotFound: "لم يتم العثور على رقم واتس آب",
+  pleaseRequiredFields: "يرجى ملء جميع الحقول المطلوبة",
+  redirectingToWhatsApp: "إعادة التوجيه إلى واتس آب...",
+  whatsAppDisclaimer: "سيتم إعادة توجيهك إلى واتس آب ويب لإرسال رسالتك",
+  sendViaWhatsApp: "إرسال عبر واتس آب",
 };
 
 export default arTranslations;

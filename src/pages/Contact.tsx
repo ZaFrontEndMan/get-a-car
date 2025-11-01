@@ -1,7 +1,17 @@
+// pages/Contact.tsx
 import React, { useState } from "react";
 import { LanguageProvider, useLanguage } from "../contexts/LanguageContext";
-import { MapPin, Phone, Mail, Clock, Send, Globe } from "lucide-react";
+import {
+  MapPin,
+  Phone,
+  Mail,
+  Clock,
+  Send,
+  Globe,
+  MessageCircle,
+} from "lucide-react";
 import { useAdminSettings } from "../hooks/useAdminSettings";
+import { toast } from "sonner";
 
 const ContactContent = () => {
   const { t } = useLanguage();
@@ -13,11 +23,113 @@ const ContactContent = () => {
     subject: "",
     message: "",
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  /**
+   * Format phone number for WhatsApp
+   * Removes all non-digit characters and ensures proper format
+   */
+  const formatPhoneForWhatsApp = (phone: string): string => {
+    // Remove all non-digit characters
+    const cleaned = phone.replace(/\D/g, "");
+
+    // If it starts with 0 (Saudi number format), replace with 966
+    if (cleaned.startsWith("0")) {
+      return "966" + cleaned.substring(1);
+    }
+
+    // If it doesn't have country code, add 966 (Saudi Arabia)
+    if (!cleaned.startsWith("966") && cleaned.length === 9) {
+      return "966" + cleaned;
+    }
+
+    return cleaned;
+  };
+
+  /**
+   * Build WhatsApp message from form data
+   */
+  const buildWhatsAppMessage = (): string => {
+    const lines = [
+      `*${t("name")}:* ${formData.name}`,
+      `*${t("emailAddress")}:* ${formData.email}`,
+      formData.phone ? `*${t("phoneNumber")}:* ${formData.phone}` : "",
+      `*${t("subject")}:* ${formData.subject}`,
+      `*${t("message")}:*\n${formData.message}`,
+    ];
+
+    return lines.filter((line) => line).join("\n");
+  };
+
+  /**
+   * Handle form submission and send to WhatsApp
+   */
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Contact form submitted:", formData);
-    // Handle form submission here
+
+    // Validate form data
+    if (
+      !formData.name ||
+      !formData.email ||
+      !formData.subject ||
+      !formData.message
+    ) {
+      toast.error(t("pleaseRequiredFields"));
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      // Get admin phone number
+      const adminPhone = settings?.supportPhone;
+      if (!adminPhone) {
+        toast.error(t("errorWhatsAppPhoneNotFound"));
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Format phone number
+      const formattedPhone = formatPhoneForWhatsApp(adminPhone);
+
+      // Build message
+      const message = buildWhatsAppMessage();
+
+      // Encode message for URL
+      const encodedMessage = encodeURIComponent(message);
+
+      // Create WhatsApp URL
+      const whatsappUrl = `https://wa.me/${formattedPhone}?text=${encodedMessage}`;
+
+      // Open WhatsApp in new window
+      window.open(whatsappUrl, "_blank");
+
+      // Show success message
+      toast.success(t("redirectingToWhatsApp"));
+
+      // Optional: Send to backend API as well
+      // await axiosInstance.post("/Admin/ContactUs/Create", {
+      //   name: formData.name,
+      //   email: formData.email,
+      //   phoneNumber: formData.phone,
+      //   subject: formData.subject,
+      //   description: formData.message,
+      // });
+
+      // Reset form
+      setFormData({
+        name: "",
+        email: "",
+        phone: "",
+        subject: "",
+        message: "",
+      });
+    } catch (err: any) {
+      console.error("WhatsApp error:", err);
+      toast.error(t("errorSendingMessage"));
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleChange = (
@@ -87,9 +199,16 @@ const ContactContent = () => {
                         <h3 className="font-semibold text-gray-900">
                           {t("phone")}
                         </h3>
-                        <p className="text-gray-600">
+                        <a
+                          href={`https://wa.me/${formatPhoneForWhatsApp(
+                            settings?.supportPhone || ""
+                          )}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-gray-600 hover:text-secondary transition-colors font-medium"
+                        >
                           {settings?.supportPhone || t("defaultPhone")}
-                        </p>
+                        </a>
                       </div>
                     </div>
 
@@ -101,9 +220,12 @@ const ContactContent = () => {
                         <h3 className="font-semibold text-gray-900">
                           {t("email")}
                         </h3>
-                        <p className="text-gray-600">
+                        <a
+                          href={`mailto:${settings?.contactEmail}`}
+                          className="text-gray-600 hover:text-primary transition-colors"
+                        >
                           {settings?.contactEmail || t("defaultEmail")}
-                        </p>
+                        </a>
                       </div>
                     </div>
 
@@ -165,9 +287,12 @@ const ContactContent = () => {
 
             {/* Contact Form */}
             <div className="bg-white rounded-xl shadow-lg p-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">
-                {t("sendMessage")}
-              </h2>
+              <div className="flex items-center gap-2 mb-6">
+                <MessageCircle className="h-6 w-6 text-green-500" />
+                <h2 className="text-2xl font-bold text-gray-900">
+                  {t("sendViaWhatsApp")}
+                </h2>
+              </div>
 
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -181,7 +306,8 @@ const ContactContent = () => {
                       required
                       value={formData.name}
                       onChange={handleChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                      disabled={isSubmitting}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent disabled:bg-gray-100"
                       placeholder={t("yourFullName")}
                     />
                   </div>
@@ -195,7 +321,8 @@ const ContactContent = () => {
                       required
                       value={formData.email}
                       onChange={handleChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                      disabled={isSubmitting}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent disabled:bg-gray-100"
                       placeholder={t("yourEmail")}
                     />
                   </div>
@@ -211,7 +338,8 @@ const ContactContent = () => {
                       name="phone"
                       value={formData.phone}
                       onChange={handleChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                      disabled={isSubmitting}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent disabled:bg-gray-100"
                       placeholder={t("phoneFormat")}
                     />
                   </div>
@@ -224,7 +352,8 @@ const ContactContent = () => {
                       required
                       value={formData.subject}
                       onChange={handleChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                      disabled={isSubmitting}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent disabled:bg-gray-100"
                     >
                       <option value="">{t("selectSubject")}</option>
                       <option value="booking">{t("bookingInquiry")}</option>
@@ -246,19 +375,29 @@ const ContactContent = () => {
                     rows={5}
                     value={formData.message}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                    disabled={isSubmitting}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent disabled:bg-gray-100"
                     placeholder={t("messageHelp")}
                   />
                 </div>
 
                 <button
                   type="submit"
-                  className="w-full bg-primary text-white py-3 rounded-lg hover:bg-primary/90 transition-colors duration-200 flex items-center justify-center gap-2 rtl:gap-reverse"
+                  disabled={isSubmitting}
+                  className="w-full bg-green-500 hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed text-white py-3 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2 rtl:gap-reverse font-medium"
                 >
-                  <Send className="h-5 w-5" />
-                  <span>{t("sendMessage")}</span>
+                  <MessageCircle className="h-5 w-5" />
+                  <span>
+                    {isSubmitting
+                      ? t("redirectingToWhatsApp")
+                      : t("sendViaWhatsApp")}
+                  </span>
                 </button>
               </form>
+
+              <p className="text-xs text-gray-500 text-center mt-4">
+                {t("whatsAppDisclaimer")}
+              </p>
             </div>
           </div>
         </div>

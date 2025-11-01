@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useTeamData } from "../hooks/useTeamData";
 import { useLanguage } from "../contexts/LanguageContext";
 import {
@@ -14,10 +14,33 @@ import {
   Lightbulb,
 } from "lucide-react";
 import PageLayout from "../components/layout/PageLayout";
+import { ApiAboutUs, constantsApi } from "@/api/website/constantsApi";
+
 const About: React.FC = () => {
   const { data: teamMembers, isLoading, error } = useTeamData();
   const { t } = useLanguage();
-  if (isLoading) {
+  const [aboutData, setAboutData] = useState<ApiAboutUs | null>(null);
+  const [aboutLoading, setAboutLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchAboutData = async () => {
+      try {
+        const data = await constantsApi.getAllAboutUs();
+        // Get the first active about us entry
+        const activeAbout = data?.find((item) => item.isActive) || data?.[0];
+        setAboutData(activeAbout || null);
+      } catch (err) {
+        console.error("Failed to fetch about us data:", err);
+        setAboutData(null);
+      } finally {
+        setAboutLoading(false);
+      }
+    };
+
+    fetchAboutData();
+  }, []);
+
+  if (isLoading || aboutLoading) {
     return (
       <>
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
@@ -44,7 +67,8 @@ const About: React.FC = () => {
       </>
     );
   }
-  if (error) {
+
+  if (error && !aboutData && !teamMembers) {
     return (
       <>
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
@@ -64,22 +88,25 @@ const About: React.FC = () => {
                 />
               </svg>
             </div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">{t('error')}</h3>
-            <p className="text-gray-600 mb-6">{t('errorLoadingTeamData')}</p>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              {t("error")}
+            </h3>
+            <p className="text-gray-600 mb-6">{t("errorLoadingTeamData")}</p>
             <button
               onClick={() => window.location.reload()}
               className="bg-primary text-white px-6 py-3 rounded-lg hover:bg-primary/90 transition-colors font-medium"
             >
-              {t('retry')}
+              {t("retry")}
             </button>
           </div>
         </div>
       </>
     );
   }
+
   return (
     <>
-      <AboutContent teamMembers={teamMembers} t={t} />
+      <AboutContent teamMembers={teamMembers} aboutData={aboutData} t={t} />
     </>
   );
 };
@@ -87,8 +114,9 @@ const About: React.FC = () => {
 // Separate component that receives translations as props to avoid useLanguage conflicts
 const AboutContent: React.FC<{
   teamMembers: any[] | undefined;
+  aboutData: ApiAboutUs | null;
   t: (key: string) => string;
-}> = ({ teamMembers, t }) => {
+}> = ({ teamMembers, aboutData, t }) => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       {/* Hero Section */}
@@ -98,10 +126,10 @@ const AboutContent: React.FC<{
         <div className="relative container mx-auto px-4 py-24">
           <div className="text-center text-white">
             <h1 className="text-5xl md:text-6xl font-bold mb-6 leading-tight">
-              {t('aboutUs')}
+              {aboutData?.title || t("aboutUs")}
             </h1>
             <p className="text-xl md:text-2xl opacity-90 max-w-4xl mx-auto leading-relaxed">
-              {t('aboutHeroDescription')}
+              {aboutData?.description || t("aboutHeroDescription")}
             </p>
           </div>
         </div>
@@ -112,49 +140,61 @@ const AboutContent: React.FC<{
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <div>
-              <div className="flex items-center mb-6">
+              <div className="flex items-center gap-2 mb-6">
                 <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mr-4">
                   <Target className="w-6 h-6 text-primary" />
                 </div>
                 <h2 className="text-3xl font-bold text-gray-900">
-                  {t('ourMission')}
+                  {t("ourMission")}
                 </h2>
               </div>
               <p className="text-lg text-gray-600 leading-relaxed mb-8">
-                {t('missionDescription')}
+                {t("missionDescription")}
               </p>
-              <div className="flex items-center mb-6">
+              <div className="flex items-center gap-2 mb-6">
                 <div className="w-12 h-12 bg-secondary/10 rounded-lg flex items-center justify-center mr-4">
                   <Lightbulb className="w-6 h-6 text-secondary" />
                 </div>
-                <h2 className="text-3xl font-bold text-gray-900">{t('ourVision')}</h2>
+                <h2 className="text-3xl font-bold text-gray-900">
+                  {t("ourVision")}
+                </h2>
               </div>
               <p className="text-lg text-gray-600 leading-relaxed">
-                {t('visionDescription')}
+                {t("visionDescription")}
               </p>
             </div>
             <div className="relative">
               <div className="aspect-square bg-gradient-to-br from-primary/5 to-secondary/5 rounded-3xl p-8 flex items-center justify-center">
-                <img
-                  src="/uploads/614c107b-eac2-4876-a794-1234caa45ab9.png"
-                  alt="Mission"
-                  className="w-full h-full object-cover rounded-2xl"
-                />
+                {aboutData?.image ? (
+                  <img
+                    src={`${import.meta.env.VITE_UPLOADS_BASE_URL}${
+                      aboutData.image
+                    }`}
+                    alt={aboutData.title || "About Us"}
+                    className="w-full h-full object-cover rounded-2xl"
+                  />
+                ) : (
+                  <img
+                    src="/uploads/614c107b-eac2-4876-a794-1234caa45ab9.png"
+                    alt="Mission"
+                    className="w-full h-full object-cover rounded-2xl"
+                  />
+                )}
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Values Section */}
+      {/* Values Section - STATIC */}
       <div className="py-20 bg-gradient-to-br from-gray-50 to-gray-100">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-gray-900 mb-6">
-              {t('ourValues')}
+              {t("ourValues")}
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              {t('valuesDescription')}
+              {t("valuesDescription")}
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -162,18 +202,22 @@ const AboutContent: React.FC<{
               <div className="w-16 h-16 bg-primary/10 rounded-xl flex items-center justify-center mb-6">
                 <Award className="w-8 h-8 text-primary" />
               </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">{t('quality')}</h3>
+              <h3 className="text-2xl font-bold text-gray-900 mb-4">
+                {t("quality")}
+              </h3>
               <p className="text-gray-600 leading-relaxed">
-                {t('qualityDescription')}
+                {t("qualityDescription")}
               </p>
             </div>
             <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow">
               <div className="w-16 h-16 bg-secondary/10 rounded-xl flex items-center justify-center mb-6">
                 <Heart className="w-8 h-8 text-secondary" />
               </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">{t('service')}</h3>
+              <h3 className="text-2xl font-bold text-gray-900 mb-4">
+                {t("service")}
+              </h3>
               <p className="text-gray-600 leading-relaxed">
-                {t('serviceDescription')}
+                {t("serviceDescription")}
               </p>
             </div>
             <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow">
@@ -181,10 +225,10 @@ const AboutContent: React.FC<{
                 <Lightbulb className="w-8 h-8 text-primary" />
               </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-4">
-                {t('innovation')}
+                {t("innovation")}
               </h3>
               <p className="text-gray-600 leading-relaxed">
-                {t('innovationDescription')}
+                {t("innovationDescription")}
               </p>
             </div>
           </div>
@@ -199,10 +243,12 @@ const AboutContent: React.FC<{
               <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mr-4">
                 <Users className="w-6 h-6 text-primary" />
               </div>
-              <h2 className="text-4xl font-bold text-gray-900">{t('ourTeam')}</h2>
+              <h2 className="text-4xl font-bold text-gray-900">
+                {t("ourTeam")}
+              </h2>
             </div>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              {t('teamDescription')}
+              {t("teamDescription")}
             </p>
           </div>
 
@@ -278,7 +324,7 @@ const AboutContent: React.FC<{
           ) : (
             <div className="text-center py-16 bg-gray-50 rounded-2xl">
               <Users className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-600 text-lg">{t('noTeamMembersFound')}</p>
+              <p className="text-gray-600 text-lg">{t("noTeamMembersFound")}</p>
             </div>
           )}
         </div>
@@ -288,4 +334,5 @@ const AboutContent: React.FC<{
     </div>
   );
 };
+
 export default About;

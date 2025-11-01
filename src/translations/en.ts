@@ -1355,6 +1355,14 @@ export const enTranslations = {
   vendorNotFound: "Vendor not found",
   vendorPolicies: "Vendor Policies",
   workingHours: "Working Hours",
+  errorSendingMessage: "Error sending message",
+  errorWhatsAppPhoneNotFound: "WhatsApp phone number not found",
+  pleaseRequiredFields: "Please fill all required fields",
+  redirectingToWhatsApp: "Redirecting to WhatsApp...",
+
+  whatsAppDisclaimer:
+    "You will be redirected to WhatsApp Web to send your message",
+  sendViaWhatsApp: "Send via WhatsApp",
 };
 
 export default enTranslations;

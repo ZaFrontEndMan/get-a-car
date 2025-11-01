@@ -8,6 +8,7 @@ import { useLanguage } from "../contexts/LanguageContext";
 import { motion } from "framer-motion";
 import SignInForm from "@/components/auth/SignInForm";
 import { fadeIn } from "@/utils/animations";
+import { encryptPassword } from "@/utils/encryptPassword";
 
 interface LoginFormData {
   username: string;
@@ -23,25 +24,16 @@ const SignIn = () => {
 
   const onSubmit = async (data: LoginFormData) => {
     try {
+      // Encrypt password before sending
+      const encryptedPassword = encryptPassword(data.password);
+
       const res = await authApi.login({
         userName: data.username,
-        password: data.password,
+        password: encryptedPassword, // Send encrypted password
         isPhone: false,
       });
 
-      const mockUserData = {
-        id: "787ca46b-0d02-4cf1-9266-021983964f19",
-        roles: "Client",
-        userName: "abdokader184@gmail.com",
-        token:
-          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiI3ODdjYTQ2Yi0wZDAyLTRjZjEtOTI2Ni0wMjE5ODM5NjRmMTkiLCJqdGkiOiI4YWNlM2ExOC0wMzljLTQyZmQtOGUyNC0yNWQzYTBmZGVjMTciLCJ1bmlxdWVfbmFtZSI6ImFiZG9rYWRlcjE4NEBnbWFpbC5jb20iLCJyb2xlIjoiQ2xpZW50IiwiVXNlclR5cGUiOiJDbGllbnQiLCJQZXJtaXNzaW9uIjoiQ2xpZW50OkNyZWF0ZSIsIm5iZiI6MTc1NzgwNjU4MywiZXhwIjoxNzU4NDExMzgzLCJpYXQiOjE3NTc4MDY1ODMsImlzcyI6Imh0dHA6Ly9sb2NhbGhvc3Q6NzA5OCIsImF1ZCI6Imh0dHA6Ly9sb2NhbGhvc3Q6NDIwMCJ9.uaPRp2NGo4ueLqREMgA8pJuutUp5mDLE8nx3xH5zMQQ",
-        isConfirmed: true,
-      };
-
-      const userData = handleLoginResponse({
-        ...res.data,
-        userData: mockUserData,
-      });
+      const userData = handleLoginResponse(res.data);
 
       if (userData) {
         toast.success(t("loginSuccessful"));
@@ -58,20 +50,20 @@ const SignIn = () => {
   };
 
   const handleQuickLogin = (role: "client" | "vendor") => {
-    const encryptedCredentials = {
+    const credentials = {
       client: {
         username: "abdokader184@gmail.com",
-        password: "LEESQgMOD4p23/7tUFsGHQ==",
+        password: "P@$$w0rd", // Use plain password
       },
       vendor: {
         username: "mahmoud7@gmail.com",
-        password: "LEESQgMOD4p23/7tUFsGHQ==",
+        password: "P@$$w0rd", // Use plain password
       },
     };
 
-    const creds = encryptedCredentials[role];
+    const creds = credentials[role];
 
-    // Simulate form submission with quick login credentials
+    // Encryption happens in onSubmit
     onSubmit({
       username: creds.username,
       password: creds.password,
@@ -83,7 +75,6 @@ const SignIn = () => {
       className="relative min-h-screen flex items-center justify-center"
       dir={isRTL ? "rtl" : "ltr"}
     >
-      {/* Background Video */}
       <video
         autoPlay
         muted
@@ -94,7 +85,6 @@ const SignIn = () => {
         <source src="/revving.mp4" type="video/mp4" />
       </video>
 
-      {/* Gradient Overlay */}
       <motion.div
         className="absolute inset-0 bg-gradient-to-br from-primary/60 to-secondary/60 z-10"
         initial={{ opacity: 0 }}
@@ -102,7 +92,6 @@ const SignIn = () => {
         transition={{ duration: 0.8 }}
       />
 
-      {/* Content */}
       <motion.div
         className="relative z-20 px-4 min-h-screen flex items-center justify-center w-full"
         initial={{ opacity: 0 }}
@@ -112,7 +101,6 @@ const SignIn = () => {
         <div className="w-full max-w-md">
           <SignInForm onSubmit={onSubmit} onQuickLogin={handleQuickLogin} />
 
-          {/* Footer Text */}
           <motion.div
             className="text-center mt-6 text-white/80 text-xs"
             variants={fadeIn}

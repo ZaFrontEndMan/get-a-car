@@ -12,7 +12,6 @@ import {
 import { useLanguage } from "../contexts/LanguageContext";
 import { useAuth } from "../contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import TestimonialForm from "./TestimonialForm";
 
 interface Testimonial {
   id: string;
@@ -105,117 +104,81 @@ const TestimonialsSection = () => {
           </p>
         </div>
 
-        {showForm && user ? (
-          <div className="mb-12">
-            <TestimonialForm />
-          </div>
-        ) : null}
-
-        {testimonials.length > 0 ? (
-          <Carousel
-            opts={{
-              align: "start",
-              loop: true,
-              direction: isRTL ? "rtl" : "ltr",
-            }}
-            className="w-full"
-          >
-            <CarouselContent className={isRTL ? "-mr-4" : "-ml-4"}>
-              {testimonials.map((testimonial) => (
-                <CarouselItem
-                  key={testimonial.id}
-                  className={`${
-                    isRTL ? "pr-4" : "pl-4"
-                  } basis-full md:basis-1/2 lg:basis-1/4`}
-                >
-                  <Card className="bg-white shadow-sm hover:shadow-md transition-shadow h-full">
-                    <CardContent className="p-6">
-                      <div
-                        className={`flex items-center mb-4 ${
-                          isRTL ? "flex-row-reverse" : ""
-                        }`}
-                      >
-                        <Quote
-                          className={`h-6 w-6 text-primary ${
-                            isRTL ? "ml-2" : "mr-2"
-                          }`}
-                        />
-                        <div className="flex">
-                          {[...Array(5)].map((_, i) => (
-                            <Star
-                              key={i}
-                              className={`h-4 w-4 ${
-                                i < testimonial.rating
-                                  ? "text-yellow-400 fill-current"
-                                  : "text-gray-300"
-                              }`}
-                            />
-                          ))}
-                        </div>
-                      </div>
-
-                      <p
-                        className={`text-gray-600 mb-4 leading-relaxed ${
-                          isRTL ? "text-right" : "text-left"
-                        }`}
-                      >
-                        "{getDisplayComment(testimonial)}"
-                      </p>
-
-                      <div
-                        className={`flex items-center ${
-                          isRTL ? "flex-row-reverse" : ""
-                        }`}
-                      >
-                        {testimonial.avatar_url ? (
-                          <img
-                            src={testimonial.avatar_url}
-                            alt={getDisplayName(testimonial)}
-                            className={`w-10 h-10 rounded-full ${
-                              isRTL ? "ml-3" : "mr-3"
+        <Carousel
+          opts={{
+            align: "start",
+            loop: true,
+            direction: isRTL ? "rtl" : "ltr",
+          }}
+          className="w-full"
+        >
+          <CarouselContent className={isRTL ? "-mr-4" : "-ml-4"}>
+            {testimonials.map((testimonial) => (
+              <CarouselItem
+                key={testimonial.id}
+                className={`${
+                  isRTL ? "pr-4" : "pl-4"
+                } basis-full md:basis-1/2 lg:basis-1/4`}
+              >
+                <Card className="bg-white shadow-sm hover:shadow-md transition-shadow h-full">
+                  <CardContent className="p-6">
+                    <div>
+                      <Quote className={`h-6 w-6 text-primary`} />
+                      <div className="flex">
+                        {[...Array(5)].map((_, i) => (
+                          <Star
+                            key={i}
+                            className={`h-4 w-4 ${
+                              i < testimonial.rating
+                                ? "text-yellow-400 fill-current"
+                                : "text-gray-300"
                             }`}
                           />
-                        ) : (
-                          <div
-                            className={`w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center ${
-                              isRTL ? "ml-3" : "mr-3"
-                            } font-medium`}
-                          >
-                            {getDisplayName(testimonial).charAt(0)}
-                          </div>
-                        )}
-                        <div className={isRTL ? "text-right" : "text-left"}>
-                          <p className="font-medium text-gray-900">
-                            {getDisplayName(testimonial)}
-                          </p>
-                          {testimonial.location ? (
-                            <p className="text-sm text-gray-500">
-                              {getDisplayLocation(testimonial)}
-                            </p>
-                          ) : null}
-                        </div>
+                        ))}
                       </div>
-                    </CardContent>
-                  </Card>
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-            <CarouselPrevious className="hidden md:flex" />
-            <CarouselNext className="hidden md:flex" />
-          </Carousel>
-        ) : (
-          <div className="text-center py-12">
-            <p className="text-gray-500 mb-4">
-              {t("noTestimonialsYet") || "No testimonials yet"}
-            </p>
-            {user ? (
-              <Button onClick={() => setShowForm(true)} variant="outline">
-                <Plus className={`h-4 w-4 ${isRTL ? "ml-2" : "mr-2"}`} />
-                {t("beTheFirst") || "Be the first to share your experience"}
-              </Button>
-            ) : null}
-          </div>
-        )}
+                    </div>
+
+                    <p
+                      className={`text-gray-600 mb-4 leading-relaxed ${
+                        isRTL ? "text-right" : "text-left"
+                      }`}
+                    >
+                      "{getDisplayComment(testimonial)}"
+                    </p>
+
+                    <div className={`flex items-center gap-2`}>
+                      {testimonial.avatar_url ? (
+                        <img
+                          src={testimonial.avatar_url}
+                          alt={getDisplayName(testimonial)}
+                          className={`w-10 h-10 rounded-full `}
+                        />
+                      ) : (
+                        <div
+                          className={`w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-medium`}
+                        >
+                          {getDisplayName(testimonial).charAt(0)}
+                        </div>
+                      )}
+                      <div>
+                        <p className="font-medium text-gray-900">
+                          {getDisplayName(testimonial)}
+                        </p>
+                        {testimonial.location ? (
+                          <p className="text-sm text-gray-500">
+                            {getDisplayLocation(testimonial)}
+                          </p>
+                        ) : null}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+          <CarouselPrevious className="hidden md:flex" />
+          <CarouselNext className="hidden md:flex" />
+        </Carousel>
       </div>
     </section>
   );
