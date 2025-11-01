@@ -856,7 +856,6 @@ export const arTranslations = {
   cityLabel: "المدينة",
   cityPlaceholder: "اختر المدينة",
   phoneLabel: "رقم الهاتف",
-  phonePlaceholder: "ادخل رقم الهاتف",
   emailPlaceholder: "ادخل البريد الإلكتروني",
   managerNameLabel: "اسم المدير",
   managerNamePlaceholder: "ادخل اسم المدير",
@@ -1315,6 +1314,24 @@ export const arTranslations = {
     "تم إعادة تعيين كلمة المرور بنجاح! جاري التوجيه إلى تسجيل الدخول...",
   errorResettingPassword: "خطأ في إعادة تعيين كلمة المرور",
   didNotReceiveCode: "لم تستلم الرمز؟ حاول مرة أخرى",
+  basicInformation: "المعلومات الأساسية",
+  personalDetails: "التفاصيل الشخصية",
+  security: "الأمان",
+  nationalIdRequired: "مستندات الهوية الوطنية مطلوبة",
+  drivingLicenseRequired: "مستندات رخصة القيادة مطلوبة",
+  signupError: "حدث خطأ أثناء التسجيل",
+  registrationSuccessful:
+    "تم التسجيل بنجاح! جاري إعادة التوجيه إلى تسجيل الدخول...",
+  firstNamePlaceholder: "أدخل اسمك الأول",
+  lastNamePlaceholder: "أدخل اسمك الأخير",
+  phonePlaceholder: "05XXXXXXXXX أو +966",
+  companyNamePlaceholder: "أدخل اسم شركتك",
+  businessLicensePlaceholder: "أدخل رقم الترخيص التجاري",
+  dateOfBirthPlaceholder: "اختر تاريخ ميلادك",
+  nationalIdPlaceholder: "أدخل رقم هويتك الوطنية (10 أرقام)",
+  licenseIdPlaceholder: "أدخل رقم رخصة القيادة (10 أرقام)",
+  passwordPlaceholder: "أدخل كلمة مرور قوية (6 أحرف على الأقل)",
+  confirmPasswordPlaceholder: "تأكيد كلمة المرور",
 };
 
 export default arTranslations;

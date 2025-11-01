@@ -1,16 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { useLanguage } from "../contexts/LanguageContext";
 import { cn } from "@/lib/utils";
-
-import {
-  useCountries,
-  useCitiesByCountry,
-  getSaudiArabiaId,
-} from "../hooks/useCountriesAndCities";
-import { useRegistration } from "../hooks/useRegistration";
-import UserTypeSwitcher from "../components/auth/UserTypeSwitcher";
-import DocumentUpload from "../components/auth/DocumentUpload";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -29,55 +19,21 @@ import {
   AccordionContent,
 } from "@/components/ui/accordion";
 import { Eye, EyeOff, AlertCircle } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { useRegistration } from "@/hooks/useRegistration";
+import { getSaudiArabiaId, useCitiesByCountry, useCountries } from "@/hooks/useCountriesAndCities";
+import DocumentUpload from "./DocumentUpload";
 
-const SignUp: React.FC = () => {
+const ClientSignUp: React.FC = () => {
   const { t, language } = useLanguage();
   const navigate = useNavigate();
   const isRTL = language === "ar";
-  const [userType, setUserType] = useState<"client" | "vendor">("client");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState("");
   const [expandedSection, setExpandedSection] = useState("section1");
 
   const { isLoading, error: apiError, register } = useRegistration();
-
-  // Field-level errors
-  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
-
-  // KSA validators
-  const saPhoneRegex =
-    /^(?:\+?9665\d{8}|009665\d{8}|9665\d{8}|05\d{8}|5\d{8})$/;
-
-  const isValidSaudiPhone = (value: string) => {
-    const normalized =
-      value.startsWith("+") || value.startsWith("00")
-        ? value
-        : value.startsWith("0")
-        ? value
-        : value.startsWith("5")
-        ? `0${value}`
-        : value;
-    return saPhoneRegex.test(normalized);
-  };
-
-  const isValidSaudiNationalId = (id: string) => {
-    const digits = id.replace(/\D/g, "");
-    if (digits.length !== 10) return false;
-    let sum = 0;
-    for (let i = 0; i < 9; i++) {
-      let v = parseInt(digits[i], 10);
-      if (i % 2 === 0) {
-        v = v * 2;
-        v = Math.floor(v / 10) + (v % 10);
-      }
-      sum += v;
-    }
-    const check = (10 - (sum % 10)) % 10;
-    return check === parseInt(digits[9], 10);
-  };
-
-  const isValidSaudiLicense = (value: string) => /^\d{10}$/.test(value.trim());
 
   useEffect(() => {
     if (error || apiError) {
@@ -92,8 +48,6 @@ const SignUp: React.FC = () => {
     phone: "",
     password: "",
     confirmPassword: "",
-    companyName: "",
-    businessLicense: "",
     gender: "",
     country: "",
     city: "",
@@ -106,8 +60,6 @@ const SignUp: React.FC = () => {
   const [fileData, setFileData] = useState({
     nationalIdFront: null as File | null,
     nationalIdBack: null as File | null,
-    licenseIdFront: null as File | null,
-    licenseIdBack: null as File | null,
     drivingLicenseFront: null as File | null,
     drivingLicenseBack: null as File | null,
   });
@@ -115,7 +67,7 @@ const SignUp: React.FC = () => {
   const { data: countries } = useCountries();
   const { data: cities } = useCitiesByCountry(formData.country);
 
-  useEffect(() => {
+  React.useEffect(() => {
     const setDefaultCountry = async () => {
       const saudiId = await getSaudiArabiaId();
       if (saudiId && !formData.country) {
@@ -126,17 +78,7 @@ const SignUp: React.FC = () => {
   }, []);
 
   const handleInputChange = (field: string, value: string | boolean) => {
-    if (
-      ["phone", "nationalId", "licenseId"].includes(field) &&
-      typeof value === "string"
-    ) {
-      value =
-        field === "phone"
-          ? value.replace(/[^\d+]/g, "")
-          : value.replace(/\D/g, "");
-    }
     setFormData((prev) => ({ ...prev, [field]: value }));
-    setFieldErrors((prev) => ({ ...prev, [field]: "" }));
     if (error) setError("");
   };
 
@@ -145,49 +87,25 @@ const SignUp: React.FC = () => {
   };
 
   const validateForm = () => {
-    const errs: Record<string, string> = {};
-
     if (!formData.firstName.trim() || !formData.lastName.trim()) {
-      errs.name = t("nameRequired");
+      setError(t("nameRequired"));
+      return false;
     }
     if (!formData.email.trim()) {
-      errs.email = t("emailRequired");
+      setError(t("emailRequired"));
+      return false;
     }
     if (!formData.password || formData.password.length < 6) {
-      errs.password = t("passwordMinLength");
+      setError(t("passwordMinLength"));
+      return false;
     }
     if (formData.password !== formData.confirmPassword) {
-      errs.confirmPassword = t("passwordMismatch");
+      setError(t("passwordMismatch"));
+      return false;
     }
     if (!formData.acceptTerms) {
-      errs.acceptTerms = t("acceptTermsRequired");
-    }
-
-    if (formData.phone && !isValidSaudiPhone(formData.phone)) {
-      errs.phone = t("invalidSaudiPhone") || "Invalid Saudi phone number";
-    }
-
-    if (!formData.nationalId) {
-      errs.nationalId = t("nationalIdRequired");
-    } else if (!isValidSaudiNationalId(formData.nationalId)) {
-      errs.nationalId =
-        t("invalidSaudiNationalId") || "Invalid Saudi National ID";
-    }
-
-    if (userType === "vendor") {
-      if (!formData.companyName.trim()) {
-        errs.companyName = t("companyNameRequired");
-      }
-      if (!formData.businessLicense.trim()) {
-        errs.businessLicense = t("businessLicenseRequired");
-      }
-    } else {
-      if (!formData.licenseId) {
-        errs.licenseId = t("drivingLicenseRequired");
-      } else if (!isValidSaudiLicense(formData.licenseId)) {
-        errs.licenseId =
-          t("invalidSaudiLicense") || "Invalid Saudi driving license number";
-      }
+      setError(t("acceptTermsRequired"));
+      return false;
     }
 
     if (formData.dateOfBirth) {
@@ -195,35 +113,30 @@ const SignUp: React.FC = () => {
       const birthDate = new Date(formData.dateOfBirth);
       let calculatedAge = today.getFullYear() - birthDate.getFullYear();
       const monthDiff = today.getMonth() - birthDate.getMonth();
+
       if (
         monthDiff < 0 ||
         (monthDiff === 0 && today.getDate() < birthDate.getDate())
       ) {
         calculatedAge--;
       }
+
       if (calculatedAge < 18) {
-        errs.dateOfBirth = t("mustBe18OrOlder");
+        setError(t("mustBe18OrOlder"));
+        return false;
       }
     }
 
     if (!fileData.nationalIdFront || !fileData.nationalIdBack) {
-      errs.nationalIdFiles = t("nationalIdRequired");
-    }
-    if (userType === "vendor") {
-      if (!fileData.licenseIdFront || !fileData.licenseIdBack) {
-        errs.vendorLicenseFiles = t("businessLicenseRequired");
-      }
-    } else {
-      if (!fileData.drivingLicenseFront || !fileData.drivingLicenseBack) {
-        errs.drivingLicenseFiles = t("drivingLicenseRequired");
-      }
-    }
-
-    setFieldErrors(errs);
-    if (Object.keys(errs).length) {
-      setError(Object.values(errs)[0]);
+      setError(t("nationalIdRequired"));
       return false;
     }
+
+    if (!fileData.drivingLicenseFront || !fileData.drivingLicenseBack) {
+      setError(t("drivingLicenseRequired"));
+      return false;
+    }
+
     return true;
   };
 
@@ -248,9 +161,9 @@ const SignUp: React.FC = () => {
         }
       });
 
-      formDataObj.append("userType", userType);
+      formDataObj.append("userType", "client");
 
-      const success = await register(userType, formDataObj);
+      const success = await register("client", formDataObj);
 
       if (success) {
         navigate("/signin", {
@@ -263,32 +176,24 @@ const SignUp: React.FC = () => {
         setError(apiError);
       }
     } catch (error: any) {
-      console.error("Signup error:", error);
+      console.error("Client signup error:", error);
       setError(error.message || t("signupError"));
     }
   };
 
   return (
     <div
-      className="min-h-screen bg-gradient-to-br from-primary to-secondary flex flex-col"
+      className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col"
       dir={isRTL ? "rtl" : "ltr"}
     >
       <div className="flex-1 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-        <h2 className="text-2xl font-bold text-center text-white drop-shadow-sm">
+        <h2 className="text-2xl font-bold text-center text-primary">
           {t("createAccount")}
         </h2>
 
         <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-3xl">
-          <Card className=" shadow-2xl border-0">
-            <CardHeader>
-              <CardTitle className="text-center">
-                <UserTypeSwitcher
-                  userType={userType}
-                  onUserTypeChange={setUserType}
-                />
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
+          <Card>
+            <CardContent className="pt-6">
               <form onSubmit={handleSubmit} className="space-y-6">
                 {(error || apiError) && (
                   <div className="bg-red-50 border border-red-200 rounded-md p-4 flex items-center gap-2">
@@ -320,7 +225,6 @@ const SignUp: React.FC = () => {
                             <Input
                               id="firstName"
                               type="text"
-                              placeholder={t("firstNamePlaceholder")}
                               value={formData.firstName}
                               onChange={(e) =>
                                 handleInputChange("firstName", e.target.value)
@@ -328,18 +232,12 @@ const SignUp: React.FC = () => {
                               isRTL={isRTL}
                               required
                             />
-                            {fieldErrors.name && (
-                              <p className="text-xs text-red-600 mt-1">
-                                {fieldErrors.name}
-                              </p>
-                            )}
                           </div>
                           <div>
                             <Label htmlFor="lastName">{t("lastName")}</Label>
                             <Input
                               id="lastName"
                               type="text"
-                              placeholder={t("lastNamePlaceholder")}
                               value={formData.lastName}
                               onChange={(e) =>
                                 handleInputChange("lastName", e.target.value)
@@ -355,7 +253,6 @@ const SignUp: React.FC = () => {
                           <Input
                             id="email"
                             type="email"
-                            placeholder={t("emailPlaceholder")}
                             value={formData.email}
                             onChange={(e) =>
                               handleInputChange("email", e.target.value)
@@ -363,11 +260,6 @@ const SignUp: React.FC = () => {
                             isRTL={isRTL}
                             required
                           />
-                          {fieldErrors.email && (
-                            <p className="text-xs text-red-600 mt-1">
-                              {fieldErrors.email}
-                            </p>
-                          )}
                         </div>
 
                         <div>
@@ -375,72 +267,13 @@ const SignUp: React.FC = () => {
                           <Input
                             id="phone"
                             type="tel"
-                            placeholder={t("phonePlaceholder")}
                             value={formData.phone}
                             onChange={(e) =>
                               handleInputChange("phone", e.target.value)
                             }
                             isRTL={isRTL}
                           />
-                          {fieldErrors.phone && (
-                            <p className="text-xs text-red-600 mt-1">
-                              {fieldErrors.phone}
-                            </p>
-                          )}
                         </div>
-
-                        {userType === "vendor" && (
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                              <Label htmlFor="companyName">
-                                {t("companyName")}
-                              </Label>
-                              <Input
-                                id="companyName"
-                                type="text"
-                                placeholder={t("companyNamePlaceholder")}
-                                value={formData.companyName}
-                                onChange={(e) =>
-                                  handleInputChange(
-                                    "companyName",
-                                    e.target.value
-                                  )
-                                }
-                                isRTL={isRTL}
-                                required
-                              />
-                              {fieldErrors.companyName && (
-                                <p className="text-xs text-red-600 mt-1">
-                                  {fieldErrors.companyName}
-                                </p>
-                              )}
-                            </div>
-                            <div>
-                              <Label htmlFor="businessLicense">
-                                {t("businessLicense")}
-                              </Label>
-                              <Input
-                                id="businessLicense"
-                                type="text"
-                                placeholder={t("businessLicensePlaceholder")}
-                                value={formData.businessLicense}
-                                onChange={(e) =>
-                                  handleInputChange(
-                                    "businessLicense",
-                                    e.target.value
-                                  )
-                                }
-                                isRTL={isRTL}
-                                required
-                              />
-                              {fieldErrors.businessLicense && (
-                                <p className="text-xs text-red-600 mt-1">
-                                  {fieldErrors.businessLicense}
-                                </p>
-                              )}
-                            </div>
-                          </div>
-                        )}
                       </div>
                     </AccordionContent>
                   </AccordionItem>
@@ -482,18 +315,12 @@ const SignUp: React.FC = () => {
                             <Input
                               id="dateOfBirth"
                               type="date"
-                              placeholder={t("dateOfBirthPlaceholder")}
                               value={formData.dateOfBirth}
                               onChange={(e) =>
                                 handleInputChange("dateOfBirth", e.target.value)
                               }
                               isRTL={isRTL}
                             />
-                            {fieldErrors.dateOfBirth && (
-                              <p className="text-xs text-red-600 mt-1">
-                                {fieldErrors.dateOfBirth}
-                              </p>
-                            )}
                           </div>
                           <div>
                             <Label htmlFor="nationalId">
@@ -502,18 +329,12 @@ const SignUp: React.FC = () => {
                             <Input
                               id="nationalId"
                               type="text"
-                              placeholder={t("nationalIdPlaceholder")}
                               value={formData.nationalId}
                               onChange={(e) =>
                                 handleInputChange("nationalId", e.target.value)
                               }
                               isRTL={isRTL}
                             />
-                            {fieldErrors.nationalId && (
-                              <p className="text-xs text-red-600 mt-1">
-                                {fieldErrors.nationalId}
-                              </p>
-                            )}
                           </div>
                         </div>
 
@@ -572,28 +393,20 @@ const SignUp: React.FC = () => {
                           </div>
                         </div>
 
-                        {userType !== "vendor" && (
-                          <div>
-                            <Label htmlFor="licenseId">
-                              {t("drivingLicenseNumber")}
-                            </Label>
-                            <Input
-                              id="licenseId"
-                              type="text"
-                              placeholder={t("licenseIdPlaceholder")}
-                              value={formData.licenseId}
-                              onChange={(e) =>
-                                handleInputChange("licenseId", e.target.value)
-                              }
-                              isRTL={isRTL}
-                            />
-                            {fieldErrors.licenseId && (
-                              <p className="text-xs text-red-600 mt-1">
-                                {fieldErrors.licenseId}
-                              </p>
-                            )}
-                          </div>
-                        )}
+                        <div>
+                          <Label htmlFor="licenseId">
+                            {t("drivingLicenseNumber")}
+                          </Label>
+                          <Input
+                            id="licenseId"
+                            type="text"
+                            value={formData.licenseId}
+                            onChange={(e) =>
+                              handleInputChange("licenseId", e.target.value)
+                            }
+                            isRTL={isRTL}
+                          />
+                        </div>
                       </div>
                     </AccordionContent>
                   </AccordionItem>
@@ -627,68 +440,26 @@ const SignUp: React.FC = () => {
                           />
                         </div>
 
-                        {userType === "vendor" ? (
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <DocumentUpload
-                              title={t("licenseIdFront")}
-                              documentType="license_id"
-                              side="front"
-                              onImageUpdate={(file) =>
-                                handleFileUpdate("licenseIdFront", file)
-                              }
-                              currentImageFile={fileData.licenseIdFront}
-                            />
-                            <DocumentUpload
-                              title={t("licenseIdBack")}
-                              documentType="license_id"
-                              side="back"
-                              onImageUpdate={(file) =>
-                                handleFileUpdate("licenseIdBack", file)
-                              }
-                              currentImageFile={fileData.licenseIdBack}
-                            />
-                          </div>
-                        ) : (
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <DocumentUpload
-                              title={t("drivingLicenseFront")}
-                              documentType="driving_license"
-                              side="front"
-                              onImageUpdate={(file) =>
-                                handleFileUpdate("drivingLicenseFront", file)
-                              }
-                              currentImageFile={fileData.drivingLicenseFront}
-                            />
-                            <DocumentUpload
-                              title={t("drivingLicenseBack")}
-                              documentType="driving_license"
-                              side="back"
-                              onImageUpdate={(file) =>
-                                handleFileUpdate("drivingLicenseBack", file)
-                              }
-                              currentImageFile={fileData.drivingLicenseBack}
-                            />
-                          </div>
-                        )}
-
-                        {/* File-level errors */}
-                        {fieldErrors.nationalIdFiles && (
-                          <p className="text-xs text-red-600">
-                            {fieldErrors.nationalIdFiles}
-                          </p>
-                        )}
-                        {userType === "vendor" &&
-                          fieldErrors.vendorLicenseFiles && (
-                            <p className="text-xs text-red-600">
-                              {fieldErrors.vendorLicenseFiles}
-                            </p>
-                          )}
-                        {userType !== "vendor" &&
-                          fieldErrors.drivingLicenseFiles && (
-                            <p className="text-xs text-red-600">
-                              {fieldErrors.drivingLicenseFiles}
-                            </p>
-                          )}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <DocumentUpload
+                            title={t("drivingLicenseFront")}
+                            documentType="driving_license"
+                            side="front"
+                            onImageUpdate={(file) =>
+                              handleFileUpdate("drivingLicenseFront", file)
+                            }
+                            currentImageFile={fileData.drivingLicenseFront}
+                          />
+                          <DocumentUpload
+                            title={t("drivingLicenseBack")}
+                            documentType="driving_license"
+                            side="back"
+                            onImageUpdate={(file) =>
+                              handleFileUpdate("drivingLicenseBack", file)
+                            }
+                            currentImageFile={fileData.drivingLicenseBack}
+                          />
+                        </div>
                       </div>
                     </AccordionContent>
                   </AccordionItem>
@@ -708,7 +479,6 @@ const SignUp: React.FC = () => {
                               <Input
                                 id="password"
                                 type={showPassword ? "text" : "password"}
-                                placeholder={t("passwordPlaceholder")}
                                 value={formData.password}
                                 onChange={(e) =>
                                   handleInputChange("password", e.target.value)
@@ -730,11 +500,6 @@ const SignUp: React.FC = () => {
                                   <Eye className="h-5 w-5 text-gray-400" />
                                 )}
                               </button>
-                              {fieldErrors.password && (
-                                <p className="text-xs text-red-600 mt-1">
-                                  {fieldErrors.password}
-                                </p>
-                              )}
                             </div>
                           </div>
                           <div>
@@ -745,7 +510,6 @@ const SignUp: React.FC = () => {
                               <Input
                                 id="confirmPassword"
                                 type={showConfirmPassword ? "text" : "password"}
-                                placeholder={t("confirmPasswordPlaceholder")}
                                 value={formData.confirmPassword}
                                 onChange={(e) =>
                                   handleInputChange(
@@ -772,11 +536,6 @@ const SignUp: React.FC = () => {
                                   <Eye className="h-5 w-5 text-gray-400" />
                                 )}
                               </button>
-                              {fieldErrors.confirmPassword && (
-                                <p className="text-xs text-red-600 mt-1">
-                                  {fieldErrors.confirmPassword}
-                                </p>
-                              )}
                             </div>
                           </div>
                         </div>
@@ -785,8 +544,7 @@ const SignUp: React.FC = () => {
                   </AccordionItem>
                 </Accordion>
 
-                {/* Terms and Conditions */}
-                <div className="flex items-start gap-2 pt-2">
+                <div className="flex items-start gap-2 pt-4">
                   <input
                     id="acceptTerms"
                     type="checkbox"
@@ -798,7 +556,7 @@ const SignUp: React.FC = () => {
                   />
                   <label
                     htmlFor="acceptTerms"
-                    className="text-sm text-gray-700 dark:text-gray-800"
+                    className="text-sm text-gray-700 dark:text-gray-300"
                   >
                     {t("agreeToTerms")}{" "}
                     <Link to="/terms" className="text-primary hover:underline">
@@ -806,19 +564,12 @@ const SignUp: React.FC = () => {
                     </Link>
                   </label>
                 </div>
-                {fieldErrors.acceptTerms && (
-                  <p className="text-xs text-red-600 -mt-2">
-                    {fieldErrors.acceptTerms}
-                  </p>
-                )}
 
-                {/* Submit Button */}
                 <Button type="submit" disabled={isLoading} className="w-full">
                   {isLoading ? t("creatingAccount") : t("createAccount")}
                 </Button>
 
-                {/* Sign In Link */}
-                <div className="text-center text-sm text-gray-700">
+                <div className="text-center text-sm text-gray-600 dark:text-gray-400">
                   {t("alreadyHaveAccount")}{" "}
                   <Link to="/signin" className="text-primary hover:underline">
                     {t("signInHere")}
@@ -833,4 +584,4 @@ const SignUp: React.FC = () => {
   );
 };
 
-export default SignUp;
+export default ClientSignUp;
