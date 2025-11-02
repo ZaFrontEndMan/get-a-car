@@ -84,22 +84,25 @@ export const getAllOffers = async (
     pageSize,
   };
 
-  const { data } = await axiosInstance.get("/Client/Website/CarAllOffers", {
-    params,
-  });
+  const { data } = await axiosInstance.get("/Client/Website/CarAllOffers");
 
   // API wraps inside `data`
   return data.data;
 };
 
 // Get most popular offers (short list)
-export const getMostPopularOffers = async (): Promise<PopularOffersResponse> => {
-  const { data } = await axiosInstance.get("/Client/Website/getMostPopularOffers");
-  return data;
-};
+export const getMostPopularOffers =
+  async (): Promise<PopularOffersResponse> => {
+    const { data } = await axiosInstance.get(
+      "/Client/Website/getMostPopularOffers"
+    );
+    return data;
+  };
 
 // Get most popular cars
 export const getMostPopularCars = async (): Promise<PopularCarsResponse> => {
-  const { data } = await axiosInstance.get("/Client/Website/GetMostPopularCars");
+  const { data } = await axiosInstance.get(
+    "/Client/Website/GetMostPopularCars"
+  );
   return data;
 };
