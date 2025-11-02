@@ -47,17 +47,45 @@ export const useRegistration = (): UseRegistrationReturn => {
       // Create FormData
       const formData = new FormData();
 
-      // Create UserDetails object with encrypted password
-      const userDetailsWithEncryptedPassword = {
-        ...userDetails,
-        Password: encryptedPassword,
-      };
+      // Add UserData fields using dot notation
+      formData.append("UserData.Password", encryptedPassword);
+      formData.append("UserData.IsPhone", String(userDetails.IsPhone));
 
-      // Add UserDetails as JSON string
-      formData.append(
-        "UserDetails",
-        JSON.stringify(userDetailsWithEncryptedPassword)
-      );
+      // Add UserDetails fields using dot notation
+      formData.append("UserDetails.Email", userDetails.Email || "");
+      formData.append("UserDetails.FullName", userDetails.FullName || "");
+      formData.append("UserDetails.PhoneNumber", userDetails.PhoneNumber || "");
+      formData.append("UserDetails.Address", userDetails.Address || "");
+      formData.append("UserDetails.NationalId", userDetails.NationalId || "");
+      formData.append("UserDetails.City", String(userDetails.City || ""));
+      formData.append("UserDetails.Country", String(userDetails.Country || ""));
+
+      // Add any other fields from UserDetails
+      Object.keys(userDetails).forEach((key) => {
+        // Skip already added fields
+        if (
+          ![
+            "Password",
+            "IsPhone",
+            "Email",
+            "FullName",
+            "PhoneNumber",
+            "Address",
+            "NationalId",
+            "City",
+            "Country",
+          ].includes(key)
+        ) {
+          const value = userDetails[key as keyof UserDetails];
+          if (value !== null && value !== undefined) {
+            if (typeof value === "boolean") {
+              formData.append(`UserDetails.${key}`, value ? "1" : "0");
+            } else {
+              formData.append(`UserDetails.${key}`, String(value));
+            }
+          }
+        }
+      });
 
       // Add only the relevant document files (don't send null/undefined files)
       if (documents) {

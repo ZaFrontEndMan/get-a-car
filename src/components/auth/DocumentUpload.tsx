@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Upload, X, FileText } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
@@ -24,9 +24,32 @@ const DocumentUpload: React.FC<DocumentUploadProps> = ({
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const { t } = useLanguage();
 
+  // Sync preview URL whenever currentImageFile changes
+  useEffect(() => {
+    if (currentImageFile && !previewUrl) {
+      const objectUrl = URL.createObjectURL(currentImageFile);
+      setPreviewUrl(objectUrl);
+      setSelectedFile(currentImageFile);
+    }
+  }, [currentImageFile, previewUrl]);
+
+  // Cleanup preview URL on unmount
+  useEffect(() => {
+    return () => {
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
+    };
+  }, [previewUrl]);
+
   const handleFileSelect = (file: File) => {
     setIsUploading(true);
     try {
+      // Revoke old preview URL before creating new one
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
+
       setSelectedFile(file);
       onImageUpdate(file);
 
