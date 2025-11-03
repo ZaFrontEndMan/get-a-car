@@ -1401,6 +1401,26 @@ export const enTranslations = {
   howItWorksDescription: "Follow our simple process to get started",
   ourPartners: "Our Partners",
   partnersDescription: "We partner with leading brands and organizations",
+  happyClients: "Happy Clients",
+  clientsWhoTrustOurService:
+    "Clients who trust our service for their travel needs.",
+  bookingsCompleted: "Bookings Completed",
+  successfulBookingsMade: "Successful bookings made through our platform.",
+  carsReadyForRental: "A wide variety of cars ready for you to rent.",
+  vendorsPartneringWithUs:
+    "Trusted vendors partnering with us to provide the best service.",
+  faqDescription:
+    "Find answers to common questions about car rentals, booking process, and our services.",
+  searchFAQs: "Search FAQs...",
+  resultsFound: "results found",
+  totalFAQs: "total FAQs available",
+  noFAQsAvailable: "No FAQs available at the moment",
+  noResultsFound: "No results found",
+  tryDifferentSearch: "Try a different search term",
+  clearSearch: "Clear search",
+  stillNeedHelp: "Still need help?",
+  contactOurSupport: "Contact our support team for personalized assistance",
+  contactSupport: "Contact Support",
 };
 
 export default enTranslations;

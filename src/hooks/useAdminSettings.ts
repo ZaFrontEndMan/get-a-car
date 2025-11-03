@@ -1,6 +1,14 @@
-// hooks/useAdminSettings.ts
 import { useQuery } from "@tanstack/react-query";
-import { ApiAboutUs, ApiContactUs, constantsApi } from "@/api/website/constantsApi";
+import {
+  ApiAboutUs,
+  ApiContactUs,
+  ApiFAQ,
+  ApiPrivacyPolicy,
+  ApiTermsAndCondition,
+  ApprovedFeedback,
+  WebsiteStatistics,
+  constantsApi,
+} from "@/api/website/constantsApi";
 
 export interface AdminSettings {
   siteName: string;
@@ -11,6 +19,7 @@ export interface AdminSettings {
   city: string;
   country: string;
   website: string;
+  businessHours: string;
   facebookUrl: string;
   twitterUrl: string;
   instagramUrl: string;
@@ -18,6 +27,11 @@ export interface AdminSettings {
   youtubeUrl: string;
   aboutData?: ApiAboutUs | null;
   contactSubmissions?: ApiContactUs[];
+  approvedFeedback?: ApprovedFeedback[];
+  websiteStatistics?: WebsiteStatistics | null;
+  // New properties for Privacy Policy and Terms & Conditions
+  privacyPolicies?: ApiPrivacyPolicy[];
+  termsAndConditions?: ApiTermsAndCondition[];
 }
 
 const DEFAULT_SETTINGS: AdminSettings = {
@@ -29,6 +43,7 @@ const DEFAULT_SETTINGS: AdminSettings = {
   city: "Riyadh",
   country: "Saudi Arabia",
   website: "https://getcar.sa",
+  businessHours: "",
   facebookUrl: "https://facebook.com/getcar",
   twitterUrl: "https://twitter.com/getcar",
   instagramUrl: "https://instagram.com/getcar",
@@ -41,60 +56,106 @@ export const useAdminSettings = () => {
     queryKey: ["admin-settings"],
     queryFn: async (): Promise<AdminSettings> => {
       try {
-        // Fetch About Us data from API
-        let aboutData: ApiAboutUs | null = null;
-        try {
-          const aboutList = await constantsApi.getAllAboutUs();
-          aboutData =
-            aboutList?.find((item) => item.isActive) || aboutList?.[0] || null;
-        } catch (err) {
-          console.error("Failed to fetch about us data:", err);
-        }
+        const [
+          aboutList,
+          submissions,
+          approvedFeedback,
+          websiteStatistics,
+          privacyPolicies,
+          termsAndConditions,
+        ] = await Promise.all([
+          constantsApi.getAllAboutUs(),
+          constantsApi.getAllContactUs(),
+          constantsApi.getApprovedFeedback(),
+          constantsApi.getWebsiteStatistics(),
+          constantsApi.getAllPrivacyPolicies(),
+          constantsApi.getAllTermsAndConditions(),
+        ]);
 
-        // Fetch Contact submissions from API
-        let contactSubmissions: ApiContactUs[] = [];
+        const aboutData =
+          aboutList?.find((item) => item.isActive) || aboutList?.[0] || null;
+        const contactSubmissions = submissions?.slice(0, 5) || [];
+
         let contactEmail = DEFAULT_SETTINGS.contactEmail;
         let supportPhone = DEFAULT_SETTINGS.supportPhone;
+        let address = DEFAULT_SETTINGS.address;
+        let website = DEFAULT_SETTINGS.website;
+        let businessHours = DEFAULT_SETTINGS.businessHours;
 
-        try {
-          const submissions = await constantsApi.getAllContactUs();
-          // Get the most recent submissions (limit to 5)
-          contactSubmissions = submissions?.slice(0, 5) || [];
-
-          // Extract contact email and phone from first submission
-          if (submissions && submissions.length > 0) {
-            const firstSubmission = submissions[0];
-            if (firstSubmission.email) {
-              contactEmail = firstSubmission.email;
-            }
-            if (firstSubmission.phoneNumber) {
-              supportPhone = firstSubmission.phoneNumber;
-            }
+        if (submissions && submissions.length > 0) {
+          const firstSubmission = submissions[0];
+          if (firstSubmission.email) {
+            contactEmail = firstSubmission.email;
           }
-        } catch (err) {
-          console.error("Failed to fetch contact submissions:", err);
+          if (firstSubmission.phoneNumber) {
+            supportPhone = firstSubmission.phoneNumber;
+          }
+          if (firstSubmission.address) {
+            address = firstSubmission.address;
+          }
+          if (firstSubmission.website) {
+            website = firstSubmission.website;
+          }
+          if (firstSubmission.businessHours) {
+            businessHours = firstSubmission.businessHours;
+          }
         }
 
-        // Merge settings with extracted contact data
         const mergedSettings: AdminSettings = {
           ...DEFAULT_SETTINGS,
           contactEmail,
           supportPhone,
+          address,
+          website,
+          businessHours,
           aboutData,
           contactSubmissions,
+          approvedFeedback: approvedFeedback || [],
+          websiteStatistics,
+          // Add the new data
+          privacyPolicies: privacyPolicies || [],
+          termsAndConditions: termsAndConditions || [],
         };
 
         return mergedSettings;
       } catch (err) {
         console.error("Error fetching admin settings:", err);
-        // Return default values with API data on error
         return {
           ...DEFAULT_SETTINGS,
           aboutData: null,
           contactSubmissions: [],
+          approvedFeedback: [],
+          websiteStatistics: null,
+          privacyPolicies: [],
+          termsAndConditions: [],
         };
       }
     },
     staleTime: 1000 * 60 * 5, // Cache for 5 minutes
+  });
+};
+
+// Separate hooks for individual use cases
+export const usePrivacyPolicies = () => {
+  return useQuery({
+    queryKey: ["privacy-policies"],
+    queryFn: () => constantsApi.getAllPrivacyPolicies(),
+    staleTime: 1000 * 60 * 15, // Cache for 15 minutes
+  });
+};
+
+export const useTermsAndConditions = () => {
+  return useQuery({
+    queryKey: ["terms-and-conditions"],
+    queryFn: () => constantsApi.getAllTermsAndConditions(),
+    staleTime: 1000 * 60 * 15, // Cache for 15 minutes
+  });
+};
+export const useFAQ = () => {
+  return useQuery<ApiFAQ[]>({
+    queryKey: ["faqs"],
+    queryFn: () => constantsApi.getAllFAQs(),
+    staleTime: 1000 * 60 * 15, // Cache for 15 minutes
+    retry: 1,
   });
 };

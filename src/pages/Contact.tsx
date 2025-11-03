@@ -182,12 +182,7 @@ const ContactContent = () => {
                         <h3 className="font-semibold text-gray-900">
                           {t("address")}
                         </h3>
-                        <p className="text-gray-600">
-                          {settings?.address || t("defaultAddress")}
-                        </p>
-                        <p className="text-gray-600">
-                          {settings?.city}, {settings?.country}
-                        </p>
+                        <p className="text-gray-600">{settings?.address}</p>
                       </div>
                     </div>
 
@@ -259,10 +254,7 @@ const ContactContent = () => {
                           {t("businessHours")}
                         </h3>
                         <p className="text-gray-600">
-                          {t("sundayThursdayHours")}
-                        </p>
-                        <p className="text-gray-600">
-                          {t("fridaySaturdayHours")}
+                          {settings?.businessHours}
                         </p>
                       </div>
                     </div>

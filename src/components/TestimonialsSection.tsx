@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Star, Quote, Plus } from "lucide-react";
+import { Star, Quote } from "lucide-react";
 import {
   Carousel,
   CarouselContent,
@@ -10,68 +9,28 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import { useLanguage } from "../contexts/LanguageContext";
-import { useAuth } from "../contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
-
-interface Testimonial {
-  id: string;
-  name: string;
-  name_ar?: string;
-  comment: string;
-  comment_ar?: string;
-  rating: number;
-  location?: string;
-  location_ar?: string;
-  avatar_url?: string;
-  is_featured: boolean;
-}
+import { useAdminSettings } from "../hooks/useAdminSettings";
 
 const TestimonialsSection = () => {
   const { t, language } = useLanguage();
-  const { user } = useAuth();
-  const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
-  const [showForm, setShowForm] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const { data: settings, isLoading } = useAdminSettings();
+  const testimonials = settings?.approvedFeedback || [];
   const isRTL = language === "ar";
 
-  useEffect(() => {
-    fetchTestimonials();
-  }, []);
+  const getAverageRating = (feedback: any) => {
+    const ratings = [
+      feedback.ratingVendor,
+      feedback.ratingCar,
+      feedback.ratingApp,
+      feedback.ratingBooking,
+    ].filter((r) => r !== null && r !== undefined);
 
-  const fetchTestimonials = async () => {
-    try {
-      const { data, error } = await supabase
-        .from("testimonials")
-        .select("*")
-        .eq("is_active", true)
-        .order("order_index", {
-          ascending: true,
-        });
-      if (error) throw error;
-      setTestimonials(data || []);
-    } catch (error) {
-      console.error("Error fetching testimonials:", error);
-    } finally {
-      setIsLoading(false);
-    }
+    if (ratings.length === 0) return 0;
+    return Math.round(ratings.reduce((a, b) => a + b, 0) / ratings.length);
   };
 
-  const getDisplayName = (testimonial: Testimonial) => {
-    return language === "ar" && testimonial.name_ar
-      ? testimonial.name_ar
-      : testimonial.name;
-  };
-
-  const getDisplayComment = (testimonial: Testimonial) => {
-    return language === "ar" && testimonial.comment_ar
-      ? testimonial.comment_ar
-      : testimonial.comment;
-  };
-
-  const getDisplayLocation = (testimonial: Testimonial) => {
-    return language === "ar" && testimonial.location_ar
-      ? testimonial.location_ar
-      : testimonial.location;
+  const getInitials = (firstName: string, lastName: string) => {
+    return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
   };
 
   if (isLoading) {
@@ -91,8 +50,12 @@ const TestimonialsSection = () => {
     );
   }
 
+  if (!testimonials || testimonials.length === 0) {
+    return null;
+  }
+
   return (
-    <section className="py-16 bg-gray-50" dir={isRTL ? "rtl" : "ltr"}>
+    <section className="py-16 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold text-gray-900 mb-4">
@@ -108,28 +71,25 @@ const TestimonialsSection = () => {
           opts={{
             align: "start",
             loop: true,
-            direction: isRTL ? "rtl" : "ltr",
           }}
           className="w-full"
         >
-          <CarouselContent className={isRTL ? "-mr-4" : "-ml-4"}>
+          <CarouselContent className={` me-4`}>
             {testimonials.map((testimonial) => (
               <CarouselItem
-                key={testimonial.id}
-                className={`${
-                  isRTL ? "pr-4" : "pl-4"
-                } basis-full md:basis-1/2 lg:basis-1/4`}
+                key={testimonial.feedbackId}
+                className={` basis-full md:basis-1/2 lg:basis-1/4`}
               >
                 <Card className="bg-white shadow-sm hover:shadow-md transition-shadow h-full">
                   <CardContent className="p-6">
-                    <div>
-                      <Quote className={`h-6 w-6 text-primary`} />
-                      <div className="flex">
+                    <div className="mb-4">
+                      <Quote className={`h-6 w-6 text-primary `} />
+                      <div className={`flex`}>
                         {[...Array(5)].map((_, i) => (
                           <Star
                             key={i}
                             className={`h-4 w-4 ${
-                              i < testimonial.rating
+                              i < getAverageRating(testimonial)
                                 ? "text-yellow-400 fill-current"
                                 : "text-gray-300"
                             }`}
@@ -138,37 +98,36 @@ const TestimonialsSection = () => {
                       </div>
                     </div>
 
-                    <p
-                      className={`text-gray-600 mb-4 leading-relaxed ${
-                        isRTL ? "text-right" : "text-left"
-                      }`}
-                    >
-                      "{getDisplayComment(testimonial)}"
+                    <p className={`text-gray-600 mb-4 leading-relaxed `}>
+                      "{testimonial.comments}"
                     </p>
 
                     <div className={`flex items-center gap-2`}>
-                      {testimonial.avatar_url ? (
+                      {testimonial.customerImage ? (
                         <img
-                          src={testimonial.avatar_url}
-                          alt={getDisplayName(testimonial)}
-                          className={`w-10 h-10 rounded-full `}
+                          src={`${import.meta.env.VITE_UPLOADS_BASE_URL}${
+                            testimonial.customerImage
+                          }`}
+                          alt={`${testimonial.fristName} ${testimonial.lastName}`}
+                          className="w-10 h-10 rounded-full object-cover"
                         />
                       ) : (
-                        <div
-                          className={`w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-medium`}
-                        >
-                          {getDisplayName(testimonial).charAt(0)}
+                        <div className="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-medium">
+                          {getInitials(
+                            testimonial.fristName,
+                            testimonial.lastName
+                          )}
                         </div>
                       )}
                       <div>
-                        <p className="font-medium text-gray-900">
-                          {getDisplayName(testimonial)}
+                        <p className={`font-medium text-gray-900 `}>
+                          {testimonial.fristName} {testimonial.lastName}
                         </p>
-                        {testimonial.location ? (
-                          <p className="text-sm text-gray-500">
-                            {getDisplayLocation(testimonial)}
+                        {testimonial.address && (
+                          <p className={`text-sm text-gray-500 `}>
+                            {testimonial.address}
                           </p>
-                        ) : null}
+                        )}
                       </div>
                     </div>
                   </CardContent>

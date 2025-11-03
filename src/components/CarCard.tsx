@@ -10,6 +10,7 @@ interface CarCardProps {
     id: string;
     title: string;
     brand: string;
+    model?: string;
     image?: string;
     images?: string[];
     price?: number;
@@ -75,9 +76,12 @@ const CarCard = ({ car, viewMode = "grid" }: CarCardProps) => {
   const weeklyPrice = car.weeklyPrice || car.weekly_rate || null;
   const monthlyPrice = car.monthlyPrice || car.monthly_rate || null;
   const vendor = car.vendor || car.vendors || null;
-  const fuelType = car.fuel || car.fuel_type || "gasoline";
-  const transmissionType = car.transmission || "automatic";
-  const rating = car.rating || 4.5;
+
+  // Extract first word from fuel type
+  const fuelType = (car.fuel || car.fuel_type || "gasoline")
+    .trim()
+    .split(" ")[0];
+  const transmissionType = (car.transmission || "automatic").trim();
 
   if (viewMode === "list") {
     return (
@@ -122,14 +126,10 @@ const CarCard = ({ car, viewMode = "grid" }: CarCardProps) => {
             <div>
               <div className="flex justify-between items-start mb-2">
                 <div>
-                  <h3 className="font-bold text-xl text-gray-900">
+                  <h3 className="font-bold text-xl text-gray-900 truncate">
                     {car.title}
                   </h3>
                   <p className="text-gray-600 text-sm">{car.brand}</p>
-                </div>
-                <div className="flex items-center gap-1 rtl:gap-reverse">
-                  <Star className="h-4 w-4 text-accent fill-current" />
-                  <span className="text-sm font-medium">{rating}</span>
                 </div>
               </div>
 
@@ -172,7 +172,7 @@ const CarCard = ({ car, viewMode = "grid" }: CarCardProps) => {
   return (
     <Link
       to={`/cars/${car.id}`}
-      className="block bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300 hover:scale-[1.02] flex flex-col h-full"
+      className=" bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300 hover:scale-[1.02] flex flex-col h-full"
     >
       <div className="relative flex-shrink-0">
         <LazyImage
@@ -209,12 +209,10 @@ const CarCard = ({ car, viewMode = "grid" }: CarCardProps) => {
       <div className="p-4 flex flex-col flex-grow">
         <div className="flex justify-between items-start mb-2">
           <div>
-            <h3 className="font-bold text-lg text-gray-900">{car.title}</h3>
-            <p className="text-gray-600 text-sm">{car.brand}</p>
-          </div>
-          <div className="flex items-center gap-1 rtl:gap-reverse">
-            <Star className="h-4 w-4 text-accent fill-current" />
-            <span className="text-sm font-medium">{rating}</span>
+            <h3 className="font-bold text-lg text-gray-900 truncate">
+              {car.title}
+            </h3>
+            <p className="text-gray-600 text-sm">{car.model || car.brand}</p>
           </div>
         </div>
 
@@ -236,7 +234,7 @@ const CarCard = ({ car, viewMode = "grid" }: CarCardProps) => {
         <div className="space-y-2 mb-4 flex-grow">
           <div className="flex justify-between items-center">
             <span className="text-sm text-gray-600 font-bold">
-              {t("daily")}
+              {t("dailyRate")}
             </span>
             <span className="text-lg font-bold text-primary">
               {t("currency")} {dailyPrice}
@@ -246,7 +244,7 @@ const CarCard = ({ car, viewMode = "grid" }: CarCardProps) => {
           <div className="flex justify-between items-center min-h-[20px]">
             {weeklyPrice ? (
               <>
-                <span className="text-sm text-gray-600">{t("weekly")}</span>
+                <span className="text-sm text-gray-600">{t("weeklyRate")}</span>
                 <span className="text-sm font-semibold text-gray-800">
                   {t("currency")} {weeklyPrice}
                 </span>
@@ -259,7 +257,9 @@ const CarCard = ({ car, viewMode = "grid" }: CarCardProps) => {
           <div className="flex justify-between items-center min-h-[20px]">
             {monthlyPrice ? (
               <>
-                <span className="text-sm text-gray-600">{t("monthly")}</span>
+                <span className="text-sm text-gray-600">
+                  {t("monthlyRate")}
+                </span>
                 <span className="text-sm font-semibold text-gray-800">
                   {t("currency")} {monthlyPrice}
                 </span>

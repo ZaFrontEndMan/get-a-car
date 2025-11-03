@@ -1413,6 +1413,25 @@ export const arTranslations = {
   howItWorksDescription: "اتبع عملنا البسيطة للبدء",
   ourPartners: "شركاؤنا",
   partnersDescription: "نحن نتعاون مع العلامات التجارية والمنظمات الرائدة",
+  happyClients: "[translate:عملاء سعداء]",
+  clientsWhoTrustOurService:
+    "[translate:عملاء يثقون في خدمتنا لتلبية احتياجات سفرهم.]",
+  bookingsCompleted: "[translate:الحجوزات المكتملة]",
+  successfulBookingsMade: "[translate:الحجوزات الناجحة التي تمت عبر منصتنا.]",
+  carsReadyForRental: "[translate:مجموعة واسعة من السيارات جاهزة للإيجار.]",
+  vendorsPartneringWithUs: "[translate:شركاء موثوق بهم يقدمون أفضل الخدمات.]",
+  faqDescription:
+    "ابحث عن إجابات للأسئلة الشائعة حول تأجير السيارات، عملية الحجز، وخدماتنا.",
+  searchFAQs: "بحث في الأسئلة الشائعة...",
+  resultsFound: "نتائج تم العثور عليها",
+  totalFAQs: "الأسئلة الشائعة المتاحة",
+  noFAQsAvailable: "لا توجد أسئلة شائعة متاحة في الوقت الحالي",
+  noResultsFound: "لم يتم العثور على نتائج",
+  tryDifferentSearch: "جرب مصطلح بحث مختلف",
+  clearSearch: "مسح البحث",
+  stillNeedHelp: "هل لا تزال بحاجة إلى مساعدة؟",
+  contactOurSupport: "اتصل بفريق الدعم للحصول على مساعدة مخصصة",
+  contactSupport: "الاتصال بالدعم",
 };
 
 export default arTranslations;

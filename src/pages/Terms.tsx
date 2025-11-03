@@ -1,66 +1,115 @@
-
-import React from 'react';
-import { useLanguage } from '../contexts/LanguageContext';
-import { useTermsConditions } from '../hooks/useTermsConditions';
-import Navbar from '../components/layout/navbar/Navbar';
-import MobileNav from '../components/MobileNav';
-import Footer from '../components/Footer';
-import { Skeleton } from '../components/ui/skeleton';
+import React from "react";
+import { useLanguage } from "../contexts/LanguageContext";
+import { Skeleton } from "../components/ui/skeleton";
+import { useTermsAndConditions } from "@/hooks/useAdminSettings";
 
 const Terms = () => {
   const { t, language } = useLanguage();
-  const { data: terms, isLoading, error } = useTermsConditions();
+  const {
+    data: termsConditions = [],
+    isLoading,
+    error,
+  } = useTermsAndConditions();
+
+  // Sort by id to maintain consistent order, then filter active terms
+  const activeTerms = termsConditions
+    .filter((terms) => terms.isActive)
+    .sort((a, b) => a.id - b.id);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-cream">
+        <main className="pt-20 pb-12">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-12">
+              <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                {t("terms")}
+              </h1>
+              <p className="text-lg text-gray-600">{t("termsDescription")}</p>
+            </div>
+            <div className="space-y-8">
+              <div className="bg-white rounded-lg shadow-sm p-8">
+                <Skeleton className="h-6 w-1/3 mb-4" />
+                <div className="space-y-4">
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-4/5" />
+                  <Skeleton className="h-4 w-3/5" />
+                </div>
+              </div>
+              <div className="bg-white rounded-lg shadow-sm p-8">
+                <Skeleton className="h-6 w-1/4 mb-4" />
+                <div className="space-y-3">
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-2/3" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  if (error || activeTerms.length === 0) {
+    return (
+      <div className="min-h-screen bg-cream">
+        <main className="pt-20 pb-12">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-12">
+              <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                {t("terms")}
+              </h1>
+              <p className="text-lg text-gray-600">{t("termsDescription")}</p>
+            </div>
+            <div className="bg-white rounded-lg shadow-sm p-8 text-center">
+              <p className="text-red-600">{t("errorLoadingTerms")}</p>
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-cream">
-      <Navbar />
-      
       <main className="pt-20 pb-12">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              {t('terms')}
+              {t("terms")}
             </h1>
-            <p className="text-lg text-gray-600">
-              {t('termsDescription')}
-            </p>
+            <p className="text-lg text-gray-600">{t("termsDescription")}</p>
           </div>
 
-          {isLoading ? (
-            <div className="space-y-4">
-              <Skeleton className="h-8 w-3/4" />
-              <Skeleton className="h-4 w-full" />
-              <Skeleton className="h-4 w-full" />
-              <Skeleton className="h-4 w-2/3" />
-            </div>
-          ) : error ? (
-            <div className="text-center py-12">
-              <p className="text-red-600">
-                {t('errorLoadingTerms')}
-              </p>
-            </div>
-          ) : (
-            <div className="bg-white rounded-lg shadow-sm p-8">
-              <div className="prose prose-lg max-w-none">
-                <div className="whitespace-pre-line text-gray-700 leading-relaxed">
-                  {language === 'ar' && terms?.content_ar ? terms.content_ar : terms?.content_en}
+          <div className="space-y-8">
+            {activeTerms.map((terms) => (
+              <div
+                key={terms.id}
+                className="bg-white rounded-lg shadow-sm p-6 sm:p-8"
+              >
+                <h2 className="text-xl font-semibold text-gray-900 mb-4 border-b border-gray-200 pb-2">
+                  {terms.mainTitle}
+                </h2>
+                <div className="prose prose-lg max-w-none text-gray-700 leading-relaxed">
+                  <p className="whitespace-pre-line">{terms.mainDescription}</p>
                 </div>
               </div>
-              
-              {terms && (
-                <div className="mt-8 pt-8 border-t border-gray-200">
-                  <p className="text-sm text-gray-500">
-                    {`${t('version')} ${terms.version} - ${t('lastUpdated')}: ${new Date(terms.updated_at).toLocaleDateString(language === 'ar' ? 'ar-SA' : 'en-US')}`}
-                  </p>
-                </div>
-              )}
+            ))}
+          </div>
+
+          {/* {activeTerms.length > 0 && (
+            <div className="mt-12 pt-8 border-t border-gray-200 text-center">
+              <p className="text-sm text-gray-500">
+                {`${t("version")} ${activeTerms[0].id} - ${t(
+                  "lastUpdated"
+                )}: ${new Date().toLocaleDateString(
+                  language === "ar" ? "ar-SA" : "en-US"
+                )}`}
+              </p>
             </div>
-          )}
+          )} */}
         </div>
       </main>
-
-      <Footer />
-      <MobileNav />
     </div>
   );
 };
