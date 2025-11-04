@@ -97,20 +97,18 @@ const SignUp: React.FC = () => {
   const saPhoneRegex =
     /^(?:\+?9665\d{8}|009665\d{8}|9665\d{8}|05\d{8}|5\d{8})$/;
 
-  const isValidSaudiPhone = (value: string) => {
-    const normalized =
-      value.startsWith("+") || value.startsWith("00")
-        ? value
-        : value.startsWith("0")
-        ? value
-        : value.startsWith("5")
-        ? `0${value}`
-        : value;
-    return saPhoneRegex.test(normalized);
+  const isValidSaudiPhone = (value: string): boolean => {
+    if (!value) return false;
+    const cleaned = value.replace(/[\s-().]/g, "");
+    return saPhoneRegex.test(cleaned);
   };
 
-  const isValidSaudiNationalId = (id: string) => {
-    return true; // Accept all numbers
+  const isValidSaudiNationalId = (id: string): boolean => {
+    if (!id) return false;
+    const cleaned = id.replace(/\s/g, "");
+    if (cleaned.length !== 10) return false;
+    if (cleaned.startsWith("0")) return false;
+    return /^\d{10}$/.test(cleaned);
   };
 
   const isValidSaudiLicense = (value: string) => /^\d{10}$/.test(value.trim());
@@ -275,7 +273,7 @@ const SignUp: React.FC = () => {
         Password: formData.password,
         UserName: formData.email,
         ConfirmPassword: formData.confirmPassword,
-        IsPhone: formData.phone ? true : false,
+        IsPhone: false,
         FirstName: formData.firstName,
         LastName: formData.lastName,
         FullName: `${formData.firstName} ${formData.lastName}`,

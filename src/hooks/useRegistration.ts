@@ -50,12 +50,15 @@ export const useRegistration = (): UseRegistrationReturn => {
       // Add UserData fields using dot notation
       formData.append("UserData.Password", encryptedPassword);
       formData.append("UserData.IsPhone", String(userDetails.IsPhone));
+      formData.append("UserData.UserName", String(userDetails.UserName));
 
       // Add UserDetails fields using dot notation
       formData.append("UserDetails.Email", userDetails.Email || "");
       formData.append("UserDetails.FullName", userDetails.FullName || "");
+      formData.append("UserDetails.NickName", userDetails.FullName || "");
+      formData.append("UserDetails.ManagerName", userDetails.FullName || "");
       formData.append("UserDetails.PhoneNumber", userDetails.PhoneNumber || "");
-      formData.append("UserDetails.Address", userDetails.Address || "");
+      formData.append("UserDetails.Address", userDetails.country || "");
       formData.append("UserDetails.NationalId", userDetails.NationalId || "");
       formData.append("UserDetails.City", String(userDetails.City || ""));
       formData.append("UserDetails.Country", String(userDetails.Country || ""));
@@ -74,6 +77,8 @@ export const useRegistration = (): UseRegistrationReturn => {
             "NationalId",
             "City",
             "Country",
+            "UserName",
+            "ConfirmPassword",
           ].includes(key)
         ) {
           const value = userDetails[key as keyof UserDetails];

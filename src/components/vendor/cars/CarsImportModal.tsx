@@ -42,20 +42,67 @@ const CarsImportModal = ({
 
   const handleDownloadTemplate = () => {
     downloadTemplate(undefined, {
-      onSuccess: (data) => {
-        const url = window.URL.createObjectURL(data);
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = "cars_template.csv";
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        window.URL.revokeObjectURL(url);
+      onSuccess: (base64File: string, variables) => {
+        try {
+          // Decode base64 to bytes
+          const paddedBase64 = base64File
+            .replace(/(\r\n|\n)/g, "\\n")
+            .replace(/[^A-Za-z0-9+/\\n=\\s]/g, "");
 
-        toast({
-          title: t("template_downloaded"),
-          description: t("template_downloaded_description"),
-        });
+          // Fix padding if needed
+          let base64String = paddedBase64;
+          while (base64String.length % 4) {
+            base64String += "=";
+          }
+
+          // Decode base64 to binary data
+          const binaryString = atob(base64String);
+          const bytes = new Uint8Array(binaryString.length);
+
+          for (let i = 0; i < binaryString.length; i++) {
+            bytes[i] = binaryString.charCodeAt(i);
+          }
+
+          // Create blob from binary data
+          const blob = new Blob([bytes], {
+            type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+          });
+          const url = window.URL.createObjectURL(blob);
+
+          // Download the decoded file
+          const link = document.createElement("a");
+          link.href = url;
+          link.download = "cars_template.xlsx";
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(url);
+
+          toast({
+            title: t("template_downloaded"),
+            description: t("template_downloaded_description"),
+          });
+        } catch (error) {
+          console.error("Error decoding file:", error);
+
+          // Fallback: try direct download if decoding fails
+          const url = window.URL.createObjectURL(
+            new Blob([base64File], { type: "application/octet-stream" })
+          );
+          const link = document.createElement("a");
+          link.href = url;
+          link.download = "cars_template.xlsx";
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(url);
+
+          toast({
+            title: t("download_error"),
+            description: t("fallback_download_warning"),
+            variant: "destructive",
+          });
+        }
       },
       onError: (error) => {
         console.error("Template download error:", error);
