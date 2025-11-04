@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, Suspense } from "react";
 import {
   Routes,
   Route,
@@ -8,6 +8,7 @@ import {
 } from "react-router-dom";
 import { useUser } from "@/contexts/UserContext";
 import routesConfig from "@/config/routes.json";
+import ErrorBoundary from "@/components/ErrorBoundary";
 
 // Import all page components
 import Index from "@/pages/Index";
@@ -136,6 +137,31 @@ const LoadingSpinner = () => (
   </div>
 );
 
+// Safe component wrapper to handle missing components
+const SafeComponent = ({ componentName, ...props }: { componentName: string; [key: string]: any }) => {
+  const Component = componentMap[componentName];
+  
+  if (!Component) {
+    console.error(`Component ${componentName} not found in componentMap`);
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold mb-2">Component Not Found</h2>
+          <p className="text-gray-600 mb-4">The component "{componentName}" could not be loaded.</p>
+          <button 
+            onClick={() => window.location.href = '/'}
+            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          >
+            Go Home
+          </button>
+        </div>
+      </div>
+    );
+  }
+  
+  return <Component {...props} />;
+};
+
 const AppRouter = React.memo(() => {
   const {
     isAuthenticated,
@@ -149,75 +175,81 @@ const AppRouter = React.memo(() => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Enhanced auth guard logic
+  // Enhanced auth guard logic with error handling
   useEffect(() => {
-    // Don't interfere during initial authentication loading
-    if (isLoading) return;
+    try {
+      // Don't interfere during initial authentication loading
+      if (isLoading) return;
 
-    const currentPath = location.pathname;
-    const routeSection = Object.entries(routesConfig).find(([_, section]) => {
-      const sectionConfig = section as RouteSection;
-      if (sectionConfig.basePath) {
-        return currentPath.startsWith(sectionConfig.basePath);
-      }
-      return sectionConfig.routes.some((route) => {
-        if (route.path === "*") return false;
-        return (
-          currentPath === route.path ||
-          (route.path.includes(":") &&
-            currentPath.match(
-              new RegExp(route.path.replace(/:[^/]+/g, "[^/]+"))
-            ))
-        );
-      });
-    });
-
-    if (routeSection) {
-      const [_, section] = routeSection;
-      const config = section as RouteSection;
-
-      // Redirect authenticated users away from auth pages (signin, signup, etc.)
-      if (config.redirectIfAuthenticated && isAuthenticated) {
-        // Check if there's a preserved route to restore
-        const preserved = getPreservedRoute();
-        if (preserved) {
-          navigate(preserved, { replace: true });
-          return;
+      const currentPath = location.pathname;
+      const routeSection = Object.entries(routesConfig).find(([_, section]) => {
+        const sectionConfig = section as RouteSection;
+        if (sectionConfig.basePath) {
+          return currentPath.startsWith(sectionConfig.basePath);
         }
-        
-        // Role-based redirect after login
-        if (userRole === "admin") navigate("/admin", { replace: true });
-        else if (userRole === "vendor")
-          navigate("/vendor-dashboard", { replace: true });
-        else if (userRole === "client")
-          navigate("/dashboard", { replace: true });
-        else navigate(getDefaultRoute(), { replace: true });
-        return;
-      }
+        return sectionConfig.routes.some((route) => {
+          if (route.path === "*") return false;
+          return (
+            currentPath === route.path ||
+            (route.path.includes(":") &&
+              currentPath.match(
+                new RegExp(route.path.replace(/:[^/]+/g, "[^/]+"))
+              ))
+          );
+        });
+      });
 
-      // Preserve current route before redirecting unauthenticated users
-      if (config.requiresAuth && !isAuthenticated) {
-        preserveCurrentRoute();
-        navigate("/signin", { replace: true });
-        return;
-      }
+      if (routeSection) {
+        const [_, section] = routeSection;
+        const config = section as RouteSection;
 
-      // Check role-based access for protected routes only
-      if (config.allowedRoles && !canAccessRoute(config.allowedRoles as any)) {
-        if (isAuthenticated) {
-          // Role-based redirect
+        // Redirect authenticated users away from auth pages (signin, signup, etc.)
+        if (config.redirectIfAuthenticated && isAuthenticated) {
+          // Check if there's a preserved route to restore
+          const preserved = getPreservedRoute();
+          if (preserved && preserved !== currentPath) {
+            navigate(preserved, { replace: true });
+            return;
+          }
+          
+          // Role-based redirect after login
           if (userRole === "admin") navigate("/admin", { replace: true });
           else if (userRole === "vendor")
             navigate("/vendor-dashboard", { replace: true });
           else if (userRole === "client")
             navigate("/dashboard", { replace: true });
           else navigate(getDefaultRoute(), { replace: true });
-        } else {
+          return;
+        }
+
+        // Preserve current route before redirecting unauthenticated users
+        if (config.requiresAuth && !isAuthenticated) {
           preserveCurrentRoute();
           navigate("/signin", { replace: true });
+          return;
         }
-        return;
+
+        // Check role-based access for protected routes only
+        if (config.allowedRoles && !canAccessRoute(config.allowedRoles as any)) {
+          if (isAuthenticated) {
+            // Role-based redirect
+            if (userRole === "admin") navigate("/admin", { replace: true });
+            else if (userRole === "vendor")
+              navigate("/vendor-dashboard", { replace: true });
+            else if (userRole === "client")
+              navigate("/dashboard", { replace: true });
+            else navigate(getDefaultRoute(), { replace: true });
+          } else {
+            preserveCurrentRoute();
+            navigate("/signin", { replace: true });
+          }
+          return;
+        }
       }
+    } catch (error) {
+      console.error('Navigation error:', error);
+      // Fallback navigation on error
+      navigate('/', { replace: true });
     }
   }, [
     isAuthenticated,
@@ -233,78 +265,133 @@ const AppRouter = React.memo(() => {
 
   // Show loading spinner during authentication checks
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
-      </div>
-    );
+    return <LoadingSpinner />;
   }
 
   const renderRouteSection = (
     sectionName: string,
     sectionConfig: RouteSection
   ) => {
-    const { layout, basePath, routes } = sectionConfig;
+    try {
+      const { layout, basePath, routes } = sectionConfig;
 
-    const routeElements = routes.map((route) => {
-      const Component = componentMap[route.component];
-      if (!Component) {
-        console.warn(`Component ${route.component} not found in componentMap`);
-        return null;
-      }
+      const routeElements = routes.map((route) => {
+        // For nested routes under basePath, use relative paths
+        const routePath = basePath ? route.path : route.path;
 
-      // For nested routes under basePath, use relative paths
-      const routePath = basePath ? route.path : route.path;
+        if (route.index) {
+          return (
+            <Route 
+              key={`${sectionName}-index`} 
+              index 
+              element={
+                <ErrorBoundary>
+                  <Suspense fallback={<LoadingSpinner />}>
+                    <SafeComponent componentName={route.component} />
+                  </Suspense>
+                </ErrorBoundary>
+              } 
+            />
+          );
+        }
 
-      if (route.index) {
-        return (
-          <Route key={`${sectionName}-index`} index element={<Component />} />
-        );
-      }
-
-      return (
-        <Route
-          key={`${sectionName}-${route.path}`}
-          path={routePath}
-          element={<Component />}
-        />
-      );
-    });
-
-    // If section has a layout, wrap routes in it
-    if (layout && layoutMap[layout]) {
-      const LayoutComponent = layoutMap[layout];
-      if (basePath) {
         return (
           <Route
-            key={sectionName}
-            path={`${basePath}/*`}
-            element={<LayoutComponent />}
-          >
-            {routeElements}
-          </Route>
+            key={`${sectionName}-${route.path}`}
+            path={routePath}
+            element={
+              <ErrorBoundary>
+                <Suspense fallback={<LoadingSpinner />}>
+                  <SafeComponent componentName={route.component} />
+                </Suspense>
+              </ErrorBoundary>
+            }
+          />
         );
-      } else {
-        return (
-          <Route key={sectionName} element={<LayoutComponent />}>
-            {routeElements}
-          </Route>
-        );
-      }
-    }
+      });
 
-    return routeElements;
+      // If section has a layout, wrap routes in it
+      if (layout && layoutMap[layout]) {
+        const LayoutComponent = layoutMap[layout];
+        if (basePath) {
+          return (
+            <Route
+              key={sectionName}
+              path={`${basePath}/*`}
+              element={
+                <ErrorBoundary>
+                  <LayoutComponent />
+                </ErrorBoundary>
+              }
+            >
+              {routeElements}
+            </Route>
+          );
+        } else {
+          return (
+            <Route 
+              key={sectionName} 
+              element={
+                <ErrorBoundary>
+                  <LayoutComponent />
+                </ErrorBoundary>
+              }
+            >
+              {routeElements}
+            </Route>
+          );
+        }
+      }
+
+      return routeElements;
+    } catch (error) {
+      console.error(`Error rendering route section ${sectionName}:`, error);
+      return (
+        <Route 
+          key={`${sectionName}-error`} 
+          path="*" 
+          element={
+            <div className="min-h-screen flex items-center justify-center">
+              <div className="text-center">
+                <h2 className="text-xl font-semibold mb-2">Route Error</h2>
+                <p className="text-gray-600">Failed to load route section: {sectionName}</p>
+              </div>
+            </div>
+          } 
+        />
+      );
+    }
   };
 
   return (
-    <Routes>
-      {/* Render all route sections */}
-      {Object.entries(routesConfig).map(([sectionName, sectionConfig]) =>
-        renderRouteSection(sectionName, sectionConfig as RouteSection)
-      )}
-      {/* Default route handling */}
-      <Route path="/" element={<Index />} />
-    </Routes>
+    <Suspense fallback={<LoadingSpinner />}>
+      <Routes>
+        {/* Render all route sections */}
+        {Object.entries(routesConfig).map(([sectionName, sectionConfig]) =>
+          renderRouteSection(sectionName, sectionConfig as RouteSection)
+        )}
+        {/* Default route handling */}
+        <Route 
+          path="/" 
+          element={
+            <ErrorBoundary>
+              <Suspense fallback={<LoadingSpinner />}>
+                <Index />
+              </Suspense>
+            </ErrorBoundary>
+          } 
+        />
+        {/* Catch-all route for 404 */}
+        <Route 
+          path="*" 
+          element={
+            <ErrorBoundary>
+              <NotFound />
+            </ErrorBoundary>
+          } 
+        />
+      </Routes>
+    </Suspense>
   );
 });
 
