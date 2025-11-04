@@ -7,6 +7,8 @@ export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 8080,
+    // Add fallback for SPA routing during development
+    historyApiFallback: true,
   },
   plugins: [react()],
   resolve: {
@@ -17,12 +19,13 @@ export default defineConfig(({ mode }) => ({
   build: {
     outDir: "dist",
     assetsDir: "assets",
-    sourcemap: false,
+    sourcemap: mode === 'development',
     rollupOptions: {
       output: {
         manualChunks: {
           vendor: ["react", "react-dom", "react-router-dom"],
           ui: ["@radix-ui/react-dialog", "@radix-ui/react-select"],
+          query: ["@tanstack/react-query"],
         },
         assetFileNames: "assets/[name]-[hash][extname]",
         chunkFileNames: "assets/[name]-[hash].js",
@@ -30,11 +33,29 @@ export default defineConfig(({ mode }) => ({
       },
     },
     chunkSizeWarningLimit: 1000,
+    // Ensure consistent builds
+    minify: mode === 'production' ? 'esbuild' : false,
+  },
+  // Add preview config for SPA routing
+  preview: {
+    port: 4173,
+    host: true,
+    // Ensure SPA routing works in preview mode
+    historyApiFallback: true,
   },
   test: {
     globals: true,
     environment: "jsdom",
     setupFiles: "./src/test/setup.ts",
     css: true,
+  },
+  // Add optimizations
+  optimizeDeps: {
+    include: [
+      "react",
+      "react-dom",
+      "react-router-dom",
+      "@tanstack/react-query",
+    ],
   },
 }));
