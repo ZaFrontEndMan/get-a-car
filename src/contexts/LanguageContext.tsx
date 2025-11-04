@@ -8,7 +8,7 @@ import {
 interface LanguageContextProps {
   language: string;
   setLanguage: (lang: SupportedLanguage) => void;
-  t: (key: string, params?: Record<string, any>) => string; // Updated to accept params
+  t: (key: string, params?: Record<string, any>) => string;
 }
 
 const LanguageContext = createContext<LanguageContextProps | undefined>(
@@ -47,49 +47,67 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({
   const loggedMissingKeys = new Set<string>();
 
   const t = (key: string, params?: Record<string, any>): string => {
-    const translationKey = key as TranslationKey;
-    let translation = translations[language]?.[translationKey];
+    try {
+      const translationKey = key as TranslationKey;
+      let translation = translations[language]?.[translationKey];
 
-    // If missing translation
-    if (!translation) {
-      const warningKey = `${language}:${key}`;
-      if (!loggedMissingKeys.has(warningKey)) {
-        console.warn(
-          `[i18n] Missing translation for "${key}" in language "${language}".`
-        );
-        loggedMissingKeys.add(warningKey);
+      // If missing translation
+      if (!translation) {
+        const warningKey = `${language}:${key}`;
+        if (!loggedMissingKeys.has(warningKey)) {
+          console.warn(
+            `[i18n] Missing translation for "${key}" in language "${language}".`
+          );
+          loggedMissingKeys.add(warningKey);
+        }
+        return key;
       }
+
+      // Replace placeholders (e.g., "Hello {name}") safely
+      if (params) {
+        Object.entries(params).forEach(([param, value]) => {
+          const regex = new RegExp(`\\{${param}\\}`, "g");
+          translation = translation.replace(regex, String(value));
+        });
+      }
+
+      return translation;
+    } catch (error) {
+      console.error("Translation error:", error);
       return key;
     }
-
-    // Replace placeholders (e.g., "Hello {name}") safely
-    if (params) {
-      Object.entries(params).forEach(([param, value]) => {
-        const regex = new RegExp(`\\{${param}\\}`, "g");
-        translation = translation.replace(regex, String(value));
-      });
-    }
-
-    return translation;
   };
 
   const handleSetLanguage = (lang: SupportedLanguage) => {
     console.log("Language change requested:", lang);
-    setLanguage(lang);
-
-    // Persist immediately and refresh to ensure UI consistency across the app
+    
     try {
+      // Update state immediately for UI responsiveness
+      setLanguage(lang);
+      
+      // Persist to localStorage
       if (typeof window !== "undefined") {
         localStorage.setItem("language", lang);
-        // Refresh the page to apply language changes consistently
-        setTimeout(() => {
-          window.location.reload();
-        }, 0);
       }
+      
+      // Instead of forcing a reload, let React handle the re-render
+      // This prevents the blank page issue during navigation
+      // The useEffect above will handle DOM attributes update
+      
     } catch (e) {
-      console.warn("Failed to persist language before reload:", e);
+      console.warn("Failed to change language:", e);
+      // Fallback: if there's an error, maintain current language
     }
   };
+
+  // Don't render children until language is initialized to prevent hydration mismatches
+  if (!isInitialized) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
     <LanguageContext.Provider
