@@ -30,6 +30,9 @@ export const useRentalCarDetails = (carId: number, offerId: number) => {
         description_ar: apiResponse.data.description, // Using same description for now
         discount: "0%", // No discount in rental car details
         discountPercentage: 0,
+        offerImage: getImageUrl(
+          apiResponse?.data?.offerCollectionForCars?.offerImage
+        ),
         validUntil:
           apiResponse.data.endDateAvailableBooking ||
           new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days from now if not provided
@@ -73,18 +76,11 @@ export const useRentalCarDetails = (carId: number, offerId: number) => {
         vendor: {
           id: apiResponse.data.vendorId,
           name: apiResponse.data.vendorName || "Unknown Vendor",
-          rating: 4.8,
-          totalReviews: 0,
           image: getImageUrl(
             apiResponse.data.companyLogo,
             DEFAULT_IMAGES.vendor
           ),
           verified: true,
-          location: "Main Branch", // Default value
-          phone: "",
-          email: "",
-          website: "",
-          carsCount: 10, // Default value
         },
         locations: apiResponse.data.pickUpLocationDto?.map(
           (loc) => loc.address || `Location ${loc.id}`

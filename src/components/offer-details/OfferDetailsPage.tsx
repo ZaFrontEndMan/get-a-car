@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useParams, useSearchParams, useLocation } from "react-router-dom";
 import { useLanguage } from "../../contexts/LanguageContext";
 import { useRentalCarDetails } from "../../hooks/useRentalCarDetails";
@@ -14,18 +14,32 @@ import OfferDetailsLoading from "./OfferDetailsLoading";
 import OfferDetailsNotFound from "./OfferDetailsNotFound";
 import { formatPricingBreakdown } from "@/utils/pricingCalculator";
 
+// --- Simple dialog/modal for image preview ---
+const ImageDialog = ({ openImage, onClose }) =>
+  openImage ? (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70"
+      onClick={onClose}
+      style={{ cursor: "zoom-out" }}
+    >
+      <img
+        src={openImage}
+        alt="Car Large"
+        className="max-w-[90vw] max-h-[90vh] rounded-xl border-white border-2 shadow-lg"
+        onClick={(e) => e.stopPropagation()}
+      />
+    </div>
+  ) : null;
+
 const OfferDetailsPage = () => {
   const { id } = useParams();
   const [searchParams] = useSearchParams();
   const location = useLocation();
   const { t } = useLanguage();
+  const [openImage, setOpenImage] = useState<string | null>(null);
 
   // Determine if current route is car details route (/cars/:id)
   const isCarRoute = location.pathname.startsWith("/cars/");
-
-  // Compute offerId and carId based on route type
-  // - For /offers/:id: offerId comes from the path, carId from query (?carId=...)
-  // - For /cars/:id: carId comes from the path, offerId is not required (set to 0)
   const pathId = id ? parseInt(id) : 0;
   const queryCarId = searchParams.get("carId")
     ? parseInt(searchParams.get("carId")!)
@@ -71,19 +85,31 @@ const OfferDetailsPage = () => {
     pricingBreakdown,
     t("currency")
   );
+
   return (
     <div className="min-h-screen">
       <div className="pt-20 pb-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Conditionally hide header on /cars/:id route */}
           {!isCarRoute && <OfferDetailsHeader offer={offer} />}
-
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Main Content */}
             <div className="lg:col-span-2 space-y-6">
               {/* Car Images and Info */}
               <div className="bg-white rounded-2xl shadow-sm border overflow-hidden">
                 <div className="relative">
+                  {/* Car Images - up to 5, as slider or gallery */}
+                  <div className="flex gap-2 px-4 py-3 overflow-x-auto bg-gray-50 border-b">
+                    {offer.car.gallery?.slice(0, 5).map((img, i) => (
+                      <img
+                        key={i}
+                        src={img}
+                        alt={`Car ${i + 1}`}
+                        className="h-20 w-32 rounded-lg shadow cursor-zoom-in object-cover ring-1 ring-gray-200"
+                        onClick={() => setOpenImage(img)}
+                      />
+                    ))}
+                  </div>
+                  {/* Main car "hero" image */}
                   <img
                     src={offer.car.image}
                     alt={offer.car.name}
@@ -107,13 +133,17 @@ const OfferDetailsPage = () => {
                 </div>
               </div>
 
-              {/* Car Details */}
+              {/* Main Dialog for image preview */}
+              <ImageDialog
+                openImage={openImage}
+                onClose={() => setOpenImage(null)}
+              />
+
               <OfferDetailsContent
                 offer={offer}
                 selectedPricing={selectedPricing}
               />
 
-              {/* Vendor Section - Moved here under car features */}
               {offer.vendor && <OfferVendorSection vendor={offer.vendor} />}
             </div>
 
