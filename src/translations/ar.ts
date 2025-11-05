@@ -27,6 +27,7 @@ export const arTranslations = {
   // Filters
   filters: "المرشحات",
   clearAll: "مسح الكل",
+  clearFilters: "مسح الكل",
   priceRange: "نطاق السعر",
   brands: "العلامات التجارية",
   categories: "الفئات",
@@ -1414,8 +1415,7 @@ export const arTranslations = {
   ourPartners: "شركاؤنا",
   partnersDescription: "نحن نتعاون مع العلامات التجارية والمنظمات الرائدة",
   happyClients: "عملاء سعداء",
-  clientsWhoTrustOurService:
-    "عملاء يثقون في خدمتنا لتلبية احتياجات سفرهم.",
+  clientsWhoTrustOurService: "عملاء يثقون في خدمتنا لتلبية احتياجات سفرهم.",
   bookingsCompleted: "الحجوزات المكتملة",
   successfulBookingsMade: "الحجوزات الناجحة التي تمت عبر منصتنا.",
   carsReadyForRental: "مجموعة واسعة من السيارات جاهزة للإيجار.",
@@ -1432,6 +1432,15 @@ export const arTranslations = {
   stillNeedHelp: "هل لا تزال بحاجة إلى مساعدة؟",
   contactOurSupport: "اتصل بفريق الدعم للحصول على مساعدة مخصصة",
   contactSupport: "الاتصال بالدعم",
+  errorLoadingVendorCars: "خطأ في تحميل سيارات المورد",
+  viewAllCars: "عرض جميع السيارات",
+
+  tryDifferentFiltersVendor:
+    "جرب تعديل المرشحات لرؤية المزيد من السيارات من هذا المورد",
+  noCarsFromVendor: "لا توجد سيارات متاحة من هذا المورد",
+  vendorCarsTitle: "سيارات من هذا المورد",
+  showingXCarsFromVendor: "عرض السيارات من هذا المورد",
+  noCarsFromThisVendor: "لا توجد سيارات متاحة من هذا المورد في الوقت الحالي",
 };
 
 export default arTranslations;

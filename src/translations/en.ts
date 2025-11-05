@@ -22,6 +22,7 @@ export const enTranslations = {
   // Filters
   filters: "Filters",
   clearAll: "Clear All",
+  clearFilters: "Clear All",
   priceRange: "Price Range",
   brands: "Brands",
   categories: "Categories",
@@ -1421,6 +1422,14 @@ export const enTranslations = {
   stillNeedHelp: "Still need help?",
   contactOurSupport: "Contact our support team for personalized assistance",
   contactSupport: "Contact Support",
+  errorLoadingVendorCars: "Error loading vendor cars",
+  viewAllCars: "View All Cars",
+  tryDifferentFiltersVendor:
+    "Try adjusting your filters to see more cars from this vendor",
+  noCarsFromVendor: "No cars available from this vendor",
+  vendorCarsTitle: "Cars from this vendor",
+  showingXCarsFromVendor: "Showing cars from this vendor",
+  noCarsFromThisVendor: "No cars available from this vendor at the moment",
 };
 
 export default enTranslations;

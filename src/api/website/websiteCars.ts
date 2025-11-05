@@ -96,9 +96,38 @@ export interface FilterOption {
 }
 
 export interface CarFilter {
-  header: "vendorNames" | "branches" | "types" | "transmissions" | "fuelTypes";
+  header:
+    | "vendorNames"
+    | "branches"
+    | "types"
+    | "transmissions"
+    | "fuelTypes"
+    | "makes"
+    | "carCapacities";
   filterData: FilterOption[];
 }
+
+export interface CarsFilters {
+  vendorNames?: string[];
+  types?: string[];
+  transmissions?: string[];
+  fuelTypes?: string[];
+  branches?: string[];
+  makes?: string[]; // New: car makes/models
+  carCapacities?: string[]; // New: passenger capacity or similar
+  priceRange?: {
+    min: number;
+    max: number;
+  };
+  pickupLocation?: string;
+  dropOffLocation?: string;
+  pickupDate?: string;
+  dropoffDate?: string;
+  withDriver?: boolean;
+}
+
+// NEW: Export VendorCarsFilters type for use in hooks
+export type VendorCarsFilters = Omit<CarsFilters, "vendorNames">;
 
 export interface AllCarsResponse {
   carSearchResult: Car[];
@@ -111,65 +140,80 @@ export interface AllCarsResponse {
   pageIndex: number;
 }
 
-export interface CarsFilters {
-  vendorNames?: string[];
-  types?: string[];
-  transmissions?: string[];
-  fuelTypes?: string[];
-  branches?: string[];
-  priceRange?: {
-    min: number;
-    max: number;
+export interface VendorCarsResponse {
+  carSearchResult: Car[];
+  carsCommonProp: {
+    data: CarFilter[];
+    maxPrice: number;
   };
-  pickupLocation?: string;
-  dropOffLocation?: string;
-  pickupDate?: string;
-  dropoffDate?: string;
-  withDriver?: boolean;
+  totalRecord: number;
+  totalPages: number;
+  pageIndex: number;
 }
 
+// Shared helper function to build request body from filters
+const buildFilterRequestBody = (
+  filters?: CarsFilters
+): Record<string, unknown> => {
+  const requestBody: Record<string, unknown> = {};
+
+  if (!filters) {
+    return requestBody;
+  }
+
+  // Common filter logic for arrays
+  if (filters.vendorNames?.length) {
+    requestBody.vendorNames = filters.vendorNames;
+  }
+  if (filters.types?.length) {
+    requestBody.types = filters.types;
+  }
+  if (filters.transmissions?.length) {
+    requestBody.transmissions = filters.transmissions;
+  }
+  if (filters.fuelTypes?.length) {
+    requestBody.fuelTypes = filters.fuelTypes;
+  }
+  if (filters.branches?.length) {
+    requestBody.branches = filters.branches;
+  }
+  if (filters.makes?.length) {
+    requestBody.makes = filters.makes;
+  }
+  if (filters.carCapacities?.length) {
+    requestBody.carCapacities = filters.carCapacities;
+  }
+  // Price range
+  if (filters.priceRange) {
+    requestBody.priceRange = filters.priceRange;
+  }
+  // Location and date filters
+  if (filters.pickupLocation) {
+    requestBody.pickupLocation = filters.pickupLocation;
+  }
+  if (filters.dropOffLocation) {
+    requestBody.dropOffLocation = filters.dropOffLocation;
+  }
+  if (filters.pickupDate) {
+    requestBody.pickupDate = filters.pickupDate;
+  }
+  if (filters.dropoffDate) {
+    requestBody.dropoffDate = filters.dropoffDate;
+  }
+  if (filters.withDriver !== undefined) {
+    requestBody.withDriver = filters.withDriver;
+  }
+
+  return requestBody;
+};
+
+// Get all cars with optional filters
 export const getAllCars = async (
   pageIndex: number,
   pageSize: number,
   filters?: CarsFilters
 ): Promise<AllCarsResponse> => {
-  const requestBody: Record<string, unknown> = {};
-
-  if (filters) {
-    if (filters.vendorNames?.length) {
-      requestBody.vendorNames = filters.vendorNames;
-    }
-    if (filters.types?.length) {
-      requestBody.types = filters.types;
-    }
-    if (filters.transmissions?.length) {
-      requestBody.transmissions = filters.transmissions;
-    }
-    if (filters.fuelTypes?.length) {
-      requestBody.fuelTypes = filters.fuelTypes;
-    }
-    if (filters.branches?.length) {
-      requestBody.branches = filters.branches;
-    }
-    if (filters.priceRange) {
-      requestBody.priceRange = filters.priceRange;
-    }
-    if (filters.pickupLocation) {
-      requestBody.pickupLocation = filters.pickupLocation;
-    }
-    if (filters.dropOffLocation) {
-      requestBody.dropOffLocation = filters.dropOffLocation;
-    }
-    if (filters.pickupDate) {
-      requestBody.pickupDate = filters.pickupDate;
-    }
-    if (filters.dropoffDate) {
-      requestBody.dropoffDate = filters.dropoffDate;
-    }
-    if (filters.withDriver !== undefined) {
-      requestBody.withDriver = filters.withDriver;
-    }
-  }
+  const requestBody = buildFilterRequestBody(filters);
 
   const params = {
     pageIndex,
@@ -185,6 +229,33 @@ export const getAllCars = async (
   return data.data;
 };
 
+// Get vendor-specific cars with filters
+export const getVendorCarWithFilter = async (
+  vendorId: string,
+  pageIndex: number,
+  pageSize: number,
+  filters?: VendorCarsFilters // Now using the exported type
+): Promise<VendorCarsResponse> => {
+  const requestBody = buildFilterRequestBody(filters as CarsFilters); // Cast for the helper function
+  
+  // Always include vendorId for this endpoint
+  requestBody.vendorId = vendorId;
+
+  const params = {
+    pageIndex,
+    pageSize,
+  };
+
+  const { data } = await axiosInstance.post(
+    "/Client/Website/GetVendorCarWithFilter",
+    requestBody,
+    { params }
+  );
+
+  return data.data;
+};
+
+// Get most popular cars (no filters)
 export const getMostPopularCars = async (
   pageIndex: number,
   pageSize: number
@@ -196,6 +267,7 @@ export const getMostPopularCars = async (
   return data.data.carSearchResult;
 };
 
+// Get rental car details by ID with offer
 export const getRentalCarDetailsById = async (
   carId: number,
   offerId: number
@@ -210,6 +282,7 @@ export const getRentalCarDetailsById = async (
   return data;
 };
 
+// Get car details by ID (uses carId as offerId)
 export const getCarDetailsById = async (
   carId: number
 ): Promise<RentalCarDetailsResponse> => {
@@ -223,6 +296,7 @@ export const getCarDetailsById = async (
   return data;
 };
 
+// Get similar cars based on criteria
 export const getSimilarCars = async (requestBody: {
   types: string[];
   pickUpLocations: string[];

@@ -1,5 +1,8 @@
 import { CarsFilters } from "../api/website/websiteCars";
 
+// Helper type for vendor-aware filters
+type VendorAwareFilters = CarsFilters | { vendorId?: string };
+
 export const parseUrlParamsToFilters = (
   searchParams: URLSearchParams
 ): CarsFilters => {
@@ -134,11 +137,21 @@ export const filtersToUrlParams = (filters: CarsFilters): URLSearchParams => {
   return params;
 };
 
-export const updateUrlWithFilters = (filters: CarsFilters): void => {
+// Updated function with optional vendorId parameter
+export const updateUrlWithFilters = (
+  filters: CarsFilters,
+  vendorId?: string | undefined
+): void => {
   const params = filtersToUrlParams(filters);
-  const newUrl = params.toString()
-    ? `?${params.toString()}`
-    : window.location.pathname;
+
+  // If vendorId is provided, add it to the URL params
+  if (vendorId) {
+    params.set("id", vendorId);
+  }
+
+  const queryString = params.toString();
+  const newUrl = queryString ? `?${queryString}` : window.location.pathname;
+
   window.history.replaceState({}, "", newUrl);
 };
 

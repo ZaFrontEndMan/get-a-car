@@ -4,6 +4,7 @@
     "routes": [
       { "path": "/", "component": "Index", "exact": true },
       { "path": "/cars", "component": "Cars" },
+      { "path": "/cars/vendor/:id", "component": "Cars" },
       { "path": "/cars/:id", "component": "CarDetails" },
       { "path": "/vendors", "component": "Vendors" },
       { "path": "/vendors/:id", "component": "VendorDetails" },
@@ -78,8 +79,6 @@
   },
   "fallback": {
     "layout": null,
-    "routes": [
-      { "path": "*", "component": "NotFound" }
-    ]
+    "routes": [{ "path": "*", "component": "NotFound" }]
   }
 }

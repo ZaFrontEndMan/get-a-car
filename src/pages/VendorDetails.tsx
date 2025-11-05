@@ -265,7 +265,7 @@ const VendorDetailsContent = () => {
             {t("availableCars")} ({filteredCars.length})
           </h2>
           <Link
-            to={`/cars?vendor=${vendor?.name}`}
+            to={`/cars/vendor/${vendor?.id}`}
             className="text-primary hover:underline font-medium"
           >
             {t("viewAll")}
