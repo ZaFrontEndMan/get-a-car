@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -26,15 +26,18 @@ interface CarFormProps {
 const CarForm = ({ carId, onClose, onSuccess, t }: CarFormProps) => {
   const isEditMode = !!carId;
 
+  // Fetch car data for editing
   const {
     data: carData,
     isLoading: isLoadingCar,
     error: carError,
   } = useGetCarById(carId ? String(carId) : "", isEditMode);
 
+  // Car data from API - useCarForm handles the mapping
   const car = carData?.data?.data || null;
 
-  const { formData, handleChange, setFormData } = useCarForm(car, onSuccess);
+  // Form hooks - direct API structure, no manual mapping needed
+  const { formData, handleChange } = useCarForm(car);
   const { paidFeatures, setPaidFeatures } = usePaidFeatures(car);
   const {
     pickupLocations,
@@ -44,49 +47,15 @@ const CarForm = ({ carId, onClose, onSuccess, t }: CarFormProps) => {
   } = useLocations(car);
   const { protections, setProtections } = useProtections(car);
 
-  useEffect(() => {
-    if (car && isEditMode) {
-      setFormData({
-        id: car.id || "",
-        name: car.name || "",
-        brand: car.tradeMark || "",
-        tradeMarkId: car.tradeMarkId || "",
-        model: car.model || "",
-        modelId: car.modelId || "",
-        year: car.year || new Date().getFullYear(),
-        type: car.type || "",
-        carTypeId: car.carTypeId || "",
-        fuel_type: car.fuelType || "",
-        fuelTypeId: car.fuelTypeId || "",
-        transmission: car.transmission || "",
-        transmissionTypeId: car.transmissionTypeId || "",
-        seats: parseInt(car.doors) || 4,
-        color: car.color || "",
-        license_plate: car.licenseNumber || "",
-        daily_rate: car.pricePerDay || 1,
-        weekly_rate: car.pricePerWeek || 1,
-        monthly_rate: car.pricePerMonth || 1,
-        deposit_amount: 0,
-        images: car.images?.map((img: any) => img.imageUrl) || [],
-        features: extractFeatures(car),
-        is_available: car.availabilityVendor ?? true,
-        branch_id: car.branchId || "",
-        mileage_limit: parseInt(car.liter) || 1,
-        cancellation_policies: "",
-        description: car.description || "",
-        liter: car.liter || "",
-        withDriver: car.withDriver || false,
-        protectionPrice: car.protectionPrice || 1,
-      });
-    }
-  }, [car, isEditMode, setFormData]);
-
+  // Branches for branch selection
   const { data: branchesData, isLoading: branchesLoading } =
     useGetVendorBranches();
 
   const branches = React.useMemo(() => {
     const d = branchesData as any;
     let list: any[] = [];
+
+    // Handle various response structures
     if (Array.isArray(d?.data?.vendorBranches)) list = d.data.vendorBranches;
     else if (Array.isArray(d?.vendorBranches)) list = d.vendorBranches;
     else if (Array.isArray(d?.data?.data?.branches))
@@ -95,69 +64,88 @@ const CarForm = ({ carId, onClose, onSuccess, t }: CarFormProps) => {
     else if (Array.isArray(d?.branches)) list = d.branches;
     else if (Array.isArray(d?.data)) list = d.data;
     else if (Array.isArray(d)) list = d;
+
     return list.map((b) => ({
       id: (b?.id ?? "").toString(),
       name: b?.branchName ?? b?.name ?? t("branch"),
     }));
   }, [branchesData, t]);
 
+  // API mutations
   const createMutation = useCreateCar();
   const updateMutation = useUpdateCar();
   const { toast } = useToast();
   const isSubmitting = createMutation.isPending || updateMutation.isPending;
 
+  // Clean FormData builder - direct field access, no mapping
   const buildApiFormData = () => {
     const fd = new FormData();
 
-    // Helper that doesn't convert File objects to strings
     const append = (key: string, value: any) => {
-      if (value === undefined || value === null) return;
+      if (value === undefined || value === null || value === "") return;
 
-      // Don't convert if it's already a File object
       if (value instanceof File) {
-        fd.append(key, value);
+        fd.append(key, value, value.name);
       } else {
         fd.append(key, typeof value === "string" ? value : String(value));
       }
     };
 
-    // Pricing
-    append("pricePerDay", formData.daily_rate ?? 0);
-    append("pricePerWeek", formData.weekly_rate ?? 0);
-    append("pricePerMonth", formData.monthly_rate ?? 0);
+    // Basic car info
+    // append("name", formData.name);
+    append("description", formData.description);
+    // append("branchId", formData.branchId);
+    append("modelYear", formData.year);
 
-    // IDs and meta
-    append("tradeMarkId", formData.tradeMarkId || 1);
-    append("modelId", formData.modelId || 1);
-    append("carTypeId", formData.carTypeId || 1);
-    append("modelYear", formData.year ?? new Date().getFullYear());
+    // Pricing - direct API fields
+    append("pricePerDay", formData.pricePerDay);
+    append("protectionPrice", formData.protectionPrice);
+    append("isProtection", formData.protectionPrice > 0);
 
-    // License
-    append("licenseNumber", formData.license_plate || "");
+    append("licenseNumber", formData.licenseNumber);
+    append("pricePerWeek", formData.pricePerWeek);
+    append("pricePerMonth", formData.pricePerMonth);
+    // append("protectionPrice", formData.protectionPrice ?? 0);
 
-    // Fuel and transmission
-    append("fuelTypeId", formData.fuelTypeId || 1);
-    append("transmissionTypeId", formData.transmissionTypeId || 1);
+    // Car detail IDs - direct API fields
+    append("tradeMarkId", formData.tradeMarkId);
+    append("modelId", formData.modelId);
+    append("carTypeId", formData.typeId); // Map carTypeId to typeId
+    append("fuelTypeId", formData.fuelTypeId);
+    append("transmissionTypeId", formData.transmissionId);
 
-    // Availability / driver option
-    append("availability", !!formData.is_available);
-    append("withDriver", !!formData.withDriver);
+    // Physical specifications
+    append("doors", formData.doors);
+    append("mileage", formData.liter);
 
-    // Body/description
-    append("doors", String(formData.seats ?? ""));
-    append("description", formData.description || "");
+    // Availability & services
+    append("availability", formData.availabilityVendor);
+    append("withDriver", formData.withDriver);
 
-    // Mileage / fuel liter
-    append("mileage", formData.mileage_limit ?? 0);
-    append("liter", formData.liter || "");
+    // Feature flags - direct boolean access
+    append("electricMirrors", formData.electricMirrors ?? false);
+    append("cruiseControl", formData.cruiseControl ?? false);
+    append("fogLights", formData.fogLights ?? false);
+    append("power", formData.power ?? false);
+    append("roofBox", formData.roofBox ?? false);
+    append("gps", formData.gps ?? false);
+    append("remoteControl", formData.remoteControl ?? false);
+    append("audioInput", formData.audioInput ?? false);
+    append("cdPlayer", formData.cdPlayer ?? false);
+    append("bluetooth", formData.bluetooth ?? false);
+    append("usbInput", formData.usbInput ?? false);
+    append("sensors", formData.sensors ?? false);
+    append("ebdBrakes", formData.ebdBrakes ?? false);
+    append("airbag", formData.airbag ?? false);
+    append("absBrakes", formData.absBrakes ?? false);
 
-    // Protections
+    // Protections - safe ID handling
     if (protections.length > 0) {
       append(
         "protections",
         JSON.stringify(
-          protections.map((p) => ({
-            id: p.id,
+          protections.map((p, index) => ({
+            id: p.id ?? (isEditMode ? carId : undefined),
             NameAr: p.nameAr,
             NameEn: p.nameEn,
             DescriptionAr: p.descriptionAr,
@@ -167,17 +155,17 @@ const CarForm = ({ carId, onClose, onSuccess, t }: CarFormProps) => {
       );
     }
 
-    // Car Services (Paid Features)
+    // Car Services - safe ID handling
     if (paidFeatures.length > 0) {
       append(
         "carServices",
         JSON.stringify(
-          paidFeatures.map((pf) => ({
-            id: pf.id,
+          paidFeatures.map((pf, index) => ({
+            id: pf.id ?? (isEditMode ? carId : undefined),
             ServiceTypeId: pf.serviceTypeId || 1,
-            NameAr: pf.titleAr || pf.title,
-            NameEn: pf.titleEn || pf.title,
-            Price: pf.price,
+            NameAr: pf.titleAr || pf.title || "",
+            NameEn: pf.titleEn || pf.title || "",
+            Price: pf.price || 0,
             DescriptionAr: pf.descriptionAr || pf.description || "",
             DescriptionEn: pf.descriptionEn || pf.description || "",
           }))
@@ -185,69 +173,54 @@ const CarForm = ({ carId, onClose, onSuccess, t }: CarFormProps) => {
       );
     }
 
-    // Locations
+    // Pick up locations - safe ID handling
     if (pickupLocations.length > 0) {
       append(
-        "pickUpLocation",
+        "pickUpLocations",
         JSON.stringify(
-          pickupLocations.map((loc) => ({
-            id: loc.id,
+          pickupLocations.map((loc, index) => ({
+            id: loc.id ?? (isEditMode ? carId : undefined),
             Address: loc.address,
-            IsActive: loc.isActive,
+            IsActive: loc.isActive ?? true,
           }))
         )
       );
     }
 
+    // Drop off locations - safe ID handling
     if (dropoffLocations.length > 0) {
       append(
-        "dropOffLocation",
+        "dropOffLocations",
         JSON.stringify(
-          dropoffLocations.map((loc) => ({
-            id: loc.id,
+          dropoffLocations.map((loc, index) => ({
+            id: loc.id ?? (isEditMode ? carId : undefined),
             Address: loc.address,
-            IsActive: loc.isActive,
+            IsActive: loc.isActive ?? true,
           }))
         )
       );
     }
 
-    // Feature flags
-    const hasFeature = (featureName: string) =>
-      (formData.features || []).includes(featureName);
-
-    append("absBrakes", hasFeature("absBrakes"));
-    append("airBag", hasFeature("airbag"));
-    append("airBagCount", hasFeature("airbag") ? 2 : 0);
-    append("audioInput", hasFeature("audioInput"));
-    append("bluetooth", hasFeature("bluetooth"));
-    append("cdplayer", hasFeature("cdPlayer"));
-    append("cruisecontrol", hasFeature("cruiseControl"));
-    append("ebdbrakes", hasFeature("ebdBrakes"));
-    append("electricmirrors", hasFeature("electricMirrors"));
-    append("foglights", hasFeature("fogLights"));
-    append("gps", hasFeature("gps"));
-    append("power", hasFeature("power"));
-    append("remotecontrol", hasFeature("remoteControl"));
-    append("roofbox", hasFeature("roofBox"));
-    append("sensors", hasFeature("sensors"));
-    append("usbinput", hasFeature("usbInput"));
-
-    const protectionPrice = formData.protectionPrice || 1;
-    append("isProtection", protectionPrice > 0);
-    append("protectionPrice", protectionPrice);
-
-    // Images - Handle both File objects and URL strings separately
+    // Images - handle both URLs and Files
     if (formData.images && formData.images.length > 0) {
       formData.images.forEach((img: string | File) => {
         if (typeof img === "string") {
-          // It's a URL string
           fd.append("images", img);
         } else if (img instanceof File) {
-          // It's a File object - append directly without string conversion
-          fd.append("images", img, img.name);
+          fd.append("images", img);
         }
       });
+    }
+
+    // Cancellation policies
+    if (
+      formData.cancellationPolicies &&
+      formData.cancellationPolicies.length > 0
+    ) {
+      append(
+        "cancellationPolicies",
+        JSON.stringify(formData.cancellationPolicies)
+      );
     }
 
     return fd;
@@ -255,7 +228,6 @@ const CarForm = ({ carId, onClose, onSuccess, t }: CarFormProps) => {
 
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
     const fd = buildApiFormData();
 
     if (isEditMode && carId) {
@@ -300,6 +272,7 @@ const CarForm = ({ carId, onClose, onSuccess, t }: CarFormProps) => {
     }
   };
 
+  // Loading state
   if (isEditMode && isLoadingCar) {
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -315,6 +288,7 @@ const CarForm = ({ carId, onClose, onSuccess, t }: CarFormProps) => {
     );
   }
 
+  // Error state
   if (isEditMode && carError) {
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -389,29 +363,6 @@ const CarForm = ({ carId, onClose, onSuccess, t }: CarFormProps) => {
       </Card>
     </div>
   );
-};
-
-// Helper function - NOW RETURNS CAMELCASE
-const extractFeatures = (car: any): string[] => {
-  const features: string[] = [];
-
-  if (car.electricMirrors) features.push("electricMirrors");
-  if (car.cruiseControl) features.push("cruiseControl");
-  if (car.fogLights) features.push("fogLights");
-  if (car.power) features.push("power");
-  if (car.roofBox) features.push("roofBox");
-  if (car.gps) features.push("gps");
-  if (car.remoteControl) features.push("remoteControl");
-  if (car.audioInput) features.push("audioInput");
-  if (car.cdPlayer) features.push("cdPlayer");
-  if (car.bluetooth) features.push("bluetooth");
-  if (car.usbInput) features.push("usbInput");
-  if (car.sensors) features.push("sensors");
-  if (car.ebdBrakes) features.push("ebdBrakes");
-  if (car.airbag) features.push("airbag");
-  if (car.absBrakes) features.push("absBrakes");
-
-  return features;
 };
 
 export default CarForm;

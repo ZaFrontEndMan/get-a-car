@@ -81,16 +81,16 @@ export interface Car {
   ebdBrakes: boolean;
   airbag: boolean;
   absBrakes: boolean;
-
+  isProtection: boolean;
   year: number;
-  images: Image[];
+  licenseNumber: number;
+  images: [];
   protectionPrice: number;
   cancellationPolicies: CancellationPolicy[];
   carServices: CarService[];
   protections: Protection[];
   pickUpLocations: Location[];
   dropOffLocations: Location[];
-
   feedBackNumber: number;
   rating: number | null;
   oneStarRatingStats: RatingStats;

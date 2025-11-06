@@ -35,13 +35,13 @@ const PricingSection = ({ formData, handleChange, t }: PricingSectionProps) => {
       <h3 className="text-lg font-semibold mb-4">{t("pricing")}</h3>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <Label htmlFor="daily_rate">{t("daily_rate")} *</Label>
+          <Label htmlFor="pricePerDay">{t("daily_rate")} *</Label>
           <Input
-            id="daily_rate"
+            id="pricePerDay"
             type="text"
             inputMode="decimal"
-            value={formData.daily_rate || ""}
-            onChange={(e) => handleNumberChange("daily_rate", e.target.value)}
+            value={formData.pricePerDay || ""}
+            onChange={(e) => handleNumberChange("pricePerDay", e.target.value)}
             onWheel={handleWheel}
             placeholder="0.00"
             required
@@ -49,40 +49,41 @@ const PricingSection = ({ formData, handleChange, t }: PricingSectionProps) => {
         </div>
 
         <div>
-          <Label htmlFor="weekly_rate">{t("weekly_rate")}</Label>
+          <Label htmlFor="pricePerWeek">{t("weekly_rate")}</Label>
           <Input
-            id="weekly_rate"
+            id="pricePerWeek"
             type="text"
             inputMode="decimal"
-            value={formData.weekly_rate || ""}
-            onChange={(e) => handleNumberChange("weekly_rate", e.target.value)}
+            value={formData.pricePerWeek || ""}
+            onChange={(e) => handleNumberChange("pricePerWeek", e.target.value)}
             onWheel={handleWheel}
             placeholder="0.00"
           />
         </div>
 
         <div>
-          <Label htmlFor="monthly_rate">{t("monthly_rate")}</Label>
+          <Label htmlFor="pricePerMonth">{t("monthly_rate")}</Label>
           <Input
-            id="monthly_rate"
+            id="pricePerMonth"
             type="text"
             inputMode="decimal"
-            value={formData.monthly_rate || ""}
-            onChange={(e) => handleNumberChange("monthly_rate", e.target.value)}
-            onWheel={handleWheel}
-            placeholder="0.00"
-          />
-        </div>
-
-        <div>
-          <Label htmlFor="deposit_amount">{t("deposit_amount")}</Label>
-          <Input
-            id="deposit_amount"
-            type="text"
-            inputMode="decimal"
-            value={formData.deposit_amount || ""}
+            value={formData.pricePerMonth || ""}
             onChange={(e) =>
-              handleNumberChange("deposit_amount", e.target.value)
+              handleNumberChange("pricePerMonth", e.target.value)
+            }
+            onWheel={handleWheel}
+            placeholder="0.00"
+          />
+        </div>
+        <div>
+          <Label htmlFor="protectionPrice ">{t("protectionFee")}</Label>
+          <Input
+            id="protectionPrice"
+            type="text"
+            inputMode="decimal"
+            value={formData.protectionPrice || ""}
+            onChange={(e) =>
+              handleNumberChange("protectionPrice", e.target.value)
             }
             onWheel={handleWheel}
             placeholder="0.00"

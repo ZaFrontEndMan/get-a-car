@@ -1,50 +1,97 @@
 import { useState, useEffect } from "react";
-import { getDefaultFormData, CarFormData } from "./types";
+import { Car } from "@/types/api/car";
 
-export const useCarForm = (car?: any, _onSuccess?: () => void) => {
-  const [formData, setFormData] = useState<CarFormData>(getDefaultFormData());
+export const useCarForm = (car?: Car | null, _onSuccess?: () => void) => {
+  // Returns empty default values matching Car interface types
+  const getDefaultFormData = (): Car => ({
+    id: 0,
+    name: "",
+    description: "",
+    transmission: "",
+    transmissionId: 0,
+    model: "",
+    modelId: 0,
+    tradeMark: "",
+    tradeMarkId: 0,
+    fuelType: "",
+    fuelTypeId: 0,
+    type: "",
+    typeId: 0,
+    branchName: "",
+    branchId: "",
+    pricePerDay: 0,
+    pricePerWeek: 0,
+    pricePerMonth: 0,
+    availabilityVendor: false,
+    availabilityAdmin: false,
+    withDriver: false,
+    liter: "",
+    doors: "",
+    vendorCanMakeOffer: false,
+    people: null,
+    electricMirrors: false,
+    cruiseControl: false,
+    fogLights: false,
+    power: false,
+    roofBox: false,
+    gps: false,
+    remoteControl: false,
+    audioInput: false,
+    cdPlayer: false,
+    bluetooth: false,
+    usbInput: false,
+    sensors: false,
+    ebdBrakes: false,
+    airbag: false,
+    absBrakes: false,
+    year: 0,
+    images: [],
+    protectionPrice: 0,
+    cancellationPolicies: [],
+    carServices: [],
+    protections: [],
+    pickUpLocations: [],
+    dropOffLocations: [],
+    licenseNumber: 0,
+    feedBackNumber: 0,
+    isProtection: false,
+    rating: null,
+    oneStarRatingStats: { numberOfRating: 0, percentage: 0 } as any,
+    twoStarRatingStats: { numberOfRating: 0, percentage: 0 } as any,
+    threeStarRatingStats: { numberOfRating: 0, percentage: 0 } as any,
+    fourStarRatingStats: { numberOfRating: 0, percentage: 0 } as any,
+    fiveStarRatingStats: { numberOfRating: 0, percentage: 0 } as any,
+    feedbackDtos: [],
+  });
 
+  // Initialize with defaults first, then merge with car if provided
+  const [formData, setFormData] = useState<Car>(() => {
+    if (car) {
+      return {
+        ...getDefaultFormData(), // Ensure all fields exist with defaults
+        ...car, // Override with actual car data
+        images: car.images?.map((img: any) => img.imageUrl) || [], // Transform images
+      };
+    }
+    return getDefaultFormData();
+  });
+
+  // Reinitialize formData when car prop changes (for editing)
   useEffect(() => {
     if (car) {
-      // Map API response to form data
+      const defaults = getDefaultFormData();
       setFormData({
-        id: car.id || "",
-        name: car.name || "",
-        brand: car.tradeMark || car.brand || "",
-        tradeMarkId: car.tradeMarkId || "",
-        model: car.model || "",
-        modelId: car.modelId || "",
-        year: car.year || new Date().getFullYear(),
-        type: car.type || "",
-        carTypeId: car.carTypeId || "",
-        fuel_type: car.fuelType || car.fuel_type || "",
-        fuelTypeId: car.fuelTypeId || "",
-        transmission: car.transmission || "",
-        transmissionTypeId: car.transmissionTypeId || "",
-        seats: parseInt(car.doors || car.seats) || 4,
-        color: car.color || "",
-        license_plate: car.license_plate || "",
-        daily_rate: car.pricePerDay || car.daily_rate || 0,
-        weekly_rate: car.pricePerWeek || car.weekly_rate || 0,
-        monthly_rate: car.pricePerMonth || car.monthly_rate || 0,
-        deposit_amount: car.deposit_amount || 0,
-        images: car.images?.map((img: any) => img.imageUrl || img) || [],
-        features: extractFeatures(car),
-        is_available: car.availabilityVendor ?? car.is_available ?? true,
-        branch_id: car.branchId || car.branch_id || "",
-        mileage_limit: parseInt(car.mileage) || car.mileage_limit || 0,
-        cancellation_policies: car.cancellation_policies || "",
-        description: car.description || "",
-        liter: car.liter || "",
-        withDriver: car.withDriver || false,
-        protectionPrice: car.protectionPrice || 0,
+        ...defaults, // Start with complete defaults
+        ...car, // Override with car data
+        images: car.images?.map((img: any) => img.imageUrl) || [], // Handle images array
       });
     } else {
+      // Reset to defaults when no car (creating new)
       setFormData(getDefaultFormData());
     }
   }, [car]);
 
-  const handleChange = (field: keyof CarFormData, value: any) => {
+  const handleChange = <K extends keyof Car>(field: K, value: Car[K]) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
@@ -53,27 +100,4 @@ export const useCarForm = (car?: any, _onSuccess?: () => void) => {
     handleChange,
     setFormData,
   };
-};
-
-// Helper function to extract features from API response
-const extractFeatures = (car: any): string[] => {
-  const features: string[] = [];
-
-  if (car.electricMirrors) features.push("electricMirrors");
-  if (car.cruiseControl) features.push("cruiseControl");
-  if (car.fogLights) features.push("fogLights");
-  if (car.power) features.push("power");
-  if (car.roofBox) features.push("roofBox");
-  if (car.gps) features.push("gps");
-  if (car.remoteControl) features.push("remoteControl");
-  if (car.audioInput) features.push("audioInput");
-  if (car.cdPlayer) features.push("cdPlayer");
-  if (car.bluetooth) features.push("bluetooth");
-  if (car.usbInput) features.push("usbInput");
-  if (car.sensors) features.push("sensors");
-  if (car.ebdBrakes) features.push("ebdBrakes");
-  if (car.airbag) features.push("airbag");
-  if (car.absBrakes) features.push("absBrakes");
-
-  return features;
 };

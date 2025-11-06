@@ -30,23 +30,21 @@ const OtherDetailsSection = ({
       <h3 className="text-lg font-semibold mb-4">{t("other_details")}</h3>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <Label htmlFor="mileage_limit">{t("daily_mileage_limit")}</Label>
+          <Label className=" block mb-2" htmlFor="mileage_limit">{t("daily_mileage_limit")}</Label>
           <Input
             id="mileage_limit"
             type="number"
-            value={formData.mileage_limit || ""}
-            onChange={(e) =>
-              handleChange("mileage_limit", parseInt(e.target.value))
-            }
+            value={formData.liter || ""}
+            onChange={(e) => handleChange("liter", parseInt(e.target.value))}
           />
         </div>
 
         <div>
-          <Label htmlFor="branch_id">{t("branch")}</Label>
+          <Label className=" block mb-2" htmlFor="branchId">{t("branch")}</Label>
           <Select
-            value={formData.branch_id || "no-branch"}
+            value={formData.branchId}
             onValueChange={(value) =>
-              handleChange("branch_id", value === "no-branch" ? null : value)
+              handleChange("branchId", value === "no-branch" ? null : value)
             }
           >
             <SelectTrigger>
@@ -76,19 +74,12 @@ const OtherDetailsSection = ({
         <div className="flex items-center gap-2">
           <Switch
             id="is_available"
-            checked={formData.is_available}
-            onCheckedChange={(checked) => handleChange("is_available", checked)}
+            checked={formData.availabilityVendor}
+            onCheckedChange={(checked) =>
+              handleChange("availabilityVendor", checked)
+            }
           />
-          <Label htmlFor="is_available">{t("available")}</Label>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <Switch
-            id="is_featured"
-            checked={formData.is_featured}
-            onCheckedChange={(checked) => handleChange("is_featured", checked)}
-          />
-          <Label htmlFor="is_featured">{t("featured")}</Label>
+          <Label className=" block mb-2" htmlFor="is_available">{t("available")}</Label>
         </div>
       </div>
     </div>

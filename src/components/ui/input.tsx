@@ -16,7 +16,6 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           isRTL && "text-right",
           className
         )}
-        dir={isRTL ? "rtl" : "ltr"}
         ref={ref}
         {...props}
       />

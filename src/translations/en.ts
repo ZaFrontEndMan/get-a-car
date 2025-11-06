@@ -36,7 +36,7 @@ export const enTranslations = {
   logout: "Logout",
 
   // Car Details
-  dailyRate: "Daily Rate",
+  dailyRate: "Daily Rate (SAR)",
   weeklyRate: "Weekly Rate",
   monthlyRate: "Monthly Rate",
 
@@ -989,7 +989,7 @@ export const enTranslations = {
   brand_model: "Brand & Model",
   type: "Type",
   fuel: "Fuel",
-  daily_rate: "Daily Rate",
+  daily_rate: "Daily Rate (SAR)",
   petrol: "Petrol",
   diesel: "Diesel",
   manual: "Manual",
@@ -1430,6 +1430,8 @@ export const enTranslations = {
   vendorCarsTitle: "Cars from this vendor",
   showingXCarsFromVendor: "Showing cars from this vendor",
   noCarsFromThisVendor: "No cars available from this vendor at the moment",
+  max_size: "Max size",
+  per_file: "per file",
 };
 
 export default enTranslations;

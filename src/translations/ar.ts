@@ -1441,6 +1441,8 @@ export const arTranslations = {
   vendorCarsTitle: "سيارات من هذا المورد",
   showingXCarsFromVendor: "عرض السيارات من هذا المورد",
   noCarsFromThisVendor: "لا توجد سيارات متاحة من هذا المورد في الوقت الحالي",
+  max_size: "الحد الأقصى للحجم",
+  per_file: "لكل ملف",
 };
 
 export default arTranslations;

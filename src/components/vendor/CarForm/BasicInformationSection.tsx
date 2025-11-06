@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import {
@@ -34,14 +34,36 @@ const BasicInformationSection = ({
   const { data: carBrands, isLoading: carBrandsLoading } = useGetCarBrands();
   const { data: carModels, isLoading: carModelsLoading } = useGetCarModels();
 
+  const [isDropdownsReady, setIsDropdownsReady] = useState(false);
+
   // Filter models by selected brand's tradeMarkId
   const filteredModels =
     carModels?.filter((model) => model.tradeMarkId === formData.tradeMarkId) ||
     [];
 
-  // Reset modelId when tradeMarkId changes if the current model is invalid
+  // Wait for all dropdown data to load before assigning initial form values on edit
   useEffect(() => {
-    if (formData.tradeMarkId && carModels && formData.modelId) {
+    const allLoaded =
+      !carTypesLoading &&
+      !fuelTypesLoading &&
+      !transmissionTypesLoading &&
+      !carBrandsLoading &&
+      !carModelsLoading;
+
+    if (allLoaded) {
+      setIsDropdownsReady(true);
+    }
+  }, [
+    carTypesLoading,
+    fuelTypesLoading,
+    transmissionTypesLoading,
+    carBrandsLoading,
+    carModelsLoading,
+  ]);
+
+  // Reset modelId when tradeMarkId changes if model is invalid
+  useEffect(() => {
+    if (isDropdownsReady && formData.tradeMarkId && formData.modelId) {
       const isValidModel = filteredModels.some(
         (model) => model.id === formData.modelId
       );
@@ -50,14 +72,26 @@ const BasicInformationSection = ({
         handleChange("model", "");
       }
     }
-  }, [formData.tradeMarkId, carModels, filteredModels, handleChange]);
+  }, [
+    formData.tradeMarkId,
+    filteredModels,
+    formData.modelId,
+    handleChange,
+    isDropdownsReady,
+  ]);
+
+  if (!isDropdownsReady) {
+    return (
+      <p className="text-center p-4 text-gray-500">{t("loading_dropdowns")}</p>
+    );
+  }
 
   return (
     <div dir={t("language") === "ar" ? "rtl" : "ltr"}>
       <h3 className="text-lg font-semibold mb-4">{t("basic_information")}</h3>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <Label htmlFor="name">{t("car_name")} *</Label>
+          <Label className="block mb-2" htmlFor="name">{t("car_name")} *</Label>
           <Input
             id="name"
             value={formData.name || ""}
@@ -67,7 +101,7 @@ const BasicInformationSection = ({
         </div>
 
         <div>
-          <Label htmlFor="tradeMarkId">{t("brand")} *</Label>
+          <Label className="block mb-2" htmlFor="tradeMarkId">{t("brand")} *</Label>
           <Select
             value={formData.tradeMarkId?.toString() || ""}
             onValueChange={(value) => {
@@ -75,7 +109,7 @@ const BasicInformationSection = ({
                 (brand) => brand.id.toString() === value
               );
               handleChange("tradeMarkId", value ? parseInt(value) : "");
-              handleChange("brand", selectedBrand?.name || "");
+              handleChange("tradeMark", selectedBrand?.name || "");
             }}
             disabled={carBrandsLoading}
           >
@@ -89,7 +123,7 @@ const BasicInformationSection = ({
             <SelectContent>
               {carBrands?.map((brand) => (
                 <SelectItem key={brand.id} value={brand.id.toString()}>
-                  {t(brand.name)}
+                  {brand.name}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -97,7 +131,7 @@ const BasicInformationSection = ({
         </div>
 
         <div>
-          <Label htmlFor="modelId">{t("model")} *</Label>
+          <Label className="block mb-2" htmlFor="modelId">{t("model")} *</Label>
           <Select
             value={formData.modelId?.toString() || ""}
             onValueChange={(value) => {
@@ -123,7 +157,7 @@ const BasicInformationSection = ({
             <SelectContent>
               {filteredModels?.map((model) => (
                 <SelectItem key={model.id} value={model.id.toString()}>
-                  {t(model.name)}
+                  {model.name}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -131,28 +165,28 @@ const BasicInformationSection = ({
         </div>
 
         <div>
-          <Label htmlFor="year">{t("year")} *</Label>
+          <Label className="block mb-2" htmlFor="year">{t("year")} *</Label>
           <Input
             id="year"
             type="number"
             value={formData.year || ""}
             onChange={(e) => handleChange("year", parseInt(e.target.value))}
-            min="2000"
+            min={2000}
             max={new Date().getFullYear() + 1}
             required
           />
         </div>
 
         <div>
-          <Label htmlFor="type">{t("type")} *</Label>
+          <Label className="block mb-2" htmlFor="typeId">{t("type")} *</Label>
           <Select
-            value={formData.type?.toString() || ""}
+            value={formData.typeId?.toString() || ""}
             onValueChange={(value) => {
               const selectedType = carTypes?.find(
                 (type) => type.id.toString() === value
               );
-              handleChange("type", value ? parseInt(value) : "");
-              handleChange("typeName", selectedType?.name || "");
+              handleChange("typeId", value ? parseInt(value) : "");
+              handleChange("type", selectedType?.name || "");
             }}
             disabled={carTypesLoading}
           >
@@ -166,7 +200,7 @@ const BasicInformationSection = ({
             <SelectContent>
               {carTypes?.map((type) => (
                 <SelectItem key={type.id} value={type.id.toString()}>
-                  {t(type.name)}
+                  {type.name}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -174,15 +208,15 @@ const BasicInformationSection = ({
         </div>
 
         <div>
-          <Label htmlFor="fuel_type">{t("fuel_type")} *</Label>
+          <Label className="block mb-2" htmlFor="fuelTypeId">{t("fuel_type")} *</Label>
           <Select
-            value={formData.fuel_type?.toString() || ""}
+            value={formData.fuelTypeId?.toString() || ""}
             onValueChange={(value) => {
               const selectedFuel = fuelTypes?.find(
                 (fuel) => fuel.id.toString() === value
               );
-              handleChange("fuel_type", value ? parseInt(value) : "");
-              handleChange("fuelTypeName", selectedFuel?.name || "");
+              handleChange("fuelTypeId", value ? parseInt(value) : "");
+              handleChange("fuelType", selectedFuel?.name || "");
             }}
             disabled={fuelTypesLoading}
           >
@@ -196,7 +230,7 @@ const BasicInformationSection = ({
             <SelectContent>
               {fuelTypes?.map((fuel) => (
                 <SelectItem key={fuel.id} value={fuel.id.toString()}>
-                  {t(fuel.name)}
+                  {fuel.name}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -204,15 +238,15 @@ const BasicInformationSection = ({
         </div>
 
         <div>
-          <Label htmlFor="transmission">{t("transmission")} *</Label>
+          <Label className="block mb-2" htmlFor="transmissionId">{t("transmission")} *</Label>
           <Select
-            value={formData.transmission?.toString() || ""}
+            value={formData.transmissionId?.toString() || ""}
             onValueChange={(value) => {
               const selectedTrans = transmissionTypes?.find(
                 (trans) => trans.id.toString() === value
               );
-              handleChange("transmission", value ? parseInt(value) : "");
-              handleChange("transmissionName", selectedTrans?.name || "");
+              handleChange("transmissionId", value ? parseInt(value) : "");
+              handleChange("transmission", selectedTrans?.name || "");
             }}
             disabled={transmissionTypesLoading}
           >
@@ -228,7 +262,7 @@ const BasicInformationSection = ({
             <SelectContent>
               {transmissionTypes?.map((trans) => (
                 <SelectItem key={trans.id} value={trans.id.toString()}>
-                  {t(trans.name)}
+                  {trans.name}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -236,33 +270,25 @@ const BasicInformationSection = ({
         </div>
 
         <div>
-          <Label htmlFor="seats">{t("seats")} *</Label>
+          <Label className="block mb-2" htmlFor="doors">{t("doors")} *</Label>
           <Input
-            id="seats"
+            id="doors"
             type="number"
-            value={formData.seats || ""}
-            onChange={(e) => handleChange("seats", parseInt(e.target.value))}
-            min="2"
-            max="8"
+            min={2}
+            max={8}
+            value={formData.doors || ""}
+            onChange={(e) => handleChange("doors", e.target.value)}
             required
           />
         </div>
-
         <div>
-          <Label htmlFor="color">{t("color")}</Label>
+          <Label className="block mb-2" htmlFor="licenseNumber">{t("license_plate")} *</Label>
           <Input
-            id="color"
-            value={formData.color || ""}
-            onChange={(e) => handleChange("color", e.target.value)}
-          />
-        </div>
-
-        <div>
-          <Label htmlFor="license_plate">{t("license_plate")}</Label>
-          <Input
-            id="license_plate"
-            value={formData.license_plate || ""}
-            onChange={(e) => handleChange("license_plate", e.target.value)}
+            id="licenseNumber"
+            type="number"
+            value={formData.licenseNumber || ""}
+            onChange={(e) => handleChange("licenseNumber", e.target.value)}
+            required
           />
         </div>
       </div>
