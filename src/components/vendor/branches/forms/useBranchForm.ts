@@ -6,13 +6,19 @@ import {
   useCreateVendorBranch,
 } from "@/hooks/vendor/useVendorBranch";
 
+// Saudi phone regex
+const saPhoneRegex = /^(?:\+?9665\d{8}|009665\d{8}|9665\d{8}|05\d{8}|5\d{8})$/;
+// Email regex
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+// National ID regex: must be 10 digits and start with 1 or 2
+const nationalIdRegex = /^[12]\d{9}$/;
+
 interface BranchFormData {
   nickName: string;
   address: string;
   managerName: string;
   fullName: string;
-  password: string;
-  // Additional fields for creation
+  password: string; // Only required for creation
   userName: string;
   email: string;
   phoneNumber: string;
@@ -37,6 +43,68 @@ interface FormErrors {
   city?: string;
   country?: string;
 }
+
+const validateEmail = (email: string, t: any): string | undefined => {
+  if (!email) return t("emailRequired");
+  if (!emailRegex.test(email)) {
+    return t("invalidEmail");
+  }
+  return undefined;
+};
+
+const validatePhone = (phone: string, t: any): string | undefined => {
+  if (!phone) return t("phoneRequired");
+  if (!saPhoneRegex.test(phone.replace(/\s/g, ""))) {
+    return t("invalidPhone");
+  }
+  return undefined;
+};
+
+const validateUserName = (
+  userName: string,
+  isPhone: boolean,
+  t: any
+): string | undefined => {
+  if (!userName) return t("userNameRequired");
+  if (isPhone) {
+    if (!saPhoneRegex.test(userName.replace(/\s/g, ""))) {
+      return t("invalidPhone");
+    }
+  } else {
+    if (!emailRegex.test(userName)) {
+      return t("invalidEmail");
+    }
+  }
+  return undefined;
+};
+
+const validateNationalId = (nationalId: string, t: any): string | undefined => {
+  if (!nationalId) return t("nationalIdRequired");
+  if (!nationalIdRegex.test(nationalId)) {
+    return t("nationalIdMustStart1or2");
+  }
+  return undefined;
+};
+
+const validateRequired = (
+  value: string,
+  fieldKey: string,
+  t: any
+): string | undefined => {
+  if (!value || value.trim() === "") {
+    return t(fieldKey + "Required") || t("fieldRequired");
+  }
+  return undefined;
+};
+
+const validatePassword = (password: string, t: any): string | undefined => {
+  // Not required if editing
+  if (!password) return t("passwordRequired");
+  if (password.length < 6) {
+    return t("passwordMinLength");
+  }
+  return undefined;
+};
 
 export const useBranchForm = (
   branch: any,
@@ -75,15 +143,16 @@ export const useBranchForm = (
         managerName: branch.managerName || "",
         fullName: branch.fullName || "",
         password: "",
-        userName: "",
-        email: "",
-        phoneNumber: "",
-        nationalId: "",
-        city: null,
-        country: null,
-        canMakeOffer: true,
-        notes: "",
-        isPhone: false,
+        userName: branch.userName || "",
+        email: branch.email || "",
+        phoneNumber: branch.phoneNumber || "",
+        nationalId: branch.nationalId || "",
+        city: branch.city || null,
+        country: branch.country || null,
+        canMakeOffer:
+          branch.canMakeOffer === undefined ? true : branch.canMakeOffer,
+        notes: branch.notes || "",
+        isPhone: branch.isPhone === undefined ? false : branch.isPhone,
       });
     } else if (!isEditing) {
       setFormData({
@@ -168,43 +237,6 @@ export const useBranchForm = (
     },
   });
 
-  // Simplified password validation - minimum 6 characters
-  const validatePassword = (password: string): string | undefined => {
-    if (!password) return t("passwordRequired");
-    if (password.length < 6) {
-      return t("passwordMinLength");
-    }
-    return undefined;
-  };
-
-  const validateEmail = (email: string): string | undefined => {
-    if (!email) return t("emailRequired");
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      return t("invalidEmail");
-    }
-    return undefined;
-  };
-
-  const validatePhone = (phone: string): string | undefined => {
-    if (!phone) return t("phoneRequired");
-    const phoneRegex = /^[\d\s\-\+\(\)]{10,15}$/;
-    if (!phoneRegex.test(phone.replace(/\s/g, ""))) {
-      return t("invalidPhone");
-    }
-    return undefined;
-  };
-
-  const validateRequired = (
-    value: string,
-    fieldKey: string
-  ): string | undefined => {
-    if (!value || value.trim() === "") {
-      return t(fieldKey + "Required") || t("fieldRequired");
-    }
-    return undefined;
-  };
-
   const handleChange = (field: string, value: any) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
 
@@ -215,14 +247,37 @@ export const useBranchForm = (
 
     // Real-time validation
     if (field === "password") {
-      const passwordError = validatePassword(value);
-      setErrors((prev) => ({ ...prev, password: passwordError }));
+      // Only validate if not editing (required for creation only)
+      if (!isEditing) {
+        setErrors((prev) => ({
+          ...prev,
+          password: validatePassword(value, t),
+        }));
+      }
     } else if (field === "email" && !isEditing) {
-      const emailError = validateEmail(value);
-      setErrors((prev) => ({ ...prev, email: emailError }));
+      setErrors((prev) => ({
+        ...prev,
+        email: validateEmail(value, t),
+      }));
     } else if (field === "phoneNumber" && !isEditing) {
-      const phoneError = validatePhone(value);
-      setErrors((prev) => ({ ...prev, phoneNumber: phoneError }));
+      setErrors((prev) => ({
+        ...prev,
+        phoneNumber: validatePhone(value, t),
+      }));
+    } else if (field === "userName") {
+      setErrors((prev) => ({
+        ...prev,
+        userName: validateUserName(
+          value,
+          field === "userName" ? value.isPhone : formData.isPhone,
+          t
+        ),
+      }));
+    } else if (field === "nationalId") {
+      setErrors((prev) => ({
+        ...prev,
+        nationalId: validateNationalId(value, t),
+      }));
     }
   };
 
@@ -231,28 +286,42 @@ export const useBranchForm = (
 
     let validationErrors: FormErrors = {};
 
-    // Common validations for all modes
-    validationErrors.nickName = validateRequired(formData.nickName, "nickName");
-    validationErrors.address = validateRequired(formData.address, "address");
+    // Common validations
+    validationErrors.nickName = validateRequired(
+      formData.nickName,
+      "nickName",
+      t
+    );
+    validationErrors.address = validateRequired(formData.address, "address", t);
     validationErrors.managerName = validateRequired(
       formData.managerName,
-      "managerName"
+      "managerName",
+      t
     );
-    validationErrors.fullName = validateRequired(formData.fullName, "fullName");
-    validationErrors.password = validatePassword(formData.password);
+    validationErrors.fullName = validateRequired(
+      formData.fullName,
+      "fullName",
+      t
+    );
+
+    // Only require password on creation
+    if (!isEditing) {
+      validationErrors.password = validatePassword(formData.password, t);
+    }
+    if (!isEditing) {
+      // Always validate userName, nationalId on submit
+      validationErrors.userName = validateUserName(
+        formData.userName,
+        formData.isPhone,
+        t
+      );
+      validationErrors.nationalId = validateNationalId(formData.nationalId, t);
+    }
 
     if (!isEditing) {
       // Creation-only validation
-      validationErrors.userName = validateRequired(
-        formData.userName,
-        "userName"
-      );
-      validationErrors.email = validateEmail(formData.email);
-      validationErrors.phoneNumber = validatePhone(formData.phoneNumber);
-      validationErrors.nationalId = validateRequired(
-        formData.nationalId,
-        "nationalId"
-      );
+      validationErrors.email = validateEmail(formData.email, t);
+      validationErrors.phoneNumber = validatePhone(formData.phoneNumber, t);
 
       if (
         !formData.country ||
@@ -266,10 +335,10 @@ export const useBranchForm = (
       }
     }
 
-    // Filter out undefined errors
+    // Filter undefined errors
     const filteredErrors = Object.fromEntries(
       Object.entries(validationErrors).filter(
-        ([, value]) => value !== undefined
+        ([_, value]) => value !== undefined
       )
     ) as FormErrors;
 

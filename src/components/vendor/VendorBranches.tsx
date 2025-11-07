@@ -1,3 +1,4 @@
+// VendorBranches.tsx
 import React, { useMemo, useState } from "react";
 import BranchForm from "./BranchForm";
 import BranchCard from "./branches/BranchCard";
@@ -11,6 +12,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { Button } from "../ui/button";
 import { Plus } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useUser } from "@/contexts/UserContext";
 
 const VendorBranches = () => {
   const { t } = useLanguage();
@@ -19,24 +21,44 @@ const VendorBranches = () => {
   const [currentView, setCurrentView] = useState<"grid" | "list" | "table">(
     "table"
   );
+  const { user } = useUser();
 
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const { data, isLoading, error } = useGetVendorBranches();
-  const branches = data?.data?.vendorBranches;
+  const branches = data?.data?.vendorBranches || [];
+  const mainVendor = data?.data?.mainVendor;
+
+  // Compose filtered and sorted branches for display
+  const finalBranches = useMemo(() => {
+    let items = [...branches];
+    if (user.roles === "Vendor" && mainVendor) {
+      // Place main vendor branch at the start
+      const mappedMainBranch = {
+        id: mainVendor.id,
+        branchName: mainVendor.branchName,
+        address: mainVendor.address,
+        city: mainVendor.city,
+        managerName: mainVendor.managerName,
+        phone: mainVendor.managerPhoneNumber,
+        email: mainVendor.email,
+        companyLogo: mainVendor.companyLogo,
+        is_active: mainVendor.isActive,
+        fullName: mainVendor.fullName,
+        nickName: mainVendor.branchName,
+        mainBranch: true, // Mark for UI highlight
+        created_at: mainVendor.creationDate,
+      };
+      // Remove the mainVendor from branches if duplicate (by id)
+      items = items.filter((b) => b.id !== mappedMainBranch.id);
+      items = [mappedMainBranch, ...items];
+    }
+    return items;
+  }, [branches, mainVendor, user.roles]);
 
   const handleEdit = (branch: any) => {
     setEditingBranch(branch);
     setShowForm(true);
-  };
-
-  console.log(data);
-
-  const handleDelete = (branchId: string) => {
-    toast({
-      title: "Not available",
-      description: "Branch deletion is not available at the moment.",
-    });
   };
 
   const handleFormClose = () => {
@@ -50,7 +72,6 @@ const VendorBranches = () => {
   };
 
   const onAddBranch = () => {
-    // Now we can open the form for creation
     setEditingBranch(null);
     setShowForm(true);
   };
@@ -68,8 +89,8 @@ const VendorBranches = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-3xl font-bold text-gray-900">{t("branches")}</h2>
-        <div className=" flex gap-4">
-          {branches && branches.length > 0 && (
+        <div className="flex gap-4">
+          {finalBranches.length > 0 && (
             <BranchesViewToggle
               currentView={currentView}
               onViewChange={setCurrentView}
@@ -86,22 +107,21 @@ const VendorBranches = () => {
         <EmptyBranchesState type="error" error={(error as any)?.message} />
       )}
 
-      {!error && (!branches || branches.length === 0) ? (
+      {!error && (!finalBranches || finalBranches.length === 0) ? (
         <EmptyBranchesState type="empty" onAddBranch={onAddBranch} />
       ) : (
         !error &&
-        branches &&
-        branches.length > 0 && (
+        finalBranches &&
+        finalBranches.length > 0 && (
           <>
             {currentView === "grid" && (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {branches.map((branch) => (
+                {finalBranches.map((branch, idx) => (
                   <BranchCard
                     t={t}
                     key={branch.id}
                     branch={branch}
                     onEdit={handleEdit}
-                    onDelete={handleDelete}
                     isDeleting={false}
                   />
                 ))}
@@ -111,18 +131,16 @@ const VendorBranches = () => {
             {currentView === "list" && (
               <BranchesListView
                 t={t}
-                branches={branches}
+                branches={finalBranches}
                 onEdit={handleEdit}
-                onDelete={handleDelete}
                 isDeleting={false}
               />
             )}
 
             {currentView === "table" && (
               <BranchesTableView
-                branches={branches}
+                branches={finalBranches}
                 onEdit={handleEdit}
-                onDelete={handleDelete}
                 isDeleting={false}
               />
             )}

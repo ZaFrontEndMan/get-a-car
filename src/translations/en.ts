@@ -1368,7 +1368,6 @@ export const enTranslations = {
   userNameLabel: "Username",
   userNamePlaceholder: "Enter username",
   phoneNumberLabel: "Phone Number",
-  phoneNumberPlaceholder: "Enter phone number",
   countryLabel: "Country",
   selectCountryFirst: "Please select a country first",
   noCountriesAvailable: "No countries available",
@@ -1432,6 +1431,23 @@ export const enTranslations = {
   noCarsFromThisVendor: "No cars available from this vendor at the moment",
   max_size: "Max size",
   per_file: "per file",
+  mainBranch: "Main Branch",
+  userNamePhonePlaceholder: "(05xxxxxxxx)",
+  userNameEmailPlaceholder: "Enter a valid email address",
+  phoneNumberPlaceholder: "(05xxxxxxxx)",
+  nationalIdMustStart1or2:
+    "National ID must be 10 digits and start with 1 or 2",
+  passwordRequired: "Password is required",
+  nickNameRequired: "Nick name is required",
+  phoneRequired: "Phone number is required",
+  Male: "Male",
+  Female: "Female",
+  createEmployee: "Create Employee",
+  user_name_label: "Username",
+  password_label: "Password",
+  national_id_label: "National ID",
+  gender_label: "Gender",
+  is_phone_hint: "If checked, username must be a phone number",
 };
 
 export default enTranslations;

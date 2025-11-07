@@ -9,32 +9,31 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Edit, Trash2 } from "lucide-react";
+import { Edit } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 interface Branch {
   id: string;
-  name: string;
+  branchName: string;
   city: string;
   address: string;
-  manager_name?: string;
+  managerName?: string;
   phone?: string;
   email?: string;
   is_active?: boolean;
   created_at: string;
+  mainBranch?: boolean;
 }
 
 interface BranchesTableViewProps {
   branches: Branch[];
   onEdit: (branch: Branch) => void;
-  onDelete: (branchId: string) => void;
   isDeleting: boolean;
 }
 
 const BranchesTableView = ({
   branches,
   onEdit,
-  onDelete,
   isDeleting,
 }: BranchesTableViewProps) => {
   const { t, language } = useLanguage();
@@ -61,7 +60,6 @@ const BranchesTableView = ({
               <TableHead className={isRTL ? "text-right" : "text-left"}>
                 {t("status")}
               </TableHead>
-             
               <TableHead className={isRTL ? "text-right" : "text-left"}>
                 {t("actions")}
               </TableHead>
@@ -70,7 +68,14 @@ const BranchesTableView = ({
           <TableBody>
             {branches.map((branch) => (
               <TableRow key={branch.id}>
-                <TableCell className="font-medium">{branch.branchName}</TableCell>
+                <TableCell className="font-medium flex items-center gap-2">
+                  {branch.branchName}
+                  {branch.mainBranch && (
+                    <Badge variant="default" className="bg-green-600">
+                      {t("mainBranch")}
+                    </Badge>
+                  )}
+                </TableCell>
                 <TableCell>
                   <div>
                     <div className="font-medium">{branch.city}</div>
@@ -93,7 +98,6 @@ const BranchesTableView = ({
                     {branch.is_active ? t("active") : t("inactive")}
                   </Badge>
                 </TableCell>
-
                 <TableCell className={isRTL ? "text-left" : "text-right"}>
                   <div
                     className={`flex items-center justify-end gap-2 ${
@@ -104,17 +108,9 @@ const BranchesTableView = ({
                       variant="ghost"
                       size="sm"
                       onClick={() => onEdit(branch)}
+                      disabled={isDeleting}
                     >
                       <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => onDelete(branch.id)}
-                      disabled={isDeleting}
-                      className="text-red-600 hover:text-red-700"
-                    >
-                      <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
                 </TableCell>

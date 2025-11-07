@@ -5,15 +5,18 @@ import {
   getEmployeeStatistics,
   updateEmployeeAvailability,
   updateEmployee,
+  createEmployee,
 } from "../../api/vendor/vendorEmployeeApi";
 
 // Query keys
 const VENDOR_EMPLOYEE_QUERY_KEYS = {
   all: ["vendor", "employees"] as const,
   lists: () => [...VENDOR_EMPLOYEE_QUERY_KEYS.all, "list"] as const,
-  list: (filters: string) => [...VENDOR_EMPLOYEE_QUERY_KEYS.lists(), { filters }] as const,
+  list: (filters: string) =>
+    [...VENDOR_EMPLOYEE_QUERY_KEYS.lists(), { filters }] as const,
   details: () => [...VENDOR_EMPLOYEE_QUERY_KEYS.all, "detail"] as const,
-  detail: (id: string) => [...VENDOR_EMPLOYEE_QUERY_KEYS.details(), id] as const,
+  detail: (id: string) =>
+    [...VENDOR_EMPLOYEE_QUERY_KEYS.details(), id] as const,
   statistics: () => [...VENDOR_EMPLOYEE_QUERY_KEYS.all, "statistics"] as const,
 };
 
@@ -45,12 +48,19 @@ export const useGetEmployeeStatistics = () => {
 // Update employee availability mutation
 export const useUpdateEmployeeAvailability = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
-    mutationFn: ({ employeeId, availabilityData }: { employeeId: string; availabilityData: any }) =>
-      updateEmployeeAvailability(employeeId, availabilityData),
+    mutationFn: ({
+      employeeId,
+      availabilityData,
+    }: {
+      employeeId: string;
+      availabilityData: any;
+    }) => updateEmployeeAvailability(employeeId, availabilityData),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: VENDOR_EMPLOYEE_QUERY_KEYS.all });
+      queryClient.invalidateQueries({
+        queryKey: VENDOR_EMPLOYEE_QUERY_KEYS.all,
+      });
     },
   });
 };
@@ -58,12 +68,31 @@ export const useUpdateEmployeeAvailability = () => {
 // Update employee mutation
 export const useUpdateEmployee = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
-    mutationFn: ({ employeeId, employeeData }: { employeeId: string; employeeData: any }) =>
-      updateEmployee(employeeId, employeeData),
+    mutationFn: ({
+      employeeId,
+      employeeData,
+    }: {
+      employeeId: string;
+      employeeData: any;
+    }) => updateEmployee(employeeId, employeeData),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: VENDOR_EMPLOYEE_QUERY_KEYS.all });
+      queryClient.invalidateQueries({
+        queryKey: VENDOR_EMPLOYEE_QUERY_KEYS.all,
+      });
+    },
+  });
+};
+export const useCreateEmployee = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (body: any) => createEmployee(body),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: VENDOR_EMPLOYEE_QUERY_KEYS.all,
+      });
     },
   });
 };

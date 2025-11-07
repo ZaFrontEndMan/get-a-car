@@ -18,6 +18,7 @@ import {
 import React, { useEffect, useState } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { encryptPassword } from "@/utils/encryptPassword";
+import { Eye, EyeOff } from "lucide-react";
 
 interface BranchFormFieldsProps {
   formData: any;
@@ -36,6 +37,7 @@ export function BranchFormFields({
 }: BranchFormFieldsProps) {
   const { language } = useLanguage();
   const isRTL = language === "ar";
+  const [showPassword, setShowPassword] = useState(false);
 
   // Local state to store the plain text password for display
   const [plainPassword, setPlainPassword] = useState("");
@@ -79,7 +81,7 @@ export function BranchFormFields({
   };
 
   return (
-    <div className="space-y-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       {/* Basic Fields - shown in both modes */}
       <div className="space-y-2">
         <Label htmlFor="nickName">{t("branchNameLabel")}</Label>
@@ -141,14 +143,28 @@ export function BranchFormFields({
 
       <div className="space-y-2">
         <Label htmlFor="password">{t("password")}</Label>
-        <Input
-          id="password"
-          type="password"
-          placeholder={t("enterPassword")}
-          value={plainPassword}
-          onChange={(e) => handlePasswordChange(e.target.value)}
-          className={errors?.password ? "border-destructive" : ""}
-        />
+        <div className="relative">
+          <Input
+            id="password"
+            type={showPassword ? "text" : "password"}
+            placeholder={t("enterPassword")}
+            value={plainPassword}
+            onChange={(e) => handlePasswordChange(e.target.value)}
+            className={errors?.password ? "border-destructive pe-10" : "pe-10"}
+          />
+          <button
+            type="button"
+            className="absolute end-2 top-3 text-muted-foreground"
+            tabIndex={-1}
+            onClick={() => setShowPassword((v) => !v)}
+          >
+            {showPassword ? (
+              <EyeOff className="h-4 w-4" />
+            ) : (
+              <Eye className="h-4 w-4" />
+            )}
+          </button>
+        </div>
         {errors?.password && (
           <p className="text-sm text-destructive">{errors.password}</p>
         )}
@@ -204,6 +220,85 @@ export function BranchFormFields({
             )}
           </div>
 
+          {/* Countries and Cities Selects */}
+          <div className="space-y-2">
+            <Label htmlFor="country">{t("countryLabel")}</Label>
+            <Select
+              value={countryValue}
+              onValueChange={handleCountryChange}
+              disabled={countriesLoading}
+            >
+              <SelectTrigger
+                className={errors?.country ? "border-destructive" : ""}
+              >
+                <SelectValue placeholder={t("selectCountry")} />
+              </SelectTrigger>
+              <SelectContent>
+                {countriesLoading ? (
+                  <div className="py-2 px-2 text-sm text-muted-foreground">
+                    {t("loading")}
+                  </div>
+                ) : countries && countries.length > 0 ? (
+                  countries.map((country: Country) => (
+                    <SelectItem key={country.id} value={country.id}>
+                      {isRTL ? country.name_ar : country.name_en}
+                    </SelectItem>
+                  ))
+                ) : (
+                  <div className="py-2 px-2 text-sm text-muted-foreground">
+                    {t("noCountriesAvailable")}
+                  </div>
+                )}
+              </SelectContent>
+            </Select>
+            {errors?.country && (
+              <p className="text-sm text-destructive">{errors.country}</p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="city">{t("cityLabel")}</Label>
+            <Select
+              value={cityValue}
+              onValueChange={handleCityChange}
+              disabled={citiesLoading || !countryValue || countriesLoading}
+            >
+              <SelectTrigger
+                className={errors?.city ? "border-destructive" : ""}
+              >
+                <SelectValue
+                  placeholder={
+                    !countryValue ? t("selectCountryFirst") : t("selectCity")
+                  }
+                />
+              </SelectTrigger>
+              <SelectContent>
+                {citiesLoading ? (
+                  <div className="py-2 px-2 text-sm text-muted-foreground">
+                    {t("loading")}
+                  </div>
+                ) : !countryValue ? (
+                  <div className="py-2 px-2 text-sm text-muted-foreground">
+                    {t("selectCountryFirst")}
+                  </div>
+                ) : cities && cities.length > 0 ? (
+                  cities.map((city: City) => (
+                    <SelectItem key={city.id} value={city.id}>
+                      {isRTL ? city.name_ar : city.name_en}
+                    </SelectItem>
+                  ))
+                ) : (
+                  <div className="py-2 px-2 text-sm text-muted-foreground">
+                    {t("noCitiesAvailable")}
+                  </div>
+                )}
+              </SelectContent>
+            </Select>
+            {errors?.city && (
+              <p className="text-sm text-destructive">{errors.city}</p>
+            )}
+          </div>
+
           <div className="space-y-2">
             <Label htmlFor="nationalId">{t("nationalIdLabel")}</Label>
             <Input
@@ -219,88 +314,6 @@ export function BranchFormFields({
               <p className="text-sm text-destructive">{errors.nationalId}</p>
             )}
           </div>
-
-          {/* Countries and Cities Selects */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="country">{t("countryLabel")}</Label>
-              <Select
-                value={countryValue}
-                onValueChange={handleCountryChange}
-                disabled={countriesLoading}
-              >
-                <SelectTrigger
-                  className={errors?.country ? "border-destructive" : ""}
-                >
-                  <SelectValue placeholder={t("selectCountry")} />
-                </SelectTrigger>
-                <SelectContent>
-                  {countriesLoading ? (
-                    <div className="py-2 px-2 text-sm text-muted-foreground">
-                      {t("loading")}
-                    </div>
-                  ) : countries && countries.length > 0 ? (
-                    countries.map((country: Country) => (
-                      <SelectItem key={country.id} value={country.id}>
-                        {isRTL ? country.name_ar : country.name_en}
-                      </SelectItem>
-                    ))
-                  ) : (
-                    <div className="py-2 px-2 text-sm text-muted-foreground">
-                      {t("noCountriesAvailable")}
-                    </div>
-                  )}
-                </SelectContent>
-              </Select>
-              {errors?.country && (
-                <p className="text-sm text-destructive">{errors.country}</p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="city">{t("cityLabel")}</Label>
-              <Select
-                value={cityValue}
-                onValueChange={handleCityChange}
-                disabled={citiesLoading || !countryValue || countriesLoading}
-              >
-                <SelectTrigger
-                  className={errors?.city ? "border-destructive" : ""}
-                >
-                  <SelectValue
-                    placeholder={
-                      !countryValue ? t("selectCountryFirst") : t("selectCity")
-                    }
-                  />
-                </SelectTrigger>
-                <SelectContent>
-                  {citiesLoading ? (
-                    <div className="py-2 px-2 text-sm text-muted-foreground">
-                      {t("loading")}
-                    </div>
-                  ) : !countryValue ? (
-                    <div className="py-2 px-2 text-sm text-muted-foreground">
-                      {t("selectCountryFirst")}
-                    </div>
-                  ) : cities && cities.length > 0 ? (
-                    cities.map((city: City) => (
-                      <SelectItem key={city.id} value={city.id}>
-                        {isRTL ? city.name_ar : city.name_en}
-                      </SelectItem>
-                    ))
-                  ) : (
-                    <div className="py-2 px-2 text-sm text-muted-foreground">
-                      {t("noCitiesAvailable")}
-                    </div>
-                  )}
-                </SelectContent>
-              </Select>
-              {errors?.city && (
-                <p className="text-sm text-destructive">{errors.city}</p>
-              )}
-            </div>
-          </div>
-
           <div className="space-y-2">
             <Label htmlFor="notes">{t("notesLabel")}</Label>
             <Textarea
@@ -311,7 +324,7 @@ export function BranchFormFields({
             />
           </div>
 
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center gap-2">
             <Checkbox
               id="canMakeOffer"
               checked={!!formData.canMakeOffer}
@@ -324,7 +337,7 @@ export function BranchFormFields({
             </Label>
           </div>
 
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center gap-2">
             <Checkbox
               id="isPhone"
               checked={!!formData.isPhone}
