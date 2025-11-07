@@ -91,17 +91,9 @@ const BasicInformationSection = ({
       <h3 className="text-lg font-semibold mb-4">{t("basic_information")}</h3>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <Label className="block mb-2" htmlFor="name">{t("car_name")} *</Label>
-          <Input
-            id="name"
-            value={formData.name || ""}
-            onChange={(e) => handleChange("name", e.target.value)}
-            required
-          />
-        </div>
-
-        <div>
-          <Label className="block mb-2" htmlFor="tradeMarkId">{t("brand")} *</Label>
+          <Label className="block mb-2" htmlFor="tradeMarkId">
+            {t("brand")} *
+          </Label>
           <Select
             value={formData.tradeMarkId?.toString() || ""}
             onValueChange={(value) => {
@@ -131,7 +123,9 @@ const BasicInformationSection = ({
         </div>
 
         <div>
-          <Label className="block mb-2" htmlFor="modelId">{t("model")} *</Label>
+          <Label className="block mb-2" htmlFor="modelId">
+            {t("model")} *
+          </Label>
           <Select
             value={formData.modelId?.toString() || ""}
             onValueChange={(value) => {
@@ -165,7 +159,9 @@ const BasicInformationSection = ({
         </div>
 
         <div>
-          <Label className="block mb-2" htmlFor="year">{t("year")} *</Label>
+          <Label className="block mb-2" htmlFor="year">
+            {t("year")} *
+          </Label>
           <Input
             id="year"
             type="number"
@@ -178,7 +174,9 @@ const BasicInformationSection = ({
         </div>
 
         <div>
-          <Label className="block mb-2" htmlFor="typeId">{t("type")} *</Label>
+          <Label className="block mb-2" htmlFor="typeId">
+            {t("type")} *
+          </Label>
           <Select
             value={formData.typeId?.toString() || ""}
             onValueChange={(value) => {
@@ -208,7 +206,9 @@ const BasicInformationSection = ({
         </div>
 
         <div>
-          <Label className="block mb-2" htmlFor="fuelTypeId">{t("fuel_type")} *</Label>
+          <Label className="block mb-2" htmlFor="fuelTypeId">
+            {t("fuel_type")} *
+          </Label>
           <Select
             value={formData.fuelTypeId?.toString() || ""}
             onValueChange={(value) => {
@@ -238,7 +238,9 @@ const BasicInformationSection = ({
         </div>
 
         <div>
-          <Label className="block mb-2" htmlFor="transmissionId">{t("transmission")} *</Label>
+          <Label className="block mb-2" htmlFor="transmissionId">
+            {t("transmission")} *
+          </Label>
           <Select
             value={formData.transmissionId?.toString() || ""}
             onValueChange={(value) => {
@@ -270,7 +272,9 @@ const BasicInformationSection = ({
         </div>
 
         <div>
-          <Label className="block mb-2" htmlFor="doors">{t("doors")} *</Label>
+          <Label className="block mb-2" htmlFor="doors">
+            {t("doors")} *
+          </Label>
           <Input
             id="doors"
             type="number"
@@ -282,7 +286,9 @@ const BasicInformationSection = ({
           />
         </div>
         <div>
-          <Label className="block mb-2" htmlFor="licenseNumber">{t("license_plate")} *</Label>
+          <Label className="block mb-2" htmlFor="licenseNumber">
+            {t("license_plate")} *
+          </Label>
           <Input
             id="licenseNumber"
             type="number"

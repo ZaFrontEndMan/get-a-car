@@ -30,17 +30,9 @@ const OtherDetailsSection = ({
       <h3 className="text-lg font-semibold mb-4">{t("other_details")}</h3>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <Label className=" block mb-2" htmlFor="mileage_limit">{t("daily_mileage_limit")}</Label>
-          <Input
-            id="mileage_limit"
-            type="number"
-            value={formData.liter || ""}
-            onChange={(e) => handleChange("liter", parseInt(e.target.value))}
-          />
-        </div>
-
-        <div>
-          <Label className=" block mb-2" htmlFor="branchId">{t("branch")}</Label>
+          <Label className=" block mb-2" htmlFor="branchId">
+            {t("branch")}
+          </Label>
           <Select
             value={formData.branchId}
             onValueChange={(value) =>
@@ -79,7 +71,9 @@ const OtherDetailsSection = ({
               handleChange("availabilityVendor", checked)
             }
           />
-          <Label className=" block mb-2" htmlFor="is_available">{t("available")}</Label>
+          <Label className=" block mb-2" htmlFor="is_available">
+            {t("available")}
+          </Label>
         </div>
       </div>
     </div>

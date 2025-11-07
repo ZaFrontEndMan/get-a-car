@@ -116,7 +116,6 @@ const CarForm = ({ carId, onClose, onSuccess, t }: CarFormProps) => {
 
     // Physical specifications
     append("doors", formData.doors);
-    append("mileage", formData.liter);
 
     // Availability & services
     append("availability", formData.availabilityVendor);
@@ -176,7 +175,7 @@ const CarForm = ({ carId, onClose, onSuccess, t }: CarFormProps) => {
     // Pick up locations - safe ID handling
     if (pickupLocations.length > 0) {
       append(
-        "pickUpLocations",
+        "pickUpLocation",
         JSON.stringify(
           pickupLocations.map((loc, index) => ({
             id: loc.id ?? (isEditMode ? carId : undefined),
@@ -190,7 +189,7 @@ const CarForm = ({ carId, onClose, onSuccess, t }: CarFormProps) => {
     // Drop off locations - safe ID handling
     if (dropoffLocations.length > 0) {
       append(
-        "dropOffLocations",
+        "dropOffLocation",
         JSON.stringify(
           dropoffLocations.map((loc, index) => ({
             id: loc.id ?? (isEditMode ? carId : undefined),
