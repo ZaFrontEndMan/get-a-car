@@ -1,8 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { useFavorites } from "../contexts/FavoritesContext";
 import { useLanguage } from "../contexts/LanguageContext";
-import { Heart, Clock, Tag } from "lucide-react";
+import { Clock } from "lucide-react";
 
 interface OfferCardProps {
   offer: {
@@ -15,6 +14,7 @@ interface OfferCardProps {
     validUntil: string;
     image: string;
     terms: string[];
+    carId?: string;
     vendor?: {
       id: string;
       name: string;
@@ -25,8 +25,11 @@ interface OfferCardProps {
   isFavorite?: boolean;
 }
 
-const OfferCard = ({ offer }: OfferCardProps) => {
-  const { addToFavorites, removeFromFavorites, isFavorite } = useFavorites();
+const OfferCard = ({
+  offer,
+  onFavorite,
+  isFavorite = false,
+}: OfferCardProps) => {
   const { language, t } = useLanguage();
 
   const getLocalizedTitle = () => {
@@ -43,7 +46,6 @@ const OfferCard = ({ offer }: OfferCardProps) => {
     return offer.description;
   };
 
-  // Truncate description to 15 words
   const truncateDescription = (text: string, wordLimit: number = 15) => {
     const words = text.split(" ");
     if (words.length <= wordLimit) {
@@ -55,16 +57,8 @@ const OfferCard = ({ offer }: OfferCardProps) => {
   const handleFavoriteClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (isFavorite(offer.id)) {
-      removeFromFavorites(offer.id);
-    } else {
-      addToFavorites({
-        id: offer.id,
-        type: "offer",
-        name: getLocalizedTitle(),
-        image: offer.image,
-        price: offer.discount + " OFF",
-      });
+    if (onFavorite) {
+      onFavorite(offer.id);
     }
   };
 
@@ -73,11 +67,9 @@ const OfferCard = ({ offer }: OfferCardProps) => {
     e.stopPropagation();
   };
 
-  const isOfferFavorite = isFavorite(offer.id);
-
   return (
     <Link
-      to={`/offers/${offer.id}?carId=${offer.carId}`}
+      to={`/offers/${offer.id}${offer.carId ? `?carId=${offer.carId}` : ""}`}
       className="block bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 transform hover:scale-105"
     >
       <div className="relative">
@@ -86,11 +78,10 @@ const OfferCard = ({ offer }: OfferCardProps) => {
           alt={getLocalizedTitle()}
           className="w-full h-48 object-cover"
         />
-        <div className="absolute top-3 left-3 bg-red-500 text-white px-3 py-1 rounded-full text-sm font-bold bg-sky-950">
+        <div className="absolute top-3 left-3 bg-red-500 text-white px-3 py-1 rounded-full text-sm font-bold">
           {offer.discount} OFF
         </div>
 
-        {/* Vendor Logo */}
         {offer.vendor?.logo_url && (
           <div className="absolute bottom-3 left-3 w-10 h-10 rounded-full bg-white shadow-md overflow-hidden border-2 border-white">
             <img
@@ -104,15 +95,24 @@ const OfferCard = ({ offer }: OfferCardProps) => {
         <button
           onClick={handleFavoriteClick}
           className={`absolute top-3 right-3 p-2 rounded-full transition-colors duration-200 z-10 ${
-            isOfferFavorite
+            isFavorite
               ? "bg-red-500 text-white"
               : "bg-white/80 text-gray-600 hover:bg-red-500 hover:text-white"
           }`}
         >
-          <Heart
+          <svg
             className="h-4 w-4"
-            fill={isOfferFavorite ? "currentColor" : "none"}
-          />
+            fill={isFavorite ? "currentColor" : "none"}
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+            />
+          </svg>
         </button>
       </div>
 

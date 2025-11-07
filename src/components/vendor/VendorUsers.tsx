@@ -249,17 +249,11 @@ const VendorUsers = () => {
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-600">
-                    {t("branch_label")}:
-                  </span>
-                  <span className="text-sm text-gray-900">
-                    {user.branchName}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">
                     {t("status_label")}:
                   </span>
-                  <Badge variant="default">{t("status_active")}</Badge>
+                  <Badge variant="default">
+                    {user.isActive ? t("status_active") : t("statusPending")}
+                  </Badge>
                 </div>
                 <div className="text-xs text-gray-500 pt-2 border-t">
                   {t("added_label")}:{" "}

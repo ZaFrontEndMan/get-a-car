@@ -21,12 +21,12 @@ const ForgotPassword = () => {
 
   const step = searchParams.get("step") || "1";
   const emailFromParams = searchParams.get("email") || "";
+  const tokenFromParams = searchParams.get("token") || "";
 
   const [email, setEmail] = useState(emailFromParams);
   const [isPhone, setIsPhone] = useState(false);
   const [isLoadingStep1, setIsLoadingStep1] = useState(false);
 
-  const [resetCode, setResetCode] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoadingStep2, setIsLoadingStep2] = useState(false);
@@ -42,6 +42,15 @@ const ForgotPassword = () => {
       setEmail(emailFromParams);
     }
   }, [emailFromParams]);
+
+  // Auto-skip to step 2 if token exists in URL
+  useEffect(() => {
+    if (tokenFromParams && step === "1") {
+      setTimeout(() => {
+        setSearchParams({ step: "2", email: emailFromParams });
+      }, 100);
+    }
+  }, [tokenFromParams, emailFromParams, step, setSearchParams]);
 
   // Clear messages when step changes
   useEffect(() => {
@@ -61,7 +70,7 @@ const ForgotPassword = () => {
         userName: email,
       });
 
-      setSuccessMessage(t("resetCodeSent"));
+      setSuccessMessage(t("resetLinkSent"));
       setTimeout(() => {
         setSearchParams({ step: "2", email });
       }, 1000);
@@ -96,7 +105,7 @@ const ForgotPassword = () => {
       await authApi.resetPassword({
         email: emailFromParams,
         newPassword,
-        token: resetCode,
+        token: tokenFromParams, // Use token from URL instead of resetCode
       });
 
       setSuccessMessage(t("passwordResetSuccess"));
@@ -115,8 +124,7 @@ const ForgotPassword = () => {
   };
 
   const handleBackToStep1 = () => {
-    setSearchParams({});
-    setResetCode("");
+    setSearchParams({ step: "1", email });
     setNewPassword("");
     setConfirmPassword("");
     setErrorMessage("");
@@ -214,7 +222,8 @@ const ForgotPassword = () => {
           >
             {step === "1"
               ? t("enterEmailOrPhoneToGetCode")
-              : t("enterCodeAndNewPassword")}
+              : t("enterNewPassword")}{" "}
+            {/* Updated subtitle for step 2 */}
           </motion.p>
         </motion.div>
 
@@ -233,9 +242,7 @@ const ForgotPassword = () => {
               >
                 <AlertCircle className="h-5 w-5 text-red flex-shrink-0 mt-0.5" />
                 <div className="flex-1">
-                  <p className="text-sm text-red font-medium">
-                    {errorMessage}
-                  </p>
+                  <p className="text-sm text-red font-medium">{errorMessage}</p>
                 </div>
               </motion.div>
             )}
@@ -418,31 +425,21 @@ const ForgotPassword = () => {
                   <p className="text-xs sm:text-sm text-blue-800 flex items-center gap-2">
                     <Check className="h-4 w-4 flex-shrink-0" />
                     <span>
-                      {t("codeSentTo")}:{" "}
-                      <strong className="break-all">{emailFromParams}</strong>
+                      {tokenFromParams
+                        ? t("useLinkToReset") ||
+                          "Use this link to reset your password"
+                        : t("codeSentTo") || "Reset link sent to"}
+                      : <strong className="break-all">{emailFromParams}</strong>
                     </span>
                   </p>
                 </motion.div>
 
-                <motion.div variants={itemVariants}>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {t("resetCode")}
-                  </label>
-                  <motion.input
-                    type="text"
-                    required
-                    value={resetCode}
-                    onChange={(e) =>
-                      setResetCode(e.target.value.replace(/\D/g, ""))
-                    }
-                    className="w-full px-4 py-3 sm:py-4 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 text-center text-xl sm:text-2xl tracking-[0.5em] font-mono font-bold"
-                    placeholder="● ● ● ● ● ●"
-                    maxLength={6}
-                    inputMode="numeric"
-                    pattern="[0-9]*"
-                    whileFocus={{ scale: 1.02 }}
-                  />
-                </motion.div>
+                {/* Token info (hidden but used for submission) */}
+                {tokenFromParams && (
+                  <input type="hidden" value={tokenFromParams} name="token" />
+                )}
+
+                {/* Removed OTP input field - now using token from URL */}
 
                 <motion.div variants={itemVariants}>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -525,7 +522,8 @@ const ForgotPassword = () => {
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >
-                  {t("didNotReceiveCode")}
+                  {t("didNotReceiveCode")}{" "}
+                  {/* This now means "did not receive email link" */}
                 </motion.button>
               </motion.form>
             )}

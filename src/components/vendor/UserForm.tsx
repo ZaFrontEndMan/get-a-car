@@ -42,8 +42,6 @@ const initialFormData = {
   nationalId: "",
   phoneNumber: "",
   gender: "1",
-  branchId: "",
-  branchName: "",
 };
 
 const UserForm = ({ user, onClose, onSuccess }: UserFormProps) => {
@@ -69,8 +67,6 @@ const UserForm = ({ user, onClose, onSuccess }: UserFormProps) => {
         nationalId: user.nationalId || "",
         phoneNumber: user.phoneNumber || "",
         gender: user.gender ? String(user.gender) : "1",
-        branchId: user.branchId || "",
-        branchName: user.branchName || "",
       });
     } else {
       setFormData(initialFormData);
@@ -91,22 +87,13 @@ const UserForm = ({ user, onClose, onSuccess }: UserFormProps) => {
     setFormData((prev) => ({
       ...prev,
       branchId,
-      branchName: selectedBranch ? selectedBranch.branchName : "",
     }));
   };
 
   const isCreate = !user;
   const requiredFields = isCreate
-    ? [
-        "fullName",
-        "phoneNumber",
-        "email",
-        "branchId",
-        "password",
-        "userName",
-        "nationalId",
-      ]
-    : ["fullName", "phoneNumber", "email", "branchId", "nationalId"];
+    ? ["fullName", "phoneNumber", "email", "password", "userName", "nationalId"]
+    : ["fullName", "phoneNumber", "email", "nationalId"];
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -135,8 +122,6 @@ const UserForm = ({ user, onClose, onSuccess }: UserFormProps) => {
           nationalId: formData.nationalId,
           phoneNumber: formData.phoneNumber,
           gender: parseInt(formData.gender),
-          branchId: formData.branchId,
-          branchName: formData.branchName,
         },
       };
       createMutation.mutate(body, {
@@ -163,8 +148,6 @@ const UserForm = ({ user, onClose, onSuccess }: UserFormProps) => {
         nationalId: formData.nationalId,
         phoneNumber: formData.phoneNumber,
         gender: parseInt(formData.gender),
-        branchId: formData.branchId,
-        branchName: formData.branchName,
       };
       updateMutation.mutate(
         {
@@ -247,7 +230,9 @@ const UserForm = ({ user, onClose, onSuccess }: UserFormProps) => {
                   <Switch
                     id="isPhone"
                     checked={!!formData.isPhone}
-                    onCheckedChange={(chicked) => handleChange("isPhone", chicked)}
+                    onCheckedChange={(chicked) =>
+                      handleChange("isPhone", chicked)
+                    }
                   />{" "}
                 </div>
               </>
@@ -313,31 +298,6 @@ const UserForm = ({ user, onClose, onSuccess }: UserFormProps) => {
               </Select>
             </div>
 
-            <div>
-              <Label htmlFor="branchId">{t("branch_label")}</Label>
-              <Select
-                value={formData.branchId}
-                onValueChange={handleBranchChange}
-                disabled={isBranchesLoading}
-              >
-                <SelectTrigger>
-                  <SelectValue
-                    placeholder={
-                      isBranchesLoading
-                        ? t("loading_branches")
-                        : t("select_branch_placeholder")
-                    }
-                  />
-                </SelectTrigger>
-                <SelectContent>
-                  {vendorBranches.map((branch: any) => (
-                    <SelectItem key={branch.id} value={branch.id}>
-                      {branch.branchName}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
             {/* Actions */}
             <div className="flex gap-2 pt-4">
               <Button
