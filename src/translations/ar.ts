@@ -467,7 +467,7 @@ export const arTranslations = {
   pickupAndDropoff: "الاستلام والتسليم",
   rentalDuration: "فترة الإيجار",
   total: "إجمالي",
-  vendor: "مؤسس",
+  vendor: "مؤسسة",
   client: "عميل",
   // Branch related
   branchName: "اسم الفرع",
