@@ -94,7 +94,7 @@ const CarForm = ({ carId, onClose, onSuccess, t }: CarFormProps) => {
     // Basic car info
     // append("name", formData.name);
     append("description", formData.description);
-    // append("branchId", formData.branchId);
+    append("branchId", formData.branchId);
     append("modelYear", formData.year);
 
     // Pricing - direct API fields

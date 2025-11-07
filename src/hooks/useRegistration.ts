@@ -58,7 +58,7 @@ export const useRegistration = (): UseRegistrationReturn => {
       formData.append("UserDetails.NickName", userDetails.FullName || "");
       formData.append("UserDetails.ManagerName", userDetails.FullName || "");
       formData.append("UserDetails.PhoneNumber", userDetails.PhoneNumber || "");
-      formData.append("UserDetails.Address", userDetails.country || "");
+      formData.append("UserDetails.Address",String(userDetails.Country || "");
       formData.append("UserDetails.NationalId", userDetails.NationalId || "");
       formData.append("UserDetails.City", String(userDetails.City || ""));
       formData.append("UserDetails.Country", String(userDetails.Country || ""));
