@@ -22,182 +22,120 @@ import {
   useAcceptReturnCarBooking,
 } from "@/hooks/vendor/useVendorBooking";
 
-// Internal app statuses (English enums)
-type BookingStatus =
-  | "pending"
-  | "confirmed"
-  | "active"
-  | "in_progress"
-  | "return_requested"
-  | "completed"
-  | "cancelled";
+// API status type (or undefined for "all")
+type APISupportedBookingStatus = 1 | 2 | 3 | 4 | 5 | 6 | undefined;
 
-// Mapping API Arabic status → Internal status
-const bookingStatusMap: Record<string, BookingStatus> = {
-  "قيد الاجراء": "in_progress",
-  "تم إرجاع السيارة": "completed",
-  ملغي: "cancelled",
-  مؤكد: "confirmed",
-  نشط: "active",
-  "قيد الانتظار": "pending",
-  "طلب استرجاع": "return_requested",
+// In case your backend sometimes returns Arabic text:
+const arabicToApiStatus: Record<string, APISupportedBookingStatus> = {
+  منتظر: 1,
+  "تم إرجاع السيارة": 2,
+
+  "تم الالغاء": 3,
+  "قيد الاجراء": 4,
+  "طلب استرجاع": 5,
+  العروض: 6,
 };
 
-// Reverse mapping Internal status → Arabic label (for UI display)
-const bookingStatusLabels: Record<BookingStatus, string> = {
-  pending: "قيد الانتظار",
-  confirmed: "مؤكد",
-  active: "نشط",
-  in_progress: "قيد الاجراء",
-  return_requested: "طلب استرجاع",
-  completed: "تم إرجاع السيارة",
-  cancelled: "ملغي",
-};
-
-const VendorBookings = ({
-  vendorId = "default-vendor-id",
-}: {
-  vendorId?: string;
-}) => {
+const VendorBookings = () => {
   const { t, language } = useLanguage();
-  const [statusFilter, setStatusFilter] = useState<BookingStatus | "all">(
-    "all"
-  );
+  const [statusFilter, setStatusFilter] =
+    useState<APISupportedBookingStatus>(undefined); // undefined = "all"
   const [viewMode, setViewMode] = useState<"grid" | "list" | "table">("grid");
   const [pageNumber, setPageNumber] = useState(1);
-  const [pageSize] = useState(10); // Fixed page size, adjustable as needed
+  const [pageSize] = useState(10);
 
-  // Set default view mode based on screen size
+  // Set view mode based on screen size once on mount and on resize
   useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth < 768) {
-        setViewMode("table");
-      } else if (window.innerWidth < 1024) {
-        setViewMode("list");
-      } else {
-        setViewMode("grid");
-      }
+      if (window.innerWidth < 768) setViewMode("table");
+      else if (window.innerWidth < 1024) setViewMode("list");
+      else setViewMode("grid");
     };
-
     handleResize();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Fetch bookings using React Query
+  // API bookings query (statusFilter sent as number or undefined)
   const { data, isLoading, isError } = useGetAllBookings({
     pageNumber,
     pageSize,
+    bookingStatus: statusFilter,
   });
-
   const acceptReturnMutation = useAcceptReturnCarBooking();
 
-  // Transform API data to match expected structure of child components
-  const transformBookingData = (booking: any) => {
-    const totalDays = Math.ceil(
-      (new Date(booking.toDate).getTime() -
-        new Date(booking.fromDate).getTime()) /
-        (1000 * 60 * 60 * 24)
-    );
-    return {
-      id: booking.id,
-      booking_number: booking.bookingNumber,
-      booking_status: bookingStatusMap[booking.bookingStatus] || "pending",
-      customer_name: booking.clientName || t("unknownCustomer"),
-      customer_email: "", // Not available in API response
-      customer_phone: "", // Not available in API response
-      pickup_date: booking.fromDate,
-      return_date: booking.toDate,
-      pickup_location: "", // Not available in API response
-      return_location: "", // Not available in API response
-      total_amount: booking.totalPrice || 0,
-      total_days: totalDays || 1,
-      daily_rate: booking.totalPrice / (totalDays || 1),
-      payment_status: booking.paymentStatus || "pending",
-      special_requests: "", // Not available in API response
-      cars: [
-        {
-          id: booking.id,
-          name: booking.carName || t("unknownCar"),
-          images: booking.carImage
-            ? [`${import.meta.env.VITE_UPLOADS_BASE_URL}${booking.carImage}`]
-            : [],
-          brand: "", // Not available in API response
-          model: "", // Not available in API response
-          daily_rate: booking.totalPrice / (totalDays || 1),
-          total_amount: booking.totalPrice || 0,
-        },
-      ],
-    };
-  };
-
+  // Transform API bookings for grid/list/table views
   const bookings = useMemo(() => {
     if (!data?.data?.items) return [];
-    return data.data.items.map(transformBookingData);
-  }, [data]);
+    return data.data.items.map((booking: any) => {
+      const totalDays =
+        Math.ceil(
+          (new Date(booking.toDate).getTime() -
+            new Date(booking.fromDate).getTime()) /
+            (1000 * 60 * 60 * 24)
+        ) || 1;
+      return {
+        id: booking.id,
+        booking_number: booking.bookingNumber,
+        booking_status:
+          typeof booking.bookingStatus === "number"
+            ? booking.bookingStatus
+            : arabicToApiStatus[booking.bookingStatus] || 1,
+        customer_name: booking.clientName || t("unknownCustomer"),
+        customer_email: booking.clientEmail || "",
+        customer_phone: booking.clientPhone || "",
+        pickup_date: booking.fromDate,
+        return_date: booking.toDate,
+        pickup_location: "",
+        return_location: "",
+        total_amount: booking.totalPrice || 0,
+        total_days: totalDays,
+        daily_rate: booking.totalPrice / totalDays,
+        payment_status: booking.paymentStatus || "pending",
+        special_requests: "",
+        cars: [
+          {
+            id: booking.id,
+            name: booking.carName || t("unknownCar"),
+            images: booking.carImage
+              ? [`${import.meta.env.VITE_UPLOADS_BASE_URL}${booking.carImage}`]
+              : [],
+            brand: "",
+            model: "",
+            daily_rate: booking.totalPrice / totalDays,
+            total_amount: booking.totalPrice || 0,
+          },
+        ],
+      };
+    });
+  }, [data, t]);
 
-  const filteredBookings = useMemo(() => {
-    return bookings.filter(
-      (booking) =>
-        statusFilter === "all" || booking.booking_status === statusFilter
-    );
-  }, [bookings, statusFilter]);
-
-  const getStatusCounts = () => {
-    return bookings.reduce((acc, booking) => {
-      const status = booking.booking_status || "pending";
-      acc[status] = (acc[status] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
-  };
-
-  const statusCounts = getStatusCounts();
-
+  // Action handlers (unchanged)
   const handleAcceptReturn = (bookingId: string) => {
     acceptReturnMutation.mutate(bookingId, {
-      onSuccess: () => {
-        toast.success(t("actionSuccess"));
-      },
-      onError: (error) => {
-        toast.error(t("actionError"));
-      },
+      onSuccess: () => toast.success(t("actionSuccess")),
+      onError: () => toast.error(t("actionError")),
     });
   };
-
   const handleAction = (action: string, bookingId: string) => {
-    // Placeholder for other actions (accept, reject, start progress)
     toast.success(t("actionSuccess"));
   };
 
-  if (isLoading) {
-    return <span content={t("loading")} />;
-  }
+  // Common props for all view components
+  const commonProps = {
+    bookings,
+    onAcceptBooking: (id: string) => handleAction("acceptBooking", id),
+    onRejectBooking: (id: string) => handleAction("rejectBooking", id),
+    onStartProgress: (id: string) => handleAction("startProgress", id),
+    onAcceptReturn: handleAcceptReturn,
+    isAcceptLoading: false,
+    isRejectLoading: false,
+    isStartLoading: false,
+    isReturnLoading: acceptReturnMutation.isPending,
+  };
 
-  if (isError) {
-    return (
-      <div className="text-center py-12">
-        <Car className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-        <h3 className="text-lg font-medium text-gray-900 mb-2">
-          {t("errorLoadingBookings")}
-        </h3>
-        <p className="text-gray-500">{t("pleaseTryAgain")}</p>
-      </div>
-    );
-  }
-
+  // Booking content renderer
   const renderBookingsContent = () => {
-    const commonProps = {
-      bookings: filteredBookings,
-      onAcceptBooking: (id: string) => handleAction("acceptBooking", id),
-      onRejectBooking: (id: string) => handleAction("rejectBooking", id),
-      onStartProgress: (id: string) => handleAction("startProgress", id),
-      onAcceptReturn: handleAcceptReturn,
-      isAcceptLoading: false, // Add mutation hooks for these if needed
-      isRejectLoading: false,
-      isStartLoading: false,
-      isReturnLoading: acceptReturnMutation.isPending,
-    };
-
     switch (viewMode) {
       case "grid":
         return <VendorBookingGridView {...commonProps} />;
@@ -210,36 +148,29 @@ const VendorBookings = ({
     }
   };
 
+  // Pagination builder
   const totalPages = data?.data?.totalPages || 1;
   const currentPage = data?.data?.pageNumber || 1;
-
   const handlePageChange = (page: number) => {
-    if (page >= 1 && page <= totalPages) {
-      setPageNumber(page);
-    }
+    if (page >= 1 && page <= totalPages) setPageNumber(page);
   };
-
   const renderPaginationItems = () => {
     const items = [];
     const maxVisiblePages = 5;
     let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
     let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
-
     if (endPage - startPage + 1 < maxVisiblePages) {
       startPage = Math.max(1, endPage - maxVisiblePages + 1);
     }
-
     if (startPage > 1) {
       items.push(
         <PaginationItem key="first">
           <PaginationLink onClick={() => handlePageChange(1)}>1</PaginationLink>
         </PaginationItem>
       );
-      if (startPage > 2) {
+      if (startPage > 2)
         items.push(<PaginationEllipsis key="start-ellipsis" />);
-      }
     }
-
     for (let page = startPage; page <= endPage; page++) {
       items.push(
         <PaginationItem key={page}>
@@ -252,11 +183,9 @@ const VendorBookings = ({
         </PaginationItem>
       );
     }
-
     if (endPage < totalPages) {
-      if (endPage < totalPages - 1) {
+      if (endPage < totalPages - 1)
         items.push(<PaginationEllipsis key="end-ellipsis" />);
-      }
       items.push(
         <PaginationItem key="last">
           <PaginationLink onClick={() => handlePageChange(totalPages)}>
@@ -265,9 +194,20 @@ const VendorBookings = ({
         </PaginationItem>
       );
     }
-
     return items;
   };
+
+  if (isError) {
+    return (
+      <div className="text-center py-12">
+        <Car className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+        <h3 className="text-lg font-medium text-gray-900 mb-2">
+          {t("errorLoadingBookings")}
+        </h3>
+        <p className="text-gray-500">{t("pleaseTryAgain")}</p>
+      </div>
+    );
+  }
 
   return (
     <div className={language === "ar" ? "text-right" : "text-left"}>
@@ -290,12 +230,24 @@ const VendorBookings = ({
         <BookingStatusFilter
           statusFilter={statusFilter}
           onFilterChange={setStatusFilter}
-          statusCounts={statusCounts}
-          totalBookings={data?.data?.totalRecords || 0}
-          statusLabels={bookingStatusLabels}
+          apiCounts={data?.data || {}}
         />
 
-        {filteredBookings.length > 0 ? (
+        {/* Show bookings or empty state */}
+        {bookings.length === 0 && !isLoading ? (
+          <EmptyBookingsState
+            isFiltered={statusFilter !== undefined}
+            statusFilter={String(statusFilter)}
+          />
+        ) : isLoading ? (
+          <>
+            {" "}
+            <div className="flex flex-col items-center py-16 gap-6">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+              <span className="text-primary text-lg">{t("loading")}</span>
+            </div>{" "}
+          </>
+        ) : (
           <>
             {renderBookingsContent()}
             {totalPages > 1 && (
@@ -320,11 +272,6 @@ const VendorBookings = ({
               </Pagination>
             )}
           </>
-        ) : (
-          <EmptyBookingsState
-            isFiltered={statusFilter !== "all"}
-            statusFilter={statusFilter}
-          />
         )}
       </div>
     </div>

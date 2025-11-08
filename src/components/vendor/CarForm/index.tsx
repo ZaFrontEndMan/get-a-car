@@ -7,7 +7,6 @@ import { useCarForm } from "./useCarForm";
 import { usePaidFeatures } from "./usePaidFeatures";
 import { useLocations } from "./useLocations";
 import { useProtections } from "./useProtections";
-import { useGetVendorBranches } from "@/hooks/vendor/useVendorBranch";
 import {
   useCreateCar,
   useUpdateCar,
@@ -15,6 +14,7 @@ import {
 } from "@/hooks/vendor/useVendorCar";
 import { useToast } from "@/components/ui/use-toast";
 import { Loader2 } from "lucide-react";
+import { useGetVendorBranchesForCars } from "@/hooks/vendor/useVendorBranch";
 
 interface CarFormProps {
   carId?: string | number;
@@ -49,27 +49,16 @@ const CarForm = ({ carId, onClose, onSuccess, t }: CarFormProps) => {
 
   // Branches for branch selection
   const { data: branchesData, isLoading: branchesLoading } =
-    useGetVendorBranches();
+    useGetVendorBranchesForCars();
 
   const branches = React.useMemo(() => {
-    const d = branchesData as any;
-    let list: any[] = [];
+    if (!branchesData?.data?.vendorBranches) return [];
 
-    // Handle various response structures
-    if (Array.isArray(d?.data?.vendorBranches)) list = d.data.vendorBranches;
-    else if (Array.isArray(d?.vendorBranches)) list = d.vendorBranches;
-    else if (Array.isArray(d?.data?.data?.branches))
-      list = d.data.data.branches;
-    else if (Array.isArray(d?.data?.branches)) list = d.data.branches;
-    else if (Array.isArray(d?.branches)) list = d.branches;
-    else if (Array.isArray(d?.data)) list = d.data;
-    else if (Array.isArray(d)) list = d;
-
-    return list.map((b) => ({
-      id: (b?.id ?? "").toString(),
-      name: b?.branchName ?? b?.name ?? t("branch"),
+    return branchesData.data.vendorBranches.map((b: any) => ({
+      id: b.id,
+      name: b.branchName,
     }));
-  }, [branchesData, t]);
+  }, [branchesData]);
 
   // API mutations
   const createMutation = useCreateCar();
@@ -94,7 +83,7 @@ const CarForm = ({ carId, onClose, onSuccess, t }: CarFormProps) => {
     // Basic car info
     // append("name", formData.name);
     append("description", formData.description);
-    append("branchId", formData.branchId);
+    append("vendorBranchId", formData.branchId);
     append("modelYear", formData.year);
 
     // Pricing - direct API fields
@@ -145,10 +134,10 @@ const CarForm = ({ carId, onClose, onSuccess, t }: CarFormProps) => {
         JSON.stringify(
           protections.map((p, index) => ({
             id: p.id ?? (isEditMode ? carId : undefined),
-            NameAr: p.nameAr,
-            NameEn: p.nameEn,
-            DescriptionAr: p.descriptionAr,
-            DescriptionEn: p.descriptionEn,
+            nameAr: p.nameAr,
+            nameEn: p.nameEn,
+            descriptionAr: p.descriptionAr,
+            descriptionEn: p.descriptionEn,
           }))
         )
       );
@@ -160,13 +149,13 @@ const CarForm = ({ carId, onClose, onSuccess, t }: CarFormProps) => {
         "carServices",
         JSON.stringify(
           paidFeatures.map((pf, index) => ({
-            id: pf.id ?? (isEditMode ? carId : undefined),
-            ServiceTypeId: pf.serviceTypeId || 1,
-            NameAr: pf.titleAr || pf.title || "",
-            NameEn: pf.titleEn || pf.title || "",
+            // id: pf.id ?? (isEditMode ? undefined : pf.id),
+            id: pf.id || 1,
+            nameAr: pf.titleAr || pf.title || "",
+            nameEn: pf.titleEn || pf.title || "",
             Price: pf.price || 0,
-            DescriptionAr: pf.descriptionAr || pf.description || "",
-            DescriptionEn: pf.descriptionEn || pf.description || "",
+            descriptionAr: pf.descriptionAr || pf.description || "",
+            descriptionEn: pf.descriptionEn || pf.description || "",
           }))
         )
       );
@@ -209,17 +198,6 @@ const CarForm = ({ carId, onClose, onSuccess, t }: CarFormProps) => {
           fd.append("images", img);
         }
       });
-    }
-
-    // Cancellation policies
-    if (
-      formData.cancellationPolicies &&
-      formData.cancellationPolicies.length > 0
-    ) {
-      append(
-        "cancellationPolicies",
-        JSON.stringify(formData.cancellationPolicies)
-      );
     }
 
     return fd;

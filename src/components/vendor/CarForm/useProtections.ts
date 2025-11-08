@@ -15,10 +15,10 @@ export const useProtections = (car?: any) => {
     if (car?.protections && Array.isArray(car.protections)) {
       const prots = car.protections.map((prot: any) => ({
         id: prot.id,
-        nameAr: prot.name || prot.NameAr || "",
-        nameEn: prot.NameEn || "",
-        descriptionAr: prot.description || prot.DescriptionAr || "",
-        descriptionEn: prot.DescriptionEn || "",
+        nameAr: prot.nameAr || "",
+        nameEn: prot.nameEn || "",
+        descriptionAr: prot.descriptionAr || "",
+        descriptionEn: prot.descriptionEn || "",
       }));
       setProtections(prots);
     }

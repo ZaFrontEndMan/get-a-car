@@ -23,7 +23,6 @@ interface PaidFeature {
   description?: string;
   descriptionAr?: string;
   descriptionEn?: string;
-  serviceTypeId?: number;
 }
 
 interface PaidFeaturesSectionProps {
@@ -52,7 +51,6 @@ const PaidFeaturesSection = ({
         description: "",
         descriptionAr: "",
         descriptionEn: "",
-        serviceTypeId: undefined,
       },
     ]);
     setExpandedIndex(paidFeatures.length);
@@ -124,9 +122,9 @@ const PaidFeaturesSection = ({
               <div>
                 <Label>{t("service_type")} *</Label>
                 <Select
-                  value={feature.serviceTypeId?.toString() || ""}
+                  value={feature.id?.toString() || ""}
                   onValueChange={(value) =>
-                    updatePaidFeature(index, "serviceTypeId", parseInt(value))
+                    updatePaidFeature(index, "id", parseInt(value))
                   }
                   disabled={serviceTypesLoading}
                 >

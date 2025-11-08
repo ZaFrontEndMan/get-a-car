@@ -54,7 +54,7 @@ export interface Car {
   type: string;
   typeId: number;
   branchName: string;
-  branchId: string;
+  branchId: number;
   pricePerDay: number;
   pricePerWeek: number;
   pricePerMonth: number;
@@ -86,7 +86,6 @@ export interface Car {
   licenseNumber: number;
   images: [];
   protectionPrice: number;
-  cancellationPolicies: CancellationPolicy[];
   carServices: CarService[];
   protections: Protection[];
   pickUpLocations: Location[];

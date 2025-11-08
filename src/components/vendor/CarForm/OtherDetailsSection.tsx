@@ -1,6 +1,5 @@
 import React from "react";
 import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import {
   Select,
@@ -34,7 +33,7 @@ const OtherDetailsSection = ({
             {t("branch")}
           </Label>
           <Select
-            value={formData.branchId}
+            value={Number(formData.branchId)}
             onValueChange={(value) =>
               handleChange("branchId", value === "no-branch" ? null : value)
             }
@@ -62,7 +61,7 @@ const OtherDetailsSection = ({
         </div>
       </div>
 
-      <div className="flex items-center gap-6 mt-4">
+      {/* <div className="flex items-center gap-6 mt-4">
         <div className="flex items-center gap-2">
           <Switch
             id="is_available"
@@ -75,7 +74,7 @@ const OtherDetailsSection = ({
             {t("available")}
           </Label>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 };

@@ -15,7 +15,12 @@ export const getVendorBranches = async () => {
   );
   return data;
 };
+// Get vendor branches
+export const getVendorBranchesForCars = async () => {
+  const { data } = await axiosInstance.get("/Vendor/Car/GetVendorAndBranhes");
 
+  return data;
+};
 // Create vendor branch
 export const createVendorBranch = async (branchData: any) => {
   const { data } = await axiosInstance.post(

@@ -4,7 +4,8 @@ import {
   getVendorBranches,
   updateEmployee,
   updateVendorBranch,
-  createVendorBranch, // New import
+  createVendorBranch,
+  getVendorBranchesForCars, // New import
 } from "../../api/vendor/vendorBranchApi";
 
 // Query keys
@@ -22,6 +23,12 @@ export const useGetVendorBranches = () => {
   return useQuery({
     queryKey: VENDOR_BRANCH_QUERY_KEYS.lists(),
     queryFn: getVendorBranches,
+  });
+};
+export const useGetVendorBranchesForCars = () => {
+  return useQuery({
+    queryKey: VENDOR_BRANCH_QUERY_KEYS.lists(),
+    queryFn: getVendorBranchesForCars,
   });
 };
 

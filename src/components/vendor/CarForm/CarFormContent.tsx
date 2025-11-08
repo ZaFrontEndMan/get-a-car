@@ -17,7 +17,6 @@ interface PaidFeature {
   description?: string;
   descriptionAr?: string;
   descriptionEn?: string;
-  serviceTypeId?: number;
 }
 
 interface Location {

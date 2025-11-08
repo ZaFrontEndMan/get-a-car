@@ -619,7 +619,7 @@ const VendorOffers: React.FC = () => {
       description_ar: "",
       discount_percentage: 0,
       valid_until: "",
-      status: "draft",
+      status: "published",
       offerImage: null,
     });
   }, []);
