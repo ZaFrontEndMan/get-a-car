@@ -131,7 +131,7 @@ const CarForm = ({
         "carServices",
         JSON.stringify(
           paidFeatures.map((pf, index) => ({
-            id: pf.id || 1,
+            ServiceTypeId: pf.id || 1,
             nameAr: pf.titleAr || pf.title || "",
             nameEn: pf.titleEn || pf.title || "",
             Price: pf.price || 0,
