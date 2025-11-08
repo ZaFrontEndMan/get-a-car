@@ -1447,6 +1447,8 @@ export const enTranslations = {
   password_label: "Password",
   national_id_label: "National ID",
   gender_label: "Gender",
+  technical: "Technical",
+  financial: "Financial",
   is_phone_hint: "If checked, username must be a phone number",
 };
 

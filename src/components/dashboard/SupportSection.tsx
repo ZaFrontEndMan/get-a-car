@@ -116,7 +116,7 @@ const SupportSection: React.FC = () => {
   // Form state (extended to support attachment and optional info)
   const [newTicketForm, setNewTicketForm] = useState({
     subject: "",
-    priority: "medium",
+    priority: "1",
     description: "",
     attachment: null as File | null,
     additionalInfo: "",
@@ -164,9 +164,9 @@ const SupportSection: React.FC = () => {
         fd.append("attachement", newTicketForm.attachment);
       fd.append("issueTitle", newTicketForm.subject);
       if (newTicketForm.categoryStatus)
-        fd.append("CategoryStatus", newTicketForm.categoryStatus);
-      if (newTicketForm.ticketStatus)
-        fd.append("ticketStatus", newTicketForm.ticketStatus);
+        fd.append("customerCategoryStatus", newTicketForm.categoryStatus);
+
+      fd.append("ticketStatus", 1);
       if (newTicketForm.vendorId) fd.append("vendorId", newTicketForm.vendorId);
       if (newTicketForm.customerId)
         fd.append("customerId", newTicketForm.customerId);
@@ -278,7 +278,7 @@ const SupportSection: React.FC = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    {t("priority")}
+                    {t("category")}
                   </label>
                   <select
                     value={newTicketForm.priority}
@@ -290,9 +290,8 @@ const SupportSection: React.FC = () => {
                     }
                     className="w-full px-3 py-2 text-sm md:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                   >
-                    <option value="low">{t("low")}</option>
-                    <option value="medium">{t("medium")}</option>
-                    <option value="high">{t("high")}</option>
+                    <option value="1">{t("technical")}</option>
+                    <option value="2">{t("financial")}</option>
                   </select>
                 </div>
 
@@ -347,7 +346,7 @@ const SupportSection: React.FC = () => {
             </div>
 
             {/* Tickets - Desktop Table */}
-            <div className="hidden md:block bg-white rounded-lg shadow">
+            <div className="hidden md:block bg-white rounded-lg shadow mt-8">
               <div className="p-6 border-b flex items-center justify-between">
                 <h2 className="text-xl font-semibold">{t("myTickets")}</h2>
                 <div className="flex items-center gap-3">
@@ -391,15 +390,13 @@ const SupportSection: React.FC = () => {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="text-end">{t("ticketId")}</TableHead>
-                    <TableHead className="text-end">{t("subject")}</TableHead>
-                    <TableHead className="text-end">{t("status")}</TableHead>
-                    <TableHead className="text-end">{t("priority")}</TableHead>
-                    <TableHead className="text-end">{t("created")}</TableHead>
-                    <TableHead className="text-end">
+                    <TableHead className="rtl:text-end text-start">{t("subject")}</TableHead>
+                    <TableHead className="rtl:text-end text-start">{t("status")}</TableHead>
+                    <TableHead className="rtl:text-end text-start">{t("created")}</TableHead>
+                    <TableHead className="rtl:text-end text-start">
                       {t("lastUpdate")}
                     </TableHead>
-                    <TableHead className="text-end">
+                    <TableHead className="rtl:text-end text-start">
                       {t("attachment")}
                     </TableHead>
                   </TableRow>
@@ -418,9 +415,6 @@ const SupportSection: React.FC = () => {
                   {!ticketsLoading &&
                     hookTickets?.map((ticket) => (
                       <TableRow key={ticket.id}>
-                        <TableCell className="font-medium">
-                          {ticket.id}
-                        </TableCell>
                         <TableCell>{ticket.title}</TableCell>
                         <TableCell>
                           <div className="flex items-end gap-2 ">
@@ -430,15 +424,7 @@ const SupportSection: React.FC = () => {
                             </span>
                           </div>
                         </TableCell>
-                        <TableCell>
-                          <span
-                            className={`px-2 py-1 rounded-full text-xs font-medium ${getPriorityColor(
-                              ticket.priority || "medium"
-                            )}`}
-                          >
-                            {t(ticket.priority || "medium")}
-                          </span>
-                        </TableCell>
+
                         <TableCell>{ticket.createdAt}</TableCell>
                         <TableCell>{ticket.updatedAt}</TableCell>
                         <TableCell>

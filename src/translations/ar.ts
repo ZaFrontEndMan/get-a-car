@@ -1458,6 +1458,8 @@ export const arTranslations = {
   national_id_label: "رقم الهوية الوطنية",
   gender_label: "الجنس",
   is_phone_hint: "إذا تم التحديد يجب أن يكون اسم المستخدم رقم جوال",
+  technical: "فني",
+  financial: "مالي",
 };
 
 export default arTranslations;
