@@ -2,7 +2,7 @@
 import React from 'react';
 import { Filter } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { bookingStatusLabels } from '../BookingsList';
+import { bookingStatusLabels } from '@/components/vendor/bookings/bookingUtils';
 
 interface BookingsFilteredEmptyStateProps {
   statusFilter: string;

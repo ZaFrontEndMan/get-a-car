@@ -1,30 +1,65 @@
 import { Clock, CheckCircle, PauseCircle, Car, XCircle } from "lucide-react";
 
-// Define the supported status number type for better type safety:
 export type APISupportedBookingStatus =
   | 1 // Waiting
   | 2 // Completed
   | 3 // Cancelled
   | 4 // InProgress
   | 5 // CarReturn
-  | 6; // Offer;
+  | 6; // Offer
 
-// API status map for labels in Arabic (or you can use t() here if you have i18n)
 export const bookingStatusLabels: Record<APISupportedBookingStatus, string> = {
   1: "منتظر", // Waiting
   2: "تم إرجاع السيارة", // Completed
-  3: "ملغي", // Cancelled
+  3: "تم الالغاء", // Cancelled
   4: "قيد الاجراء", // In Progress
   5: "طلب استرجاع", // Car Return
-  6: "العروض", // Offer
+  6: "عرض", // Offer
 };
 
-// Icon/color config mapped by status number
+// Maps Arabic/English status to number, fallback to undefined
+const statusStringToNumber: Record<string, APISupportedBookingStatus> = {
+  // Arabic
+  منتظر: 1,
+  "تم إرجاع السيارة": 2,
+  "تم الالغاء": 3,
+  "قيد الاجراء": 4,
+  "طلب استرجاع": 5,
+  عرض: 6,
+  // English (in case, for robustness)
+  waiting: 1,
+  completed: 2,
+  cancelled: 3,
+  inprogress: 4,
+  in_progress: 4,
+  carreturn: 5,
+  offer: 6,
+};
+
 export const getStatusConfig = (
   status: APISupportedBookingStatus | number | string
 ) => {
-  // Ensure status is always an integer
-  let key = Number(status) as APISupportedBookingStatus;
+  // Resolve string status to number if needed
+  let key: APISupportedBookingStatus;
+
+  if (typeof status === "number") {
+    key = status as APISupportedBookingStatus;
+  } else if (typeof status === "string") {
+    // Try direct numeric conversion
+    const asNum = Number(status);
+    if (!isNaN(asNum) && asNum >= 1 && asNum <= 6) {
+      key = asNum as APISupportedBookingStatus;
+    } else {
+      // Try text mapping
+      key =
+        statusStringToNumber[status.trim()] ||
+        statusStringToNumber[status.trim().toLowerCase().replace(/\s+/g, "")] ||
+        1; // fallback to 1 if not found
+    }
+  } else {
+    key = 1;
+  }
+
   const statusConfigs: Record<
     APISupportedBookingStatus,
     {
@@ -36,7 +71,6 @@ export const getStatusConfig = (
     }
   > = {
     1: {
-      // Waiting
       label: bookingStatusLabels[1],
       variant: "secondary",
       icon: Clock,
@@ -44,7 +78,6 @@ export const getStatusConfig = (
       dotColor: "bg-yellow-500",
     },
     2: {
-      // Completed
       label: bookingStatusLabels[2],
       variant: "default",
       icon: CheckCircle,
@@ -52,7 +85,6 @@ export const getStatusConfig = (
       dotColor: "bg-blue-500",
     },
     3: {
-      // Cancelled
       label: bookingStatusLabels[3],
       variant: "destructive",
       icon: XCircle,
@@ -60,7 +92,6 @@ export const getStatusConfig = (
       dotColor: "bg-red-500",
     },
     4: {
-      // InProgress
       label: bookingStatusLabels[4],
       variant: "default",
       icon: PauseCircle,
@@ -68,7 +99,6 @@ export const getStatusConfig = (
       dotColor: "bg-orange-500",
     },
     5: {
-      // CarReturn
       label: bookingStatusLabels[5],
       variant: "destructive",
       icon: Car,
@@ -76,7 +106,6 @@ export const getStatusConfig = (
       dotColor: "bg-purple-500",
     },
     6: {
-      // Offer
       label: bookingStatusLabels[6],
       variant: "default",
       icon: CheckCircle,
@@ -84,5 +113,5 @@ export const getStatusConfig = (
       dotColor: "bg-green-500",
     },
   };
-  return statusConfigs[key] || statusConfigs[1]; // default to Waiting if not found
+  return statusConfigs[key] || statusConfigs[1];
 };

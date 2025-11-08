@@ -52,7 +52,7 @@ const apiStatusButtons = [
   {
     key: "Cancelled",
     apiStatus: 3,
-    label: { ar: "ملغي", en: "Cancelled" },
+    label: { ar: "تم الالغاء", en: "Cancelled" },
     icon: XCircle,
     countKey: "cancelledCount",
   },

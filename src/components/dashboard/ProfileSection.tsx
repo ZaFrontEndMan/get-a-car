@@ -36,24 +36,52 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { toast } from "sonner";
+import { useCountries, useCitiesByCountry } from "@/hooks/useCountriesAndCities";
 
 const ProfileSection: React.FC = () => {
   const { t } = useLanguage();
   const [isEditing, setIsEditing] = useState(false);
-  const [originalData, setOriginalData] = useState<ProfileFormData | null>(
-    null
-  );
+  const [originalData, setOriginalData] = useState<ProfileFormData | null>(null);
+  const [countryId, setCountryId] = useState<string | undefined>(undefined);
+  const [cityId, setCityId] = useState<string | undefined>(undefined);
 
   const { data, isLoading } = useGetUserInfo();
   const editMutation = useEditClient();
   const profile = data?.data;
+  const { data: countries, isLoading: loadingCountries } = useCountries();
+  const { data: cities, isLoading: loadingCities } = useCitiesByCountry(countryId ?? null);
+
+  useEffect(() => {
+    if (profile && countries && countries.length > 0) {
+      const foundCountry = countries.find(
+        (c) =>
+          c.name_en === profile.countryName ||
+          c.name_ar === profile.countryName ||
+          c.name_en.toLowerCase().includes(profile.countryName?.toLowerCase() ?? "") ||
+          c.name_ar.includes(profile.countryName ?? "")
+      );
+      if (foundCountry) setCountryId(foundCountry.id);
+    }
+  }, [profile, countries]);
+
+  useEffect(() => {
+    if (profile && cities && cities.length > 0) {
+      const foundCity = cities.find(
+        (c) =>
+          c.name_en === profile.cityName ||
+          c.name_ar === profile.cityName ||
+          c.name_en.toLowerCase().includes(profile.cityName?.toLowerCase() ?? "") ||
+          c.name_ar.includes(profile.cityName ?? "")
+      );
+      if (foundCity) setCityId(foundCity.id);
+    }
+  }, [profile, cities]);
+
   const form = useForm<ProfileFormData>({
     resolver: zodResolver(profileSchema),
     defaultValues: {} as ProfileFormData,
   });
-  console.log(profile);
 
-  // Reset form when profile data is fetched
   useEffect(() => {
     if (profile) {
       const formData = {
@@ -63,7 +91,9 @@ const ProfileSection: React.FC = () => {
         birthDate: profile.birthDate?.split("T")[0] || "",
         gender: profile.gender || 1,
         countryName: profile.countryName || "",
+        countryId: countryId || "",
         cityName: profile.cityName || "",
+        cityId: cityId || "",
         licenseNumber: profile.licenseNumber || "",
         email: profile.email || "",
         phoneNumber: profile.phoneNumber || "",
@@ -73,28 +103,19 @@ const ProfileSection: React.FC = () => {
       form.reset(formData);
       setOriginalData(formData);
     }
-  }, [profile, form]);
+  }, [profile, countryId, cityId, form]);
 
-  // Function to get only changed fields
-  const getChangedFields = (
-    currentData: ProfileFormData
-  ): Partial<ProfileFormData> => {
+  const getChangedFields = (currentData: ProfileFormData): Partial<ProfileFormData> => {
     if (!originalData) return currentData;
-
     const changedFields: Partial<ProfileFormData> = {};
-
-    (Object.keys(currentData) as Array<keyof ProfileFormData>).forEach(
-      (key) => {
-        if (currentData[key] !== originalData[key]) {
-          (changedFields as any)[key] = currentData[key];
-        }
+    (Object.keys(currentData) as Array<keyof ProfileFormData>).forEach((key) => {
+      if (currentData[key] !== originalData[key]) {
+        (changedFields as any)[key] = currentData[key];
       }
-    );
-
+    });
     return changedFields;
   };
 
-  // Handle image update for all document fields
   const handleImageUpdate = (fieldName: string, file: File) => {
     const updateData = { [fieldName]: file };
     editMutation.mutate(updateData as ProfileFormData, {
@@ -114,20 +135,25 @@ const ProfileSection: React.FC = () => {
     });
   };
 
-  // Handle submit
   const onSubmit = (data: ProfileFormData) => {
+    if (countryId && countries) {
+      const c = countries.find((ct) => ct.id === countryId);
+      if (c) data.countryName = c.name_en;
+      data.countryId = countryId;
+    }
+    if (cityId && cities) {
+      const c = cities.find((ct) => ct.id === cityId);
+      if (c) data.cityName = c.name_en;
+      data.cityId = cityId;
+    }
     const changedFields = getChangedFields(data);
-
-    // Only submit if there are actual changes
     if (Object.keys(changedFields).length === 0) {
       setIsEditing(false);
       return;
     }
-
     editMutation.mutate(changedFields as ProfileFormData, {
       onSuccess: () => {
         setIsEditing(false);
-        // Update original data with the new values
         setOriginalData(data);
       },
     });
@@ -139,7 +165,6 @@ const ProfileSection: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
@@ -176,10 +201,8 @@ const ProfileSection: React.FC = () => {
           )}
         </div>
       </div>
-
-      {/* Row layout */}
       <div className="grid grid-cols-12 gap-6">
-        {/* Profile Form (9/12) */}
+        {/* Profile Form */}
         <div className="col-span-12 md:col-span-9">
           <Card>
             <CardHeader>
@@ -208,7 +231,7 @@ const ProfileSection: React.FC = () => {
                             <Input
                               {...field}
                               disabled={!isEditing}
-                              placeholder="Enter your first name"
+                              placeholder={t("enterFirstName")}
                             />
                           </FormControl>
                           <FormMessage />
@@ -228,7 +251,7 @@ const ProfileSection: React.FC = () => {
                             <Input
                               {...field}
                               disabled={!isEditing}
-                              placeholder="Enter your last name"
+                              placeholder={t("enterLastName")}
                             />
                           </FormControl>
                           <FormMessage />
@@ -236,7 +259,6 @@ const ProfileSection: React.FC = () => {
                       )}
                     />
                   </div>
-
                   <FormField
                     control={form.control}
                     name="fullName"
@@ -250,14 +272,13 @@ const ProfileSection: React.FC = () => {
                           <Input
                             {...field}
                             disabled={!isEditing}
-                            placeholder="Enter your full name"
+                            placeholder={t("enterFullName")}
                           />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-
                   <FormField
                     control={form.control}
                     name="email"
@@ -272,14 +293,13 @@ const ProfileSection: React.FC = () => {
                             {...field}
                             type="email"
                             disabled={!isEditing}
-                            placeholder="Enter your email"
+                            placeholder={t("enterEmail")}
                           />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-
                   <FormField
                     control={form.control}
                     name="phoneNumber"
@@ -294,14 +314,13 @@ const ProfileSection: React.FC = () => {
                             {...field}
                             type="tel"
                             disabled={!isEditing}
-                            placeholder="Enter your phone number"
+                            placeholder={t("enterPhoneNumber")}
                           />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-
                   <FormField
                     control={form.control}
                     name="birthDate"
@@ -318,7 +337,6 @@ const ProfileSection: React.FC = () => {
                       </FormItem>
                     )}
                   />
-
                   <FormField
                     control={form.control}
                     name="gender"
@@ -329,9 +347,7 @@ const ProfileSection: React.FC = () => {
                           {t("gender")}
                         </FormLabel>
                         <Select
-                          onValueChange={(value) =>
-                            field.onChange(parseInt(value))
-                          }
+                          onValueChange={(value) => field.onChange(parseInt(value))}
                           value={field.value?.toString()}
                           disabled={!isEditing}
                         >
@@ -350,49 +366,93 @@ const ProfileSection: React.FC = () => {
                     )}
                   />
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="countryName"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="flex items-center gap-2">
-                            <Globe className="h-4 w-4" />
-                            {t("country")}
-                          </FormLabel>
-                          <FormControl>
-                            <Input
-                              {...field}
-                              disabled={!isEditing}
-                              placeholder="Enter your country"
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="cityName"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="flex items-center gap-2">
-                            <MapPin className="h-4 w-4" />
-                            {t("city")}
-                          </FormLabel>
-                          <FormControl>
-                            <Input
-                              {...field}
-                              disabled={!isEditing}
-                              placeholder="Enter your city"
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
+                  {/* Country Dropdown */}
+                  <FormField
+                    control={form.control}
+                    name="countryId"
+                    render={() => (
+                      <FormItem>
+                        <FormLabel className="flex items-center gap-2">
+                          <Globe className="h-4 w-4" />
+                          {t("country")}
+                        </FormLabel>
+                        <FormControl>
+                          <Select
+                            disabled={!isEditing || loadingCountries}
+                            value={countryId}
+                            onValueChange={(val) => {
+                              setCountryId(val);
+                              setCityId("");
+                              form.setValue("countryId", val);
+                            }}
+                          >
+                            <SelectTrigger>
+                              <SelectValue
+                                placeholder={t(
+                                  loadingCountries
+                                    ? "loading"
+                                    : "selectCountry"
+                                )}
+                              />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {(countries ?? []).map((c) => (
+                                <SelectItem key={c.id} value={c.id}>
+                                  {c.name_en}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  {/* City Dropdown */}
+                  <FormField
+                    control={form.control}
+                    name="cityId"
+                    render={() => (
+                      <FormItem>
+                        <FormLabel className="flex items-center gap-2">
+                          <MapPin className="h-4 w-4" />
+                          {t("city")}
+                        </FormLabel>
+                        <FormControl>
+                          <Select
+                            disabled={
+                              !isEditing || !countryId || loadingCities
+                            }
+                            value={cityId}
+                            onValueChange={(val) => {
+                              setCityId(val);
+                              form.setValue("cityId", val);
+                            }}
+                          >
+                            <SelectTrigger>
+                              <SelectValue
+                                placeholder={t(
+                                  loadingCities
+                                    ? "loading"
+                                    : !countryId
+                                    ? "selectCountryFirst"
+                                    : "selectCity"
+                                )}
+                              />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {(cities ?? []).map((c) => (
+                                <SelectItem key={c.id} value={c.id}>
+                                  {c.name_en}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                   <FormField
                     control={form.control}
                     name="licenseNumber"
@@ -406,14 +466,13 @@ const ProfileSection: React.FC = () => {
                           <Input
                             {...field}
                             disabled={!isEditing}
-                            placeholder="Enter your license number"
+                            placeholder={t("enterLicenseNumber")}
                           />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-
                   <FormField
                     control={form.control}
                     name="nationalId"
@@ -427,7 +486,7 @@ const ProfileSection: React.FC = () => {
                           <Input
                             {...field}
                             disabled={!isEditing}
-                            placeholder="Enter your national ID"
+                            placeholder={t("enterNationalId")}
                           />
                         </FormControl>
                         <FormMessage />
@@ -439,8 +498,7 @@ const ProfileSection: React.FC = () => {
             </CardContent>
           </Card>
         </div>
-
-        {/* Image Uploads (3/12) */}
+        {/* Image upload cards */}
         <div className="col-span-12 md:col-span-3 space-y-6">
           <ProfileImageUpload
             loading={editMutation.isPending}

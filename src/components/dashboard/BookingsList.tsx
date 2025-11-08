@@ -4,53 +4,22 @@ import { useLanguage } from "../../contexts/LanguageContext";
 import BookingsHeader from "./bookings/BookingsHeader";
 import BookingsLoadingState from "./bookings/BookingsLoadingState";
 import BookingsEmptyState from "./bookings/BookingsEmptyState";
-import BookingsFilteredEmptyState from "./bookings/BookingsFilteredEmptyState";
 import ClientBookingGridView from "./bookings/ClientBookingGridView";
 import ClientBookingListView from "./bookings/ClientBookingListView";
 import ClientBookingTableView from "./bookings/ClientBookingTableView";
 import BookingStatusFilter from "@/components/vendor/bookings/BookingStatusFilter";
 import BookingsPagination from "./bookings/BookingsPagination";
-import { getStatusCounts } from "@/utils/bookingUtils";
 import { useClientBookings } from "@/hooks/client/useClientBookings";
 import { Booking } from "@/types/clientBookings";
-
-type BookingStatus =
-  | "pending"
-  | "confirmed"
-  | "active"
-  | "InProgress"
-  | "return_requested"
-  | "completed"
-  | "cancelled";
-
-const bookingStatusMap: Record<string, BookingStatus> = {
-  "قيد الاجراء": "InProgress",
-  "تم إرجاع السيارة": "completed",
-  ملغي: "cancelled",
-  مؤكد: "confirmed",
-  نشط: "active",
-  "قيد الانتظار": "pending",
-  "طلب استرجاع": "return_requested",
-};
-
-export const bookingStatusLabels: Record<BookingStatus, string> = {
-  pending: "قيد الانتظار",
-  confirmed: "مؤكد",
-  active: "نشط",
-  InProgress: "قيد الاجراء",
-  return_requested: "طلب استرجاع",
-  completed: "تم إرجاع السيارة",
-  cancelled: "ملغي",
-};
+import { APISupportedBookingStatus } from "../vendor/bookings/bookingUtils";
 
 const ITEMS_PER_PAGE = 12;
 
 const BookingsList: React.FC = () => {
   const { viewMode, setViewMode } = useBookingViewMode();
   const { language, t } = useLanguage();
-  const [statusFilter, setStatusFilter] = useState<BookingStatus | "all">(
-    "all"
-  );
+  const [statusFilter, setStatusFilter] =
+    useState<APISupportedBookingStatus>(undefined); // undefined = "all"
   const [currentPage, setCurrentPage] = useState(1);
 
   const { useGetAllBookings, useAcceptReturnCar } = useClientBookings();
@@ -58,21 +27,14 @@ const BookingsList: React.FC = () => {
   const { data, isLoading, isError, isFetching } = useGetAllBookings({
     pageNumber: currentPage,
     pageSize: ITEMS_PER_PAGE,
-    bookingStatus: statusFilter === "all" ? undefined : statusFilter,
+    bookingStatus: statusFilter,
   });
 
   const acceptReturnMutation = useAcceptReturnCar();
 
-  const bookings: Booking[] =
-    data?.data?.items?.map((item: any) => ({
-      ...item,
-      bookingStatus: bookingStatusMap[item.bookingStatus] || "pending",
-    })) || [];
-
+  const bookings: Booking[] = data?.data?.items || [];
   const totalPages = data?.data?.totalPages || 0;
-  const totalItems = data?.data?.totalCount || 0;
-
-  const statusCounts = getStatusCounts(bookings);
+  const totalItems = data?.data?.totalRecords || 0;
 
   const handlePageChange = (page: number) => {
     if (page >= 1 && page <= totalPages && page !== currentPage) {
@@ -81,61 +43,44 @@ const BookingsList: React.FC = () => {
     }
   };
 
-  const handleStatusFilterChange = (status: BookingStatus | "all") => {
-    setStatusFilter(status);
-    setCurrentPage(1);
-  };
-
   const handleAcceptReturn = (bookingId: string) => {
     acceptReturnMutation.mutate({ bookingId });
   };
 
-  if (isLoading) {
-    return <BookingsLoadingState />;
-  }
-
-  if (isError) {
-    return (
-      <div className="text-center py-8">
-        <p className="text-red-600">
-          {t("errorLoadingBookings")}. {t("pleaseTryAgainLater")}
-        </p>
-      </div>
-    );
-  }
-
-  if (!bookings.length && statusFilter === "all") {
-    return <BookingsEmptyState />;
-  }
-
-  const renderContent = () => {
-    const commonProps = {
-      bookings,
-      onReturnCar: () => {
-        console.log("returning");
-      },
-      isReturning: false,
-      onAcceptReturnCar: handleAcceptReturn,
-      isAccepting: acceptReturnMutation.isPending,
-    };
-
-    const isMobile = window.innerWidth < 768;
-    const currentViewMode = isMobile ? "grid" : viewMode;
-
-    switch (currentViewMode) {
-      case "grid":
-        return <ClientBookingGridView {...commonProps} />;
-      case "list":
-        return <ClientBookingListView {...commonProps} />;
-      case "table":
-        return <ClientBookingTableView {...commonProps} />;
-      default:
-        return <ClientBookingGridView {...commonProps} />;
-    }
+  const commonProps = {
+    bookings,
+    onReturnCar: () => {},
+    isReturning: false,
+    onAcceptReturnCar: handleAcceptReturn,
+    isAccepting: acceptReturnMutation.isPending,
   };
 
+  const isMobile =
+    typeof window !== "undefined" ? window.innerWidth < 768 : false;
+  const currentViewMode = isMobile ? "grid" : viewMode;
+
+  let bookingsContent: React.ReactNode = null;
+  if (bookings.length > 0) {
+    switch (currentViewMode) {
+      case "grid":
+        bookingsContent = <ClientBookingGridView {...commonProps} />;
+        break;
+      case "list":
+        bookingsContent = <ClientBookingListView {...commonProps} />;
+        break;
+      case "table":
+        bookingsContent = <ClientBookingTableView {...commonProps} />;
+        break;
+      default:
+        bookingsContent = <ClientBookingGridView {...commonProps} />;
+    }
+  }
+
   return (
-    <div className={language === "ar" ? "text-right" : "text-left"}>
+    <div
+      className={language === "ar" ? "text-right" : "text-left"}
+      style={{ position: "relative" }}
+    >
       <BookingsHeader
         bookingsCount={totalItems}
         viewMode={viewMode}
@@ -145,27 +90,44 @@ const BookingsList: React.FC = () => {
       <div className="mb-6">
         <BookingStatusFilter
           statusFilter={statusFilter}
-          onFilterChange={handleStatusFilterChange}
-          statusCounts={statusCounts}
-          totalBookings={totalItems}
-          statusLabels={bookingStatusLabels}
+          onFilterChange={setStatusFilter}
+          apiCounts={data?.data || {}}
         />
       </div>
 
-      {bookings.length > 0 ? (
-        <>
-          {renderContent()}
+      {/* Always render loading and empty states in the background */}
+      <div className="relative min-h-[6rem]">
+        {/* Loading always displayed */}
+        {isLoading || isFetching ? (
+          <div className="absolute inset-0 z-10 pointer-events-none">
+            <BookingsLoadingState />
+          </div>
+        ) : null}
 
-          <BookingsPagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={handlePageChange}
-            isLoading={isFetching}
-          />
-        </>
-      ) : (
-        <BookingsFilteredEmptyState statusFilter={statusFilter} />
-      )}
+        {/* Empty displayed if no bookings and not loading */}
+        {!isLoading && !isFetching && bookings.length === 0 ? (
+          <div className="absolute inset-0 z-10 pointer-events-none">
+            <BookingsEmptyState />
+          </div>
+        ) : null}
+
+        {/* Main content (always rendered, can be styled to be on top) */}
+        <div
+          className={
+            isLoading || isFetching || bookings.length === 0 ? "opacity-60" : ""
+          }
+        >
+          {bookingsContent}
+        </div>
+      </div>
+
+      {/* Pagination rendered always, but disabled during loading/fetching */}
+      <BookingsPagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={handlePageChange}
+        isLoading={isFetching}
+      />
     </div>
   );
 };

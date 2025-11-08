@@ -198,7 +198,6 @@ const SupportSection: React.FC = () => {
       });
     }
   };
-  console.log("hookTickets", hookTickets);
   return (
     <div className="px-2 md:px-0">
       <h1 className="text-xl md:text-2xl font-bold text-gray-900 mb-4 md:mb-6">
@@ -246,15 +245,15 @@ const SupportSection: React.FC = () => {
           </div>
         </TabsContent>
 
-        <TabsContent value="tickets" className="mt-4 md:mt-6">
-          <div className="space-y-4 md:space-y-6">
+        <TabsContent value="tickets" className="mt-4 md:mt-6 ">
+          <div>
             {/* New Ticket Form */}
             <div className="bg-white rounded-lg shadow p-4 md:p-6">
               <div className="flex items-center justify-between mb-4">
+                <Plus className="h-5 w-5 text-primary" />
                 <h2 className="text-lg md:text-xl font-semibold">
                   {t("createNewTicket")}
                 </h2>
-                <Plus className="h-5 w-5 text-primary" />
               </div>
 
               <form onSubmit={handleSubmitTicket} className="space-y-4">
@@ -591,15 +590,6 @@ const SupportSection: React.FC = () => {
                   {t("responseIn24h")}
                 </p>
               </div>
-
-              {/* <div className="text-center p-4 md:p-6 border rounded-lg">
-                <MessageSquare className="h-6 w-6 md:h-8 md:w-8 text-primary mx-auto mb-3" />
-                <h3 className="font-semibold mb-2 text-sm md:text-base">{t('liveChat')}</h3>
-                <button className="bg-primary text-white px-3 md:px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors text-xs md:text-sm">
-                  {t('startChat')}
-                </button>
-                <p className="text-xs md:text-sm text-gray-500 mt-1">{t('instantSupport')}</p>
-              </div> */}
             </div>
           </div>
         </TabsContent>
