@@ -42,7 +42,7 @@ const VendorBookings = () => {
     useState<APISupportedBookingStatus>(undefined); // undefined = "all"
   const [viewMode, setViewMode] = useState<"grid" | "list" | "table">("grid");
   const [pageNumber, setPageNumber] = useState(1);
-  const [pageSize] = useState(10);
+  const [pageSize] = useState(12);
 
   // Set view mode based on screen size once on mount and on resize
   useEffect(() => {

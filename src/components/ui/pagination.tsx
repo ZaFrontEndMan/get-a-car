@@ -70,20 +70,11 @@ const PaginationPrevious = ({
     <PaginationLink
       aria-label={t("goToPreviousPage") || "Go to previous page"}
       size="default"
-      className={cn("gap-1", isRTL ? "pr-2.5" : "pl-2.5", className)}
+      className={cn("flex items-center gap-1", className)}
       {...props}
     >
-      {isRTL ? (
-        <>
-          <span>{t("next") || "Next"}</span>
-          <ChevronRight className="h-4 w-4" />
-        </>
-      ) : (
-        <>
-          <ChevronLeft className="h-4 w-4" />
-          <span>{t("previous") || "Previous"}</span>
-        </>
-      )}
+      <ChevronRight className="h-4 w-4 " />
+      <span>{t("previous") || "previous"}</span>
     </PaginationLink>
   );
 };
@@ -100,20 +91,11 @@ const PaginationNext = ({
     <PaginationLink
       aria-label={t("goToNextPage") || "Go to next page"}
       size="default"
-      className={cn("gap-1", isRTL ? "pl-2.5" : "pr-2.5", className)}
+      className={cn("flex items-center gap-1", className)}
       {...props}
     >
-      {isRTL ? (
-        <>
-          <ChevronLeft className="h-4 w-4" />
-          <span>{t("previous") || "Previous"}</span>
-        </>
-      ) : (
-        <>
-          <span>{t("next") || "Next"}</span>
-          <ChevronRight className="h-4 w-4" />
-        </>
-      )}
+      <span>{t("next") || "Next"}</span>
+      <ChevronLeft className="h-4 w-4 rtl:180" />
     </PaginationLink>
   );
 };
