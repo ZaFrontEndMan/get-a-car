@@ -45,7 +45,6 @@ const ClientBookingGridView = ({
   const canAcceptReturn = (status: string) => {
     return status.toLowerCase() === "return_requested";
   };
-console.log(bookings);
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
