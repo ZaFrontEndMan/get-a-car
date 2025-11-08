@@ -141,7 +141,7 @@ const CarMobileCard = ({
             </div>
             <div className="flex items-center gap-1">
               <Users className="h-3 w-3 text-gray-400" />
-              <span>{t("seats_count", { count: car.seats })}</span>
+              <span>    {`${t("seats")}  ${car.doors}`}</span>
             </div>
             <div className="flex items-center gap-1">
               <Fuel className="h-3 w-3 text-gray-400" />

@@ -21,22 +21,26 @@ interface CarFormProps {
   onClose: () => void;
   onSuccess: () => void;
   t: (key: string, params?: Record<string, any>) => string;
+  isViewMode?: boolean;
 }
 
-const CarForm = ({ carId, onClose, onSuccess, t }: CarFormProps) => {
+const CarForm = ({
+  carId,
+  onClose,
+  onSuccess,
+  t,
+  isViewMode,
+}: CarFormProps) => {
   const isEditMode = !!carId;
 
-  // Fetch car data for editing
   const {
     data: carData,
     isLoading: isLoadingCar,
     error: carError,
   } = useGetCarById(carId ? String(carId) : "", isEditMode);
 
-  // Car data from API - useCarForm handles the mapping
   const car = carData?.data?.data || null;
 
-  // Form hooks - direct API structure, no manual mapping needed
   const { formData, handleChange } = useCarForm(car);
   const { paidFeatures, setPaidFeatures } = usePaidFeatures(car);
   const {
@@ -47,32 +51,26 @@ const CarForm = ({ carId, onClose, onSuccess, t }: CarFormProps) => {
   } = useLocations(car);
   const { protections, setProtections } = useProtections(car);
 
-  // Branches for branch selection
   const { data: branchesData, isLoading: branchesLoading } =
     useGetVendorBranchesForCars();
 
   const branches = React.useMemo(() => {
     if (!branchesData?.data?.vendorBranches) return [];
-
     return branchesData.data.vendorBranches.map((b: any) => ({
       id: b.id,
       name: b.branchName,
     }));
   }, [branchesData]);
 
-  // API mutations
   const createMutation = useCreateCar();
   const updateMutation = useUpdateCar();
   const { toast } = useToast();
   const isSubmitting = createMutation.isPending || updateMutation.isPending;
 
-  // Clean FormData builder - direct field access, no mapping
   const buildApiFormData = () => {
     const fd = new FormData();
-
     const append = (key: string, value: any) => {
       if (value === undefined || value === null || value === "") return;
-
       if (value instanceof File) {
         fd.append(key, value, value.name);
       } else {
@@ -80,37 +78,24 @@ const CarForm = ({ carId, onClose, onSuccess, t }: CarFormProps) => {
       }
     };
 
-    // Basic car info
-    // append("name", formData.name);
     append("description", formData.description);
-    append("vendorBranchId", formData.branchId);
+    append("vendorBranchId", formData.vendorBranchId);
+    append("vendorId", branchesData?.data?.vendors[0]?.id);
     append("modelYear", formData.year);
-
-    // Pricing - direct API fields
     append("pricePerDay", formData.pricePerDay);
     append("protectionPrice", formData.protectionPrice);
     append("isProtection", formData.protectionPrice > 0);
-
     append("licenseNumber", formData.licenseNumber);
     append("pricePerWeek", formData.pricePerWeek);
     append("pricePerMonth", formData.pricePerMonth);
-    // append("protectionPrice", formData.protectionPrice ?? 0);
-
-    // Car detail IDs - direct API fields
     append("tradeMarkId", formData.tradeMarkId);
     append("modelId", formData.modelId);
-    append("carTypeId", formData.typeId); // Map carTypeId to typeId
+    append("carTypeId", formData.typeId);
     append("fuelTypeId", formData.fuelTypeId);
     append("transmissionTypeId", formData.transmissionId);
-
-    // Physical specifications
     append("doors", formData.doors);
-
-    // Availability & services
     append("availability", formData.availabilityVendor);
     append("withDriver", formData.withDriver);
-
-    // Feature flags - direct boolean access
     append("electricMirrors", formData.electricMirrors ?? false);
     append("cruiseControl", formData.cruiseControl ?? false);
     append("fogLights", formData.fogLights ?? false);
@@ -127,7 +112,6 @@ const CarForm = ({ carId, onClose, onSuccess, t }: CarFormProps) => {
     append("airbag", formData.airbag ?? false);
     append("absBrakes", formData.absBrakes ?? false);
 
-    // Protections - safe ID handling
     if (protections.length > 0) {
       append(
         "protections",
@@ -142,14 +126,11 @@ const CarForm = ({ carId, onClose, onSuccess, t }: CarFormProps) => {
         )
       );
     }
-
-    // Car Services - safe ID handling
     if (paidFeatures.length > 0) {
       append(
         "carServices",
         JSON.stringify(
           paidFeatures.map((pf, index) => ({
-            // id: pf.id ?? (isEditMode ? undefined : pf.id),
             id: pf.id || 1,
             nameAr: pf.titleAr || pf.title || "",
             nameEn: pf.titleEn || pf.title || "",
@@ -160,8 +141,6 @@ const CarForm = ({ carId, onClose, onSuccess, t }: CarFormProps) => {
         )
       );
     }
-
-    // Pick up locations - safe ID handling
     if (pickupLocations.length > 0) {
       append(
         "pickUpLocation",
@@ -174,8 +153,6 @@ const CarForm = ({ carId, onClose, onSuccess, t }: CarFormProps) => {
         )
       );
     }
-
-    // Drop off locations - safe ID handling
     if (dropoffLocations.length > 0) {
       append(
         "dropOffLocation",
@@ -188,25 +165,19 @@ const CarForm = ({ carId, onClose, onSuccess, t }: CarFormProps) => {
         )
       );
     }
-
-    // Images - handle both URLs and Files
     if (formData.images && formData.images.length > 0) {
       formData.images.forEach((img: string | File) => {
-        if (typeof img === "string") {
-          fd.append("images", img);
-        } else if (img instanceof File) {
-          fd.append("images", img);
-        }
+        if (typeof img === "string") fd.append("images", img);
+        else if (img instanceof File) fd.append("images", img);
       });
     }
-
     return fd;
   };
 
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (isViewMode) return;
     const fd = buildApiFormData();
-
     if (isEditMode && carId) {
       updateMutation.mutate(
         { carId: String(carId), carData: fd },
@@ -249,7 +220,6 @@ const CarForm = ({ carId, onClose, onSuccess, t }: CarFormProps) => {
     }
   };
 
-  // Loading state
   if (isEditMode && isLoadingCar) {
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -265,7 +235,6 @@ const CarForm = ({ carId, onClose, onSuccess, t }: CarFormProps) => {
     );
   }
 
-  // Error state
   if (isEditMode && carError) {
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -301,7 +270,10 @@ const CarForm = ({ carId, onClose, onSuccess, t }: CarFormProps) => {
           </div>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleFormSubmit}>
+          <form
+            onSubmit={handleFormSubmit}
+            className={isViewMode ? "pointer-events-none select-none" : ""}
+          >
             <CarFormContent
               formData={formData}
               handleChange={handleChange}
@@ -316,25 +288,31 @@ const CarForm = ({ carId, onClose, onSuccess, t }: CarFormProps) => {
               branches={branches}
               branchesLoading={branchesLoading}
               t={t}
+              isViewMode={isViewMode}
             />
-
-            <div className="flex gap-2 pt-4">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={onClose}
-                className="flex-1"
-              >
-                {t("cancel")}
-              </Button>
-              <Button type="submit" className="flex-1" disabled={isSubmitting}>
-                {isSubmitting
-                  ? t("saving")
-                  : isEditMode
-                  ? t("update")
-                  : t("create")}
-              </Button>
-            </div>
+            {!isViewMode && (
+              <div className="flex gap-2 pt-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={onClose}
+                  className="flex-1"
+                >
+                  {t("cancel")}
+                </Button>
+                <Button
+                  type="submit"
+                  className="flex-1"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting
+                    ? t("saving")
+                    : isEditMode
+                    ? t("update")
+                    : t("create")}
+                </Button>
+              </div>
+            )}
           </form>
         </CardContent>
       </Card>

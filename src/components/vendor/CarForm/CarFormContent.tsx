@@ -46,6 +46,7 @@ interface CarFormContentProps {
   setProtections: React.Dispatch<React.SetStateAction<Protection[]>>;
   branches?: Array<{ id: string; name: string }>;
   branchesLoading?: boolean;
+  isViewMode?: boolean;
   t: (key: string, params?: Record<string, any>) => string;
 }
 
@@ -63,6 +64,7 @@ const CarFormContent = ({
   branches,
   branchesLoading,
   t,
+  isViewMode,
 }: CarFormContentProps) => {
   return (
     <div className="space-y-6">
@@ -72,7 +74,12 @@ const CarFormContent = ({
         handleChange={handleChange}
       />
       <PricingSection t={t} formData={formData} handleChange={handleChange} />
-      <ImageSection t={t} formData={formData} handleChange={handleChange} />
+      <ImageSection
+        isViewMode={isViewMode}
+        t={t}
+        formData={formData}
+        handleChange={handleChange}
+      />
       <FeaturesSection t={t} formData={formData} handleChange={handleChange} />
       <LocationsSection
         t={t}

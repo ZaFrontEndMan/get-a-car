@@ -113,7 +113,7 @@ const CarsTableView = ({
               </TableCell>
               <TableCell>{car.year}</TableCell>
               <TableCell className="capitalize">{t(car.type)}</TableCell>
-              <TableCell>{car.seats}</TableCell>
+              <TableCell>{car.doors}</TableCell>
               <TableCell className="capitalize">{t(car.fuel_type)}</TableCell>
               <TableCell>
                 <Badge variant={car.is_available ? "default" : "secondary"}>

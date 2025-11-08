@@ -104,7 +104,7 @@ const CarsListView = ({
                   </div>
                   <div className="flex items-center gap-1">
                     <Users className="h-4 w-4" />
-                    <span>{t("seats", { count: car.seats })}</span>
+                    <span>    {`${t("seats")}  ${car.doors}`}</span>
                   </div>
                   <div className="flex items-center gap-1">
                     <Fuel className="h-4 w-4" />

@@ -47,10 +47,10 @@ const VendorCars = () => {
   // Extract pagination metadata
   const paginationMeta = useMemo(
     () => ({
-      pageNumber: (data as any)?.data?.data?.pageNumber || 1,
-      pageSize: (data as any)?.data?.data?.pageSize || 10,
-      totalPages: (data as any)?.data?.data?.totalPages || 1,
-      totalRecords: (data as any)?.data?.data?.totalRecords || 0,
+      pageNumber: data?.data?.data?.pageNumber || 1,
+      pageSize: data?.data?.data?.pageSize || 10,
+      totalPages: data?.data?.data?.totalPages || 1,
+      totalRecords: data?.data?.data?.totalRecords || 0,
     }),
     [data]
   );
@@ -58,41 +58,38 @@ const VendorCars = () => {
   // Map API response to UI CarData shape
   const cars = useMemo(() => {
     const rawList =
-      (data as any)?.data?.data?.vendorCars ||
-      (data as any)?.data?.vendorCars ||
-      (data as any)?.vendorCars ||
+      data?.data?.data?.vendorCars ||
+      data?.data?.vendorCars ||
+      data?.vendorCars ||
       [];
 
-    const extractYear = (text?: string) => {
-      if (!text) return new Date().getFullYear();
-      const match = text.match(/(20\d{2}|19\d{2})/);
-      return match ? parseInt(match[1], 10) : new Date().getFullYear();
-    };
-
-    const extractBrand = (name?: string, model?: string) => {
-      if (!name && !model) return "";
-      const nameParts = (name || model || "").split(" ");
-      return nameParts.length > 1 ? nameParts[0] : "";
-    };
-
     return (rawList as any[]).map((c) => ({
-      id: (c?.id ?? "").toString(),
+      id: c?.id?.toString() ?? "",
       name: c?.name ?? "",
-      brand: extractBrand(c?.name, c?.model),
       model: c?.model ?? "",
-      year: extractYear(c?.name),
-      type: "sedan",
-      seats: 5,
-      fuel_type: "petrol",
-      transmission: "automatic",
+      doors: c?.doors ?? "",
+      brand: c?.name ? c?.name.split(" ")[0] || "" : "",
+      year: (() => {
+        if (!c?.name) return new Date().getFullYear();
+        const match = c.name.match(/(20\d{2}|19\d{2})/);
+        return match ? parseInt(match[1], 10) : new Date().getFullYear();
+      })(),
+      type: "sedan", // static/fallback
+      seats: 5, // static/fallback
+      fuel_type: "petrol", // static/fallback
+      transmission: "automatic", // static/fallback
       daily_rate: c?.pricePerDay ?? 0,
-      weekly_rate: undefined,
-      monthly_rate: undefined,
-      is_available: Boolean(c?.availabilityVendor && c?.availabilityAdmin),
-      is_approved: Boolean(c?.availabilityAdmin),
+      weekly_rate: undefined, // not provided by API
+      monthly_rate: undefined, // not provided by API
+      is_available: !!c?.availabilityVendor && !!c?.availabilityAdmin,
+      is_approved: !!c?.availabilityAdmin,
       images: Array.isArray(c?.imageUrls)
         ? c.imageUrls.map(
-            (url: string) => `${import.meta.env.VITE_UPLOADS_BASE_URL}${url}`
+            (url: string) =>
+              `${import.meta.env.VITE_UPLOADS_BASE_URL}${url.replace(
+                /\\/g,
+                "/"
+              )}`
           )
         : [],
       features: [],
@@ -103,6 +100,7 @@ const VendorCars = () => {
       mileage_limit: undefined,
       deposit_amount: undefined,
       branch_name: c?.branchName ?? t("branch"),
+      rating: c?.rating ?? 0,
     }));
   }, [data, t]);
 
@@ -193,43 +191,20 @@ const VendorCars = () => {
     const { totalPages } = paginationMeta;
 
     if (totalPages <= maxVisible) {
-      // Show all pages
       for (let i = 1; i <= totalPages; i++) {
         items.push(i);
       }
     } else {
-      // Show first page
       items.push(1);
-
-      // Calculate range around current page
       let startPage = Math.max(2, currentPage - 1);
       let endPage = Math.min(totalPages - 1, currentPage + 1);
-
-      if (currentPage <= 2) {
-        endPage = 4;
-      } else if (currentPage >= totalPages - 1) {
-        startPage = totalPages - 3;
-      }
-
-      // Add ellipsis if needed
-      if (startPage > 2) {
-        items.push("...");
-      }
-
-      // Add middle pages
-      for (let i = startPage; i <= endPage; i++) {
-        items.push(i);
-      }
-
-      // Add ellipsis if needed
-      if (endPage < totalPages - 1) {
-        items.push("...");
-      }
-
-      // Add last page
+      if (currentPage <= 2) endPage = 4;
+      else if (currentPage >= totalPages - 1) startPage = totalPages - 3;
+      if (startPage > 2) items.push("...");
+      for (let i = startPage; i <= endPage; i++) items.push(i);
+      if (endPage < totalPages - 1) items.push("...");
       items.push(totalPages);
     }
-
     return items;
   };
 
@@ -276,8 +251,7 @@ const VendorCars = () => {
         onAddCar={handleAddCar}
         onImportCars={handleImportCars}
       />
-
-      {error || !cars || cars.length === 0 ? (
+      {error || cars.length === 0 ? (
         <CarsEmptyState
           t={t}
           currentUser={{}}
@@ -287,11 +261,8 @@ const VendorCars = () => {
       ) : (
         <>
           {renderCurrentView()}
-
-          {/* Pagination */}
           {paginationMeta.totalPages > 1 && (
             <div className="space-y-4">
-              {/* Page Size Selector */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <span className="text-sm text-gray-600">
@@ -310,8 +281,6 @@ const VendorCars = () => {
                     <option value={100}>100</option>
                   </select>
                 </div>
-
-                {/* Pagination Info */}
                 <div className="text-sm text-gray-600">
                   {t("showing")} {(currentPage - 1) * pageSize + 1} -{" "}
                   {Math.min(
@@ -321,8 +290,6 @@ const VendorCars = () => {
                   {t("of")} {paginationMeta.totalRecords}
                 </div>
               </div>
-
-              {/* Pagination Controls */}
               <Pagination>
                 <PaginationContent>
                   <PaginationItem>
@@ -335,7 +302,6 @@ const VendorCars = () => {
                       }`}
                     />
                   </PaginationItem>
-
                   {generatePaginationItems().map((item, index) => (
                     <PaginationItem key={index}>
                       {item === "..." ? (
@@ -351,7 +317,6 @@ const VendorCars = () => {
                       )}
                     </PaginationItem>
                   ))}
-
                   <PaginationItem>
                     <PaginationNext
                       onClick={handleNextPage}
@@ -368,7 +333,6 @@ const VendorCars = () => {
           )}
         </>
       )}
-
       {showForm && (
         <CarForm
           t={t}
@@ -380,15 +344,18 @@ const VendorCars = () => {
           }}
         />
       )}
-
       {viewingCar && (
-        <CarDetailsModal
+        <CarForm
           t={t}
-          car={viewingCar}
+          carId={viewingCar?.id}
           onClose={() => setViewingCar(null)}
+          onSuccess={() => {
+            queryClient.invalidateQueries({ queryKey: ["vendor", "cars"] });
+            setViewingCar(null);
+          }}
+          isViewMode={true}
         />
       )}
-
       {showImportModal && (
         <CarsImportModal
           t={t}

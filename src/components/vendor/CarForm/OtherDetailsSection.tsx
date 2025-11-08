@@ -33,9 +33,9 @@ const OtherDetailsSection = ({
             {t("branch")}
           </Label>
           <Select
-            value={Number(formData.branchId)}
+            value={Number(formData.vendorBranchId)}
             onValueChange={(value) =>
-              handleChange("branchId", value === "no-branch" ? null : value)
+              handleChange("vendorBranchId", value === "no-branch" ? null : value)
             }
           >
             <SelectTrigger>

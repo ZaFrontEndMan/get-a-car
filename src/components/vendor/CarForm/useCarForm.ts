@@ -18,7 +18,7 @@ export const useCarForm = (car?: Car | null, _onSuccess?: () => void) => {
     type: "",
     typeId: 0,
     branchName: "",
-    branchId: "",
+    vendorBranchId: "",
     pricePerDay: 0,
     pricePerWeek: 0,
     pricePerMonth: 0,

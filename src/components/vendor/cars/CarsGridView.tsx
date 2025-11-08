@@ -121,7 +121,7 @@ const CarsGridView = ({
                   <div className="flex items-center gap-1">
                     <Users className="h-3 w-3" />
                     <span>
-                      {car.seats ? t("seats", { count: car.seats }) : t("n_a")}
+                      {`${t("seats")}  ${car.doors}`}
                     </span>
                   </div>
                   <div className="flex items-center gap-1">
