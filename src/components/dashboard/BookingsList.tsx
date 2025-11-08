@@ -22,13 +22,15 @@ const BookingsList: React.FC = () => {
     useState<APISupportedBookingStatus>(undefined); // undefined = "all"
   const [currentPage, setCurrentPage] = useState(1);
 
-  const { useGetAllBookings, useAcceptReturnCar } = useClientBookings();
+  const { useGetAllBookings, useAcceptReturnCar, useAddBookingFavourite } =
+    useClientBookings();
 
   const { data, isLoading, isError, isFetching } = useGetAllBookings({
     pageNumber: currentPage,
     pageSize: ITEMS_PER_PAGE,
     bookingStatus: statusFilter,
   });
+  const { mutate: addFavourite } = useAddBookingFavourite();
 
   const acceptReturnMutation = useAcceptReturnCar();
 
@@ -52,6 +54,8 @@ const BookingsList: React.FC = () => {
     onReturnCar: () => {},
     isReturning: false,
     onAcceptReturnCar: handleAcceptReturn,
+    onFavourite: addFavourite,
+
     isAccepting: acceptReturnMutation.isPending,
   };
 

@@ -1460,6 +1460,13 @@ export const arTranslations = {
   is_phone_hint: "إذا تم التحديد يجب أن يكون اسم المستخدم رقم جوال",
   technical: "فني",
   financial: "مالي",
+  rateBooking: "تقييم الحجز",
+  rateVendor: "تقييم مقدم الخدمة",
+  rateBookingProcess: "تقييم الحجز",
+  rateWebsite: "تقييم الموقع",
+  rateCar: "تقييم السيارة",
+  commentPlaceholder: "أضف تعليقاً (اختياري)",
+  submitRating: "إرسال التقييم",
 };
 
 export default arTranslations;

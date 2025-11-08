@@ -34,6 +34,7 @@ const OfferDetailsHeader = ({ offer }: OfferDetailsHeaderProps) => {
 
   // Get offer image from nested offerCollectionForCars
   const offerImage = offer.offerImage;
+  console.log(offer);
 
   return (
     <>

@@ -14,36 +14,58 @@ import { Booking } from "@/types/clientBookings";
 import { getStatusConfig } from "@/components/vendor/bookings/bookingUtils";
 import BookingInvoiceModal from "@/components/booking/BookingInvoiceModal";
 import { useLanguage } from "@/contexts/LanguageContext";
+import RatingDialog from "./RatingDialog";
 
 interface ClientBookingGridViewProps {
   bookings: Booking[];
   onReturnCar: (bookingId: string) => void;
   isReturning: boolean;
   onAcceptReturnCar?: (bookingId: string) => void;
+  onFavourite?: () => void;
   isAccepting?: boolean;
 }
 
 const ClientBookingGridView = ({
   bookings,
-  onReturnCar,
   isReturning,
   onAcceptReturnCar,
-  isAccepting,
+  onFavourite,
 }: ClientBookingGridViewProps) => {
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const { t } = useLanguage();
+  const [openRatingDialog, setOpenRatingDialog] = useState(false);
+  const [ratingBookingId, setRatingBookingId] = useState<
+    string | number | null
+  >(null);
 
-  const canReturnCar = (status: string) => {
+  // ...keep your status logic as before
+
+  const handleOpenRating = (bookingId: string | number) => {
+    setRatingBookingId(bookingId);
+    setOpenRatingDialog(true);
+  };
+  const handleCloseRating = () => {
+    setOpenRatingDialog(false);
+    setRatingBookingId(null);
+  };
+  const canAcceptReturn = (status: string) => {
+    const key = getStatusConfig(status);
+    // in progress (Arabic/English/number)
     return (
-      status.toLowerCase() === "confirmed" ||
-      status.toLowerCase() === "active" ||
-      status.toLowerCase() === "in_progress" ||
-      status === "InProgress"
+      key.label === "قيد الاجراء" ||
+      key.label.toLowerCase() === "inprogress" ||
+      key.label.toLowerCase() === "in progress"
     );
   };
 
-  const canAcceptReturn = (status: string) => {
-    return status.toLowerCase() === "return_requested";
+  const isCompleted = (status: string) => {
+    const key = getStatusConfig(status);
+    // completed (Arabic/English/number)
+    return (
+      key.label === "تم إرجاع السيارة" ||
+      key.label === "تم الارجاع" ||
+      key.label.toLowerCase() === "completed"
+    );
   };
 
   return (
@@ -167,29 +189,34 @@ const ClientBookingGridView = ({
 
               {/* Action Buttons */}
               <div className="flex flex-col md:flex-row gap-2 pt-2">
-                {canReturnCar(booking.bookingStatus) && (
-                  <Button
-                    className="flex-1"
-                    size="sm"
-                    onClick={() => onAcceptReturnCar(booking.id.toString())}
-                    disabled={isReturning}
-                  >
-                    <RotateCcw className="h-4 w-4 me-2" />
-                    {t("returnCar")}
-                  </Button>
-                )}
+                {/* Return Car */}
                 {canAcceptReturn(booking.bookingStatus) &&
                   onAcceptReturnCar && (
                     <Button
                       className="flex-1"
                       size="sm"
                       onClick={() => onAcceptReturnCar(booking.id.toString())}
-                      disabled={isAccepting}
+                      disabled={isReturning}
                     >
-                      <CheckCircle className="h-4 w-4 me-2" />
-                      {t("acceptReturn")}
+                      <RotateCcw className="h-4 w-4 me-2" />
+                      {t("returnCar")}
                     </Button>
                   )}
+
+                {/* Rate Button (Completed Only) */}
+                {isCompleted(booking.bookingStatus) && onFavourite && (
+                  <Button
+                    className="flex-1"
+                    size="sm"
+                    variant="success"
+                    onClick={()=>{handleOpenRating(booking.id)}}
+                  >
+                    <CheckCircle className="h-4 w-4 me-2" />
+                    {t("rateBooking")}
+                  </Button>
+                )}
+
+                {/* View Invoice */}
                 <Button
                   className="flex-1"
                   size="sm"
@@ -208,6 +235,12 @@ const ClientBookingGridView = ({
         isOpen={!!selectedBooking}
         onClose={() => setSelectedBooking(null)}
         booking={selectedBooking}
+      />
+      <RatingDialog
+        open={openRatingDialog}
+        onClose={handleCloseRating}
+        bookingId={ratingBookingId ?? ""}
+        onSubmit={onFavourite}
       />
     </div>
   );

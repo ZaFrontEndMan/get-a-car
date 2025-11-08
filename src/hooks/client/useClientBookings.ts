@@ -13,6 +13,7 @@ import {
   getCustomerBookingCar,
   generateInvoicePdf,
   acceptReturnCar,
+  addBookingFavourite,
 } from "./../../api/client/clientBookings";
 import { Booking, ClientBookingsResponse } from "@/types/clientBookings";
 import { InvoiceResponse } from "@/types/invoiceDetails";
@@ -102,7 +103,28 @@ export const useClientBookings = () => {
       mutationFn: ({ invoiceId }) => generateInvoicePdf(invoiceId),
       ...options,
     });
-
+  const useAddBookingFavourite = (
+    options?: UseMutationOptions<any, Error, AddBookingFavouritePayload>
+  ) =>
+    useMutation({
+      mutationFn: addBookingFavourite,
+      onSuccess: () => {
+        toast({
+          title: "تم التقييم",
+          description: "تم حفظ تقييمك بنجاح!",
+        });
+        // Invalidate or refetch wherever needed:
+        queryClient.invalidateQueries({ queryKey: ["bookings"] });
+      },
+      onError: (error: any) => { 
+        toast({
+          title: "خطأ",
+          description: error?.message || "فشل في إرسال التقييم",
+          variant: "destructive",
+        });
+      },
+      ...options,
+    });
   const useAcceptReturnCar = (
     options?: UseMutationOptions<any, Error, { bookingId: string | number }>
   ) =>
@@ -135,5 +157,6 @@ export const useClientBookings = () => {
     useGetCustomerBookingCar,
     useGenerateInvoicePdf,
     useAcceptReturnCar,
+    useAddBookingFavourite,
   };
 };

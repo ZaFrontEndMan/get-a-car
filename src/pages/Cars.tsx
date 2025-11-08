@@ -130,11 +130,13 @@ const Cars = () => {
     if (!carsResponse?.carSearchResult) return [];
 
     return carsResponse.carSearchResult.map((car) => ({
-      id: car?.carID?.toString(),
+      id: car?.carID?.toString() || car?.carId?.toString(),
       title: car?.name || "",
       brand: car?.model || "",
       image: car?.image
         ? getImageUrl(car.image)
+        : car?.imageURLs[0]
+        ? getImageUrl(car?.imageURLs[0])
         : "https://images.unsplash.com/photo-1549924231-f129b911e442",
       price: car?.pricePerDay || 0,
       daily_rate: car?.pricePerDay || 0,
@@ -557,7 +559,7 @@ const Cars = () => {
                     priceRange={priceRange}
                     setPriceRange={(range) =>
                       updateFilters({
-                        priceRange: {  },
+                        priceRange: {},
                       })
                     }
                     selectedCategories={selectedCategories}

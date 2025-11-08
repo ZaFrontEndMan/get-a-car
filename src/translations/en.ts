@@ -1450,6 +1450,13 @@ export const enTranslations = {
   technical: "Technical",
   financial: "Financial",
   is_phone_hint: "If checked, username must be a phone number",
+  rateBooking: "Rate Booking",
+  rateVendor: "Vendor rating",
+  rateBookingProcess: "Booking rating",
+  rateWebsite: "Website rating",
+  rateCar: "Car rating",
+  commentPlaceholder: "Add a comment (optional)",
+  submitRating: "Submit Rating",
 };
 
 export default enTranslations;
