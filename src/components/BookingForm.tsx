@@ -160,9 +160,11 @@ const BookingForm = ({
         carId: parseInt(car.id),
         fromDate: data.pickupDate.toISOString(),
         toDate: data.dropoffDate.toISOString(),
+        pickupLocation: data.pickupLocation,
+        dropoffLocation: data.dropoffLocation,
         offerId: 0,
         services: getServiceDetails().map((service) => service.serviceId),
-        protection: ["7c4e7416-a173-4cb0-9dcf-51db365581cb"],
+        protection: [],
       };
 
       console.log("Sending booking data:", bookingData); // Debug log
@@ -188,7 +190,7 @@ const BookingForm = ({
       console.error("Booking error:", error); // Debug log
       toast({
         title: t("bookingFailed"),
-        description: t("pleaseTryAgain"),
+        description: error?.response?.data?.customMessage,
         variant: "destructive",
       });
     } finally {

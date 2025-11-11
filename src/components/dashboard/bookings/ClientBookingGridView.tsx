@@ -132,6 +132,7 @@ const ClientBookingGridView = ({
             <CardContent className="p-6 space-y-6">
               {/* Booking Timeline */}
               <div className="flex flex-col md:flex-row gap-4">
+                {/* Pickup */}
                 <div className="flex-1 flex items-start p-3 bg-emerald-50 rounded-lg border border-emerald-100 gap-2">
                   <div className="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center">
                     <Calendar className="h-4 w-4 text-white" />
@@ -143,8 +144,12 @@ const ClientBookingGridView = ({
                     <p className="font-semibold text-slate-900 text-sm truncate">
                       {format(new Date(booking.fromDate), "MMM dd, yyyy")}
                     </p>
+                    <p className="text-xs text-slate-500 truncate">
+                      {booking.pickUpLocationName}
+                    </p>
                   </div>
                 </div>
+                {/* Dropoff */}
                 <div className="flex-1 flex items-start p-3 bg-rose-50 rounded-lg border border-rose-100 gap-2">
                   <div className="w-8 h-8 bg-rose-500 rounded-lg flex items-center justify-center">
                     <Calendar className="h-4 w-4 text-white" />
@@ -155,6 +160,9 @@ const ClientBookingGridView = ({
                     </p>
                     <p className="font-semibold text-slate-900 text-sm truncate">
                       {format(new Date(booking.toDate), "MMM dd, yyyy")}
+                    </p>
+                    <p className="text-xs text-slate-500 truncate">
+                      {booking.dropoffLocationName}
                     </p>
                   </div>
                 </div>
