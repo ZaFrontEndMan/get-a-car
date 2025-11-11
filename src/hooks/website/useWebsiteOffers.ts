@@ -18,12 +18,34 @@ interface OfferFilters {
   selectedCategories?: string[];
 }
 
-// 🔹 Hook: Get all offers (paginated only - filtering done locally)
-export const useAllOffers = (pageIndex: number, pageSize: number) => {
+// Updated hook to support server-side filtering
+export const useAllOffers = (
+  pageIndex: number = 1,
+  pageSize: number = 12,
+  filters?: {
+    searchTerm?: string;
+    vendors?: string[];
+    types?: string[];
+    transmissions?: string[];
+    fuelTypes?: string[];
+    branches?: string[];
+    priceRange?: [number, number];
+  }
+) => {
   return useQuery<AllOffersResponse>({
-    queryKey: ["allOffers", pageIndex, pageSize],
-    queryFn: () => getAllOffers(pageIndex, pageSize),
+    queryKey: ["allOffers", pageIndex, pageSize, JSON.stringify(filters)],
+    queryFn: () => getAllOffers(pageIndex, pageSize, filters),
+    placeholderData: (previousData) => previousData, // smooth pagination
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes
     keepPreviousData: true,
+    enabled: !!pageIndex && !!pageSize,
+    retry: (failureCount, error: any) => {
+      if (error?.status >= 400 && error?.status < 500) {
+        return false;
+      }
+      return failureCount < 3;
+    },
   });
 };
 

@@ -1,90 +1,205 @@
-
-import React from 'react';
-import { Search, Grid3X3, List } from 'lucide-react';
-import { useLanguage } from '@/contexts/LanguageContext';
+import React, { useState } from "react";
+import { Grid3X3, List, Loader2, Search } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface OffersSearchControlsProps {
   searchTerm: string;
   setSearchTerm: (term: string) => void;
-  viewMode: 'grid' | 'list';
-  setViewMode: (mode: 'grid' | 'list') => void;
-  filteredOffersLength: number;
+  viewMode: "grid" | "list";
+  setViewMode: (mode: "grid" | "list") => void;
+  filteredoffersLength: number;
   currentPage: number;
   totalPages: number;
+  onPageChange: (page: number) => void;
+  isSearching?: boolean;
+  isLoading?: boolean;
 }
 
-const OffersSearchControls = ({
+const OffersSearchControls: React.FC<OffersSearchControlsProps> = ({
   searchTerm,
   setSearchTerm,
   viewMode,
   setViewMode,
-  filteredOffersLength,
+  filteredoffersLength,
   currentPage,
-  totalPages
-}: OffersSearchControlsProps) => {
-  const { t, language } = useLanguage();
-  const isRTL = language === 'ar';
+  totalPages,
+  onPageChange,
+  isSearching = false,
+  isLoading = false,
+}) => {
+  const { t } = useLanguage();
+
+  // Simple ellipsis logic - only show ... when totalPages > 4
+  const showEllipsis = totalPages > 4;
+
+  const handlePreviousPage = () => {
+    if (currentPage > 1 && !isLoading) {
+      onPageChange(currentPage - 1);
+    }
+  };
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages && !isLoading) {
+      onPageChange(currentPage + 1);
+    }
+  };
+
+  const handlePageClick = (page: number) => {
+    if (page !== currentPage && !isLoading) {
+      onPageChange(page);
+    }
+  };
 
   return (
     <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 mb-6">
-      <div className="flex flex-col lg:flex-row gap-4 mb-4">
+      {/* Debug Toggle - Only in development */}
+
+      {/* Search and View Mode Controls */}
+      <div className="flex flex-col lg:flex-row gap-4 mb-6">
+        {/* Search Input */}
         <div className="flex-1 relative">
-          <Search className={`absolute top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5 ${
-            isRTL ? 'right-4' : 'left-4'
-          }`} />
-          <input
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            {isSearching ? (
+              <Loader2 className="h-5 w-5 text-primary animate-spin" />
+            ) : (
+              <Search className="h-5 w-5 text-gray-400" />
+            )}
+          </div>
+          <Input
             type="text"
-            placeholder={t('searchOffers') || t('search')}
+            placeholder={t("searchOffers") || "Search offers..."}
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className={`w-full ${isRTL ? 'pr-12 pl-4' : 'pl-12 pr-4'} py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent bg-gray-50 transition-all ${
-              isRTL ? 'text-right' : 'text-left'
-            }`}
-            dir={isRTL ? 'rtl' : 'ltr'}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+            }}
+            className={`pl-10 pr-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${
+              isSearching ? "bg-blue-50 border-blue-200" : "bg-gray-50"
+            } ${isLoading ? "opacity-50 cursor-not-allowed" : ""}`}
+            disabled={isLoading}
           />
         </div>
+
+        {/* View Mode Toggle */}
         <div className="flex items-center gap-2">
-          <button
-            onClick={() => setViewMode('grid')}
-            className={`p-3 rounded-xl transition-all ${
-              viewMode === 'grid' 
-                ? 'bg-primary text-white shadow-lg' 
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-            }`}
+          <Button
+            variant={viewMode === "grid" ? "default" : "outline"}
+            size="sm"
+            onClick={() => {
+              setViewMode("grid");
+            }}
+            disabled={isLoading}
+            className="h-10 px-3"
           >
-            <Grid3X3 className="h-5 w-5" />
-          </button>
-          <button
-            onClick={() => setViewMode('list')}
-            className={`p-3 rounded-xl transition-all ${
-              viewMode === 'list' 
-                ? 'bg-primary text-white shadow-lg' 
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-            }`}
+            <Grid3X3 className="h-4 w-4" />
+          </Button>
+          <Button
+            variant={viewMode === "list" ? "default" : "outline"}
+            size="sm"
+            onClick={() => {
+              setViewMode("list");
+            }}
+            disabled={isLoading}
+            className="h-10 px-3"
           >
-            <List className="h-5 w-5" />
-          </button>
+            <List className="h-4 w-4" />
+          </Button>
         </div>
       </div>
 
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between text-sm text-gray-600 gap-4">
-        <div className="flex items-center gap-2">
-          <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full font-medium">
-            {filteredOffersLength} {t('offersFound') || 'offers found'}
-          </span>
-          <span>{t('page') || 'Page'} {currentPage} {t('of')} {totalPages}</span>
+      {/* Results Info and Pagination */}
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+        {/* Results Summary */}
+        <div className="flex items-center gap-3 flex-wrap">
+          <Badge variant="secondary" className="text-sm">
+            {filteredoffersLength} {t("offersFound") || "offers found"}
+          </Badge>
+          {totalPages > 0 && (
+            <span className="text-sm text-gray-600">
+              {t("page")} {currentPage} {t("of")} {totalPages}
+            </span>
+          )}
         </div>
-        <div className="flex items-center gap-2">
-          <span>{t('sortBy') || 'Sort by'}:</span>
-          <select className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary focus:border-transparent bg-white">
-            <option>{t('highestDiscount') || 'Highest Discount'}</option>
-            <option>{t('newestFirst') || 'Newest First'}</option>
-            <option>{t('expiringSoon') || 'Expiring Soon'}</option>
-            <option>{t('mostPopular') || 'Most Popular'}</option>
-            <option>{t('priceLowToHigh') || 'Price: Low to High'}</option>
-            <option>{t('priceHighToLow') || 'Price: High to Low'}</option>
-          </select>
-        </div>
+
+        {/* Simple Pagination */}
+        {totalPages > 1 && !isLoading && (
+          <div className="flex items-center gap-2">
+            {/* Previous */}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handlePreviousPage}
+              disabled={currentPage === 1}
+              className="h-10 px-4 min-w-[100px]"
+            >
+              {t("previous") || "Previous"}
+            </Button>
+
+            {/* Pages - Simplified logic */}
+            <div className="flex items-center gap-1">
+              {showEllipsis && currentPage > 4 && (
+                <>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handlePageClick(1)}
+                    className="h-10 w-10"
+                  >
+                    1
+                  </Button>
+                  <span className="px-1 text-gray-400">...</span>
+                </>
+              )}
+
+              {/* Current page range - simple: show current page and one on each side */}
+              {Array.from({ length: Math.min(5, totalPages) })
+                .map((_, i) => currentPage - 2 + i)
+                .filter((page) => page >= 1 && page <= totalPages)
+                .map((page, index) => (
+                  <Button
+                    key={index}
+                    variant={page === currentPage ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => handlePageClick(page)}
+                    className={`h-10 px-3 min-w-[44px] ${
+                      page === currentPage
+                        ? "bg-primary text-white"
+                        : "border-gray-200 hover:bg-gray-50"
+                    }`}
+                  >
+                    {page}
+                  </Button>
+                ))}
+
+              {showEllipsis && currentPage < totalPages - 3 && (
+                <>
+                  <span className="px-1 text-gray-400">...</span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handlePageClick(totalPages)}
+                    className="h-10 w-10"
+                  >
+                    {totalPages}
+                  </Button>
+                </>
+              )}
+            </div>
+
+            {/* Next */}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleNextPage}
+              disabled={currentPage === totalPages}
+              className="h-10 px-4 min-w-[100px]"
+            >
+              {t("next") || "Next"}
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );

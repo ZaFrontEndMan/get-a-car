@@ -2,11 +2,13 @@
 import { useQuery } from "@tanstack/react-query";
 import {
   getAllCars,
+  getVendorCarWithFilter, // Add this import
   getMostPopularCars,
   getRentalCarDetailsById,
   getCarDetailsById,
   getSimilarCars,
   AllCarsResponse,
+  VendorCarsResponse, // Add this import for vendor response type
   Car,
   RentalCarDetailsResponse,
 } from "@/api/website/websiteCars";
@@ -28,6 +30,34 @@ export const useAllCars = (
     queryKey: ["allCars", pageIndex, pageSize, filters],
     queryFn: () => getAllCars(pageIndex, pageSize, filters),
     placeholderData: (previousData) => previousData, // smooth pagination
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes (formerly cacheTime)
+    keepPreviousData: true,
+  });
+};
+
+// 🔹 NEW: Hook: Get vendor-specific cars with filters
+export const useGetVendorCarWithFilter = (
+  vendorId: string,
+  pageIndex: number,
+  pageSize: number,
+  filters?: {
+    types?: string[];
+    transmissions?: string[];
+    fuelTypes?: string[];
+    branches?: string[];
+    priceRange?: [number, number];
+  }
+) => {
+  return useQuery<VendorCarsResponse>({
+    queryKey: ["vendorCars", vendorId, pageIndex, pageSize, filters],
+    queryFn: () =>
+      getVendorCarWithFilter(vendorId, pageIndex, pageSize, filters),
+    placeholderData: (previousData) => previousData, // smooth pagination
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes
+    keepPreviousData: true,
+    enabled: !!vendorId && vendorId.length > 0, // Only enable when vendorId is valid
   });
 };
 
@@ -36,6 +66,8 @@ export const useMostPopularCars = (pageIndex: number, pageSize: number) => {
   return useQuery<Car[]>({
     queryKey: ["mostPopularCars", pageIndex, pageSize],
     queryFn: () => getMostPopularCars(pageIndex, pageSize),
+    staleTime: 10 * 60 * 1000, // 10 minutes
+    gcTime: 15 * 60 * 1000, // 15 minutes
   });
 };
 
@@ -49,6 +81,8 @@ export const useRentalCarDetails = (carId: number, offerId: number) => {
         ? getRentalCarDetailsById(carId, offerId)
         : getCarDetailsById(carId),
     enabled: carId > 0, // Allow when carId exists (with or without offerId)
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes
   });
 };
 
@@ -58,6 +92,8 @@ export const useCarDetailsById = (carId: number) => {
     queryKey: ["carDetails", carId],
     queryFn: () => getCarDetailsById(carId),
     enabled: carId > 0, // Only run query if carId is valid
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes
   });
 };
 
@@ -68,11 +104,15 @@ export const useSimilarCars = (requestBody: {
   maxPrice: number;
 }) => {
   // Only enable query if we have valid data
-  const enabled = (requestBody.types.length > 0 || requestBody.pickUpLocations.length > 0) && requestBody.maxPrice > 0;
+  const enabled =
+    (requestBody.types.length > 0 || requestBody.pickUpLocations.length > 0) &&
+    requestBody.maxPrice > 0;
 
   return useQuery<{ isSuccess: boolean; customMessage: string; data: Car[] }>({
     queryKey: ["similarCars", requestBody],
     queryFn: () => getSimilarCars(requestBody),
     enabled,
+    staleTime: 2 * 60 * 1000, // 2 minutes
+    gcTime: 5 * 60 * 1000, // 5 minutes
   });
 };

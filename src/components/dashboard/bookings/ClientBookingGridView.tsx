@@ -204,17 +204,17 @@ const ClientBookingGridView = ({
                   )}
 
                 {/* Rate Button (Completed Only) */}
-                {isCompleted(booking.bookingStatus) && onFavourite && (
-                  <Button
-                    className="flex-1"
-                    size="sm"
-                    variant="success"
-                    onClick={()=>{handleOpenRating(booking.id)}}
-                  >
-                    <CheckCircle className="h-4 w-4 me-2" />
-                    {t("rateBooking")}
-                  </Button>
-                )}
+                <Button
+                  className="flex-1"
+                  size="sm"
+                  variant="success"
+                  onClick={() => {
+                    handleOpenRating(booking.id);
+                  }}
+                >
+                  <CheckCircle className="h-4 w-4 me-2" />
+                  {t("rateBooking")}
+                </Button>
 
                 {/* View Invoice */}
                 <Button

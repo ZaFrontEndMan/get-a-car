@@ -812,7 +812,7 @@ export const arTranslations = {
   vehicleInformation: "معلومات المركبة",
   rate: "السعر",
   rentalLabel: "إيجار",
-  protectionFee: "رسوم الحماية",
+  protectionFee: "رسوم التامين",
   carRental: "إيجار السيارة",
   totalAmount: "المبلغ الإجمالي",
   thankYouChoosingGetCar: "شكراً لاختيارك Get Car!",

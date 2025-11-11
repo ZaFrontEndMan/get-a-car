@@ -23,13 +23,10 @@ interface OfferCardProps {
   };
   onFavorite?: (offerId: string) => void;
   isFavorite?: boolean;
+  isLoading?: boolean;
 }
 
-const OfferCard = ({
-  offer,
-  onFavorite,
-  isFavorite = false,
-}: OfferCardProps) => {
+const OfferCard = ({ offer, isLoading }: OfferCardProps) => {
   const { language, t } = useLanguage();
 
   const getLocalizedTitle = () => {
@@ -47,30 +44,19 @@ const OfferCard = ({
   };
 
   const truncateDescription = (text: string, wordLimit: number = 15) => {
-    const words = text.split(" ");
-    if (words.length <= wordLimit) {
+    const words = text?.split(" ");
+    if (words?.length <= wordLimit) {
       return text;
     }
-    return words.slice(0, wordLimit).join(" ") + "...";
-  };
-
-  const handleFavoriteClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (onFavorite) {
-      onFavorite(offer.id);
-    }
-  };
-
-  const handleClaimClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+    return words?.slice(0, wordLimit).join(" ") + "...";
   };
 
   return (
     <Link
       to={`/offers/${offer.id}${offer.carId ? `?carId=${offer.carId}` : ""}`}
-      className="block bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 transform hover:scale-105"
+      className={`"block bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 transform hover:scale-105 ${
+        isLoading ? " animate-pulse opacity-75 pointer-events-none" : ""
+      }`}
     >
       <div className="relative">
         <img
@@ -78,65 +64,46 @@ const OfferCard = ({
           alt={getLocalizedTitle()}
           className="w-full h-48 object-cover"
         />
-        <div className="absolute top-3 left-3 bg-red-500 text-white px-3 py-1 rounded-full text-sm font-bold">
-          {offer.discount} OFF
+        <div className="absolute top-3 start-3 bg-red-500 text-white px-3 py-1 rounded-full text-sm font-bold">
+          {offer.discount} {t("off")}
         </div>
 
         {offer.vendor?.logo_url && (
-          <div className="absolute bottom-3 left-3 w-10 h-10 rounded-full bg-white shadow-md overflow-hidden border-2 border-white">
-            <img
-              src={offer.vendor.logo_url}
-              alt={offer.vendor.name}
-              className="w-full h-full object-cover"
-            />
+          <div className="absolute bottom-3 start-3 w-10 h-10 rounded-full bg-white shadow-md overflow-hidden border-2 border-white hover:scale-125 transition duration-300">
+            <Link to={`/vendors/${offer.vendor?.id}`}>
+              <img
+                title={offer.vendor.name}
+                src={offer.vendor.logo_url}
+                alt={offer.vendor.name}
+                className="w-full h-full object-cover"
+              />
+            </Link>
           </div>
         )}
-
-        <button
-          onClick={handleFavoriteClick}
-          className={`absolute top-3 right-3 p-2 rounded-full transition-colors duration-200 z-10 ${
-            isFavorite
-              ? "bg-red-500 text-white"
-              : "bg-white/80 text-gray-600 hover:bg-red-500 hover:text-white"
-          }`}
-        >
-          <svg
-            className="h-4 w-4"
-            fill={isFavorite ? "currentColor" : "none"}
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-            />
-          </svg>
-        </button>
       </div>
 
       <div className="p-6">
-        <h3 className="font-bold text-xl text-gray-900 mb-2">
+        <h3 className="font-bold text-xl text-gray-900 mb-2 line-clamp-1">
           {getLocalizedTitle()}
         </h3>
-        <p className="text-gray-600 mb-4 line-clamp-2">
+        <p className="text-gray-600 mb-4 line-clamp-1">
           {truncateDescription(getLocalizedDescription(), 15)}
         </p>
 
-        <div className="flex items-center text-sm text-gray-500 mb-4">
-          <Clock className="h-4 w-4 mr-2" />
-          <span className="text-center text-blue-700 text-lg">
+        <div className="flex items-center text-xs text-gray-500 mb-4">
+          <Clock className="h-3 w-3 me-2" />
+          <span className="text-center text-blue-700 text-md">
             {t("validUntil")} {new Date(offer.validUntil).toLocaleDateString()}
           </span>
         </div>
-
-        <div
-          onClick={handleClaimClick}
-          className="w-full bg-primary text-white px-4 py-3 rounded-lg hover:bg-primary/90 transition-colors duration-200 font-semibold cursor-pointer text-center"
+        <Link
+          to={`/offers/${offer.id}${
+            offer.carId ? `?carId=${offer.carId}` : ""
+          }`}
+          className="block w-full bg-primary text-white px-4 py-3 rounded-lg hover:bg-primary/90 transition-colors duration-200 font-semibold cursor-pointer text-center"
         >
           {t("claimOffer")}
-        </div>
+        </Link>
       </div>
     </Link>
   );

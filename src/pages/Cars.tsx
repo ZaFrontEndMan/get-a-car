@@ -19,17 +19,15 @@ import MemoizedCarsFilters from "../components/cars/MemoizedCarsFilters";
 import CarsSearchControls from "@/components/cars/CarsSearchControls";
 import SimilarCarsSlider from "@/components/SimilarCarsSlider";
 import {
-  useOptimizedCars,
-  useOptimizedVendorCars,
-  useBackgroundSync,
-  useCarsCache,
-} from "@/hooks/useOptimizedCars";
+  useAllCars,
+  useGetVendorCarWithFilter,
+  useSimilarCars,
+} from "@/hooks/website/useWebsiteCars"; // Import your hooks
 import { getImageUrl } from "@/utils/imageUtils";
 import { useDebouncedSearch } from "@/hooks/useDebounce";
 import CarsSkeleton, {
   CarsSearchControlsSkeleton,
 } from "@/components/cars/CarsSkeleton";
-import { VirtualScrolling } from "@/components/ui/VirtualScrolling";
 import {
   ErrorBoundary,
   ApiErrorBoundary,
@@ -51,6 +49,7 @@ const Cars = () => {
   const params = useParams();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+
   // Detect vendor from route parameter /cars/vendor/:id
   const vendorId = params.id || "";
   const isVendorMode =
@@ -66,8 +65,6 @@ const Cars = () => {
     // Handle vendor filters if in vendor mode
     if (isVendorMode && vendorId) {
       const vendorFilters = { ...parsed } as VendorCarsFilters;
-      // Ensure vendorNames is excluded for vendor mode
-      delete vendorFilters.vendorNames;
       return vendorFilters;
     }
 
@@ -84,7 +81,6 @@ const Cars = () => {
 
   const itemsPerPage = 12;
   const VIRTUAL_SCROLL_THRESHOLD = 50;
-  const CARD_HEIGHT = viewMode === "grid" ? 320 : 200;
 
   const containerRef = useRef<HTMLDivElement>(null);
   const { debouncedSearchTerm, isSearching } = useDebouncedSearch(
@@ -95,22 +91,29 @@ const Cars = () => {
     serverFilters
   );
   const isInitialMount = useRef(true);
-  const cache = useCarsCache();
 
-  // Dynamic hook selection based on route
-  const queryResult =
+  // Prepare filters for the hooks
+  const carFilters = useMemo(() => {
+    return {
+      vendors: (serverFilters as CarsFiltersType).vendorNames,
+      types: (serverFilters as CarsFiltersType).types,
+      transmissions: (serverFilters as CarsFiltersType).transmissions,
+      fuelTypes: (serverFilters as CarsFiltersType).fuelTypes,
+      branches: (serverFilters as CarsFiltersType).branches,
+      priceRange: (serverFilters as CarsFiltersType).priceRange,
+    };
+  }, [serverFilters]);
+
+  // Dynamic hook selection based on route using your hooks
+  const carsQuery =
     isVendorMode && vendorId
-      ? useOptimizedVendorCars(
+      ? useGetVendorCarWithFilter(
           vendorId,
           currentPage,
           itemsPerPage,
           serverFilters as VendorCarsFilters
         )
-      : useOptimizedCars(
-          currentPage,
-          itemsPerPage,
-          serverFilters as CarsFiltersType
-        );
+      : useAllCars(currentPage, itemsPerPage, carFilters);
 
   const {
     data: carsResponse,
@@ -118,24 +121,24 @@ const Cars = () => {
     error,
     refetch,
     isFetching,
-    prefetchNextPages,
-    hasNextPage,
-    hasPreviousPage,
-  } = queryResult;
+  } = carsQuery;
 
-  useBackgroundSync();
+  // Extract data from response
+  const carsData = carsResponse?.carSearchResult || [];
+  const totalPages = carsResponse?.totalPages || 0;
+  const totalRecord = carsResponse?.totalRecord || 0;
 
   // Memoized car transformation (simplified)
   const cars = useMemo(() => {
-    if (!carsResponse?.carSearchResult) return [];
+    if (!carsData || carsData.length === 0) return [];
 
-    return carsResponse.carSearchResult.map((car) => ({
+    return carsData.map((car) => ({
       id: car?.carID?.toString() || car?.carId?.toString(),
       title: car?.name || "",
       brand: car?.model || "",
       image: car?.image
         ? getImageUrl(car.image)
-        : car?.imageURLs[0]
+        : car?.imageURLs?.[0]
         ? getImageUrl(car?.imageURLs[0])
         : "https://images.unsplash.com/photo-1549924231-f129b911e442",
       price: car?.pricePerDay || 0,
@@ -167,7 +170,7 @@ const Cars = () => {
         monthly: car?.pricePerMonth || 0,
       },
     }));
-  }, [carsResponse?.carSearchResult]);
+  }, [carsData]);
 
   const filteredCars = useMemo(() => {
     if (!debouncedSearchTerm) return cars;
@@ -176,9 +179,6 @@ const Cars = () => {
     );
   }, [cars, debouncedSearchTerm]);
 
-  const totalPages = carsResponse?.totalPages || 0;
-  const totalRecord = carsResponse?.totalRecord || 0;
-
   // Simplified filter updates with URL sync and vendor awareness
   const updateFilters = useCallback(
     (newFilters: Partial<CarsFiltersType>) => {
@@ -186,26 +186,13 @@ const Cars = () => {
         | CarsFiltersType
         | VendorCarsFilters;
 
-      // Clean vendorNames for vendor mode
-      if (isVendorMode && vendorId) {
-        delete (updatedFilters as any).vendorNames;
-      }
-
       if (!areFiltersEqual(updatedFilters, serverFilters)) {
         setServerFilters(updatedFilters);
-        updateUrlWithFilters(
-          updatedFilters,
-          isVendorMode ? vendorId : undefined
-        );
-        setCurrentPage(1);
-
-        // Auto-prefetch next page
-        if (totalPages > 1) {
-          prefetchNextPages();
-        }
+        updateUrlWithFilters(updatedFilters, vendorId);
+        // setCurrentPage(1);
       }
     },
-    [serverFilters, isVendorMode, vendorId, totalPages, prefetchNextPages]
+    [serverFilters, vendorId]
   );
 
   // Helper function to update URL with vendor preservation
@@ -257,14 +244,7 @@ const Cars = () => {
 
     setSearchTerm("");
     setCurrentPage(1);
-
-    // Invalidate appropriate cache
-    if (isVendorMode && vendorId) {
-      cache.invalidateVendorCars(vendorId);
-    } else {
-      cache.invalidateAllCars();
-    }
-  }, [isVendorMode, vendorId, cache, updateUrlWithVendor]);
+  }, [isVendorMode, updateUrlWithVendor]);
 
   // Simplified pagination handler
   const handlePageChange = useCallback(
@@ -276,29 +256,15 @@ const Cars = () => {
         updateUrlWithVendor(serverFilters, page);
 
         window.scrollTo({ top: 0, behavior: "smooth" });
-
-        // Prefetch adjacent pages
-        if (page < totalPages) prefetchNextPages();
       }
     },
-    [
-      currentPage,
-      totalPages,
-      serverFilters,
-      updateUrlWithVendor,
-      prefetchNextPages,
-    ]
+    [currentPage, totalPages, serverFilters, updateUrlWithVendor]
   );
 
   // Enhanced URL sync effect for route + query param handling
   useEffect(() => {
     if (isInitialMount.current) {
       isInitialMount.current = false;
-
-      // Initial prefetch
-      if (totalPages > 1) {
-        prefetchNextPages();
-      }
       return;
     }
 
@@ -331,16 +297,7 @@ const Cars = () => {
         previousFiltersRef.current = isCurrentVendorMode
           ? (parsedFilters as VendorCarsFilters)
           : parsedFilters;
-
-        // Invalidate cache for new mode
-        if (isCurrentVendorMode && currentVendorId) {
-          cache.invalidateVendorCars(currentVendorId);
-        } else {
-          cache.invalidateAllCars();
-        }
       }
-
-      setCurrentPage(pageFromUrl);
     }
   }, [
     location.pathname,
@@ -350,9 +307,6 @@ const Cars = () => {
     serverFilters,
     isVendorMode,
     vendorId,
-    totalPages,
-    prefetchNextPages,
-    cache,
   ]);
 
   // Filter change detection (simplified)
@@ -363,16 +317,8 @@ const Cars = () => {
     );
     if (hasChanged) {
       previousFiltersRef.current = serverFilters;
-      if (currentPage !== 1) {
-        setCurrentPage(1);
-      }
-      if (isVendorMode && vendorId) {
-        cache.invalidateVendorCars(vendorId);
-      } else {
-        cache.invalidateAllCarQueries();
-      }
     }
-  }, [serverFilters, currentPage, isVendorMode, vendorId, cache]);
+  }, [serverFilters, currentPage]);
 
   // View mode persistence
   useEffect(() => {
@@ -381,7 +327,7 @@ const Cars = () => {
 
   // Simplified filter data extraction with vendor awareness
   const filterData = useMemo(() => {
-    if (!carsResponse?.carsCommonProp?.data)
+    if (!carsResponse?.carsCommonProp?.data) {
       return {
         vendorNames: [],
         branches: [],
@@ -392,6 +338,7 @@ const Cars = () => {
         carCapacities: [],
         maxPrice: 2000,
       };
+    }
 
     const commonProps = carsResponse.carsCommonProp.data;
     const filterMap = new Map();
@@ -400,7 +347,7 @@ const Cars = () => {
     });
 
     return {
-      vendorNames: !isVendorMode ? filterMap.get("vendorNames") || [] : [],
+      vendorNames: filterMap.get("vendorNames") || [],
       branches: filterMap.get("branches") || [],
       types: filterMap.get("types") || [],
       transmissions: filterMap.get("transmissions") || [],
@@ -594,13 +541,11 @@ const Cars = () => {
                           carCapacities.length > 0 ? carCapacities : undefined,
                       });
                     }}
-                    selectedVendors={isVendorMode ? [] : selectedVendors}
+                    selectedVendors={selectedVendors}
                     setSelectedVendors={(vendors) => {
-                      if (!isVendorMode) {
-                        updateFilters({
-                          vendorNames: vendors.length > 0 ? vendors : undefined,
-                        });
-                      }
+                      updateFilters({
+                        vendorNames: vendors.length > 0 ? vendors : undefined,
+                      });
                     }}
                     searchTerm={searchTerm}
                     setSearchTerm={setSearchTerm}
@@ -633,9 +578,9 @@ const Cars = () => {
                     totalPages={totalPages}
                     onPageChange={handlePageChange}
                     isSearching={isSearching}
-                    isLoading={isLoading || isFetching}
-                    hasNextPage={hasNextPage}
-                    hasPreviousPage={hasPreviousPage}
+                    isLoading={isLoading}
+                    hasNextPage={totalPages > currentPage}
+                    hasPreviousPage={currentPage > 1}
                     vendorId={isVendorMode ? vendorId : undefined}
                     isVendorMode={isVendorMode}
                   />
@@ -650,16 +595,15 @@ const Cars = () => {
                       />
                     ) : filteredCars.length > 0 ? (
                       filteredCars.length > VIRTUAL_SCROLL_THRESHOLD ? (
-                        <VirtualScrolling
-                          items={filteredCars}
-                          itemHeight={CARD_HEIGHT}
-                          containerHeight={800}
+                        // You can implement virtual scrolling if needed, or just use regular mapping
+                        <div
                           className={
                             viewMode === "grid"
                               ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
                               : "space-y-4"
                           }
-                          renderItem={(car, index) => (
+                        >
+                          {filteredCars.map((car, index) => (
                             <CarErrorBoundary key={car?.id}>
                               <OptimizedCarCard
                                 car={car}
@@ -669,8 +613,8 @@ const Cars = () => {
                                 animationDelay={index * 0.05}
                               />
                             </CarErrorBoundary>
-                          )}
-                        />
+                          ))}
+                        </div>
                       ) : viewMode === "grid" ? (
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                           {filteredCars.map((car, index) => (

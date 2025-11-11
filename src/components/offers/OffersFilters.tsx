@@ -94,7 +94,7 @@ const OffersFilters = ({
 
           <div className="p-4 space-y-5">
             {/* Search */}
-            <div>
+            {/* <div>
               <h3 className="font-semibold mb-3 text-xs text-gray-800 uppercase tracking-wide">
                 {t('search')}
               </h3>
@@ -108,10 +108,10 @@ const OffersFilters = ({
                 }`}
                 dir={isRTL ? 'rtl' : 'ltr'}
               />
-            </div>
+            </div> */}
 
             {/* Price Range */}
-            <div>
+            {/* <div>
               <h3 className="font-semibold mb-3 text-xs text-gray-800 uppercase tracking-wide">
                 {t('priceRange')}
               </h3>
@@ -127,7 +127,7 @@ const OffersFilters = ({
               <div className="text-xs text-gray-600 bg-gray-50 rounded-lg px-2 py-1">
                 {t('currency')} {priceRange[0]} - {t('currency')} {priceRange[1]}
               </div>
-            </div>
+            </div> */}
 
             {/* Vendors */}
             {filterData?.vendorNames && filterData.vendorNames.length > 0 && (

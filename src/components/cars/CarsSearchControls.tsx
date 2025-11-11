@@ -1,13 +1,18 @@
-import React from "react";
+import React, { useState } from "react";
 import {
-  Search,
+  ChevronLeft,
+  ChevronRight,
   Grid3X3,
   List,
   Loader2,
-  ChevronLeft,
-  ChevronRight,
+  Search,
+  Bug,
 } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 
 interface CarsSearchControlsProps {
   searchTerm: string;
@@ -22,7 +27,7 @@ interface CarsSearchControlsProps {
   isLoading?: boolean;
 }
 
-const CarsSearchControls = ({
+const CarsSearchControls: React.FC<CarsSearchControlsProps> = ({
   searchTerm,
   setSearchTerm,
   viewMode,
@@ -33,162 +38,177 @@ const CarsSearchControls = ({
   onPageChange,
   isSearching = false,
   isLoading = false,
-}: CarsSearchControlsProps) => {
-  const { t, language } = useLanguage();
-  const isRTL = language === "ar";
+}) => {
+  const { t } = useLanguage();
 
-  const getPageNumbers = () => {
-    const pages: (number | string)[] = [];
-    const maxVisible = 5;
+  // Simple ellipsis logic - only show ... when totalPages > 4
+  const showEllipsis = totalPages > 4;
 
-    if (totalPages <= maxVisible) {
-      for (let i = 1; i <= totalPages; i++) {
-        pages.push(i);
-      }
-    } else {
-      pages.push(1);
-
-      if (currentPage > 3) {
-        pages.push("...");
-      }
-
-      const start = Math.max(2, currentPage - 1);
-      const end = Math.min(totalPages - 1, currentPage + 1);
-
-      for (let i = start; i <= end; i++) {
-        pages.push(i);
-      }
-
-      if (currentPage < totalPages - 2) {
-        pages.push("...");
-      }
-
-      pages.push(totalPages);
+  const handlePreviousPage = () => {
+    if (currentPage > 1 && !isLoading) {
+      onPageChange(currentPage - 1);
     }
+  };
 
-    return pages;
+  const handleNextPage = () => {
+    if (currentPage < totalPages && !isLoading) {
+      onPageChange(currentPage + 1);
+    }
+  };
+
+  const handlePageClick = (page: number) => {
+    if (page !== currentPage && !isLoading) {
+      onPageChange(page);
+    }
   };
 
   return (
     <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 mb-6">
-      <div className="flex flex-col lg:flex-row gap-4 mb-4">
+      {/* Debug Toggle - Only in development */}
+
+      {/* Search and View Mode Controls */}
+      <div className="flex flex-col lg:flex-row gap-4 mb-6">
+        {/* Search Input */}
         <div className="flex-1 relative">
-          {isSearching ? (
-            <Loader2
-              className={`absolute top-1/2 transform -translate-y-1/2 text-primary h-5 w-5 animate-spin ${
-                isRTL ? "right-4" : "left-4"
-              }`}
-            />
-          ) : (
-            <Search
-              className={`absolute top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5 ${
-                isRTL ? "right-4" : "left-4"
-              }`}
-            />
-          )}
-          <input
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            {isSearching ? (
+              <Loader2 className="h-5 w-5 text-primary animate-spin" />
+            ) : (
+              <Search className="h-5 w-5 text-gray-400" />
+            )}
+          </div>
+          <Input
             type="text"
-            placeholder={t("searchCars") || t("search")}
+            placeholder={t("searchCars") || "Search cars..."}
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className={`w-full ${
-              isRTL ? "pr-12 pl-4" : "pl-12 pr-4"
-            } py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent bg-gray-50 transition-all ${
-              isRTL ? "text-right" : "text-left"
-            } ${isSearching ? "border-primary bg-blue-50" : ""}`}
-            dir={isRTL ? "rtl" : "ltr"}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+            }}
+            className={`pl-10 pr-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${
+              isSearching ? "bg-blue-50 border-blue-200" : "bg-gray-50"
+            } ${isLoading ? "opacity-50 cursor-not-allowed" : ""}`}
             disabled={isLoading}
           />
         </div>
+
+        {/* View Mode Toggle */}
         <div className="flex items-center gap-2">
-          <button
-            onClick={() => setViewMode("grid")}
-            className={`p-3 rounded-xl transition-all ${
-              viewMode === "grid"
-                ? "bg-primary text-white shadow-lg"
-                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-            }`}
+          <Button
+            variant={viewMode === "grid" ? "default" : "outline"}
+            size="sm"
+            onClick={() => {
+              setViewMode("grid");
+            }}
             disabled={isLoading}
-            aria-label="Grid view"
+            className="h-10 px-3"
           >
-            <Grid3X3 className="h-5 w-5" />
-          </button>
-          <button
-            onClick={() => setViewMode("list")}
-            className={`p-3 rounded-xl transition-all ${
-              viewMode === "list"
-                ? "bg-primary text-white shadow-lg"
-                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-            }`}
+            <Grid3X3 className="h-4 w-4" />
+          </Button>
+          <Button
+            variant={viewMode === "list" ? "default" : "outline"}
+            size="sm"
+            onClick={() => {
+              setViewMode("list");
+            }}
             disabled={isLoading}
-            aria-label="List view"
+            className="h-10 px-3"
           >
-            <List className="h-5 w-5" />
-          </button>
+            <List className="h-4 w-4" />
+          </Button>
         </div>
       </div>
 
-      <div className="flex flex-col gap-4">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between text-sm text-gray-600 gap-4">
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full font-medium">
-              {filteredCarsLength} {t("carsFound") || "cars found"}
+      {/* Results Info and Pagination */}
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+        {/* Results Summary */}
+        <div className="flex items-center gap-3 flex-wrap">
+          <Badge variant="secondary" className="text-sm">
+            {filteredCarsLength} {t("carsFound") || "cars found"}
+          </Badge>
+          {totalPages > 0 && (
+            <span className="text-sm text-gray-600">
+              {t("page")} {currentPage} {t("of")} {totalPages}
             </span>
-            <span>
-              {t("page") || "Page"} {currentPage} {t("of")} {totalPages}
-            </span>
-          </div>
-          {totalPages > 1 && (
-            <div className="flex items-center justify-end gap-1 flex-wrap">
-              <button
-                onClick={() => onPageChange(currentPage - 1)}
-                disabled={currentPage === 1 || isLoading}
-                className="p-2 rounded-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                aria-label={isRTL ? "Next page" : "Previous page"}
-              >
-                {isRTL ? (
-                  <ChevronRight className="h-4 w-4" />
-                ) : (
-                  <ChevronLeft className="h-4 w-4" />
-                )}
-              </button>
-
-              {getPageNumbers().map((page, index) =>
-                typeof page === "number" ? (
-                  <button
-                    key={index}
-                    onClick={() => onPageChange(page)}
-                    disabled={isLoading}
-                    className={`min-w-[40px] h-10 px-3 rounded-lg font-medium transition-all ${
-                      currentPage === page
-                        ? "bg-primary text-white shadow-md"
-                        : "border border-gray-200 hover:bg-gray-50 text-gray-700"
-                    } disabled:opacity-50 disabled:cursor-not-allowed`}
-                  >
-                    {page}
-                  </button>
-                ) : (
-                  <span key={index} className="px-2 text-gray-400">
-                    {page}
-                  </span>
-                )
-              )}
-
-              <button
-                onClick={() => onPageChange(currentPage + 1)}
-                disabled={currentPage === totalPages || isLoading}
-                className="p-2 rounded-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                aria-label={isRTL ? "Previous page" : "Next page"}
-              >
-                {isRTL ? (
-                  <ChevronLeft className="h-4 w-4" />
-                ) : (
-                  <ChevronRight className="h-4 w-4" />
-                )}
-              </button>
-            </div>
           )}
         </div>
+
+        {/* Simple Pagination */}
+        {totalPages > 1 && !isLoading && (
+          <div className="flex items-center gap-2">
+            {/* Previous */}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handlePreviousPage}
+              disabled={currentPage === 1}
+              className="h-10 px-4 min-w-[100px]"
+            >
+              {t("previous") || "Previous"}
+            </Button>
+
+            {/* Pages - Simplified logic */}
+            <div className="flex items-center gap-1">
+              {showEllipsis && currentPage > 4 && (
+                <>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handlePageClick(1)}
+                    className="h-10 w-10"
+                  >
+                    1
+                  </Button>
+                  <span className="px-1 text-gray-400">...</span>
+                </>
+              )}
+
+              {/* Current page range - simple: show current page and one on each side */}
+              {Array.from({ length: Math.min(5, totalPages) })
+                .map((_, i) => currentPage - 2 + i)
+                .filter((page) => page >= 1 && page <= totalPages)
+                .map((page, index) => (
+                  <Button
+                    key={index}
+                    variant={page === currentPage ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => handlePageClick(page)}
+                    className={`h-10 px-3 min-w-[44px] ${
+                      page === currentPage
+                        ? "bg-primary text-white"
+                        : "border-gray-200 hover:bg-gray-50"
+                    }`}
+                  >
+                    {page}
+                  </Button>
+                ))}
+
+              {showEllipsis && currentPage < totalPages - 3 && (
+                <>
+                  <span className="px-1 text-gray-400">...</span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handlePageClick(totalPages)}
+                    className="h-10 w-10"
+                  >
+                    {totalPages}
+                  </Button>
+                </>
+              )}
+            </div>
+
+            {/* Next */}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleNextPage}
+              disabled={currentPage === totalPages}
+              className="h-10 px-4 min-w-[100px]"
+            >
+              {t("next") || "Next"}
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );
