@@ -16,6 +16,7 @@ import {
   useBulkUploadCars,
   useDownloadCarTemplate,
 } from "@/hooks/vendor/useVendorCar";
+import * as XLSX from "xlsx";
 
 interface CarsImportModalProps {
   isOpen: boolean;
@@ -40,72 +41,64 @@ const CarsImportModal = ({
   const { mutate: bulkUploadCars, isPending: isUploadingCars } =
     useBulkUploadCars();
 
-  const handleDownloadTemplate = () => {
-    downloadTemplate(undefined, {
-      onSuccess: (base64File: string, variables) => {
-        try {
-          // Decode base64 to bytes
-          const paddedBase64 = base64File
-            .replace(/(\r\n|\n)/g, "\\n")
-            .replace(/[^A-Za-z0-9+/\\n=\\s]/g, "");
+  const downloadTemplateMutate = downloadTemplate;
+  const handleDownloadTemplate = (
+    fileContent: string,
+    fileName: string = "CarsTemplate.xlsx"
+  ) => {
+    try {
+      // 1. Sanitize base64
+      let base64String = fileContent.replace(/[^A-Za-z0-9+/=]/g, "");
+      while (base64String.length % 4) base64String += "=";
 
-          // Fix padding if needed
-          let base64String = paddedBase64;
-          while (base64String.length % 4) {
-            base64String += "=";
-          }
+      // 2. Convert base64 to binary string (Uint8Array)
+      const binaryString = atob(base64String);
+      const bytes = new Uint8Array(binaryString.length);
+      for (let i = 0; i < binaryString.length; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
 
-          // Decode base64 to binary data
-          const binaryString = atob(base64String);
-          const bytes = new Uint8Array(binaryString.length);
+      // 3. Use xlsx library to parse and save as .xlsx
+      const wb = XLSX.read(bytes, { type: "array" });
 
-          for (let i = 0; i < binaryString.length; i++) {
-            bytes[i] = binaryString.charCodeAt(i);
-          }
+      /* Option 1: Save direct to xlsx file */
+      XLSX.writeFile(wb, fileName);
 
-          // Create blob from binary data
-          const blob = new Blob([bytes], {
-            type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-          });
-          const url = window.URL.createObjectURL(blob);
+      toast({
+        title: t("template_downloaded"),
+        description: t("template_downloaded_description"),
+      });
+    } catch (error) {
+      console.error("🔥 XLSX decode error!", error);
 
-          // Download the decoded file
-          const link = document.createElement("a");
-          link.href = url;
-          link.download = "cars_template.xlsx";
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-          window.URL.revokeObjectURL(url);
+      // Fallback: Trigger old download
+      const url = window.URL.createObjectURL(
+        new Blob([fileContent], { type: "application/octet-stream" })
+      );
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
 
-          toast({
-            title: t("template_downloaded"),
-            description: t("template_downloaded_description"),
-          });
-        } catch (error) {
-          console.error("Error decoding file:", error);
-
-          // Fallback: try direct download if decoding fails
-          const url = window.URL.createObjectURL(
-            new Blob([base64File], { type: "application/octet-stream" })
-          );
-          const link = document.createElement("a");
-          link.href = url;
-          link.download = "cars_template.xlsx";
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-          window.URL.revokeObjectURL(url);
-
-          toast({
-            title: t("download_error"),
-            description: t("fallback_download_warning"),
-            variant: "destructive",
-          });
-        }
+      toast({
+        title: t("download_error"),
+        description: t("fallback_download_warning"),
+        variant: "destructive",
+      });
+    }
+  };
+  const handleTemplateDownloadClick = () => {
+    downloadTemplateMutate(undefined, {
+      onSuccess: (data) => {
+        handleDownloadTemplate(
+          data.fileContent,
+          data.fileName || "CarsTemplate.xlsx"
+        );
       },
       onError: (error) => {
-        console.error("Template download error:", error);
         toast({
           title: t("download_error"),
           description: t("download_error_description"),
@@ -207,7 +200,7 @@ const CarsImportModal = ({
           <div className="space-y-3">
             <h4 className="font-medium">{t("step_1_download_template")}</h4>
             <Button
-              onClick={handleDownloadTemplate}
+              onClick={handleTemplateDownloadClick}
               variant="outline"
               className="w-full flex items-center gap-2"
               disabled={isDownloading}
