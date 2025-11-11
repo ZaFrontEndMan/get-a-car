@@ -8,6 +8,8 @@ import {
   ApprovedFeedback,
   WebsiteStatistics,
   constantsApi,
+  ApiBlog,
+  ApiSocialMedia,
 } from "@/api/website/constantsApi";
 
 export interface AdminSettings {
@@ -134,7 +136,29 @@ export const useAdminSettings = () => {
     staleTime: 1000 * 60 * 5, // Cache for 5 minutes
   });
 };
+export const useBlogs = () => {
+  return useQuery<ApiBlog[]>({
+    queryKey: ["blogs"],
+    queryFn: constantsApi.getAllBlogs,
+    staleTime: 1000 * 60 * 5,
+  });
+};
 
+export const useBlogDetail = (id?: number) => {
+  return useQuery<ApiBlog | null>({
+    queryKey: ["blog-detail", id],
+    queryFn: () => (id ? constantsApi.getBlogById(id) : null),
+    enabled: !!id,
+    staleTime: 1000 * 60 * 5,
+  });
+};
+export const useSocialMedias = () => {
+  return useQuery<ApiSocialMedia[]>({
+    queryKey: ["social-medias"],
+    queryFn: constantsApi.getAllSocialMedias,
+    staleTime: 1000 * 60 * 15, // 15 minutes
+  });
+};
 // Separate hooks for individual use cases
 export const usePrivacyPolicies = () => {
   return useQuery({

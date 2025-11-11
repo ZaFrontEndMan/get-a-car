@@ -1467,6 +1467,19 @@ export const arTranslations = {
   rateCar: "تقييم السيارة",
   commentPlaceholder: "أضف تعليقاً (اختياري)",
   submitRating: "إرسال التقييم",
+  ourBlog: "مدونتنا",
+  stayUpdated: "ابق على اطلاع بأحدث المقالات والنصائح",
+  searchArticles: "ابحث في المقالات...",
+  noArticlesFound: "لم يتم العثور على مقالات.",
+  readMore: "اقرأ المزيد",
+  by: "بواسطة",
+  publishedOn: "تاريخ النشر",
+  minRead: "دقيقة قراءة",
+  backToBlog: "العودة للمدونة",
+  shareArticle: "مشاركة المقال",
+  errorLoadingBlogPost: "حدث خطأ أثناء تحميل المقال",
+  blogPostNotFound: "لم يتم العثور على المقال",
+  noBlogIdProvided: "لم يتم توفير معرف المقال",
 };
 
 export default arTranslations;

@@ -21,6 +21,47 @@ type ApiFAQResponse = {
     customMessage: any;
   };
 };
+export type ApiBlog = {
+  id: number;
+  title: string;
+  image: string;
+  description: string;
+  authorName: string;
+  publishedDate: string;
+};
+type ApiBlogListResponse = {
+  isSuccess: boolean;
+  customMessage: string;
+  data: {
+    data: ApiBlog[];
+    isSuccess: boolean;
+    customMessage: any;
+  };
+};
+type ApiBlogSingleResponse = {
+  isSuccess: boolean;
+  customMessage: string;
+  data: {
+    data: ApiBlog;
+    isSuccess: boolean;
+    customMessage: any;
+  };
+};
+export type ApiSocialMedia = {
+  id: number;
+  name: string;
+  link: string;
+};
+
+type ApiSocialMediaListResponse = {
+  isSuccess: boolean;
+  customMessage: string;
+  data: {
+    data: ApiSocialMedia[];
+    isSuccess: boolean;
+    customMessage: any;
+  };
+};
 export type ApiAboutUs = {
   id: number;
   title: string;
@@ -200,5 +241,26 @@ export const constantsApi = {
       console.error("Error fetching FAQs:", error);
       return [];
     }
+  },
+  getAllBlogs: async (): Promise<ApiBlog[]> => {
+    const res = await axiosInstance.get<ApiBlogListResponse>(
+      "/Admin/Blogs/GetAllBlogs"
+    );
+    if (!res.data?.data?.data || !res.data.isSuccess) return [];
+    return res.data.data.data;
+  },
+  getBlogById: async (id: number): Promise<ApiBlog | null> => {
+    const res = await axiosInstance.get<ApiBlogSingleResponse>(
+      `/Admin/Blogs/GetBlog/${id}`
+    );
+    if (!res.data?.data?.data || !res.data.isSuccess) return null;
+    return res.data.data.data;
+  },
+  getAllSocialMedias: async (): Promise<ApiSocialMedia[]> => {
+    const res = await axiosInstance.get<ApiSocialMediaListResponse>(
+      "/Admin/SocialMedia/GetAllSocialMedias"
+    );
+    if (!res.data?.data?.data || !res.data.isSuccess) return [];
+    return res.data.data.data;
   },
 };

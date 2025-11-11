@@ -1457,6 +1457,19 @@ export const enTranslations = {
   rateCar: "Car rating",
   commentPlaceholder: "Add a comment (optional)",
   submitRating: "Submit Rating",
+  ourBlog: "Our Blog",
+  stayUpdated: "Stay updated with the latest articles and tips",
+  searchArticles: "Search articles...",
+  noArticlesFound: "No articles found.",
+  readMore: "Read More",
+  by: "By",
+  publishedOn: "Published on",
+  minRead: "min read",
+  backToBlog: "Back to Blog",
+  shareArticle: "Share Article",
+  errorLoadingBlogPost: "Error loading blog post",
+  blogPostNotFound: "Blog post not found",
+  noBlogIdProvided: "No blog ID provided",
 };
 
 export default enTranslations;

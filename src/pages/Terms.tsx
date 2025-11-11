@@ -5,13 +5,12 @@ import { useTermsAndConditions } from "@/hooks/useAdminSettings";
 
 const Terms = () => {
   const { t, language } = useLanguage();
-  const {
-    data: termsConditions = [],
-    isLoading,
-    error,
-  } = useTermsAndConditions();
+  const { data: response = {}, isLoading, error } = useTermsAndConditions();
 
-  // Sort by id to maintain consistent order, then filter active terms
+  // 1. Extract the real terms array from the nested structure
+  const termsConditions = response;
+
+  // 2. Sort and filter as before
   const activeTerms = termsConditions
     .filter((terms) => terms.isActive)
     .sort((a, b) => a.id - b.id);
@@ -28,21 +27,16 @@ const Terms = () => {
               <p className="text-lg text-gray-600">{t("termsDescription")}</p>
             </div>
             <div className="space-y-8">
-              <div className="bg-white rounded-lg shadow-sm p-8">
-                <Skeleton className="h-6 w-1/3 mb-4" />
-                <div className="space-y-4">
-                  <Skeleton className="h-4 w-full" />
-                  <Skeleton className="h-4 w-4/5" />
-                  <Skeleton className="h-4 w-3/5" />
+              {[1, 2].map((i) => (
+                <div key={i} className="bg-white rounded-lg shadow-sm p-8">
+                  <Skeleton className="h-6 w-1/3 mb-4" />
+                  <div className="space-y-4">
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-4/5" />
+                    <Skeleton className="h-4 w-3/5" />
+                  </div>
                 </div>
-              </div>
-              <div className="bg-white rounded-lg shadow-sm p-8">
-                <Skeleton className="h-6 w-1/4 mb-4" />
-                <div className="space-y-3">
-                  <Skeleton className="h-4 w-full" />
-                  <Skeleton className="h-4 w-2/3" />
-                </div>
-              </div>
+              ))}
             </div>
           </div>
         </main>
@@ -70,6 +64,7 @@ const Terms = () => {
     );
   }
 
+  // 3. Show English or Arabic content based on selected language
   return (
     <div className="min-h-screen bg-cream">
       <main className="pt-20 pb-12">
@@ -88,26 +83,18 @@ const Terms = () => {
                 className="bg-white rounded-lg shadow-sm p-6 sm:p-8"
               >
                 <h2 className="text-xl font-semibold text-gray-900 mb-4 border-b border-gray-200 pb-2">
-                  {terms.mainTitle}
+                  {language === "ar" ? terms.mainTitleAr : terms.mainTitleEn}
                 </h2>
                 <div className="prose prose-lg max-w-none text-gray-700 leading-relaxed">
-                  <p className="whitespace-pre-line">{terms.mainDescription}</p>
+                  <p className="whitespace-pre-line">
+                    {language === "ar"
+                      ? terms.mainDescriptionAr
+                      : terms.mainDescriptionEn}
+                  </p>
                 </div>
               </div>
             ))}
           </div>
-
-          {/* {activeTerms.length > 0 && (
-            <div className="mt-12 pt-8 border-t border-gray-200 text-center">
-              <p className="text-sm text-gray-500">
-                {`${t("version")} ${activeTerms[0].id} - ${t(
-                  "lastUpdated"
-                )}: ${new Date().toLocaleDateString(
-                  language === "ar" ? "ar-SA" : "en-US"
-                )}`}
-              </p>
-            </div>
-          )} */}
         </div>
       </main>
     </div>

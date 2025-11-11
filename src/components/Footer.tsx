@@ -13,56 +13,37 @@ import {
   Youtube,
   Linkedin,
 } from "lucide-react";
-import { useAdminSettings } from "../hooks/useAdminSettings";
-
+import { useAdminSettings, useSocialMedias } from "../hooks/useAdminSettings";
+import { Link2 } from "lucide-react";
+const SOCIAL_ICON_MAP = {
+  facebook: Facebook,
+  instagram: Instagram,
+  twitter: Twitter, // Can map "x" if you want, e.g., "x": Twitter,
+  youtube: Youtube,
+  linkedin: Linkedin,
+  tiktok: Music,
+};
 const Footer = () => {
   const { t } = useLanguage();
   const { data: settings, isLoading } = useAdminSettings();
-
-  const getSocialIcons = () => {
-    const icons = [];
-
-    if (settings?.facebookUrl) {
-      icons.push({
-        name: "Facebook",
-        icon: Facebook,
-        href: settings.facebookUrl,
-      });
-    }
-    if (settings?.instagramUrl) {
-      icons.push({
-        name: "Instagram",
-        icon: Instagram,
-        href: settings.instagramUrl,
-      });
-    }
-    if (settings?.twitterUrl) {
-      icons.push({ name: "X", icon: Twitter, href: settings.twitterUrl });
-    }
-    if (settings?.linkedinUrl) {
-      icons.push({
-        name: "LinkedIn",
-        icon: Linkedin,
-        href: settings.linkedinUrl,
-      });
-    }
-    if (settings?.youtubeUrl) {
-      icons.push({ name: "YouTube", icon: Youtube, href: settings.youtubeUrl });
-    }
-
-    // fallback
-    if (icons.length === 0) {
-      return [
-        { name: "Facebook", icon: Facebook, href: "#" },
-        { name: "Instagram", icon: Instagram, href: "#" },
-        { name: "X", icon: Twitter, href: "#" },
-        { name: "TikTok", icon: Music, href: "#" },
-      ];
-    }
-
-    return icons;
+  const getSocialIcon = (name) => {
+    const key = name?.toLowerCase() || "";
+    return SOCIAL_ICON_MAP[key] || Link2; // default to Link icon
   };
-
+  const { data: socialMedias = [], isLoading: socialsLoading } =
+    useSocialMedias();
+  const renderSocialIcons = () => {
+    // 1. Use socialMedias from API if available
+    let sourceIcons = [];
+    if (socialMedias && socialMedias.length > 0) {
+      sourceIcons = socialMedias.map((social) => ({
+        name: social.name,
+        icon: getSocialIcon(social.name),
+        href: social.link,
+      }));
+    }
+    return sourceIcons;
+  };
   const quickLinks = [
     { label: t("home"), path: "/" },
     { label: t("cars"), path: "/cars" },
@@ -109,11 +90,12 @@ const Footer = () => {
               {settings?.siteDescription || t("premiumCarRentalService")}
             </p>
             <div className="flex gap-3 pt-2">
-              {getSocialIcons().map((social) => {
+              {renderSocialIcons().map((social) => {
                 const IconComponent = social.icon;
                 return (
                   <a
-                    key={social.name}
+                    title={social.name}
+                    key={social.name + social.href}
                     href={social.href}
                     className="text-gray-400 hover:text-white transition-colors p-2 hover:bg-gray-800 rounded-full"
                     aria-label={social.name}
