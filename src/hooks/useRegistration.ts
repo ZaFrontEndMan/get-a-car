@@ -140,7 +140,7 @@ export const useRegistration = (): UseRegistrationReturn => {
       console.error("Registration error:", err);
       setError(
         err.response?.data?.customMessage ||
-          err.message ||
+          err.response?.data?.error?.message ||
           "Registration failed"
       );
       return false;

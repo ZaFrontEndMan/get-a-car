@@ -30,6 +30,7 @@ import {
   AccordionContent,
 } from "@/components/ui/accordion";
 import { Eye, EyeOff, AlertCircle } from "lucide-react";
+import { toast } from "sonner";
 
 // Animation variants
 const fadeIn = {
@@ -323,6 +324,7 @@ const SignUp: React.FC = () => {
       const success = await register(userType, userDetails, documents);
 
       if (success) {
+        toast.success(t("success_title"));
         navigate("/signin", {
           state: {
             message: t("registrationSuccessful"),
@@ -332,7 +334,9 @@ const SignUp: React.FC = () => {
       }
     } catch (error: any) {
       console.error("Signup error:", error);
-      setError(error.message || t("signupError"));
+      console.log(error);
+
+      setError(error.response?.data?.error?.message || t("signupError"));
     }
   };
 
@@ -354,10 +358,13 @@ const SignUp: React.FC = () => {
         <motion.img
           src="/logo.png"
           alt="Logo"
-          className="h-14 w-auto mb-4"
+          className="h-14 w-auto mb-4 cursor-pointer"
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.6, delay: 0.1 }}
+          onClick={() => {
+            navigate("/");
+          }}
         />
         <motion.h2
           className="text-3xl font-bold text-center text-white drop-shadow-sm"
@@ -944,7 +951,7 @@ const SignUp: React.FC = () => {
                     <motion.div variants={staggerItem}>
                       <AccordionItem value="section4">
                         <AccordionTrigger className="text-lg font-semibold hover:no-underline">
-                          <span className={isRTL ? "mr-2" : "ml-2"}>🔐</span>
+                          <span>🔐</span>
                           {t("security")}
                         </AccordionTrigger>
                         <AccordionContent>
@@ -956,10 +963,18 @@ const SignUp: React.FC = () => {
                           >
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                               <motion.div variants={staggerItem}>
-                                <Label htmlFor="password">
+                                <Label className="block text-sm font-semibold text-gray-700 mb-2">
                                   {t("password")}
                                 </Label>
-                                <div className="relative">
+                                <motion.div
+                                  className="relative"
+                                  whileFocus={{ scale: 1.02 }}
+                                  transition={{
+                                    type: "spring",
+                                    stiffness: 400,
+                                    damping: 10,
+                                  }}
+                                >
                                   <Input
                                     id="password"
                                     type={showPassword ? "text" : "password"}
@@ -973,42 +988,61 @@ const SignUp: React.FC = () => {
                                     }
                                     isRTL={isRTL}
                                     required
+                                    className={cn(
+                                      "w-full rounded-lg border-2 pe-12 transition-all duration-200",
+                                      "focus:outline-none",
+                                      fieldErrors.password
+                                        ? "border-red focus:border-red"
+                                        : ""
+                                    )}
                                   />
                                   <motion.button
                                     type="button"
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      setShowPassword(!showPassword);
+                                      e.currentTarget.blur();
+                                    }}
                                     className={cn(
-                                      "absolute inset-y-0 flex items-center pr-3",
-                                      isRTL && "left-0 pl-3 pr-0"
+                                      "absolute inset-y-0 end-0 flex items-center px-3 text-gray-500 hover:text-gray-700",
+                                      "focus:outline-none focus-visible:outline-none"
                                     )}
-                                    onClick={() =>
-                                      setShowPassword(!showPassword)
-                                    }
+                                    tabIndex={-1}
                                     whileHover={{ scale: 1.1 }}
                                     whileTap={{ scale: 0.95 }}
                                   >
                                     {showPassword ? (
-                                      <EyeOff className="h-5 w-5 text-gray-400" />
+                                      <EyeOff className="h-5 w-5" />
                                     ) : (
-                                      <Eye className="h-5 w-5 text-gray-400" />
+                                      <Eye className="h-5 w-5" />
                                     )}
                                   </motion.button>
-                                  {fieldErrors.password && (
-                                    <motion.p
-                                      className="text-xs text-rose-600 mt-1"
-                                      variants={errorAnimation}
-                                      initial="initial"
-                                      animate="animate"
-                                    >
-                                      {fieldErrors.password}
-                                    </motion.p>
-                                  )}
-                                </div>
+                                </motion.div>
+                                {fieldErrors.password && (
+                                  <motion.p
+                                    className="text-red text-xs mt-2 flex items-center gap-1"
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    transition={{ duration: 0.3 }}
+                                  >
+                                    <span>✕</span> {fieldErrors.password}
+                                  </motion.p>
+                                )}
                               </motion.div>
+
                               <motion.div variants={staggerItem}>
-                                <Label htmlFor="confirmPassword">
+                                <label className="block text-sm font-semibold text-gray-700 mb-2">
                                   {t("confirmPassword")}
-                                </Label>
-                                <div className="relative">
+                                </label>
+                                <motion.div
+                                  className="relative"
+                                  whileFocus={{ scale: 1.02 }}
+                                  transition={{
+                                    type: "spring",
+                                    stiffness: 400,
+                                    damping: 10,
+                                  }}
+                                >
                                   <Input
                                     id="confirmPassword"
                                     type={
@@ -1026,38 +1060,48 @@ const SignUp: React.FC = () => {
                                     }
                                     isRTL={isRTL}
                                     required
+                                    className={cn(
+                                      "w-full rounded-lg border-2 pe-12 transition-all duration-200",
+                                      "focus:outline-none",
+                                      fieldErrors.confirmPassword
+                                        ? "border-red focus:border-red"
+                                        : ""
+                                    )}
                                   />
                                   <motion.button
                                     type="button"
-                                    className={cn(
-                                      "absolute inset-y-0 flex items-center pr-3",
-                                      isRTL && "left-0 pl-3 pr-0"
-                                    )}
-                                    onClick={() =>
+                                    onClick={(e) => {
+                                      e.preventDefault();
                                       setShowConfirmPassword(
                                         !showConfirmPassword
-                                      )
-                                    }
+                                      );
+                                      e.currentTarget.blur();
+                                    }}
+                                    className={cn(
+                                      "absolute inset-y-0 end-0 flex items-center px-3 text-gray-500 hover:text-gray-700",
+                                      "focus:outline-none focus-visible:outline-none"
+                                    )}
+                                    tabIndex={-1}
                                     whileHover={{ scale: 1.1 }}
                                     whileTap={{ scale: 0.95 }}
                                   >
                                     {showConfirmPassword ? (
-                                      <EyeOff className="h-5 w-5 text-gray-400" />
+                                      <EyeOff className="h-5 w-5" />
                                     ) : (
-                                      <Eye className="h-5 w-5 text-gray-400" />
+                                      <Eye className="h-5 w-5" />
                                     )}
                                   </motion.button>
-                                  {fieldErrors.confirmPassword && (
-                                    <motion.p
-                                      className="text-xs text-rose-600 mt-1"
-                                      variants={errorAnimation}
-                                      initial="initial"
-                                      animate="animate"
-                                    >
-                                      {fieldErrors.confirmPassword}
-                                    </motion.p>
-                                  )}
-                                </div>
+                                </motion.div>
+                                {fieldErrors.confirmPassword && (
+                                  <motion.p
+                                    className="text-red text-xs mt-2 flex items-center gap-1"
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    transition={{ duration: 0.3 }}
+                                  >
+                                    <span>✕</span> {fieldErrors.confirmPassword}
+                                  </motion.p>
+                                )}
                               </motion.div>
                             </div>
                           </motion.div>

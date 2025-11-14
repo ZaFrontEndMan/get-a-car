@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useLanguage } from "../../contexts/LanguageContext";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { Eye, EyeOff } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -36,7 +36,7 @@ const SignInForm: React.FC<SignInFormProps> = ({
 }) => {
   const { t, language } = useLanguage();
   const isRTL = language === "ar";
-
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
 
@@ -69,7 +69,10 @@ const SignInForm: React.FC<SignInFormProps> = ({
         <motion.img
           src="/logo.png"
           alt="Logo"
-          className="h-16 w-auto mb-4"
+          onClick={() => {
+            navigate("/");
+          }}
+          className="h-16 w-auto mb-4 cursor-pointer"
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.6, delay: 0.2 }}
@@ -140,7 +143,7 @@ const SignInForm: React.FC<SignInFormProps> = ({
                 placeholder={t("passwordPlaceholder")}
                 {...register("password")}
                 className={cn(
-                  "w-full rounded-lg border-2 px-4 py-3 pr-12 transition-all duration-200",
+                  "w-full rounded-lg border-2 px-4 py-3 pe-12 transition-all duration-200",
                   "focus:outline-none focus:ring-2 focus:ring-primary/20",
                   errors.password
                     ? "border-red-500 focus:border-red-500"
@@ -149,11 +152,16 @@ const SignInForm: React.FC<SignInFormProps> = ({
               />
               <motion.button
                 type="button"
-                onClick={() => setShowPassword(!showPassword)}
+                onClick={(e) => {
+                  e.preventDefault();
+                  setShowPassword(!showPassword);
+                  e.currentTarget.blur();
+                }}
                 className={cn(
-                  "absolute inset-y-0 flex items-center px-3 text-gray-500 hover:text-gray-700",
-                  isRTL ? "left-0" : "right-0"
+                  "absolute inset-y-0 end-0 flex items-center px-3 text-gray-500 hover:text-gray-700",
+                  "focus:outline-none focus-visible:outline-none"
                 )}
+                tabIndex={-1}
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.95 }}
               >
@@ -230,54 +238,54 @@ const SignInForm: React.FC<SignInFormProps> = ({
           </div>
         </motion.div>
 
-        {/* Quick Login Buttons */}
-        <motion.div
-          className="grid grid-cols-3 gap-3"
-          variants={staggerContainer}
-        >
-          <motion.button
-            type="button"
-            onClick={() => handleQuickLoginClick("client")}
-            className={cn(
-              "rounded-lg px-3 py-2.5 text-xs font-semibold text-white",
-              "bg-blue-500 hover:bg-blue-600 transition-colors shadow-md"
-            )}
-            variants={staggerItem}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+        {process.env.NODE_ENV === "development" && (
+          <motion.div
+            className="grid grid-cols-3 gap-3"
+            variants={staggerContainer}
           >
-            {t("quickLoginClient")}
-          </motion.button>
-          <motion.button
-            type="button"
-            onClick={() => handleQuickLoginClick("vendor")}
-            className={cn(
-              "rounded-lg px-3 py-2.5 text-xs font-semibold text-white",
-              "bg-green-500 hover:bg-green-600 transition-colors shadow-md"
-            )}
-            variants={staggerItem}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            {t("quickLoginVendor")}
-          </motion.button>
-          <motion.button
-            type="button"
-            onClick={() =>
-              window.open("https://get-car-admin.vercel.app/", "_blank")
-            }
-            className={cn(
-              "rounded-lg px-3 py-2.5 text-xs font-semibold text-white",
-              "bg-purple-500 hover:bg-purple-600 transition-colors shadow-md"
-            )}
-            variants={staggerItem}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            {t("quickLoginAdmin")}
-          </motion.button>
-        </motion.div>
-
+            <motion.button
+              type="button"
+              onClick={() => handleQuickLoginClick("client")}
+              className={cn(
+                "rounded-lg px-3 py-2.5 text-xs font-semibold text-white",
+                "bg-blue-500 hover:bg-blue-600 transition-colors shadow-md"
+              )}
+              variants={staggerItem}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              {t("quickLoginClient")}
+            </motion.button>
+            <motion.button
+              type="button"
+              onClick={() => handleQuickLoginClick("vendor")}
+              className={cn(
+                "rounded-lg px-3 py-2.5 text-xs font-semibold text-white",
+                "bg-green-500 hover:bg-green-600 transition-colors shadow-md"
+              )}
+              variants={staggerItem}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              {t("quickLoginVendor")}
+            </motion.button>
+            <motion.button
+              type="button"
+              onClick={() =>
+                window.open("https://get-car-admin.vercel.app/", "_blank")
+              }
+              className={cn(
+                "rounded-lg px-3 py-2.5 text-xs font-semibold text-white",
+                "bg-purple-500 hover:bg-purple-600 transition-colors shadow-md"
+              )}
+              variants={staggerItem}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              {t("quickLoginAdmin")}
+            </motion.button>
+          </motion.div>
+        )}
         {/* Sign Up Link */}
         <motion.div
           className="mt-8 pt-6 border-t border-gray-200 text-center"
