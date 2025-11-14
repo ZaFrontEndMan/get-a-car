@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from "react";
+import React, { useState, useCallback, useMemo, useEffect } from "react";
 import { useLanguage } from "../contexts/LanguageContext";
 import { useFAQ } from "@/hooks/useAdminSettings";
 import { Skeleton } from "../components/ui/skeleton";
@@ -7,15 +7,17 @@ import { debounce } from "lodash";
 
 interface FAQItem {
   id: number;
-  title: string;
-  description: string;
+  titleAr: string;
+  titleEn: string;
+  descriptionAr: string;
+  descriptionEn: string;
   isActive: boolean;
   isOpen?: boolean;
 }
 
 const FAQ: React.FC = () => {
-  const { t } = useLanguage();
-  const { data: faqs = [], isLoading, error } = useFAQ();
+  const { t, language: lang } = useLanguage();
+  const { data: faqs, isLoading, error } = useFAQ();
   const [searchTerm, setSearchTerm] = useState("");
   const [openItems, setOpenItems] = useState<Set<number>>(new Set());
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
@@ -28,6 +30,12 @@ const FAQ: React.FC = () => {
     []
   );
 
+  useEffect(() => {
+    return () => {
+      debouncedSetSearchTerm.cancel();
+    };
+  }, [debouncedSetSearchTerm]);
+
   const handleSearchChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const value = e.target.value;
@@ -37,29 +45,25 @@ const FAQ: React.FC = () => {
     [debouncedSetSearchTerm]
   );
 
-  React.useEffect(() => {
-    return () => {
-      debouncedSetSearchTerm.cancel();
-    };
-  }, [debouncedSetSearchTerm]);
-
   const filteredFAQs: FAQItem[] = useMemo(() => {
-    if (isLoading) return [];
-
+    if (isLoading || !Array.isArray(faqs)) return [];
     return faqs
-      .filter((faq) => faq.isActive)
-      .filter(
-        (faq) =>
-          faq.title.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
-          faq.description
-            .toLowerCase()
-            .includes(debouncedSearchTerm.toLowerCase())
-      )
+      .filter((faq) => faq?.isActive)
+      .filter((faq) => {
+        const search = debouncedSearchTerm.toLowerCase();
+        const title = (lang === "ar" ? faq?.titleAr : faq?.titleEn) || "";
+        const desc =
+          (lang === "ar" ? faq?.descriptionAr : faq?.descriptionEn) || "";
+        return (
+          title.toLowerCase().includes(search) ||
+          desc.toLowerCase().includes(search)
+        );
+      })
       .map((faq) => ({
         ...faq,
-        isOpen: openItems.has(faq.id),
+        isOpen: openItems.has(faq?.id),
       }));
-  }, [faqs, debouncedSearchTerm, openItems, isLoading]);
+  }, [faqs, debouncedSearchTerm, openItems, isLoading, lang]);
 
   const toggleFAQ = useCallback((id: number) => {
     setOpenItems((prev) => {
@@ -118,9 +122,7 @@ const FAQ: React.FC = () => {
         {debouncedSearchTerm ? t("noResultsFound") : t("noFAQsAvailable")}
       </h3>
       <p className="text-gray-600 mb-6">
-        {debouncedSearchTerm
-          ? t("tryDifferentSearch")
-          : t("contactSupportText")}
+        {debouncedSearchTerm && t("tryDifferentSearch")}
       </p>
       {debouncedSearchTerm && (
         <button
@@ -134,50 +136,43 @@ const FAQ: React.FC = () => {
   );
 
   const renderFAQItems = () => {
-    if (isLoading) {
-      return renderLoadingFAQs();
-    }
-
-    if (filteredFAQs.length === 0) {
-      return renderEmptyState();
-    }
-
+    if (isLoading) return renderLoadingFAQs();
+    if (!filteredFAQs || filteredFAQs.length === 0) return renderEmptyState();
     return (
       <div className="space-y-4">
         {filteredFAQs.map((faq) => (
           <div
-            key={faq.id}
+            key={faq?.id}
             className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden"
           >
-            {/* FAQ Header */}
             <button
-              onClick={() => toggleFAQ(faq.id)}
+              onClick={() => toggleFAQ(faq?.id)}
               className="w-full flex items-center justify-between p-6 hover:bg-gray-50 transition-colors"
-              aria-expanded={faq.isOpen}
-              aria-controls={`faq-content-${faq.id}`}
+              aria-expanded={faq?.isOpen}
+              aria-controls={`faq-content-${faq?.id}`}
             >
               <h3 className="text-lg font-semibold text-gray-900 pe-2 flex-1 text-start">
-                {faq.title}
+                {lang === "ar" ? faq.titleAr : faq.titleEn}
               </h3>
               <div
                 className={`transform transition-transform duration-200 ${
-                  faq.isOpen ? "rotate-180" : ""
+                  faq?.isOpen ? "rotate-180" : ""
                 }`}
               >
                 <ChevronDown className="w-5 h-5 text-gray-400" />
               </div>
             </button>
-
-            {/* FAQ Content */}
-            {faq.isOpen && (
+            {faq?.isOpen && (
               <div
-                id={`faq-content-${faq.id}`}
+                id={`faq-content-${faq?.id}`}
                 className="px-6 pb-6 bg-gray-50"
                 role="region"
-                aria-labelledby={`faq-title-${faq.id}`}
+                aria-labelledby={`faq-title-${faq?.id}`}
               >
                 <div className="prose prose-lg max-w-none text-gray-700 leading-relaxed">
-                  <p className="whitespace-pre-line">{faq.description}</p>
+                  <p className="whitespace-pre-line">
+                    {lang === "ar" ? faq.descriptionAr : faq.descriptionEn}
+                  </p>
                 </div>
               </div>
             )}
@@ -221,7 +216,6 @@ const FAQ: React.FC = () => {
     <div className="min-h-screen bg-cream">
       <main className="pt-20 pb-12">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Header - Always Visible */}
           <div className="text-center mb-12">
             <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
               {t("faq")}
@@ -230,8 +224,6 @@ const FAQ: React.FC = () => {
               {t("faqDescription")}
             </p>
           </div>
-
-          {/* Search Bar - Always Visible */}
           <div className="mb-8">
             <div className="relative max-w-md mx-auto">
               <Search className="absolute start-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -270,8 +262,6 @@ const FAQ: React.FC = () => {
               </p>
             )}
           </div>
-
-          {/* FAQ Results Count - Only show when not loading and not searching */}
           {!isLoading && !debouncedSearchTerm && filteredFAQs.length > 0 && (
             <div className="text-center mb-8">
               <p className="text-sm text-gray-500">
@@ -279,14 +269,8 @@ const FAQ: React.FC = () => {
               </p>
             </div>
           )}
-
-          {/* FAQ Content Area */}
           <div className="space-y-4 min-h-[400px]">
-            {/* Show error state if there's an error */}
-            {error && !isLoading
-              ? renderErrorState()
-              : /* Otherwise render the FAQ items, loading, or empty state */
-                renderFAQItems()}
+            {error && !isLoading ? renderErrorState() : renderFAQItems()}
           </div>
         </div>
       </main>

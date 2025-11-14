@@ -5,10 +5,11 @@ import { useTermsAndConditions } from "@/hooks/useAdminSettings";
 
 const Terms = () => {
   const { t, language } = useLanguage();
-  const { data: response = {}, isLoading, error } = useTermsAndConditions();
+  const { data: response = [], isLoading, error } = useTermsAndConditions();
 
   // 1. Extract the real terms array from the nested structure
   const termsConditions = response;
+  console.log(response);
 
   // 2. Sort and filter as before
   const activeTerms = termsConditions

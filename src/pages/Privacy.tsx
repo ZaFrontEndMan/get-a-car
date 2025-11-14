@@ -5,7 +5,7 @@ import { usePrivacyPolicies } from "@/hooks/useAdminSettings";
 
 const Privacy = () => {
   const { t, language } = useLanguage();
-  const { data: response = {}, isLoading, error } = usePrivacyPolicies();
+  const { data: response = [], isLoading, error } = usePrivacyPolicies();
 
   // Adapt to response structure: .data now contains your array
   const privacyPolicies = response ?? [];
