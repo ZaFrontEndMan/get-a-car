@@ -25,10 +25,12 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
+const token = Cookies.get("auth_token");
 api.interceptors.response.use(
+
   (response) => response,
   (error) => {
-    if (error?.response?.status === 401) {
+    if (token && error?.response?.status === 401) {
       Cookies.remove("auth_token");
       window.location.href = "/";
 
