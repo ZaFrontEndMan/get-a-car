@@ -50,6 +50,7 @@ const OfferCard = ({ offer, isLoading }: OfferCardProps) => {
     }
     return words?.slice(0, wordLimit).join(" ") + "...";
   };
+  console.log(offer);
 
   return (
     <Link
@@ -89,7 +90,7 @@ const OfferCard = ({ offer, isLoading }: OfferCardProps) => {
         <p className="text-gray-600 mb-4 line-clamp-1">
           {truncateDescription(getLocalizedDescription(), 15)}
         </p>
-
+        <span>{offer?.originalPricePerDay}</span>
         <div className="flex items-center text-xs text-gray-500 mb-4">
           <Clock className="h-3 w-3 me-2" />
           <span className="text-center text-blue-700 text-md">

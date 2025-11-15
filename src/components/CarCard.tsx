@@ -1,9 +1,9 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "../contexts/LanguageContext";
-import { useWishlist } from "../hooks/useWishlist";
 import { Heart, Star, Users, Fuel, Settings } from "lucide-react";
 import LazyImage from "./ui/LazyImage";
+import { useClientFavorites } from "@/hooks/client/useClientFavorites";
 
 interface CarCardProps {
   car: {
@@ -42,24 +42,26 @@ interface CarCardProps {
 
 const CarCard = ({ car, viewMode = "grid" }: CarCardProps) => {
   const { t } = useLanguage();
-  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
+  const {
+    favorites,
+    addToFavorites,
+    removeFromFavoritesByCarId,
+    isAdding,
+    isRemovingByCarId,
+  } = useClientFavorites();
+
+  // Car is favorite if in favorites OR flagged on object
+  const isCarFavorite =
+    car.isWishList ||
+    favorites.some((fav) => fav.carId === car.id || fav.id === car.id);
 
   const handleFavoriteClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-
-    const wishlistItem = {
-      id: car.id,
-      name: car.title,
-      image: car.image || (car.images ? car.images[0] : "") || "",
-      price: car.price || car.daily_rate || 0,
-      brand: car.brand,
-    };
-
-    if (isInWishlist(car.id)) {
-      removeFromWishlist(car.id);
+    if (isCarFavorite) {
+      removeFromFavoritesByCarId(car.id);
     } else {
-      addToWishlist(wishlistItem);
+      addToFavorites(car.id);
     }
   };
 
@@ -69,7 +71,6 @@ const CarCard = ({ car, viewMode = "grid" }: CarCardProps) => {
     window.location.href = `/cars/${car.id}`;
   };
 
-  const isCarFavorite = car?.isWishList || false;
   const imageSource =
     car.image || (car.images ? car.images[0] : "") || "/placeholder.svg";
   const dailyPrice = car.price || car.daily_rate || 0;
@@ -109,6 +110,7 @@ const CarCard = ({ car, viewMode = "grid" }: CarCardProps) => {
 
             <button
               onClick={handleFavoriteClick}
+              disabled={isAdding || isRemovingByCarId}
               className={`absolute top-2 right-2 p-1.5 rounded-full transition-colors duration-200 z-10 ${
                 isCarFavorite
                   ? "bg-red-500 text-white"
@@ -193,6 +195,7 @@ const CarCard = ({ car, viewMode = "grid" }: CarCardProps) => {
 
         <button
           onClick={handleFavoriteClick}
+          disabled={isAdding || isRemovingByCarId}
           className={`absolute top-3 right-3 p-2 rounded-full transition-colors duration-200 z-10 ${
             isCarFavorite
               ? "bg-red-500 text-white"
@@ -240,7 +243,6 @@ const CarCard = ({ car, viewMode = "grid" }: CarCardProps) => {
               {t("currency")} {dailyPrice}
             </span>
           </div>
-
           <div className="flex justify-between items-center min-h-[20px]">
             {weeklyPrice ? (
               <>
@@ -253,7 +255,6 @@ const CarCard = ({ car, viewMode = "grid" }: CarCardProps) => {
               <div className="h-5"></div>
             )}
           </div>
-
           <div className="flex justify-between items-center min-h-[20px]">
             {monthlyPrice ? (
               <>
@@ -269,7 +270,6 @@ const CarCard = ({ car, viewMode = "grid" }: CarCardProps) => {
             )}
           </div>
         </div>
-
         <div
           onClick={handleBookClick}
           className="w-full bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors duration-200 text-center cursor-pointer mt-auto"

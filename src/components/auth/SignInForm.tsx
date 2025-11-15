@@ -227,64 +227,66 @@ const SignInForm: React.FC<SignInFormProps> = ({
         </form>
 
         {/* Divider */}
-        <motion.div className="relative my-6" variants={staggerItem}>
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-gray-300"></div>
-          </div>
-          <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-white px-2 text-gray-600 font-medium">
-              {t("quickLoginTitle")}
-            </span>
-          </div>
-        </motion.div>
 
         {process.env.NODE_ENV === "development" && (
-          <motion.div
-            className="grid grid-cols-3 gap-3"
-            variants={staggerContainer}
-          >
-            <motion.button
-              type="button"
-              onClick={() => handleQuickLoginClick("client")}
-              className={cn(
-                "rounded-lg px-3 py-2.5 text-xs font-semibold text-white",
-                "bg-blue-500 hover:bg-blue-600 transition-colors shadow-md"
-              )}
-              variants={staggerItem}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+          <>
+            <motion.div className="relative my-6" variants={staggerItem}>
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-300"></div>
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-white px-2 text-gray-600 font-medium">
+                  {t("quickLoginTitle")}
+                </span>
+              </div>
+            </motion.div>
+            <motion.div
+              className="grid grid-cols-3 gap-3"
+              variants={staggerContainer}
             >
-              {t("quickLoginClient")}
-            </motion.button>
-            <motion.button
-              type="button"
-              onClick={() => handleQuickLoginClick("vendor")}
-              className={cn(
-                "rounded-lg px-3 py-2.5 text-xs font-semibold text-white",
-                "bg-green-500 hover:bg-green-600 transition-colors shadow-md"
-              )}
-              variants={staggerItem}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              {t("quickLoginVendor")}
-            </motion.button>
-            <motion.button
-              type="button"
-              onClick={() =>
-                window.open("https://get-car-admin.vercel.app/", "_blank")
-              }
-              className={cn(
-                "rounded-lg px-3 py-2.5 text-xs font-semibold text-white",
-                "bg-purple-500 hover:bg-purple-600 transition-colors shadow-md"
-              )}
-              variants={staggerItem}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              {t("quickLoginAdmin")}
-            </motion.button>
-          </motion.div>
+              <motion.button
+                type="button"
+                onClick={() => handleQuickLoginClick("client")}
+                className={cn(
+                  "rounded-lg px-3 py-2.5 text-xs font-semibold text-white",
+                  "bg-blue-500 hover:bg-blue-600 transition-colors shadow-md"
+                )}
+                variants={staggerItem}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                {t("quickLoginClient")}
+              </motion.button>
+              <motion.button
+                type="button"
+                onClick={() => handleQuickLoginClick("vendor")}
+                className={cn(
+                  "rounded-lg px-3 py-2.5 text-xs font-semibold text-white",
+                  "bg-green-500 hover:bg-green-600 transition-colors shadow-md"
+                )}
+                variants={staggerItem}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                {t("quickLoginVendor")}
+              </motion.button>
+              <motion.button
+                type="button"
+                onClick={() =>
+                  window.open("https://get-car-admin.vercel.app/", "_blank")
+                }
+                className={cn(
+                  "rounded-lg px-3 py-2.5 text-xs font-semibold text-white",
+                  "bg-purple-500 hover:bg-purple-600 transition-colors shadow-md"
+                )}
+                variants={staggerItem}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                {t("quickLoginAdmin")}
+              </motion.button>
+            </motion.div>
+          </>
         )}
         {/* Sign Up Link */}
         <motion.div

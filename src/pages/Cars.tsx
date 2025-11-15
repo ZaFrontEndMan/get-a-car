@@ -21,8 +21,7 @@ import SimilarCarsSlider from "@/components/SimilarCarsSlider";
 import {
   useAllCars,
   useGetVendorCarWithFilter,
-  useSimilarCars,
-} from "@/hooks/website/useWebsiteCars"; // Import your hooks
+} from "@/hooks/website/useWebsiteCars";
 import { getImageUrl } from "@/utils/imageUtils";
 import { useDebouncedSearch } from "@/hooks/useDebounce";
 import CarsSkeleton, {
@@ -50,35 +49,58 @@ const Cars = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
-  // Detect vendor from route parameter /cars/vendor/:id
+  // Vendor page detection
   const vendorId = params.id || "";
   const isVendorMode =
     !!vendorId && location.pathname.includes("/cars/vendor/");
 
-  // Unified state management
-  const [serverFilters, setServerFilters] = useState<
-    CarsFiltersType | VendorCarsFilters
-  >(() => {
+  // Initial filters from URL
+  const [serverFilters, setServerFilters] = useState(() => {
     const urlParams = new URLSearchParams(location.search);
     const parsed = parseUrlParamsToFilters(urlParams);
+    // Additional URL extraction
+    const pickupLocation = urlParams.get("pickupLocation") || undefined;
+    const dropOffLocation = urlParams.get("dropOffLocation") || undefined;
+    const pickupDate = urlParams.get("pickupDate") || undefined;
+    const dropoffDate = urlParams.get("dropoffDate") || undefined;
+    const withDriver = urlParams.get("withDriver") === "true" || false;
 
-    // Handle vendor filters if in vendor mode
+    const validPickupDate = pickupDate
+      ? new Date(pickupDate).toISOString() || undefined
+      : undefined;
+    const validDropoffDate = dropoffDate
+      ? new Date(dropoffDate).toISOString() || undefined
+      : undefined;
+
+    const initialFilters = {
+      ...parsed,
+      pickupLocation,
+      dropOffLocation,
+      pickupDate: validPickupDate,
+      dropoffDate: validDropoffDate,
+      withDriver,
+      vendorNames:
+        parsed.vendorNames && Array.isArray(parsed.vendorNames)
+          ? parsed.vendorNames
+          : parsed.vendorNames
+          ? [parsed.vendorNames]
+          : [],
+    };
+
     if (isVendorMode && vendorId) {
-      const vendorFilters = { ...parsed } as VendorCarsFilters;
-      return vendorFilters;
+      return initialFilters;
     }
-
-    return parsed;
+    return initialFilters;
   });
 
+  // Query, paging, modes
   const [searchTerm, setSearchTerm] = useState(searchParams.get("q") || "");
   const [currentPage, setCurrentPage] = useState(
     parseInt(searchParams.get("page") || "1", 10)
   );
-  const [viewMode, setViewMode] = useState<"grid" | "list">(
+  const [viewMode, setViewMode] = useState(
     (localStorage.getItem("carsViewMode") as "grid" | "list") || "grid"
   );
-
   const itemsPerPage = 12;
   const VIRTUAL_SCROLL_THRESHOLD = 50;
 
@@ -87,31 +109,31 @@ const Cars = () => {
     searchTerm,
     300
   );
-  const previousFiltersRef = useRef<CarsFiltersType | VendorCarsFilters>(
-    serverFilters
-  );
+  const previousFiltersRef = useRef(serverFilters);
   const isInitialMount = useRef(true);
 
-  // Prepare filters for the hooks
-  const carFilters = useMemo(() => {
-    return {
-      vendors: (serverFilters as CarsFiltersType).vendorNames,
-      types: (serverFilters as CarsFiltersType).types,
-      transmissions: (serverFilters as CarsFiltersType).transmissions,
-      fuelTypes: (serverFilters as CarsFiltersType).fuelTypes,
-      branches: (serverFilters as CarsFiltersType).branches,
-      priceRange: (serverFilters as CarsFiltersType).priceRange,
-    };
-  }, [serverFilters]);
+  // Compose filters passed to API
+  const carFilters = useMemo(
+    () => ({
+      ...serverFilters,
+      vendorNames:
+        serverFilters.vendorNames && Array.isArray(serverFilters.vendorNames)
+          ? serverFilters.vendorNames
+          : serverFilters.vendorNames
+          ? [serverFilters.vendorNames]
+          : [],
+    }),
+    [serverFilters]
+  );
 
-  // Dynamic hook selection based on route using your hooks
+  // Unified API query based on vendor presence
   const carsQuery =
     isVendorMode && vendorId
       ? useGetVendorCarWithFilter(
           vendorId,
           currentPage,
           itemsPerPage,
-          serverFilters as VendorCarsFilters
+          serverFilters
         )
       : useAllCars(currentPage, itemsPerPage, carFilters);
 
@@ -123,15 +145,14 @@ const Cars = () => {
     isFetching,
   } = carsQuery;
 
-  // Extract data from response
+  // Extract response
   const carsData = carsResponse?.carSearchResult || [];
   const totalPages = carsResponse?.totalPages || 0;
   const totalRecord = carsResponse?.totalRecord || 0;
 
-  // Memoized car transformation (simplified)
+  // Transform raw API to car format for cards
   const cars = useMemo(() => {
     if (!carsData || carsData.length === 0) return [];
-
     return carsData.map((car) => ({
       id: car?.carID?.toString() || car?.carId?.toString(),
       title: car?.name || "",
@@ -172,6 +193,7 @@ const Cars = () => {
     }));
   }, [carsData]);
 
+  // Local search filter
   const filteredCars = useMemo(() => {
     if (!debouncedSearchTerm) return cars;
     return cars.filter((car) =>
@@ -179,28 +201,28 @@ const Cars = () => {
     );
   }, [cars, debouncedSearchTerm]);
 
-  // Simplified filter updates with URL sync and vendor awareness
+  // Update filters only if changed
   const updateFilters = useCallback(
     (newFilters: Partial<CarsFiltersType>) => {
-      const updatedFilters = { ...serverFilters, ...newFilters } as
-        | CarsFiltersType
-        | VendorCarsFilters;
-
+      const updatedFilters = { ...serverFilters, ...newFilters };
+      // Always keep vendorNames as array
+      if (updatedFilters.vendorNames) {
+        updatedFilters.vendorNames = Array.isArray(updatedFilters.vendorNames)
+          ? updatedFilters.vendorNames
+          : [updatedFilters.vendorNames];
+      }
       if (!areFiltersEqual(updatedFilters, serverFilters)) {
         setServerFilters(updatedFilters);
         updateUrlWithFilters(updatedFilters, vendorId);
-        // setCurrentPage(1);
       }
     },
     [serverFilters, vendorId]
   );
 
-  // Helper function to update URL with vendor preservation
+  // Update URL for page change, use array for vendorNames
   const updateUrlWithVendor = useCallback(
     (filters: CarsFiltersType | VendorCarsFilters, page?: number) => {
       const urlParams = new URLSearchParams();
-
-      // Add filters to URL
       Object.entries(filters).forEach(([key, value]) => {
         if (Array.isArray(value)) {
           value.forEach((v) => urlParams.append(key, v));
@@ -208,20 +230,9 @@ const Cars = () => {
           urlParams.set(key, value.toString());
         }
       });
-
-      // Add page parameter
-      if (page && page > 1) {
-        urlParams.set("page", page.toString());
-      }
-
-      // Preserve vendorId in path, not as query param
-      let newPath = location.pathname;
-      if (isVendorMode && vendorId) {
-        newPath = `/cars/vendor/${vendorId}`;
-      } else {
-        newPath = "/cars";
-      }
-
+      if (page && page > 1) urlParams.set("page", page.toString());
+      let newPath =
+        isVendorMode && vendorId ? `/cars/vendor/${vendorId}` : "/cars";
       const newSearch = urlParams.toString();
       window.history.replaceState(
         {},
@@ -229,103 +240,117 @@ const Cars = () => {
         `${newPath}${newSearch ? `?${newSearch}` : ""}`
       );
     },
-    [isVendorMode, vendorId, location.pathname]
+    [isVendorMode, vendorId]
   );
 
-  // Simplified clear filters (preserves vendor route)
+  // Clear all filters
   const clearAllFilters = useCallback(() => {
     const clearedFilters = isVendorMode
       ? ({} as VendorCarsFilters)
       : ({} as CarsFiltersType);
     setServerFilters(clearedFilters);
-
-    // Clear URL params but preserve vendor route
     updateUrlWithVendor(clearedFilters);
-
     setSearchTerm("");
     setCurrentPage(1);
   }, [isVendorMode, updateUrlWithVendor]);
 
-  // Simplified pagination handler
+  // Pagination handler
   const handlePageChange = useCallback(
     (page: number) => {
       if (page >= 1 && page <= totalPages && page !== currentPage) {
         setCurrentPage(page);
-
-        // Update URL with page parameter, preserve vendor route and filters
         updateUrlWithVendor(serverFilters, page);
-
         window.scrollTo({ top: 0, behavior: "smooth" });
       }
     },
     [currentPage, totalPages, serverFilters, updateUrlWithVendor]
   );
 
-  // Enhanced URL sync effect for route + query param handling
+  // Effect for syncing URL → filters, only on relevant changes
   useEffect(() => {
     if (isInitialMount.current) {
       isInitialMount.current = false;
       return;
     }
-
-    // Detect route changes
+    // Only watch route changes!
     const isCurrentVendorMode = location.pathname.includes("/cars/vendor/");
     const currentVendorId = isCurrentVendorMode ? params.id : "";
-
     const paramsForFilters = new URLSearchParams(location.search);
     const pageFromUrl = parseInt(paramsForFilters.get("page") || "1", 10);
     const parsedFilters = parseUrlParamsToFilters(paramsForFilters);
 
-    const shouldUpdateFilters = !areFiltersEqual(parsedFilters, serverFilters);
+    // Extract locations/dates/driver from current URL
+    const pickupLocation = paramsForFilters.get("pickupLocation") || undefined;
+    const dropOffLocation =
+      paramsForFilters.get("dropOffLocation") || undefined;
+    const pickupDate = paramsForFilters.get("pickupDate") || undefined;
+    const dropoffDate = paramsForFilters.get("dropoffDate") || undefined;
+    const withDriver = paramsForFilters.get("withDriver") === "true" || false;
+
+    const validPickupDate = pickupDate
+      ? new Date(pickupDate).toISOString() || undefined
+      : undefined;
+    const validDropoffDate = dropoffDate
+      ? new Date(dropoffDate).toISOString() || undefined
+      : undefined;
+
+    // Vendor names always as array!
+    const vendorNamesArray =
+      parsedFilters.vendorNames && Array.isArray(parsedFilters.vendorNames)
+        ? parsedFilters.vendorNames
+        : parsedFilters.vendorNames
+        ? [parsedFilters.vendorNames]
+        : [];
+
+    const syncedFilters = {
+      ...parsedFilters,
+      pickupLocation,
+      dropOffLocation,
+      pickupDate: validPickupDate,
+      dropoffDate: validDropoffDate,
+      withDriver,
+      vendorNames: vendorNamesArray,
+    };
+
+    const shouldUpdateFilters = !areFiltersEqual(syncedFilters, serverFilters);
     const shouldUpdatePage = pageFromUrl !== currentPage;
     const vendorModeChanged = isCurrentVendorMode !== isVendorMode;
     const vendorIdChanged = currentVendorId !== vendorId;
 
+    // Only fire setters if change
     if (
       shouldUpdateFilters ||
       shouldUpdatePage ||
       vendorModeChanged ||
       vendorIdChanged
     ) {
-      // Update vendor state first
       if (vendorModeChanged || vendorIdChanged) {
-        setServerFilters(
-          isCurrentVendorMode
-            ? (parsedFilters as VendorCarsFilters)
-            : parsedFilters
-        );
-        previousFiltersRef.current = isCurrentVendorMode
-          ? (parsedFilters as VendorCarsFilters)
-          : parsedFilters;
+        setServerFilters(syncedFilters);
+        previousFiltersRef.current = syncedFilters;
+      } else if (shouldUpdateFilters) {
+        setServerFilters(syncedFilters);
+        previousFiltersRef.current = syncedFilters;
+      } else if (shouldUpdatePage) {
+        setCurrentPage(pageFromUrl);
       }
     }
-  }, [
-    location.pathname,
-    location.search,
-    params.id,
-    currentPage,
-    serverFilters,
-    isVendorMode,
-    vendorId,
-  ]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.pathname, location.search, params.id]);
 
-  // Filter change detection (simplified)
+  // Track last filter
   useEffect(() => {
     const hasChanged = !areFiltersEqual(
       serverFilters,
       previousFiltersRef.current
     );
-    if (hasChanged) {
-      previousFiltersRef.current = serverFilters;
-    }
-  }, [serverFilters, currentPage]);
+    if (hasChanged) previousFiltersRef.current = serverFilters;
+  }, [serverFilters]);
 
-  // View mode persistence
   useEffect(() => {
     localStorage.setItem("carsViewMode", viewMode);
   }, [viewMode]);
 
-  // Simplified filter data extraction with vendor awareness
+  // Extract filter data from response
   const filterData = useMemo(() => {
     if (!carsResponse?.carsCommonProp?.data) {
       return {
@@ -339,13 +364,11 @@ const Cars = () => {
         maxPrice: 2000,
       };
     }
-
     const commonProps = carsResponse.carsCommonProp.data;
     const filterMap = new Map();
     commonProps.forEach((item) => {
       filterMap.set(item.header, item.filterData);
     });
-
     return {
       vendorNames: filterMap.get("vendorNames") || [],
       branches: filterMap.get("branches") || [],
@@ -358,26 +381,25 @@ const Cars = () => {
     };
   }, [carsResponse?.carsCommonProp, isVendorMode]);
 
-  const priceRange: [number, number] = serverFilters.priceRange
+  const priceRange = serverFilters.priceRange
     ? [serverFilters.priceRange.min, serverFilters.priceRange.max]
     : [0, filterData.maxPrice || 2000];
 
-  const selectedVendors = (serverFilters as CarsFiltersType).vendorNames || [];
+  const selectedVendors = serverFilters.vendorNames || [];
   const selectedCategories = [
-    ...((serverFilters as CarsFiltersType).types || []),
-    ...((serverFilters as CarsFiltersType).fuelTypes || []),
-    ...((serverFilters as CarsFiltersType).branches || []),
-    ...((serverFilters as CarsFiltersType).transmissions || []),
-    ...((serverFilters as CarsFiltersType).makes || []),
-    ...((serverFilters as CarsFiltersType).carCapacities || []),
+    ...(serverFilters.types || []),
+    ...(serverFilters.fuelTypes || []),
+    ...(serverFilters.branches || []),
+    ...(serverFilters.transmissions || []),
+    ...(serverFilters.makes || []),
+    ...(serverFilters.carCapacities || []),
   ];
 
   const showSimilarCarsSlider =
-    !isVendorMode && // Don't show on vendor pages
-    (serverFilters as CarsFiltersType).pickupLocation &&
-    (serverFilters as CarsFiltersType).dropOffLocation;
+    !isVendorMode &&
+    serverFilters.pickupLocation &&
+    serverFilters.dropOffLocation;
 
-  // Loading state (unchanged)
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50">
@@ -404,7 +426,6 @@ const Cars = () => {
     );
   }
 
-  // Error state with vendor awareness
   if (error) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50">
@@ -445,7 +466,6 @@ const Cars = () => {
     );
   }
 
-  // Main render with vendor-specific UI
   return (
     <ErrorBoundary>
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50">
@@ -473,7 +493,6 @@ const Cars = () => {
                         </p>
                       </div>
                     </div>
-
                     <button
                       onClick={() => {
                         navigate("/cars");
@@ -504,11 +523,7 @@ const Cars = () => {
                 >
                   <MemoizedCarsFilters
                     priceRange={priceRange}
-                    setPriceRange={(range) =>
-                      updateFilters({
-                        priceRange: {},
-                      })
-                    }
+                    setPriceRange={(range) => updateFilters({ priceRange: {} })}
                     selectedCategories={selectedCategories}
                     setSelectedCategories={(categories) => {
                       const types = categories.filter((cat) =>
@@ -543,8 +558,11 @@ const Cars = () => {
                     }}
                     selectedVendors={selectedVendors}
                     setSelectedVendors={(vendors) => {
+                      // Vendors always array!
                       updateFilters({
-                        vendorNames: vendors.length > 0 ? vendors : undefined,
+                        vendorNames: Array.isArray(vendors)
+                          ? vendors
+                          : [vendors],
                       });
                     }}
                     searchTerm={searchTerm}
@@ -553,6 +571,11 @@ const Cars = () => {
                     filterData={filterData}
                     isVendorMode={isVendorMode}
                     vendorId={vendorId}
+                    pickupLocation={serverFilters.pickupLocation}
+                    dropOffLocation={serverFilters.dropOffLocation}
+                    pickupDate={serverFilters.pickupDate}
+                    dropoffDate={serverFilters.dropoffDate}
+                    withDriver={serverFilters.withDriver}
                   />
                 </ErrorBoundary>
               </div>
@@ -595,7 +618,6 @@ const Cars = () => {
                       />
                     ) : filteredCars.length > 0 ? (
                       filteredCars.length > VIRTUAL_SCROLL_THRESHOLD ? (
-                        // You can implement virtual scrolling if needed, or just use regular mapping
                         <div
                           className={
                             viewMode === "grid"

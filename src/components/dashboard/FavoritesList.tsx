@@ -1,12 +1,17 @@
 import React, { useState } from "react";
 import { useLanguage } from "../../contexts/LanguageContext";
-import { useFavoritesData } from "../../hooks/useFavoritesData";
-import { Grid, List, Users, Fuel, Car, Heart, Trash2 } from "lucide-react";
+import { Grid, List, Users, Fuel, Heart, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useClientFavorites } from "@/hooks/client/useClientFavorites";
 
 const FavoritesList: React.FC = () => {
   const { t } = useLanguage();
-  const { favorites, removeFromFavorites, isLoading } = useFavoritesData();
+  const {
+    favorites,
+    removeFromFavoritesByCarId,
+    isLoading,
+    isRemovingByCarId,
+  } = useClientFavorites();
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const navigate = useNavigate();
 
@@ -26,7 +31,7 @@ const FavoritesList: React.FC = () => {
     );
   }
 
-  if (favorites.length === 0) {
+  if (!favorites || favorites.length === 0) {
     return (
       <div className="text-center py-12">
         <div className="text-gray-400 mb-4">
@@ -40,16 +45,17 @@ const FavoritesList: React.FC = () => {
     );
   }
 
-  const handleRemove = (e: React.MouseEvent, carId: string) => {
+  const handleRemove = (e: React.MouseEvent, carId: string | number) => {
     e.stopPropagation();
-    removeFromFavorites(carId);
+    removeFromFavoritesByCarId(carId);
   };
 
-  const handleOpenCar = (carId?: string) => {
-    const id = carId || "";
-    if (!id) return;
-    navigate(`/cars/${id}`);
+  const handleOpenCar = (carId?: string | number) => {
+    if (!carId) return;
+    navigate(`/cars/${carId}`);
   };
+
+  // If your Favorite type uses 'carId' (from backend), change favorite.car.id to favorite.carId below.
 
   return (
     <div>
@@ -88,17 +94,25 @@ const FavoritesList: React.FC = () => {
           {favorites.map((favorite) => (
             <div
               key={favorite.id}
-              onClick={() => handleOpenCar((favorite as any).carId || favorite.car?.id)}
+              onClick={() =>
+                handleOpenCar(favorite.car?.id ?? favorite.carId ?? favorite.id)
+              }
               className="bg-white rounded-lg shadow-sm border overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
             >
               <div className="relative">
                 <img
-                  src={favorite.car.images?.[0] || "/placeholder.svg"}
-                  alt={favorite.car.name}
+                  src={favorite.car?.images?.[0] || "/placeholder.svg"}
+                  alt={favorite.car?.name}
                   className="w-full h-48 object-cover"
                 />
                 <button
-                  onClick={(e) => handleRemove(e, favorite.car.id)}
+                  onClick={(e) =>
+                    handleRemove(
+                      e,
+                      favorite.car?.id ?? favorite.carId ?? favorite.id
+                    )
+                  }
+                  disabled={isRemovingByCarId}
                   className="absolute top-2 right-2 p-2 bg-white rounded-full shadow-sm hover:bg-red-50 transition-colors"
                 >
                   <Trash2 className="h-4 w-4 text-red-500" />
@@ -107,37 +121,38 @@ const FavoritesList: React.FC = () => {
 
               <div className="p-4">
                 <h3 className="font-semibold text-lg text-gray-900 mb-1">
-                  {favorite.car.name}
+                  {favorite.car?.name}
                 </h3>
                 <p className="text-gray-600 mb-2">
-                  {favorite.car.brand} {favorite.car.model} {favorite.car.year}
+                  {favorite.car?.brand} {favorite.car?.model}{" "}
+                  {favorite.car?.year}
                 </p>
-
                 <div className="flex items-center gap-2 text-sm text-gray-500 mb-3">
                   <div className="flex items-center gap-2">
                     <Users className="h-4 w-4" />
-                    <span>5 {t("seats")}</span>
+                    <span>
+                      {favorite.car?.seats || 5} {t("seats")}
+                    </span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Fuel className="h-4 w-4" />
-                    <span>{t("gasoline")}</span>
+                    <span>{t(favorite.car?.fuel || "gasoline")}</span>
                   </div>
                 </div>
-
                 <div className="flex justify-between items-center">
                   <div className="flex items-center gap-2">
                     <img
-                      src={favorite.car.vendor.logo_url || "/placeholder.svg"}
-                      alt={favorite.car.vendor.name}
+                      src={favorite.car?.vendor?.logo_url || "/placeholder.svg"}
+                      alt={favorite.car?.vendor?.name}
                       className="w-6 h-6 rounded-full object-cover"
                     />
                     <span className="text-sm text-gray-600">
-                      {favorite.car.vendor.name}
+                      {favorite.car?.vendor?.name}
                     </span>
                   </div>
                   <div className="text-right">
                     <p className="text-lg font-bold text-primary">
-                      {favorite.car.daily_rate} / {t("day")}
+                      {favorite.car?.daily_rate} / {t("day")}
                     </p>
                   </div>
                 </div>
@@ -151,51 +166,63 @@ const FavoritesList: React.FC = () => {
           {favorites.map((favorite) => (
             <div
               key={favorite.id}
-              onClick={() => handleOpenCar((favorite as any).carId || favorite.car?.id)}
+              onClick={() =>
+                handleOpenCar(favorite.car?.id ?? favorite.carId ?? favorite.id)
+              }
               className="bg-white rounded-lg shadow-sm border p-6 cursor-pointer hover:shadow-md transition-shadow"
             >
               <div className="flex items-center gap-2">
                 <img
-                  src={favorite.car.images?.[0] || "/placeholder.svg"}
-                  alt={favorite.car.name}
+                  src={favorite.car?.images?.[0] || "/placeholder.svg"}
+                  alt={favorite.car?.name}
                   className="w-24 h-24 object-cover rounded-lg"
                 />
 
                 <div className="flex-1">
                   <h3 className="font-semibold text-lg text-gray-900 mb-1">
-                    {favorite.car.name}
+                    {favorite.car?.name}
                   </h3>
                   <p className="text-gray-600 mb-2">
-                    {favorite.car.brand} {favorite.car.model}{" "}
-                    {favorite.car.year}
+                    {favorite.car?.brand} {favorite.car?.model}{" "}
+                    {favorite.car?.year}
                   </p>
 
                   <div className="flex items-center gap-2 text-sm text-gray-500">
                     <div className="flex items-center gap-2">
                       <Users className="h-4 w-4" />
-                      <span>5 {t("seats")}</span>
+                      <span>
+                        {favorite.car?.seats || 5} {t("seats")}
+                      </span>
                     </div>
                     <div className="flex items-center gap-2">
                       <Fuel className="h-4 w-4" />
-                      <span>{t("gasoline")}</span>
+                      <span>{t(favorite.car?.fuel || "gasoline")}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <img
-                        src={favorite.car.vendor.logo_url || "/placeholder.svg"}
-                        alt={favorite.car.vendor.name}
+                        src={
+                          favorite.car?.vendor?.logo_url || "/placeholder.svg"
+                        }
+                        alt={favorite.car?.vendor?.name}
                         className="w-4 h-4 rounded-full object-cover"
                       />
-                      <span>{favorite.car.vendor.name}</span>
+                      <span>{favorite.car?.vendor?.name}</span>
                     </div>
                   </div>
                 </div>
 
                 <div className="text-right">
                   <p className="text-lg font-bold text-primary mb-2">
-                    {favorite.car.daily_rate} / {t("day")}
+                    {favorite.car?.daily_rate} / {t("day")}
                   </p>
                   <button
-                    onClick={(e) => handleRemove(e, favorite.car.id)}
+                    onClick={(e) =>
+                      handleRemove(
+                        e,
+                        favorite.car?.id ?? favorite.carId ?? favorite.id
+                      )
+                    }
+                    disabled={isRemovingByCarId}
                     className="px-4 py-2 text-red-600 border border-red-600 rounded-lg hover:bg-red-50 transition-colors text-sm"
                   >
                     {t("remove")}

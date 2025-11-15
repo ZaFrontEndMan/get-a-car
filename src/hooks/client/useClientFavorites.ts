@@ -17,7 +17,6 @@ export const useClientFavorites = () => {
   const favoritesQuery = useQuery<Favorite[]>({
     queryKey: ["clientFavorites"],
     queryFn: getFavorites,
-    staleTime: 60 * 1000,
   });
 
   const addMutation = useMutation({

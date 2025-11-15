@@ -6,6 +6,7 @@ import {
   Mail,
   CreditCard,
   CheckCircle,
+  MapPin,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -132,7 +133,7 @@ const ClientBookingGridView = ({
             <CardContent className="p-6 space-y-6">
               {/* Booking Timeline */}
               <div className="flex flex-col md:flex-row gap-4">
-                {/* Pickup */}
+                {/* Pickup Date */}
                 <div className="flex-1 flex items-start p-3 bg-emerald-50 rounded-lg border border-emerald-100 gap-2">
                   <div className="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center">
                     <Calendar className="h-4 w-4 text-white" />
@@ -144,12 +145,9 @@ const ClientBookingGridView = ({
                     <p className="font-semibold text-slate-900 text-sm truncate">
                       {format(new Date(booking.fromDate), "MMM dd, yyyy")}
                     </p>
-                    <p className="text-xs text-slate-500 truncate">
-                      {booking.pickUpLocationName}
-                    </p>
                   </div>
                 </div>
-                {/* Dropoff */}
+                {/* Dropoff Date */}
                 <div className="flex-1 flex items-start p-3 bg-rose-50 rounded-lg border border-rose-100 gap-2">
                   <div className="w-8 h-8 bg-rose-500 rounded-lg flex items-center justify-center">
                     <Calendar className="h-4 w-4 text-white" />
@@ -161,7 +159,35 @@ const ClientBookingGridView = ({
                     <p className="font-semibold text-slate-900 text-sm truncate">
                       {format(new Date(booking.toDate), "MMM dd, yyyy")}
                     </p>
-                    <p className="text-xs text-slate-500 truncate">
+                  </div>
+                </div>
+              </div>
+              {/* Booking Locations */}
+              <div className="flex flex-col md:flex-row gap-4">
+                {/* Pickup Location */}
+                <div className="flex-1 flex items-start p-3 bg-blue-50 rounded-lg border border-blue-100 gap-2">
+                  <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
+                    <MapPin className="h-4 w-4 text-white" />
+                  </div>
+                  <div className="flex flex-col gap-1 items-start">
+                    <p className="text-xs font-medium text-blue-700 uppercase">
+                      {t("pickupLocation")}
+                    </p>
+                    <p className="font-semibold text-slate-900 text-sm truncate">
+                      {booking.pickUpLocationName}
+                    </p>
+                  </div>
+                </div>
+                {/* Dropoff Location */}
+                <div className="flex-1 flex items-start p-3 bg-orange-50 rounded-lg border border-orange-100 gap-2">
+                  <div className="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center">
+                    <MapPin className="h-4 w-4 text-white" />
+                  </div>
+                  <div className="flex flex-col gap-1 items-start">
+                    <p className="text-xs font-medium text-orange-700 uppercase">
+                      {t("dropoffLocation")}
+                    </p>
+                    <p className="font-semibold text-slate-900 text-sm truncate">
                       {booking.dropoffLocationName}
                     </p>
                   </div>
@@ -194,7 +220,6 @@ const ClientBookingGridView = ({
                   <Badge variant="default">{booking?.paymentStatus}</Badge>
                 </div>
               </div>
-
               {/* Action Buttons */}
               <div className="flex flex-col md:flex-row gap-2 pt-2">
                 {/* Return Car */}
@@ -210,12 +235,11 @@ const ClientBookingGridView = ({
                       {t("returnCar")}
                     </Button>
                   )}
-
-                {/* Rate Button (Completed Only) */}
+                {/* Rate Button */}
                 <Button
                   className="flex-1"
                   size="sm"
-                  variant="success"
+                  variant="default"
                   onClick={() => {
                     handleOpenRating(booking.id);
                   }}
@@ -223,7 +247,6 @@ const ClientBookingGridView = ({
                   <CheckCircle className="h-4 w-4 me-2" />
                   {t("rateBooking")}
                 </Button>
-
                 {/* View Invoice */}
                 <Button
                   className="flex-1"
