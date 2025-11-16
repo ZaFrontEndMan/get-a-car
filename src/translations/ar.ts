@@ -1480,6 +1480,8 @@ export const arTranslations = {
   errorLoadingBlogPost: "حدث خطأ أثناء تحميل المقال",
   blogPostNotFound: "لم يتم العثور على المقال",
   noBlogIdProvided: "لم يتم توفير معرف المقال",
+  toggleFavorite: "إضافة إلى المفضلة",
+  loginToSyncFavorites: "سجل الدخول لمزامنة المفضلة",
 };
 
 export default arTranslations;

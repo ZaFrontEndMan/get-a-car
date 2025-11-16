@@ -1470,6 +1470,8 @@ export const enTranslations = {
   errorLoadingBlogPost: "Error loading blog post",
   blogPostNotFound: "Blog post not found",
   noBlogIdProvided: "No blog ID provided",
+  toggleFavorite: "Toggle favorite",
+  loginToSyncFavorites: "Login to sync your favorites",
 };
 
 export default enTranslations;
