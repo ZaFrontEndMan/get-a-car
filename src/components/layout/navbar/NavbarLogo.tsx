@@ -56,7 +56,7 @@ const NavbarLogo = () => {
           whileTap={{ scale: 0.95 }}
         >
           <div className="relative w-10 h-10">
-            <LazyImage
+            <img
               src="/logo.png"
               alt="Logo"
               className="w-full h-full object-contain"

@@ -66,7 +66,7 @@ const OfferCard = ({ offer, isLoading }: OfferCardProps) => {
           className="w-full h-48 object-cover"
         />
         <div className="absolute top-3 start-3 bg-red-500 text-white px-3 py-1 rounded-full text-sm font-bold bg-black/50">
-          {offer.originalOffer?.totalPrice} {t("off")}
+          {offer.originalOffer?.totalPrice}% {t("off") }
         </div>
 
         {offer.vendor?.logo_url && (

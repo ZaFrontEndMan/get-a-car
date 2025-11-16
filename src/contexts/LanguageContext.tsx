@@ -93,6 +93,7 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({
 
   const handleSetLanguage = (lang: SupportedLanguage) => {
     setLanguage(lang);
+    window.location.reload();
   };
 
   if (!isInitialized) {

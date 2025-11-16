@@ -91,8 +91,8 @@ const BookingForm = ({
   const form = useForm<BookingFormData>({
     resolver: zodResolver(bookingSchema),
     defaultValues: {
-      pickupDate: pickupDate || new Date(),
-      dropoffDate: dropoffDate || addDays(new Date(), 1),
+      pickupDate: pickupDate ? new Date(pickupDate) : new Date(),
+      dropoffDate: dropoffDate ? new Date(dropoffDate) : addDays(new Date(), 1),
       pickupLocation: selectedPickup || "",
       dropoffLocation: selectedDropoff || "",
     },
