@@ -47,7 +47,6 @@ const BookingCard = ({
   const [isInvoiceOpen, setIsInvoiceOpen] = useState(false);
   const statusConfig = getStatusConfig(booking.booking_status || "pending");
   const StatusIcon = statusConfig.icon;
-  console.log(booking);
 
   return (
     <div className="w-full">

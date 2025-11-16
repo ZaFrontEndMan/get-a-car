@@ -1,5 +1,10 @@
 import React, { useState } from "react";
-import { useParams, useSearchParams, useLocation } from "react-router-dom";
+import {
+  useParams,
+  useSearchParams,
+  useLocation,
+  Link,
+} from "react-router-dom";
 import { useLanguage } from "../../contexts/LanguageContext";
 import { useRentalCarDetails } from "../../hooks/useRentalCarDetails";
 import { useOfferDetailsState } from "../../hooks/useOfferDetailsState";
@@ -13,6 +18,7 @@ import OfferVendorSection from "./OfferVendorSection";
 import OfferDetailsLoading from "./OfferDetailsLoading";
 import OfferDetailsNotFound from "./OfferDetailsNotFound";
 import { formatPricingBreakdown } from "@/utils/pricingCalculator";
+import LazyImage from "../ui/LazyImage";
 
 // --- Simple dialog/modal for image preview ---
 const ImageDialog = ({ openImage, onClose }) =>
@@ -22,7 +28,7 @@ const ImageDialog = ({ openImage, onClose }) =>
       onClick={onClose}
       style={{ cursor: "zoom-out" }}
     >
-      <img
+      <LazyImage
         src={openImage}
         alt="Car Large"
         className="max-w-[90vw] max-h-[90vh] rounded-xl border-white border-2 shadow-lg"
@@ -73,6 +79,10 @@ const OfferDetailsPage = () => {
     calculateTotalPrice,
     handleBookNow,
     handleLoginSuccess,
+    pickupDate,
+    setPickupDate,
+    dropoffDate,
+    setDropoffDate,
   } = useOfferDetailsState({
     pickupLocation: initialPickupLocation,
     dropOffLocation: initialDropOffLocation,
@@ -108,7 +118,7 @@ const OfferDetailsPage = () => {
                   {/* Car Images - up to 5, as slider or gallery */}
                   <div className="flex gap-2 px-4 py-3 overflow-x-auto bg-gray-50 border-b">
                     {offer.car.gallery?.slice(0, 5).map((img, i) => (
-                      <img
+                      <LazyImage
                         key={i}
                         src={img}
                         alt={`Car ${i + 1}`}
@@ -118,23 +128,27 @@ const OfferDetailsPage = () => {
                     ))}
                   </div>
                   {/* Main car "hero" image */}
-                  <img
+                  <LazyImage
                     src={offer.car.image}
                     alt={offer.car.name}
                     className="w-full h-80 md:h-96 object-cover"
                   />
-                  <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full flex items-center gap-1 rtl:gap-reverse">
-                    <span className="font-medium text-sm">
-                      {offer.car.rating}
-                    </span>
-                    <span className="text-gray-600 text-sm">
-                      ({offer.car.reviews})
-                    </span>
-                  </div>
-                  {offer.discount !== "0%" && (
-                    <div className="absolute top-4 right-4 bg-red-500 text-white px-3 py-1.5 rounded-full flex items-center gap-1 rtl:gap-reverse">
+                  {offer?.vendor?.image && offer?.vendor?.id && (
+                    <div className="absolute bottom-3 end-3 w-16 h-16 rounded-full bg-white shadow-md overflow-hidden border-2 border-white hover:scale-110 transition duration-300">
+                      <Link to={`/vendors/${offer?.vendor?.id}`}>
+                        <LazyImage
+                          title={offer?.vendor.name}
+                          src={offer?.vendor.image}
+                          alt={offer?.vendor.name}
+                          className="w-full h-full object-cover"
+                        />
+                      </Link>
+                    </div>
+                  )}
+                  {offer.discount !== 0 && (
+                    <div className="absolute top-5 end-5 bg-red-500 bg-black/40 text-white px-3 py-1.5 rounded-full flex items-center gap-1 rtl:gap-reverse">
                       <span className="font-bold text-sm">
-                        {offer.discount} OFF
+                        {`${offer.discount}% ${t("discount")} `}
                       </span>
                     </div>
                   )}
@@ -152,7 +166,33 @@ const OfferDetailsPage = () => {
                 selectedPricing={selectedPricing}
               />
 
-              {offer.vendor && <OfferVendorSection vendor={offer.vendor} />}
+              {/* {offer.vendor && <OfferVendorSection vendor={offer.vendor} />} */}
+              {isBookingOpen && (
+                <BookingForm
+                  pickupDate={pickupDate}
+                  setPickupDate={setPickupDate}
+                  dropoffDate={dropoffDate}
+                  setDropoffDate={setDropoffDate}
+                  pricingBreakdown={pricingBreakdown}
+                  setRentalDays={setRentalDays}
+                  isLoggedUser={!isLoginOpen}
+                  isOpen={isBookingOpen}
+                  onClose={() => setIsBookingOpen(false)}
+                  car={offer.car}
+                  locations={{
+                    pickupLocations: offer.locations,
+                    dropoffLocations: offer.dropoffLocations,
+                  }}
+                  vendor={offer?.vendor}
+                  totalPrice={pricingBreakdown.totalPrice}
+                  selectedServices={selectedServices}
+                  pricingType={selectedPricing}
+                  selectedPickup={selectedPickup}
+                  selectedDropoff={selectedDropoff}
+                  rentalDays={rentalDays}
+                  formattedPricing={formattedPricing}
+                />
+              )}
             </div>
 
             {/* Booking Sidebar */}
@@ -174,25 +214,6 @@ const OfferDetailsPage = () => {
             />
           </div>
 
-          {isBookingOpen && (
-            <BookingForm
-              isLoggedUser={!isLoginOpen}
-              isOpen={isBookingOpen}
-              onClose={() => setIsBookingOpen(false)}
-              car={offer.car}
-              locations={{
-                pickupLocations: offer.locations,
-                dropoffLocations: offer.dropoffLocations,
-              }}
-              totalPrice={pricingBreakdown.totalPrice}
-              selectedServices={selectedServices}
-              pricingType={selectedPricing}
-              selectedPickup={selectedPickup}
-              selectedDropoff={selectedDropoff}
-              rentalDays={rentalDays}
-              formattedPricing={formattedPricing}
-            />
-          )}
           {/* Terms & Policies - Only offer-specific policies */}
           <div className="mt-8">
             <OfferDetailsTerms policies={offer.policies} offer={offer} />

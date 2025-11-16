@@ -13,7 +13,6 @@ const SearchBar = () => {
   const { t } = useLanguage();
   const navigate = useNavigate();
 
-  // Consolidated search data object
   const [searchData, setSearchData] = useState({
     pickupLocation: "",
     dropOffLocation: "",
@@ -28,21 +27,17 @@ const SearchBar = () => {
   const [pickupSearchTerm, setPickupSearchTerm] = useState("");
   const [dropoffSearchTerm, setDropoffSearchTerm] = useState("");
 
-  // Refs for click outside detection
   const pickupRef = useRef(null);
   const dropoffRef = useRef(null);
 
-  // Debounced search terms
   const debouncedPickupSearch = useDebounce(pickupSearchTerm, 300);
   const debouncedDropoffSearch = useDebounce(dropoffSearchTerm, 300);
 
-  // Location hooks
   const { data: pickupLocationsData, isLoading: pickupLoading } =
     usePickUpLocations();
   const { data: dropoffLocationsData, isLoading: dropoffLoading } =
     useDropOffLocations();
 
-  // Fuse.js configuration for fuzzy search
   const fuseOptions = {
     keys: ["address"],
     threshold: 0.3,
@@ -65,7 +60,6 @@ const SearchBar = () => {
     return null;
   }, [dropoffLocationsData?.data]);
 
-  // Filtered locations using Fuse.js
   const filteredPickupLocations = useMemo(() => {
     if (!pickupFuse || !debouncedPickupSearch?.trim()) {
       return pickupLocationsData?.data?.slice(0, 10) || [];
@@ -73,7 +67,7 @@ const SearchBar = () => {
     return pickupFuse
       .search(debouncedPickupSearch)
       .slice(0, 10)
-      .map((result) => result.item);
+      .map((r) => r.item);
   }, [pickupFuse, debouncedPickupSearch, pickupLocationsData?.data]);
 
   const filteredDropoffLocations = useMemo(() => {
@@ -83,8 +77,30 @@ const SearchBar = () => {
     return dropoffFuse
       .search(debouncedDropoffSearch)
       .slice(0, 10)
-      .map((result) => result.item);
+      .map((r) => r.item);
   }, [dropoffFuse, debouncedDropoffSearch, dropoffLocationsData?.data]);
+
+  // INITIALIZE: Pickup after 1 hour (rounded up to next half hour)
+  useEffect(() => {
+    const now = new Date();
+    now.setMinutes(now.getMinutes() + 60);
+
+    // Round up to nearest 30 minutes
+    const minutes = now.getMinutes();
+    if (minutes > 0 && minutes <= 30) now.setMinutes(30, 0, 0);
+    else if (minutes > 30) {
+      now.setHours(now.getHours() + 1, 0, 0, 0);
+    }
+
+    const dropoff = new Date(now);
+    dropoff.setDate(dropoff.getDate() + 1);
+
+    setSearchData((prev) => ({
+      ...prev,
+      pickupDate: now.toISOString().slice(0, 16),
+      dropoffDate: dropoff.toISOString().slice(0, 16),
+    }));
+  }, []);
 
   // Calculate rental days
   const calculateRentalDays = () => {
@@ -92,12 +108,10 @@ const SearchBar = () => {
     const pickup = new Date(searchData.pickupDate);
     const dropoff = new Date(searchData.dropoffDate);
     const diffTime = Math.abs(dropoff.getTime() - pickup.getTime());
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays;
+    return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
   };
 
-  // Adjust rental days
-  const adjustRentalDays = (direction: "add" | "subtract") => {
+  const adjustRentalDays = (direction) => {
     const pickupDate = new Date(searchData.pickupDate);
     let dropoffDate = new Date(searchData.dropoffDate);
     const today = new Date();
@@ -108,14 +122,9 @@ const SearchBar = () => {
     } else {
       const newDropoffDate = new Date(dropoffDate);
       newDropoffDate.setDate(newDropoffDate.getDate() - 1);
-
-      // Prevent dropoff from being before pickup or in the past
-      if (newDropoffDate <= pickupDate || newDropoffDate < today) {
-        return;
-      }
+      if (newDropoffDate <= pickupDate || newDropoffDate < today) return;
       dropoffDate = newDropoffDate;
     }
-
     setSearchData((prev) => ({
       ...prev,
       dropoffDate: dropoffDate.toISOString().slice(0, 16),
@@ -130,69 +139,41 @@ const SearchBar = () => {
         alert("Geolocation is not supported by this browser.");
         return;
       }
-      const position = await new Promise<GeolocationPosition>(
-        (resolve, reject) => {
-          navigator.geolocation.getCurrentPosition(resolve, reject, {
-            timeout: 10000,
-            enableHighAccuracy: true,
-            maximumAge: 60000,
-          });
-        }
+      const position = await new Promise((resolve) =>
+        navigator.geolocation.getCurrentPosition(resolve, resolve, {
+          timeout: 10000,
+          enableHighAccuracy: true,
+          maximumAge: 60000,
+        })
       );
-
       const { latitude, longitude } = position.coords;
-      console.log("Current coordinates:", latitude, longitude);
-
       const currentLocationName =
         t("currentLocation") +
         ` (${latitude.toFixed(2)}, ${longitude.toFixed(2)})`;
       setSearchData((prev) => ({
         ...prev,
         pickupLocation: currentLocationName,
-        dropOffLocation: currentLocationName, // Auto-set dropoff to same location
+        dropOffLocation: currentLocationName,
       }));
       setPickupSearchTerm(currentLocationName);
       setDropoffSearchTerm(currentLocationName);
     } catch (error) {
-      console.error("Error getting location:", error);
-      alert(t("locationPermission") + " - " + (error as Error).message);
+      alert(t("locationPermission") + " - " + (error && error.message));
     } finally {
       setIsGettingLocation(false);
     }
   };
 
-  // Set default dates on component mount
-  useEffect(() => {
-    const today = new Date();
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    const formatDateTime = (date: Date) => {
-      return date.toISOString().slice(0, 16);
-    };
-    setSearchData((prev) => ({
-      ...prev,
-      pickupDate: formatDateTime(today),
-      dropoffDate: formatDateTime(tomorrow),
-    }));
-  }, []);
-
   // Click outside handler to close dropdowns
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        pickupRef.current &&
-        !pickupRef.current.contains(event.target as Node)
-      ) {
+    const handleClickOutside = (event) => {
+      if (pickupRef.current && !pickupRef.current.contains(event.target)) {
         setShowPickupSuggestions(false);
       }
-      if (
-        dropoffRef.current &&
-        !dropoffRef.current.contains(event.target as Node)
-      ) {
+      if (dropoffRef.current && !dropoffRef.current.contains(event.target)) {
         setShowDropoffSuggestions(false);
       }
     };
-
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
@@ -200,42 +181,24 @@ const SearchBar = () => {
   }, []);
 
   const handleSearch = () => {
-    console.log("Search initiated with:", searchData);
-
-    // Validate required fields
-    if (!searchData.pickupLocation?.trim()) {
-      alert("Please select a pickup location");
-      return;
-    }
-    if (!searchData.dropOffLocation?.trim()) {
-      alert("Please select a dropoff location");
-      return;
-    }
-
-    // Build search parameters using object keys
     const searchParams = new URLSearchParams();
     Object.entries(searchData).forEach(([key, value]) => {
       if (value !== null && value !== undefined && value !== "") {
         searchParams.set(key, value.toString());
       }
     });
-
-    // Navigate to cars page with search parameters
     navigate(`/cars?${searchParams.toString()}`);
   };
 
-  const handleLocationSelect = (
-    location: { address: string; id: number },
-    type: "pickup" | "dropoff"
-  ) => {
+  const handleLocationSelect = (location, type) => {
     if (type === "pickup") {
       setSearchData((prev) => ({
         ...prev,
         pickupLocation: location.address,
-        dropOffLocation: location.address, // Auto-set dropoff to same location
+        dropOffLocation: location.address,
       }));
       setPickupSearchTerm(location.address);
-      setDropoffSearchTerm(location.address); // Update dropoff search term
+      setDropoffSearchTerm(location.address);
       setShowPickupSuggestions(false);
     } else {
       setSearchData((prev) => ({
@@ -247,27 +210,19 @@ const SearchBar = () => {
     }
   };
 
-  const adjustDate = (
-    type: "pickup" | "dropoff",
-    direction: "add" | "subtract"
-  ) => {
+  const adjustDate = (type, direction) => {
     const currentDate =
       type === "pickup"
         ? new Date(searchData.pickupDate)
         : new Date(searchData.dropoffDate);
     const today = new Date();
-    today.setHours(0, 0, 0, 0); // Set to start of today for comparison
-
+    today.setHours(0, 0, 0, 0);
     if (direction === "add") {
       currentDate.setDate(currentDate.getDate() + 1);
     } else {
       const newDate = new Date(currentDate);
       newDate.setDate(newDate.getDate() - 1);
-
-      // Prevent going to past dates
-      if (newDate < today) {
-        return; // Don't allow past dates
-      }
+      if (newDate < today) return;
       currentDate.setTime(newDate.getTime());
     }
     const formattedDate = currentDate.toISOString().slice(0, 16);
@@ -276,7 +231,6 @@ const SearchBar = () => {
         ...prev,
         pickupDate: formattedDate,
       }));
-      // Ensure dropoff is always after pickup
       const dropoffDateTime = new Date(searchData.dropoffDate);
       if (currentDate >= dropoffDateTime) {
         const newDropoff = new Date(currentDate);
@@ -287,11 +241,8 @@ const SearchBar = () => {
         }));
       }
     } else {
-      // Ensure dropoff is not before pickup
       const pickupDateTime = new Date(searchData.pickupDate);
-      if (currentDate <= pickupDateTime) {
-        return; // Don't allow dropoff before pickup
-      }
+      if (currentDate <= pickupDateTime) return;
       setSearchData((prev) => ({
         ...prev,
         dropoffDate: formattedDate,
@@ -395,7 +346,6 @@ const SearchBar = () => {
               )}
             </div>
           </div>
-
           {/* Dropoff Location */}
           <div className="relative" ref={dropoffRef}>
             <div className="relative">
@@ -445,7 +395,6 @@ const SearchBar = () => {
               )}
             </div>
           </div>
-
           {/* Pickup Date */}
           <div className="relative">
             <input
@@ -458,10 +407,9 @@ const SearchBar = () => {
                 }))
               }
               min={new Date().toISOString().slice(0, 16)}
-              className="w-full pl-8 pr-16 py-2 text-sm border border-gray-300/50 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 bg-white/70"
+              className="w-full ps-8 pe-16 py-2 text-sm border border-gray-300/50 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 bg-white/70"
             />
           </div>
-
           {/* Dropoff Date */}
           <div className="relative">
             <input
@@ -476,14 +424,12 @@ const SearchBar = () => {
               min={
                 searchData.pickupDate || new Date().toISOString().slice(0, 16)
               }
-              className="w-full pl-8 pr-16 py-2 text-sm border border-gray-300/50 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 bg-white/70"
+              className="w-full ps-8 pe-16 py-2 text-sm border border-gray-300/50 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 bg-white/70"
             />
           </div>
         </div>
-
         {/* Search Button with Day Counter */}
         <div className="flex justify-center items-center gap-4">
-          {/* Day Counter with Plus/Minus */}
           {rentalDays > 0 && (
             <div className="bg-blue-100 text-blue-800 px-3 py-2 rounded-lg text-sm font-medium flex items-center gap-2">
               <button
@@ -505,7 +451,6 @@ const SearchBar = () => {
               </button>
             </div>
           )}
-
           <button
             onClick={handleSearch}
             className="gradient-primary px-6 py-2 rounded-lg font-semibold hover:shadow-lg transform hover:scale-105 transition-all duration-300 flex items-center gap-2 rtl:gap-reverse text-zinc-50 bg-blue-900 hover:bg-blue-800"

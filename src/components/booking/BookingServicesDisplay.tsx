@@ -3,15 +3,26 @@ import { Shield } from "lucide-react";
 
 interface BookingServicesDisplayProps {
   selectedServices: string[];
-  getServiceDetails: () => Array<{ id: string; name: string; price: number }>;
+  formattedPricing: {
+    servicesPrice: string;
+  };
+  getServiceDetails?: () => Array<{ id: string; name: string; price: number }>;
+  t: (key: string) => string;
 }
 
 const BookingServicesDisplay = ({
   selectedServices,
-  getServiceDetails,
   formattedPricing,
+  getServiceDetails,
+  t,
 }: BookingServicesDisplayProps) => {
   if (selectedServices.length === 0) return null;
+
+  const serviceList = getServiceDetails
+    ? getServiceDetails()
+        .map((service) => t(service.name))
+        .join(", ")
+    : "";
 
   return (
     <div className="bg-white rounded-lg p-4 sm:p-6">
@@ -20,9 +31,13 @@ const BookingServicesDisplay = ({
           <Shield className="h-3 w-3 sm:h-4 sm:w-4 text-white" />
         </div>
         <h3 className="text-base sm:text-lg font-semibold">
-          Selected Additional Services
+          {t("selectedAdditionalServices")}
         </h3>
       </div>
+
+      {serviceList && (
+        <div className="mb-2 text-xs text-gray-500">{serviceList}</div>
+      )}
 
       <div className="grid grid-cols-1 gap-3">
         <span className="text-sm font-medium animate-in zoom-in-50 duration-300 delay-200">

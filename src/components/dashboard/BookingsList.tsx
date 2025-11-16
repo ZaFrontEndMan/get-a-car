@@ -58,7 +58,10 @@ const BookingsList: React.FC = () => {
 
     isAccepting: acceptReturnMutation.isPending,
   };
-
+  const handleFilterChange = (apiStatus: APISupportedBookingStatus) => {
+    setCurrentPage(1);
+    setStatusFilter(apiStatus);
+  };
   const isMobile =
     typeof window !== "undefined" ? window.innerWidth < 768 : false;
   const currentViewMode = isMobile ? "grid" : viewMode;
@@ -94,7 +97,7 @@ const BookingsList: React.FC = () => {
       <div className="mb-6">
         <BookingStatusFilter
           statusFilter={statusFilter}
-          onFilterChange={setStatusFilter}
+          onFilterChange={handleFilterChange}
           apiCounts={data?.data || {}}
         />
       </div>

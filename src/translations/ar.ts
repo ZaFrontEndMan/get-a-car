@@ -1482,6 +1482,9 @@ export const arTranslations = {
   noBlogIdProvided: "لم يتم توفير معرف المقال",
   toggleFavorite: "إضافة إلى المفضلة",
   loginToSyncFavorites: "سجل الدخول لمزامنة المفضلة",
+  imageNotAvailable: "الصورة غير متاحة",
+  feesVehicleRental:
+    "سيتم دفع نسبة {{percentage}}٪ الآن عبر الإنترنت، وسيتم دفع الباقي لدى البائع عند استلام السيارة.",
 };
 
 export default arTranslations;

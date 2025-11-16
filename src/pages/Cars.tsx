@@ -41,7 +41,6 @@ import {
   updateUrlWithFilters,
   areFiltersEqual,
 } from "@/utils/urlParams";
-import { getAppliedFilterBadges } from "@/utils/bookingUtils";
 
 const Cars = () => {
   const { t } = useLanguage();

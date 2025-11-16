@@ -141,23 +141,12 @@ export const getAllOffers = async (
     pageSize,
   };
 
-  console.log("[DEBUG] Offers API Request Body:", requestBody);
-  console.log("[DEBUG] Offers API Params:", params);
-
   try {
     const { data } = await axiosInstance.post(
       "/Client/Website/FilterCarAllOffers", // Your filtering endpoint
       requestBody, // Always complete carFilterationDto object
       { params }
     );
-
-    console.log("[DEBUG] Offers API Response Structure:", {
-      isSuccess: data?.isSuccess,
-      totalRecords: data?.data?.totalRecord,
-      totalPages: data?.data?.totalPages,
-      currentPage: data?.data?.pageIndex,
-      recordsReturned: data?.data?.carSearchResult?.length,
-    });
 
     // Return the entire response (including isSuccess and customMessage)
     return data;

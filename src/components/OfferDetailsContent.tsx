@@ -1,12 +1,11 @@
-
-import React from 'react';
-import { useLanguage } from '../contexts/LanguageContext';
-import CarFeatures from './CarFeatures';
-import { Star, Users, Fuel, Settings, Calendar, Tag } from 'lucide-react';
+import React from "react";
+import { useLanguage } from "../contexts/LanguageContext";
+import CarFeatures from "./CarFeatures";
+import { Star, Users, Fuel, Settings, Calendar, Tag, UserPlus } from "lucide-react";
 
 interface OfferDetailsContentProps {
   offer: {
-    discount: string;
+    discount: number;
     car: {
       id: string;
       name: string;
@@ -47,20 +46,22 @@ interface OfferDetailsContentProps {
       total_reviews?: number;
     };
   };
-  selectedPricing: 'daily' | 'weekly' | 'monthly';
+  selectedPricing: "daily" | "weekly" | "monthly";
 }
 
 const OfferDetailsContent = ({
   offer,
-  selectedPricing
+  selectedPricing,
 }: OfferDetailsContentProps) => {
   const { t } = useLanguage();
 
+  // Check if there's an active discount
+  const hasDiscount = offer?.discount !== 0;
   return (
     <div className="space-y-6">
       {/* Car Info */}
       <div className="bg-white rounded-2xl shadow-sm border p-6">
-        <div className="flex flex-col md:flex-row md:items-start md:justify-between mb-6">
+        <div className="flex flex-col md:flex-row md:items-start rtl:flex-row-reverse md:justify-between mb-6">
           <div className="mb-4 md:mb-0">
             <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
               {offer.car.name}
@@ -69,62 +70,80 @@ const OfferDetailsContent = ({
               {offer.car.brand} • {offer.car.year}
             </p>
           </div>
-          <div className="text-left md:text-right">
+          <div className="text-start">
             <div className="flex flex-col md:items-end space-y-2">
               <div className="flex items-center gap-2 rtl:gap-reverse">
                 <div className="text-2xl md:text-3xl font-bold text-primary">
-                  {t('currency')} {offer.car.pricing[selectedPricing]}
+                  {t("sarPerDay")} {offer.car.pricing[selectedPricing]}
                 </div>
-                <div className="bg-red-100 text-red-600 px-2 py-1 rounded text-sm font-medium">
-                  {offer.discount} OFF
-                </div>
-              </div>
-              <div className="text-lg line-through text-gray-400">
-                {t('currency')} {offer.car.originalPricing[selectedPricing]}
-              </div>
-              <div className="text-gray-600 text-sm">
-                {selectedPricing === 'daily' && t('perDay')}
-                {selectedPricing === 'weekly' && t('perWeek')}
-                {selectedPricing === 'monthly' && t('perMonth')}
+                {hasDiscount && (
+                  <div className="bg-black/40 text-white px-2 py-1 rounded-lg text-sm font-medium">
+                    {`${offer.discount}% ${t("discount")} `}
+                  </div>
+                )}
+                {hasDiscount && (
+                  <div className="text-lg line-through text-gray-400">
+                    {t("currency")} {offer.car.originalPricing[selectedPricing]}
+                  </div>
+                )}
               </div>
             </div>
           </div>
         </div>
 
         {/* Car Specifications */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
           <div className="flex items-center gap-3 rtl:gap-reverse p-3 bg-gray-50 rounded-lg">
             <Users className="h-5 w-5 text-primary flex-shrink-0" />
             <div>
-              <div className="text-sm font-medium text-gray-900">{offer.car.seats}</div>
-              <div className="text-xs text-gray-500">{t('seats')}</div>
+              <div className="text-sm font-medium text-gray-900">
+                {offer.car.seats}
+              </div>
+              <div className="text-xs text-gray-500">{t("seats")}</div>
             </div>
           </div>
           <div className="flex items-center gap-3 rtl:gap-reverse p-3 bg-gray-50 rounded-lg">
             <Fuel className="h-5 w-5 text-primary flex-shrink-0" />
             <div>
-              <div className="text-sm font-medium text-gray-900">{offer.car.fuel}</div>
-              <div className="text-xs text-gray-500">{t('fuel')}</div>
+              <div className="text-sm font-medium text-gray-900">
+                {offer.car.fuel}
+              </div>
+              <div className="text-xs text-gray-500">{t("fuel")}</div>
             </div>
           </div>
           <div className="flex items-center gap-3 rtl:gap-reverse p-3 bg-gray-50 rounded-lg">
             <Settings className="h-5 w-5 text-primary flex-shrink-0" />
             <div>
-              <div className="text-sm font-medium text-gray-900">{offer.car.transmission}</div>
-              <div className="text-xs text-gray-500">{t('transmission')}</div>
+              <div className="text-sm font-medium text-gray-900">
+                {offer.car.transmission}
+              </div>
+              <div className="text-xs text-gray-500">{t("transmission")}</div>
             </div>
           </div>
           <div className="flex items-center gap-3 rtl:gap-reverse p-3 bg-gray-50 rounded-lg">
             <Calendar className="h-5 w-5 text-primary flex-shrink-0" />
             <div>
-              <div className="text-sm font-medium text-gray-900">{offer.car.year}</div>
-              <div className="text-xs text-gray-500">Year</div>
+              <div className="text-sm font-medium text-gray-900">
+                {offer.car.year}
+              </div>
+              <div className="text-xs text-gray-500">{t("year")}</div>
             </div>
           </div>
+          {offer.rentalCarDetails.withDriver && (
+            <div className="flex items-center gap-3 rtl:gap-reverse p-3 bg-gray-50 rounded-lg">
+              <UserPlus className="h-5 w-5 text-primary flex-shrink-0" />
+              <div>
+                <div className="text-sm font-medium text-gray-900">
+                  {t("driver")}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
-        {/* Car Features */}
-        <CarFeatures features={offer.car.features} />
+        {/* Car Features */} 
+
+        {/* <CarFeatures features={offer.car.features} /> */}
       </div>
     </div>
   );

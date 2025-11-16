@@ -1472,6 +1472,17 @@ export const enTranslations = {
   noBlogIdProvided: "No blog ID provided",
   toggleFavorite: "Toggle favorite",
   loginToSyncFavorites: "Login to sync your favorites",
+  imageNotAvailable: "Image not available",
+  calculationDay: "{count} day × {price} = {total}",
+  calculationWeek: "{count} week × {price} = {total}",
+  calculationMonth: "{count} month × {price} = {total}",
+  calculationMultiDay: "{days} days × {price} = {total}",
+  calculationMultiWeek: "{weeks} weeks × {price} = {total}",
+  calculationMultiMonth: "{months} months × {price} = {total}",
+  calculationPlus: " + ", // For joining segments
+  noDaysSelected: "No days selected",
+  feesVehicleRental:
+    "{{percentage}}% fee paid now online. Remaining will be paid at vendor location when you get your car.",
 };
 
 export default enTranslations;

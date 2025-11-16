@@ -35,15 +35,28 @@ export interface CarPricing {
  * @param pricing - Car pricing structure
  * @returns Base price and calculation details
  */
-export const calculateBasePrice = (days: number, pricing: CarPricing): { price: number; details: any } => {
-  if (days <= 0) return { price: 0, details: { days: 0, weeklyPeriods: 0, monthlyPeriods: 0, remainingDays: 0, calculation: 'No days selected' } };
+export const calculateBasePrice = (
+  days: number,
+  pricing: CarPricing
+): { price: number; details: any } => {
+  if (days <= 0)
+    return {
+      price: 0,
+      details: {
+        days: 0,
+        weeklyPeriods: 0,
+        monthlyPeriods: 0,
+        remainingDays: 0,
+        calculation: "No days selected",
+      },
+    };
 
   const { daily, weekly, monthly } = pricing;
   let totalPrice = 0;
   let weeklyPeriods = 0;
   let monthlyPeriods = 0;
   let remainingDays = days;
-  let calculation = '';
+  let calculation = "";
 
   // Calculate monthly periods first
   monthlyPeriods = Math.floor(days / 30);
@@ -51,7 +64,9 @@ export const calculateBasePrice = (days: number, pricing: CarPricing): { price: 
   totalPrice += monthlyPeriods * monthly;
 
   if (monthlyPeriods > 0) {
-    calculation += `${monthlyPeriods} month${monthlyPeriods > 1 ? 's' : ''} × ${monthly} = ${monthlyPeriods * monthly}`;
+    calculation += `${monthlyPeriods} monthRate${
+      monthlyPeriods > 1 ? "s" : ""
+    } × ${monthly} = ${monthlyPeriods * monthly}`;
   }
 
   // Handle remaining days (0-29)
@@ -60,22 +75,28 @@ export const calculateBasePrice = (days: number, pricing: CarPricing): { price: 
       // Convert to weekly if 7+ days remain
       const weeks = Math.floor(remainingDays / 7);
       const extraDays = remainingDays % 7;
-      
+
       weeklyPeriods += weeks;
       totalPrice += weeks * weekly;
-      
-      if (calculation) calculation += ' + ';
-      calculation += `${weeks} week${weeks > 1 ? 's' : ''} × ${weekly} = ${weeks * weekly}`;
-      
+
+      if (calculation) calculation += " + ";
+      calculation += `${weeks} week${weeks > 1 ? "s" : ""} × ${weekly} = ${
+        weeks * weekly
+      }`;
+
       if (extraDays > 0) {
         totalPrice += extraDays * daily;
-        calculation += ` + ${extraDays} day${extraDays > 1 ? 's' : ''} × ${daily} = ${extraDays * daily}`;
+        calculation += ` + ${extraDays} day${
+          extraDays > 1 ? "s" : ""
+        } × ${daily} = ${extraDays * daily}`;
       }
     } else {
       // Use daily rate for remaining days
       totalPrice += remainingDays * daily;
-      if (calculation) calculation += ' + ';
-      calculation += `${remainingDays} day${remainingDays > 1 ? 's' : ''} × ${daily} = ${remainingDays * daily}`;
+      if (calculation) calculation += " + ";
+      calculation += `${remainingDays} day${
+        remainingDays > 1 ? "s" : ""
+      } × ${daily} = ${remainingDays * daily}`;
     }
   }
 
@@ -86,8 +107,10 @@ export const calculateBasePrice = (days: number, pricing: CarPricing): { price: 
       weeklyPeriods,
       monthlyPeriods,
       remainingDays: remainingDays % 7,
-      calculation: calculation || `${days} day${days > 1 ? 's' : ''} × ${daily} = ${totalPrice}`
-    }
+      calculation:
+        calculation ||
+        `${days} day${days > 1 ? "s" : ""} × ${daily} = ${totalPrice}`,
+    },
   };
 };
 
@@ -105,14 +128,14 @@ export const calculateBookingPrice = (
 ): PricingBreakdown => {
   const baseCalculation = calculateBasePrice(days, pricing);
   const servicesPrice = selectedServices
-    .filter(service => service.selected)
+    .filter((service) => service.selected)
     .reduce((total, service) => total + service.price, 0);
 
   return {
     basePrice: baseCalculation.price,
     servicesPrice,
     totalPrice: baseCalculation.price + servicesPrice,
-    pricingDetails: baseCalculation.details
+    pricingDetails: baseCalculation.details,
   };
 };
 
@@ -122,14 +145,18 @@ export const calculateBookingPrice = (
  * @param pricing - Car pricing structure
  * @returns Most cost-effective pricing type
  */
-export const getOptimalPricingType = (days: number, pricing: CarPricing): 'daily' | 'weekly' | 'monthly' => {
+export const getOptimalPricingType = (
+  days: number,
+  pricing: CarPricing
+): "daily" | "weekly" | "monthly" => {
   const dailyTotal = days * pricing.daily;
   const weeklyTotal = Math.ceil(days / 7) * pricing.weekly;
   const monthlyTotal = Math.ceil(days / 30) * pricing.monthly;
 
-  if (monthlyTotal <= weeklyTotal && monthlyTotal <= dailyTotal) return 'monthly';
-  if (weeklyTotal <= dailyTotal) return 'weekly';
-  return 'daily';
+  if (monthlyTotal <= weeklyTotal && monthlyTotal <= dailyTotal)
+    return "monthly";
+  if (weeklyTotal <= dailyTotal) return "weekly";
+  return "daily";
 };
 
 /**
@@ -138,11 +165,14 @@ export const getOptimalPricingType = (days: number, pricing: CarPricing): 'daily
  * @param currency - Currency symbol
  * @returns Formatted breakdown strings
  */
-export const formatPricingBreakdown = (breakdown: PricingBreakdown, currency: string = 'SAR') => {
+export const formatPricingBreakdown = (
+  breakdown: PricingBreakdown,
+  currency: string = "SAR"
+) => {
   return {
     basePrice: `${currency} ${breakdown.basePrice.toLocaleString()}`,
     servicesPrice: `${currency} ${breakdown.servicesPrice.toLocaleString()}`,
-    totalPrice: `${currency} ${breakdown.totalPrice.toLocaleString()}`,
-    calculation: breakdown.pricingDetails.calculation
+    totalPrice: breakdown.totalPrice,
+    calculation: breakdown.pricingDetails.calculation,
   };
 };

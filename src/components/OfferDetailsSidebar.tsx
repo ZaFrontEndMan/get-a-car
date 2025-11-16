@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from "react";
 import { useLanguage } from "../contexts/LanguageContext";
 import PricingOptions from "./PricingOptions";
-import { Plus } from "lucide-react";
+import { Plus, Bug } from "lucide-react";
 import {
   formatPricingBreakdown,
   PricingBreakdown,
@@ -65,21 +65,19 @@ const OfferDetailsSidebar = ({
   onBookNow,
 }: OfferDetailsSidebarProps) => {
   const { t } = useLanguage();
+  const [pickupExpanded, setPickupExpanded] = useState(false);
+  const [dropoffExpanded, setDropoffExpanded] = useState(false);
 
   const formattedPricing = formatPricingBreakdown(
     pricingBreakdown,
     t("currency")
   );
 
-  // Accordion state for pickup and dropoff locations when list is long
   const pickupLocations = offer.locations || [];
   const dropoffLocations = offer.dropoffLocations || offer.locations || [];
 
   const pickupHasMore = pickupLocations.length > 3;
   const dropoffHasMore = dropoffLocations.length > 3;
-
-  const [pickupExpanded, setPickupExpanded] = useState(false);
-  const [dropoffExpanded, setDropoffExpanded] = useState(false);
 
   const visiblePickupLocations = useMemo(
     () =>
@@ -115,7 +113,6 @@ const OfferDetailsSidebar = ({
         <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2 rtl:gap-reverse">
           <span>{t("pickupAndDropoff")}</span>
         </h3>
-
         <div className="space-y-6">
           {/* Pickup Location */}
           <div>
@@ -193,7 +190,6 @@ const OfferDetailsSidebar = ({
           <Plus className="h-5 w-5 text-primary" />
           <span>{t("additionalServices")}</span>
         </h3>
-
         <div className="space-y-3">
           {additionalServices && additionalServices.length > 0 ? (
             additionalServices.map((service) => (

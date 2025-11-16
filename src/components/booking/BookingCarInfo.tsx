@@ -1,17 +1,12 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Plus, Minus, Car, Clock, Shield } from "lucide-react";
-import { calculateBasePrice } from "../../utils/pricingCalculator";
+import LazyImage from "../ui/LazyImage";
 
 interface Car {
   name: string;
   brand: string;
   image: string;
-  pricing: {
-    daily: number;
-    weekly: number;
-    monthly: number;
-  };
 }
 
 interface BookingCarInfoProps {
@@ -20,6 +15,10 @@ interface BookingCarInfoProps {
   pricingType: string;
   rentalDays: number;
   onAdjustDays: (increment: boolean) => void;
+  formattedPricing: {
+    basePrice: string;
+    calculation: string;
+  };
 }
 
 const BookingCarInfo = ({
@@ -28,15 +27,13 @@ const BookingCarInfo = ({
   rentalDays,
   onAdjustDays,
   t,
+  formattedPricing,
 }: BookingCarInfoProps) => {
-  // Calculate dynamic pricing
-  const pricingBreakdown = calculateBasePrice(rentalDays, car.pricing);
-
   return (
     <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-shadow duration-300">
       <div className="flex flex-col lg:flex-row items-center gap-6 rtl:gap-reverse">
         <div className="relative">
-          <img
+          <LazyImage
             src={car.image}
             alt={car.name}
             className="w-24 h-24 sm:w-32 sm:h-32 rounded-xl object-cover shadow-md"
@@ -54,15 +51,10 @@ const BookingCarInfo = ({
           <div className="flex items-center justify-center lg:justify-start rtl:lg:justify-end gap-2 rtl:gap-2 text-primary font-semibold">
             <Shield className="h-4 w-4" />
             <span className="text-sm sm:text-base">
-              {`${
-                rentalDays + " " + (rentalDays === 1 ? t("day") : t("days"))
-              } `}
-              {t("currency")} {pricingBreakdown.price} {}{" "}
+              {rentalDays + " " + (rentalDays === 1 ? t("day") : t("days"))}{" "}
+              {formattedPricing.basePrice}
             </span>
           </div>
-          {/* <div className="text-xs text-gray-500 mt-1">
-            {pricingBreakdown.details.calculation}
-          </div> */}
         </div>
 
         <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rtl:bg-gradient-to-l rounded-xl p-4 border border-blue-200">

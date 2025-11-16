@@ -2,6 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "../contexts/LanguageContext";
 import { Clock } from "lucide-react";
+import LazyImage from "./ui/LazyImage";
 
 interface OfferCardProps {
   offer: {
@@ -50,7 +51,6 @@ const OfferCard = ({ offer, isLoading }: OfferCardProps) => {
     }
     return words?.slice(0, wordLimit).join(" ") + "...";
   };
-  console.log(offer);
 
   return (
     <Link
@@ -60,19 +60,19 @@ const OfferCard = ({ offer, isLoading }: OfferCardProps) => {
       }`}
     >
       <div className="relative">
-        <img
+        <LazyImage
           src={offer.image}
           alt={getLocalizedTitle()}
           className="w-full h-48 object-cover"
         />
-        <div className="absolute top-3 start-3 bg-red-500 text-white px-3 py-1 rounded-full text-sm font-bold">
-          {offer.discount} {t("off")}
+        <div className="absolute top-3 start-3 bg-red-500 text-white px-3 py-1 rounded-full text-sm font-bold bg-black/50">
+          {offer.originalOffer?.totalPrice} {t("off")}
         </div>
 
         {offer.vendor?.logo_url && (
           <div className="absolute bottom-3 start-3 w-10 h-10 rounded-full bg-white shadow-md overflow-hidden border-2 border-white hover:scale-125 transition duration-300">
             <Link to={`/vendors/${offer.vendor?.id}`}>
-              <img
+              <LazyImage
                 title={offer.vendor.name}
                 src={offer.vendor.logo_url}
                 alt={offer.vendor.name}

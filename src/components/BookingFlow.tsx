@@ -118,23 +118,6 @@ const BookingFlow = ({
     }));
   }, [selectedPickup, selectedDropoff]);
 
-  // Debug log to check if data is being passed
-  useEffect(() => {
-    console.log("BookingFlow Props:", {
-      selectedServices,
-      selectedPickup,
-      selectedDropoff,
-      totalPrice,
-      carAdditionalServices,
-    });
-  }, [
-    selectedServices,
-    selectedPickup,
-    selectedDropoff,
-    totalPrice,
-    carAdditionalServices,
-  ]);
-
   // Use pickup and dropoff locations from the car data, with fallback
   const pickupLocations =
     car.pickup_locations && car.pickup_locations.length > 0
@@ -175,17 +158,12 @@ const BookingFlow = ({
         : []),
     ];
 
-    console.log("Selected services:", selectedServices);
-    console.log("All services:", allServices);
-
     const filteredServices = allServices.filter((service) =>
       selectedServices.includes(service.id)
     );
-    console.log("Filtered services:", filteredServices);
 
     return filteredServices;
   };
-  console.log(bookingData);
 
   const calculateTotalPrice = () => {
     const basePrice = car.daily_rate * rentalDays;
@@ -194,14 +172,6 @@ const BookingFlow = ({
       0
     );
     const total = basePrice + servicesPrice;
-
-    console.log("Price calculation:", {
-      basePrice,
-      servicesPrice,
-      total,
-      rentalDays,
-      selectedServices: getServiceDetails(),
-    });
 
     return total;
   };

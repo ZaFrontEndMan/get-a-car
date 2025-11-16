@@ -14,11 +14,48 @@ interface InitialFilters {
   dropoffDate?: string;
 }
 
+// Helper to compactly format calculation string (M=month, W=week, D=day)
+const formatCalculationSimple = (
+  pricingDetails: PricingBreakdown["pricingDetails"]
+) => {
+  const lines: string[] = [];
+  if (pricingDetails.monthlyPeriods) {
+    lines.push(
+      `${pricingDetails.monthlyPeriods}M × ${
+        pricingDetails.calculation
+          .match(/([0-9]+ monthRate.*?= [0-9]+)/)?.[0]
+          ?.split("=")[0]
+          ?.match(/([0-9]+)/g)[1] || "monthly"
+      }`
+    );
+  }
+  if (pricingDetails.weeklyPeriods) {
+    lines.push(
+      `${pricingDetails.weeklyPeriods}W × ${
+        pricingDetails.calculation
+          .match(/([0-9]+ week.*?= [0-9]+)/)?.[0]
+          ?.split("=")[0]
+          ?.match(/([0-9]+)/g)[1] || "weekly"
+      }`
+    );
+  }
+  if (pricingDetails.remainingDays) {
+    lines.push(
+      `${pricingDetails.remainingDays}D × ${
+        pricingDetails.calculation
+          .match(/([0-9]+ day.*?= [0-9]+)/)?.[0]
+          ?.split("=")[0]
+          ?.match(/([0-9]+)/g)[1] || "daily"
+      }`
+    );
+  }
+  return lines.length ? lines.join(" + ") : pricingDetails.calculation;
+};
+
 export const useOfferDetailsState = (initialFilters: InitialFilters = {}) => {
   const { user } = useAuth();
-  const { t } = useLanguage();
 
-  // Initial state with support for passed-in values or fallback to empty string
+  // Initial state setup
   const [selectedPickup, setSelectedPickup] = useState(
     initialFilters.pickupLocation || ""
   );
@@ -36,12 +73,23 @@ export const useOfferDetailsState = (initialFilters: InitialFilters = {}) => {
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
   const [isBookingOpen, setIsBookingOpen] = useState(false);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
-  const [rentalDays, setRentalDays] = useState(1);
+  const initialRentalDays =
+    initialFilters.pickupDate && initialFilters.dropoffDate
+      ? Math.max(
+          1,
+          Math.ceil(
+            (new Date(initialFilters.dropoffDate).getTime() -
+              new Date(initialFilters.pickupDate).getTime()) /
+              (1000 * 60 * 60 * 24)
+          )
+        )
+      : 1;
 
+  const [rentalDays, setRentalDays] = useState(initialRentalDays);
   const calculateTotalPrice = (
     offer: any,
     additionalServices: any[]
-  ): PricingBreakdown => {
+  ): PricingBreakdown & { formattedCalculation: string } => {
     if (!offer) {
       return {
         basePrice: 0,
@@ -54,6 +102,7 @@ export const useOfferDetailsState = (initialFilters: InitialFilters = {}) => {
           remainingDays: 0,
           calculation: "No offer data",
         },
+        formattedCalculation: "No offer data",
       };
     }
 
@@ -69,7 +118,13 @@ export const useOfferDetailsState = (initialFilters: InitialFilters = {}) => {
       offer.car.pricing,
       services
     );
-    return dynamicPricing;
+    // Add a formatted calculation string for easy display in UI
+    return {
+      ...dynamicPricing,
+      formattedCalculation: formatCalculationSimple(
+        dynamicPricing.pricingDetails
+      ),
+    };
   };
 
   const handleBookNow = () => {

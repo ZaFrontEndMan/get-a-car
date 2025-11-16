@@ -4,7 +4,15 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import { useToast } from "@/components/ui/use-toast";
-import { Loader2, MapPin, CreditCard, Shield, X } from "lucide-react";
+import {
+  Loader2,
+  MapPin,
+  CreditCard,
+  Shield,
+  X,
+  Bug,
+  InfoIcon,
+} from "lucide-react";
 import { differenceInDays, addDays } from "date-fns";
 import { createBookingSchema, BookingFormData } from "./booking/bookingSchema";
 import BookingInvoice from "./booking/BookingInvoice";
@@ -43,7 +51,7 @@ interface BookingFormProps {
   selectedPickup?: string;
   selectedDropoff?: string;
   rentalDays?: number;
-  locations?: string[];
+  locations?: any;
   isLoggedUser: boolean;
 }
 
@@ -55,53 +63,42 @@ const BookingForm = ({
   pricingType,
   selectedPickup,
   selectedDropoff,
-  rentalDays: initialRentalDays = 1,
+  rentalDays,
+  setRentalDays,
   locations = [],
   isLoggedUser,
+  formattedPricing,
+  pricingBreakdown,
+  vendor,
+  pickupDate,
+  setPickupDate,
+  dropoffDate,
+  setDropoffDate,
 }: BookingFormProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [showInvoice, setShowInvoice] = useState(false);
   const [bookingId, setBookingId] = useState("");
-  const [rentalDays, setRentalDays] = useState(initialRentalDays);
   const [isUserVerified, setIsUserVerified] = useState(isLoggedUser);
   const [paymentUrl, setPaymentUrl] = useState("");
   const { toast } = useToast();
   const { t } = useLanguage();
-  const { useCreateBookingMutation, usePaymentCallbackMutation } =
-    useClientBookings();
+  const { useCreateBookingMutation } = useClientBookings();
 
   const createBookingMutation = useCreateBookingMutation();
-  const paymentCallbackMutation = usePaymentCallbackMutation();
-
-  // Sync internal rentalDays state with prop changes
-  useEffect(() => {
-    setRentalDays(initialRentalDays);
-  }, [initialRentalDays]);
 
   const bookingSchema = createBookingSchema(selectedPickup, selectedDropoff);
 
   const form = useForm<BookingFormData>({
     resolver: zodResolver(bookingSchema),
     defaultValues: {
-      pickupDate: new Date(),
-      dropoffDate: addDays(new Date(), 1),
+      pickupDate: pickupDate || new Date(),
+      dropoffDate: dropoffDate || addDays(new Date(), 1),
       pickupLocation: selectedPickup || "",
       dropoffLocation: selectedDropoff || "",
     },
   });
 
   const watchedPickupDate = form.watch("pickupDate");
-  const watchedDropoffDate = form.watch("dropoffDate");
-
-  React.useEffect(() => {
-    if (watchedPickupDate && watchedDropoffDate) {
-      const days = Math.max(
-        1,
-        differenceInDays(watchedDropoffDate, watchedPickupDate)
-      );
-      setRentalDays(days);
-    }
-  }, [watchedPickupDate, watchedDropoffDate]);
 
   const adjustDays = (increment: boolean) => {
     const currentDays = rentalDays;
@@ -119,7 +116,6 @@ const BookingForm = ({
         driver: { name: t("driver"), price: 200 },
         delivery: { name: t("delivery"), price: 75 },
       };
-
       const service = serviceMap[serviceId as keyof typeof serviceMap];
       return {
         id: serviceId,
@@ -128,7 +124,6 @@ const BookingForm = ({
         selected: true,
       };
     });
-
     return calculateBookingPrice(rentalDays, car.pricing, services);
   };
 
@@ -143,7 +138,6 @@ const BookingForm = ({
       driver: { name: t("driver"), price: 200, id: 21 },
       delivery: { name: t("delivery"), price: 75, id: 22 },
     };
-
     return selectedServices.map((serviceId) => ({
       id: serviceId,
       name: serviceMap[serviceId as keyof typeof serviceMap]?.name || serviceId,
@@ -153,7 +147,6 @@ const BookingForm = ({
   };
 
   const onSubmit = async (data: BookingFormData) => {
-    console.log("Form submitted with data:", data); // Debug log
     setIsLoading(true);
     try {
       const bookingData = {
@@ -163,13 +156,10 @@ const BookingForm = ({
         pickupLocation: data.pickupLocation,
         dropoffLocation: data.dropoffLocation,
         offerId: 0,
-        services: getServiceDetails().map((service) => service.serviceId),
+        services: selectedServices,
         protection: [],
       };
-
-      console.log("Sending booking data:", bookingData); // Debug log
       const response = await createBookingMutation.mutateAsync(bookingData);
-      console.log("Booking response:", response); // Debug log
 
       const newBookingId =
         response.bookingId ||
@@ -178,15 +168,13 @@ const BookingForm = ({
 
       if (response.data) {
         setPaymentUrl(response.data);
-        // await paymentCallbackMutation.mutateAsync(response.data);
-        console.log("Payment callback triggered for URL:", response.data); // Debug log
       }
 
       toast({
         title: t("paymentInitiated"),
         description: t("redirectingToPayment"),
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Booking error:", error); // Debug log
       toast({
         title: t("bookingFailed"),
@@ -201,10 +189,10 @@ const BookingForm = ({
   if (paymentUrl) {
     return (
       <Dialog open={true} onOpenChange={() => setPaymentUrl("")}>
-        <DialogContent className="max-w-3xl">
+        <DialogContent className="max-w-3xl border">
           <DialogHeader>
             <DialogTitle>{t("completePayment")}</DialogTitle>
-            <DialogClose className="absolute right-4 top-4">
+            <DialogClose className="absolute start-4 top-4">
               <X className="h-5 w-5" />
               <span className="sr-only">Close</span>
             </DialogClose>
@@ -237,7 +225,7 @@ const BookingForm = ({
 
   return (
     <div
-      className={`bg-white rounded-2xl shadow-lg p-6 transform transition-all duration-500 ease-in-out mt-8 origin-top mx-auto${
+      className={`bg-white rounded-2xl shadow-lg p-6 transform transition-all duration-500 ease-in-out mt-8 origin-top mx-auto border ${
         isOpen ? "scale-y-100 opacity-100" : "scale-y-0 opacity-0"
       }`}
     >
@@ -245,8 +233,10 @@ const BookingForm = ({
         <h2 className="text-2xl sm:text-3xl font-bold text-center bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
           {t("completeBooking")}
         </h2>
-        <p className="text-gray-600 text-center mt-2 text-sm sm:text-base">
-          {t("secureVehicleRental")}
+
+        <p className="text-gray-600 text-center mt-2 text-sm sm:text-base flex items-center justify-center gap-2">
+          <InfoIcon />
+          {t("feesVehicleRental", { percentage: vendor?.percentage })}
         </p>
       </div>
       {!isUserVerified && (
@@ -262,6 +252,7 @@ const BookingForm = ({
         }`}
       >
         <BookingCarInfo
+          formattedPricing={formattedPricing}
           car={car}
           pricingType={pricingType}
           rentalDays={rentalDays}
@@ -277,7 +268,6 @@ const BookingForm = ({
                   {t("pickupAndDropoff")}
                 </h3>
               </div>
-
               <BookingDateLocationStep
                 control={form.control}
                 watchedPickupDate={watchedPickupDate}
@@ -286,57 +276,55 @@ const BookingForm = ({
                 pickupLocations={locations.pickupLocations}
                 dropoffLocations={locations.dropoffLocations}
               />
-
               <BookingServicesDisplay
-                formattedPricing={getPricingBreakdown()}
+                t={t}
+                formattedPricing={formattedPricing}
                 selectedServices={selectedServices}
                 getServiceDetails={getServiceDetails}
               />
             </div>
-
-            <div className="bg-gradient-to-r from-primary to-secondary rounded-2xl shadow-xl p-6 sm:p-8 text-white">
+            <div className="bg-gradient-to-r from-primary to-secondary rounded-2xl shadow-xl p-6 sm:p-8 text-white mb-6">
               <h4 className="text-xl font-bold mb-6 flex items-center gap-3">
                 <Shield className="h-6 w-6" />
                 {t("priceSummary")}
               </h4>
               <div className="space-y-4">
-                {(() => {
-                  const pricingBreakdown = getPricingBreakdown();
-                  return (
-                    <>
-                      <div className="flex justify-between items-center text-lg">
-                        <span className="text-blue-100">
-                          {t("rentalDuration")} ({rentalDays}{" "}
-                          {rentalDays === 1 ? t("day") : t("days")}):
-                        </span>
-                        <span className="font-semibold">
-                          {t("currency")} {pricingBreakdown.basePrice}
-                        </span>
-                      </div>
-                      {pricingBreakdown.servicesPrice > 0 && (
-                        <div className="flex justify-between items-center text-lg">
-                          <span className="text-blue-100">
-                            {t("additionalServices")}:
-                          </span>
-                          <span className="font-semibold">
-                            {t("currency")} {pricingBreakdown.servicesPrice}
-                          </span>
-                        </div>
-                      )}
-                      <div className="border-t border-blue-300 pt-4">
-                        <div className="flex justify-between items-center text-2xl font-bold">
-                          <span>{t("total")}:</span>
-                          <span className="text-yellow-300">
-                            {t("currency")} {pricingBreakdown.totalPrice}
-                          </span>
-                        </div>
-                      </div>
-                    </>
-                  );
-                })()}
+                <div className="flex justify-between items-center text-lg">
+                  <span className="text-blue-100">{t("basePrice")}:</span>
+                  <span className="font-semibold">
+                    {formattedPricing.basePrice}
+                  </span>
+                </div>
+                {parseFloat(
+                  formattedPricing.servicesPrice.replace(/[^0-9.]/g, "")
+                ) > 0 && (
+                  <div className="flex justify-between items-center text-lg">
+                    <span className="text-blue-100">
+                      {t("additionalServices")}:
+                    </span>
+                    <span className="font-semibold">
+                      {formattedPricing.servicesPrice}
+                    </span>
+                  </div>
+                )}
+                <div className="flex justify-between items-center text-lg">
+                  <span className="text-blue-100">
+                    {t("pricingCalculation")}:
+                  </span>
+                  <span className="font-semibold">
+                    {pricingBreakdown.formattedCalculation}
+                  </span>
+                </div>
+                <div className="border-t border-blue-300 pt-4">
+                  <div className="flex justify-between items-center text-2xl font-bold">
+                    <span>{t("total")}:</span>
+                    <span className="text-yellow-300">
+                      {formattedPricing.totalPrice.toFixed(2)}
+                    </span>
+                  </div>
+                </div>
               </div>
             </div>
-
             <div className="pt-6">
               <Button
                 type="submit"
@@ -355,7 +343,10 @@ const BookingForm = ({
                 ) : (
                   <>
                     <CreditCard className="h-6 w-6 mr-3" />
-                    {t("completePayment")}
+                    {`${t("completePayment")}  ${(
+                      (vendor?.percentage / 100) *
+                      formattedPricing.totalPrice
+                    ).toFixed(2)}`}
                   </>
                 )}
               </Button>

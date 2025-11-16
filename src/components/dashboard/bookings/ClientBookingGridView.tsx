@@ -7,6 +7,7 @@ import {
   CreditCard,
   CheckCircle,
   MapPin,
+  Star,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -39,8 +40,6 @@ const ClientBookingGridView = ({
     string | number | null
   >(null);
 
-  // ...keep your status logic as before
-
   const handleOpenRating = (bookingId: string | number) => {
     setRatingBookingId(bookingId);
     setOpenRatingDialog(true);
@@ -51,7 +50,6 @@ const ClientBookingGridView = ({
   };
   const canAcceptReturn = (status: string) => {
     const key = getStatusConfig(status);
-    // in progress (Arabic/English/number)
     return (
       key.label === "قيد الاجراء" ||
       key.label.toLowerCase() === "inprogress" ||
@@ -59,18 +57,8 @@ const ClientBookingGridView = ({
     );
   };
 
-  const isCompleted = (status: string) => {
-    const key = getStatusConfig(status);
-    // completed (Arabic/English/number)
-    return (
-      key.label === "تم إرجاع السيارة" ||
-      key.label === "تم الارجاع" ||
-      key.label.toLowerCase() === "completed"
-    );
-  };
-
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
       {bookings.map((booking) => {
         const statusConfig = getStatusConfig(booking.bookingStatus);
         const StatusIcon = statusConfig.icon;
@@ -78,12 +66,12 @@ const ClientBookingGridView = ({
         return (
           <Card
             key={booking.id}
-            className="group hover:shadow-lg transition-all duration-300 border-0 shadow-md bg-white"
+            className="group hover:shadow-md border-0 shadow bg-white"
           >
-            <CardHeader className="pb-4 bg-gradient-to-r from-slate-50 to-white border-b border-slate-100">
-              <div className="flex gap-4 items-start">
+            <CardHeader className="py-2 px-3 bg-gradient-to-r from-slate-50 to-white border-b border-slate-100">
+              <div className="flex gap-3 items-start">
                 <div className="relative">
-                  <div className="w-20 h-16 rounded-xl overflow-hidden shadow-sm border border-slate-200">
+                  <div className="w-14 h-12 rounded-lg overflow-hidden shadow-sm border border-slate-200">
                     <img
                       src={`${import.meta.env.VITE_UPLOADS_BASE_URL}${
                         booking.carImage
@@ -93,18 +81,20 @@ const ClientBookingGridView = ({
                     />
                   </div>
                   <div
-                    className={`absolute -top-1 -right-1 w-3 h-3 rounded-full ${statusConfig.dotColor} ring-2 ring-white shadow-sm`}
+                    className={`absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full ${statusConfig.dotColor} ring-2 ring-white shadow-sm`}
                   ></div>
                 </div>
-                <div className="flex flex-col gap-2">
-                  <div className="flex flex-col gap-1">
-                    <span className="text-lg font-medium">
+                <div className="flex flex-col gap-1 min-w-0 flex-1">
+                  <div className="flex flex-col gap-0 min-w-0">
+                    <span className="text-sm font-medium line-clamp-1">
                       {booking.carName}
                     </span>
-                    <span className="text-md">SAR {booking.totalPrice}</span>
+                    <span className="text-xs text-slate-700 font-normal">
+                      SAR {booking.totalPrice}
+                    </span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <div className="text-xs text-slate-500 bg-slate-100 px-2 py-1 rounded-full text-start w-fit uppercase">
+                  <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                    <span className="text-xs text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full uppercase font-normal">
                       {Math.ceil(
                         (new Date(booking.toDate).getTime() -
                           new Date(booking.fromDate).getTime()) /
@@ -117,145 +107,137 @@ const ClientBookingGridView = ({
                       ) > 1
                         ? t("days")
                         : t("day")}
-                    </div>
+                    </span>
                     <Badge
                       variant="outline"
-                      className={`${statusConfig.color} border-0 px-3 py-1 text-xs font-medium flex gap-1 items-center`}
+                      className={`${statusConfig.color} border-0 px-2.5 py-0.5 text-[11px] font-medium flex gap-1 items-center`}
                     >
                       <StatusIcon className="h-3 w-3" />
-                      {statusConfig.label}
+                      <span className="line-clamp-1">{statusConfig.label}</span>
                     </Badge>
                   </div>
                 </div>
               </div>
             </CardHeader>
 
-            <CardContent className="p-6 space-y-6">
-              {/* Booking Timeline */}
-              <div className="flex flex-col md:flex-row gap-4">
+            <CardContent className="p-3 space-y-2">
+              <div className="flex flex-col md:flex-row gap-2">
                 {/* Pickup Date */}
-                <div className="flex-1 flex items-start p-3 bg-emerald-50 rounded-lg border border-emerald-100 gap-2">
-                  <div className="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center">
-                    <Calendar className="h-4 w-4 text-white" />
-                  </div>
-                  <div className="flex flex-col gap-1 items-start">
-                    <p className="text-xs font-medium text-emerald-700 uppercase">
+                <div className="flex-1 flex items-start p-2 bg-emerald-50 rounded-md border border-emerald-100 gap-2 min-w-0">
+                  <Calendar className="h-4 w-4 text-emerald-400" />
+                  <div className="flex flex-col gap-0 items-start min-w-0">
+                    <p className="text-[11px] font-medium text-emerald-700 uppercase">
                       {t("pickupDate")}
                     </p>
-                    <p className="font-semibold text-slate-900 text-sm truncate">
+                    <p className="font-semibold text-slate-900 text-xs truncate line-clamp-1">
                       {format(new Date(booking.fromDate), "MMM dd, yyyy")}
                     </p>
                   </div>
                 </div>
                 {/* Dropoff Date */}
-                <div className="flex-1 flex items-start p-3 bg-rose-50 rounded-lg border border-rose-100 gap-2">
-                  <div className="w-8 h-8 bg-rose-500 rounded-lg flex items-center justify-center">
-                    <Calendar className="h-4 w-4 text-white" />
-                  </div>
-                  <div className="flex flex-col gap-1 items-start">
-                    <p className="text-xs font-medium text-rose-700 uppercase">
+                <div className="flex-1 flex items-start p-2 bg-rose-50 rounded-md border border-rose-100 gap-2 min-w-0">
+                  <Calendar className="h-4 w-4 text-rose-400" />
+                  <div className="flex flex-col gap-0 items-start min-w-0">
+                    <p className="text-[11px] font-medium text-rose-700 uppercase">
                       {t("returnDate")}
                     </p>
-                    <p className="font-semibold text-slate-900 text-sm truncate">
+                    <p className="font-semibold text-slate-900 text-xs truncate line-clamp-1">
                       {format(new Date(booking.toDate), "MMM dd, yyyy")}
                     </p>
                   </div>
                 </div>
               </div>
               {/* Booking Locations */}
-              <div className="flex flex-col md:flex-row gap-4">
+              <div className="flex flex-col md:flex-row gap-2">
                 {/* Pickup Location */}
-                <div className="flex-1 flex items-start p-3 bg-blue-50 rounded-lg border border-blue-100 gap-2">
-                  <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
-                    <MapPin className="h-4 w-4 text-white" />
-                  </div>
-                  <div className="flex flex-col gap-1 items-start">
-                    <p className="text-xs font-medium text-blue-700 uppercase">
+                <div className="flex-1 flex items-start p-2 bg-blue-50 rounded-md border border-blue-100 gap-2 min-w-0">
+                  <MapPin className="h-4 w-4 text-blue-400 " />
+                  <div className="flex flex-col gap-0 items-start min-w-0">
+                    <p className="text-[11px] font-medium text-blue-700 uppercase">
                       {t("pickupLocation")}
                     </p>
-                    <p className="font-semibold text-slate-900 text-sm truncate">
+                    <p className="font-semibold text-slate-900 text-xs truncate line-clamp-1">
                       {booking.pickUpLocationName}
                     </p>
                   </div>
                 </div>
                 {/* Dropoff Location */}
-                <div className="flex-1 flex items-start p-3 bg-orange-50 rounded-lg border border-orange-100 gap-2">
-                  <div className="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center">
-                    <MapPin className="h-4 w-4 text-white" />
-                  </div>
-                  <div className="flex flex-col gap-1 items-start">
-                    <p className="text-xs font-medium text-orange-700 uppercase">
+                <div className="flex-1 flex items-start p-2 bg-orange-50 rounded-md border border-orange-100 gap-2 min-w-0">
+                  <MapPin className="h-4 w-4 text-orange-400 " />
+                  <div className="flex flex-col gap-0 items-start min-w-0">
+                    <p className="text-[11px] font-medium text-orange-700 uppercase">
                       {t("dropoffLocation")}
                     </p>
-                    <p className="font-semibold text-slate-900 text-sm truncate">
+                    <p className="font-semibold text-slate-900 text-xs truncate line-clamp-1">
                       {booking.dropoffLocationName}
                     </p>
                   </div>
                 </div>
               </div>
-
               {/* Vendor Info */}
-              <div className="flex flex-col md:flex-row md:items-center md:justify-between pt-4 border-t border-slate-100 gap-4">
-                <div className="flex items-center gap-2 flex-1 min-w-0">
-                  <div className="w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center">
+              <div className="flex flex-row items-center justify-between pt-2 border-t border-slate-100 gap-1 min-h-[42px]">
+                <div className="flex items-center gap-1 flex-1 min-w-0">
+                  <div className="w-7 h-7 bg-slate-100 rounded flex items-center justify-center">
                     <img
                       src={`${import.meta.env.VITE_UPLOADS_BASE_URL}${
                         booking.vendorLogo
                       }`}
                       alt={booking.vendorName}
-                      className="w-full h-full object-cover rounded-lg"
+                      className="w-full h-full object-cover rounded"
                     />
                   </div>
-                  <div className="min-w-0">
-                    <p className="font-medium text-slate-900 text-sm truncate">
+                  <div className="min-w-0 flex flex-col">
+                    <p className="font-medium text-slate-900 text-xs truncate line-clamp-1">
                       {booking.vendorName}
                     </p>
-                    <p className="text-xs text-slate-500">
+                    <p className="text-[10px] text-slate-500 truncate line-clamp-1">
                       {booking.clientName}
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-2 uppercase">
-                  <CreditCard className="h-4 w-4 text-slate-400 mx-[6px]" />
-                  <Badge variant="default">{booking?.paymentStatus}</Badge>
+                <div className="flex items-center gap-1">
+                  <CreditCard className="h-3.5 w-3.5 -400 mx-[2px]" />
+                  <Badge variant="default" className="text-[11px] px-2">
+                    {booking?.paymentStatus}
+                  </Badge>
                 </div>
               </div>
               {/* Action Buttons */}
-              <div className="flex flex-col md:flex-row gap-2 pt-2">
+              <div className="flex flex-row flex-wrap gap-1 pt-1">
                 {/* Return Car */}
                 {canAcceptReturn(booking.bookingStatus) &&
                   onAcceptReturnCar && (
                     <Button
-                      className="flex-1"
+                      className="flex-1 min-w-[90px] px-0 py-1"
                       size="sm"
                       onClick={() => onAcceptReturnCar(booking.id.toString())}
                       disabled={isReturning}
                     >
-                      <RotateCcw className="h-4 w-4 me-2" />
-                      {t("returnCar")}
+                      <RotateCcw className="h-4 w-4 me-1" />
+                      <span className="text-xs">{t("returnCar")}</span>
                     </Button>
                   )}
                 {/* Rate Button */}
                 <Button
-                  className="flex-1"
+                  className="flex-1 min-w-[90px] px-0 py-1"
                   size="sm"
                   variant="default"
                   onClick={() => {
                     handleOpenRating(booking.id);
                   }}
                 >
-                  <CheckCircle className="h-4 w-4 me-2" />
-                  {t("rateBooking")}
+                  <Star className="h-4 w-4 me-1" />
+                  <span className="text-xs">{t("rateBooking")}</span>
                 </Button>
                 {/* View Invoice */}
                 <Button
-                  className="flex-1"
+                  className="flex-1 min-w-[90px] px-0 py-1"
                   size="sm"
                   variant="outline"
                   onClick={() => setSelectedBooking(booking)}
                 >
-                  <Mail className="h-4 w-4 me-2" />
-                  {t("invoice")}
+                  <Mail className="h-4 w-4 me-1" />
+                  <span className="text-xs">{t("invoice")}</span>
                 </Button>
               </div>
             </CardContent>
