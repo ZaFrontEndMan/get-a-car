@@ -4,19 +4,36 @@ import { useLanguage } from "../contexts/LanguageContext";
 import {
   calculateBookingPrice,
   Service,
-  CarPricing,
   PricingBreakdown,
 } from "../utils/pricingCalculator";
 
-export const useOfferDetailsState = () => {
+interface InitialFilters {
+  pickupLocation?: string;
+  dropOffLocation?: string;
+  pickupDate?: string;
+  dropoffDate?: string;
+}
+
+export const useOfferDetailsState = (initialFilters: InitialFilters = {}) => {
   const { user } = useAuth();
   const { t } = useLanguage();
+
+  // Initial state with support for passed-in values or fallback to empty string
+  const [selectedPickup, setSelectedPickup] = useState(
+    initialFilters.pickupLocation || ""
+  );
+  const [selectedDropoff, setSelectedDropoff] = useState(
+    initialFilters.dropOffLocation || ""
+  );
+  const [pickupDate, setPickupDate] = useState(initialFilters.pickupDate || "");
+  const [dropoffDate, setDropoffDate] = useState(
+    initialFilters.dropoffDate || ""
+  );
+
   const [selectedPricing, setSelectedPricing] = useState<
     "daily" | "weekly" | "monthly"
   >("daily");
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
-  const [selectedPickup, setSelectedPickup] = useState("");
-  const [selectedDropoff, setSelectedDropoff] = useState("");
   const [isBookingOpen, setIsBookingOpen] = useState(false);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [rentalDays, setRentalDays] = useState(1);
@@ -40,32 +57,24 @@ export const useOfferDetailsState = () => {
       };
     }
 
-    // Convert additional services to the format expected by pricing calculator
     const services: Service[] = additionalServices.map((service) => ({
       id: service.id,
       name: service.name,
       price: service.price,
       selected: selectedServices.includes(service.id),
     }));
-    console.log(services);
 
-    // Use dynamic pricing calculation based on rental days
     const dynamicPricing = calculateBookingPrice(
       rentalDays,
       offer.car.pricing,
       services
     );
-
     return dynamicPricing;
   };
 
   const handleBookNow = () => {
     setIsBookingOpen(true);
-    if (!user) {
-      setIsLoginOpen(true);
-    } else {
-      setIsLoginOpen(false);
-    }
+    setIsLoginOpen(!user);
   };
 
   const handleLoginSuccess = () => {
@@ -82,6 +91,10 @@ export const useOfferDetailsState = () => {
     setSelectedPickup,
     selectedDropoff,
     setSelectedDropoff,
+    pickupDate,
+    setPickupDate,
+    dropoffDate,
+    setDropoffDate,
     isBookingOpen,
     setIsBookingOpen,
     isLoginOpen,

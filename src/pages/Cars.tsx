@@ -41,6 +41,7 @@ import {
   updateUrlWithFilters,
   areFiltersEqual,
 } from "@/utils/urlParams";
+import { getAppliedFilterBadges } from "@/utils/bookingUtils";
 
 const Cars = () => {
   const { t } = useLanguage();
@@ -127,16 +128,15 @@ const Cars = () => {
   );
 
   // Unified API query based on vendor presence
-  const carsQuery =
-    isVendorMode && vendorId
-      ? useGetVendorCarWithFilter(
-          vendorId,
-          currentPage,
-          itemsPerPage,
-          serverFilters
-        )
-      : useAllCars(currentPage, itemsPerPage, carFilters);
+  const vendorCarsQuery = useGetVendorCarWithFilter(
+    vendorId,
+    currentPage,
+    itemsPerPage,
+    serverFilters
+  );
+  const allCarsQuery = useAllCars(currentPage, itemsPerPage, carFilters);
 
+  const carsQuery = isVendorMode && vendorId ? vendorCarsQuery : allCarsQuery;
   const {
     data: carsResponse,
     isLoading,
@@ -190,6 +190,7 @@ const Cars = () => {
         weekly: car?.pricePerWeek || 0,
         monthly: car?.pricePerMonth || 0,
       },
+      withDriver: car?.withDriver,
     }));
   }, [carsData]);
 
@@ -465,7 +466,10 @@ const Cars = () => {
       </div>
     );
   }
-
+  // const appliedBadges = useMemo(
+  //   () => getAppliedFilterBadges(serverFilters, t, filterData),
+  //   []
+  // );
   return (
     <ErrorBoundary>
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50">
@@ -508,7 +512,27 @@ const Cars = () => {
             ) : (
               <CarsHeader />
             )}
-
+            {/* {appliedBadges.length > 0 && (
+              <div className="mb-5 flex flex-wrap gap-2">
+                {appliedBadges.map(({ key, value }, idx) => (
+                  <span
+                    key={key + value + idx}
+                    className="inline-flex items-center bg-blue-100 text-blue-800 text-xs font-semibold mr-2 px-3 py-1 rounded-full"
+                  >
+                    {key}
+                    {value && ": "}
+                    {value}
+                  </span>
+                ))}
+                <button
+                  className="ml-2 text-xs text-blue-600 underline"
+                  onClick={clearAllFilters}
+                  type="button"
+                >
+                  {t("clearFilters")}
+                </button>
+              </div>
+            )} */}
             <div className="flex gap-8">
               {/* Filters sidebar */}
               <div className="w-52 flex-shrink-0 hidden lg:block">

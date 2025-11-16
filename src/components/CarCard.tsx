@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useLanguage } from "../contexts/LanguageContext";
 import { Heart, Users, Fuel, Settings } from "lucide-react";
 import LazyImage from "./ui/LazyImage";
@@ -65,6 +65,7 @@ const CarCard = ({ car, viewMode = "grid" }: CarCardProps) => {
   } = useClientFavorites();
   const { user } = useAuth();
   const [showToast, setShowToast] = useState(false);
+  const location = useLocation();
 
   const isCarFavorite =
     car.isWishList ||
@@ -106,7 +107,7 @@ const CarCard = ({ car, viewMode = "grid" }: CarCardProps) => {
     return (
       <>
         <Link
-          to={`/cars/${car.id}`}
+          to={`/cars/${car.id}${location.search}`}
           className="block bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300 hover:scale-[1.02]"
         >
           <div className="flex gap-6 p-6">
@@ -116,15 +117,18 @@ const CarCard = ({ car, viewMode = "grid" }: CarCardProps) => {
                 alt={car.title}
                 className="w-full h-full rounded-xl object-cover"
               />
-              {vendor?.logo_url ? (
-                <div className="absolute bottom-2 left-2 w-8 h-8 rounded-full bg-white shadow-md overflow-hidden border-2 border-white">
-                  <LazyImage
-                    src={vendor.logo_url}
-                    alt={vendor.name}
-                    className="w-full h-full object-cover"
-                  />
+              {vendor?.logo_url && vendor?.id && (
+                <div className="absolute bottom-3 start-3 w-10 h-10 rounded-full bg-white shadow-md overflow-hidden border-2 border-white hover:scale-125 transition duration-300">
+                  <Link to={`/vendors/${vendor?.id}`}>
+                    <LazyImage
+                      title={vendor.name}
+                      src={vendor.logo_url}
+                      alt={vendor.name}
+                      className="w-full h-full object-cover"
+                    />
+                  </Link>
                 </div>
-              ) : null}
+              )}
               <button
                 onClick={handleFavoriteClick}
                 disabled={isAdding || isRemovingByCarId}
@@ -140,6 +144,11 @@ const CarCard = ({ car, viewMode = "grid" }: CarCardProps) => {
                   fill={isCarFavorite ? "currentColor" : "none"}
                 />
               </button>
+              {car.withDriver && (
+                <div className="absolute top-2 end-2 bg-green-600 text-white px-2 py-0.5 rounded-xl text-xs font-semibold shadow z-10">
+                  {t("withDriver")}
+                </div>
+              )}
             </div>
             <div className="flex-1 flex flex-col justify-between">
               <div>
@@ -196,7 +205,7 @@ const CarCard = ({ car, viewMode = "grid" }: CarCardProps) => {
   return (
     <>
       <Link
-        to={`/cars/${car.id}`}
+        to={`/cars/${car.id}${location.search}`}
         className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300 hover:scale-[1.02] flex flex-col h-full"
       >
         <div className="relative flex-shrink-0">
@@ -205,15 +214,19 @@ const CarCard = ({ car, viewMode = "grid" }: CarCardProps) => {
             alt={car.title}
             className="w-full h-48 object-cover"
           />
-          {vendor?.logo_url ? (
-            <div className="absolute bottom-3 left-3 w-10 h-10 rounded-full bg-white shadow-md overflow-hidden border-2 border-white">
-              <LazyImage
-                src={vendor.logo_url}
-                alt={vendor.name}
-                className="w-full h-full object-cover"
-              />
+          {vendor?.logo_url && vendor?.id && (
+            <div className="absolute bottom-3 start-3 w-10 h-10 rounded-full bg-white shadow-md overflow-hidden border-2 border-white hover:scale-125 transition duration-300">
+              <Link to={`/vendors/${vendor?.id}`}>
+                <LazyImage
+                  title={vendor.name}
+                  src={vendor.logo_url}
+                  alt={vendor.name}
+                  className="w-full h-full object-cover"
+                />
+              </Link>
             </div>
-          ) : null}
+          )}
+
           <button
             onClick={handleFavoriteClick}
             disabled={isAdding || isRemovingByCarId}
@@ -229,6 +242,11 @@ const CarCard = ({ car, viewMode = "grid" }: CarCardProps) => {
               fill={isCarFavorite ? "currentColor" : "none"}
             />
           </button>
+          {car.withDriver && (
+            <div className="absolute top-2 end-2 bg-green-600 text-white px-2 py-0.5 rounded-xl text-xs font-semibold shadow z-10">
+              {t("withDriver")}
+            </div>
+          )}
         </div>
         <div className="p-4 flex flex-col flex-grow">
           <div className="flex justify-between items-start mb-2">

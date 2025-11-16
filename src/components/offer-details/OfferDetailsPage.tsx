@@ -37,7 +37,10 @@ const OfferDetailsPage = () => {
   const location = useLocation();
   const { t } = useLanguage();
   const [openImage, setOpenImage] = useState<string | null>(null);
-
+  const initialPickupLocation = searchParams.get("pickupLocation") || "";
+  const initialDropOffLocation = searchParams.get("dropOffLocation") || "";
+  const initialPickupDate = searchParams.get("pickupDate") || "";
+  const initialDropoffDate = searchParams.get("dropoffDate") || "";
   // Determine if current route is car details route (/cars/:id)
   const isCarRoute = location.pathname.startsWith("/cars/");
   const pathId = id ? parseInt(id) : 0;
@@ -70,7 +73,12 @@ const OfferDetailsPage = () => {
     calculateTotalPrice,
     handleBookNow,
     handleLoginSuccess,
-  } = useOfferDetailsState();
+  } = useOfferDetailsState({
+    pickupLocation: initialPickupLocation,
+    dropOffLocation: initialDropOffLocation,
+    pickupDate: initialPickupDate,
+    dropoffDate: initialDropoffDate,
+  });
 
   if (loading) {
     return <OfferDetailsLoading />;
