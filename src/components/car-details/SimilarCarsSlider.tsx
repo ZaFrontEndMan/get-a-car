@@ -5,6 +5,7 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 import { Link } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import LazyImage from '../ui/LazyImage';
 interface SimilarCarsSliderProps {
   currentCarId: string;
   carType?: string;
@@ -84,7 +85,7 @@ const SimilarCarsSlider = ({
                 <Card className="hover:shadow-lg transition-shadow duration-300">
                   <CardContent className="p-4">
                     <div className="aspect-video mb-3 overflow-hidden rounded-lg">
-                      <img src={car.images?.[0] || '/placeholder.svg'} alt={car.name} className="w-full h-full object-cover" />
+                      <LazyImage src={car.images?.[0] || '/placeholder.svg'} alt={car.name} className="w-full h-full object-cover" />
                     </div>
                     
                     <div className="space-y-2">

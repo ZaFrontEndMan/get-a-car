@@ -46,6 +46,7 @@ import {
 } from "@/hooks/vendor/useVendorCarOffer";
 import { useGetAllCarsOffers } from "@/hooks/vendor/useVendorCar";
 import { useLanguage } from "@/contexts/LanguageContext";
+import LazyImage from "../ui/LazyImage";
 
 interface Offer {
   id: string;
@@ -131,7 +132,7 @@ const OfferCard: React.FC<{
           )}
           {offer.offerImage && (
             <div className="mb-2">
-              <img
+              <LazyImage
                 src={`${import.meta.env.VITE_UPLOADS_BASE_URL}/${
                   offer.offerImage
                 }`}
@@ -333,7 +334,7 @@ const OfferForm: React.FC<{
             {editingOffer && editingOffer.offerImage && (
               <div className="mt-2">
                 <p className="text-sm text-gray-500">{t("image")}</p>
-                <img
+                <LazyImage
                   src={`${import.meta.env.VITE_UPLOADS_BASE_URL}/${
                     editingOffer.offerImage
                   }`}

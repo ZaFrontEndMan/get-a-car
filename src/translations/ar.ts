@@ -1485,6 +1485,8 @@ export const arTranslations = {
   imageNotAvailable: "الصورة غير متاحة",
   feesVehicleRental:
     "سيتم دفع نسبة {{percentage}}٪ الآن عبر الإنترنت، وسيتم دفع الباقي لدى البائع عند استلام السيارة.",
+  noSimilarCarsFound: "لم يتم العثور على سيارات مماثلة.",
+  selectedAdditionalServices: "الخدمات الإضافية المحددة",
 };
 
 export default arTranslations;

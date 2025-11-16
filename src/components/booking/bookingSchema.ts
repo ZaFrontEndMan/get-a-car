@@ -5,14 +5,14 @@ export const createBookingSchema = (
   selectedDropoff?: string
 ) => {
   return z.object({
-    pickupDate: z.date({ required_error: "Pickup date is required" }),
-    dropoffDate: z.date({ required_error: "Drop-off date is required" }),
+    pickupDate: z.date({ required_error: "" }),
+    dropoffDate: z.date({ required_error: "" }),
     pickupLocation: selectedPickup
       ? z.string().default(selectedPickup)
-      : z.string().min(1, "Pickup location is required"),
+      : z.string().min(1, ""),
     dropoffLocation: selectedDropoff
       ? z.string().default(selectedDropoff)
-      : z.string().min(1, "Drop-off location is required"),
+      : z.string().min(1, ""),
   });
 };
 

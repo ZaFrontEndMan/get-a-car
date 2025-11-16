@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Building2, Phone, Mail, MapPin, Calendar, Star, Car, CreditCard, FileText, Globe2 } from 'lucide-react';
 import { VendorDetails } from './types';
+import LazyImage from '@/components/ui/LazyImage';
 
 interface VendorInfoCardProps {
   vendor: VendorDetails;
@@ -16,7 +17,7 @@ export const VendorInfoCard: React.FC<VendorInfoCardProps> = ({ vendor, carsCoun
       <CardHeader>
         <CardTitle className="flex items-center gap-3">
           {vendor.logo_url ? (
-            <img src={vendor.logo_url} alt={vendor.name} className="w-12 h-12 rounded-full" />
+            <LazyImage src={vendor.logo_url} alt={vendor.name} className="w-12 h-12 rounded-full" />
           ) : (
             <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center">
               <Building2 className="h-6 w-6 text-gray-500" />

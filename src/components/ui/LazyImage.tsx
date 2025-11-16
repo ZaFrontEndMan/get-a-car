@@ -65,7 +65,7 @@ const LazyImage: React.FC<LazyImageProps> = ({
 
   return (
     <div className={`relative overflow-hidden ${className}`}>
-      <img
+      <LazyImage
         ref={imgRef}
         src={imageSrc}
         alt={alt}

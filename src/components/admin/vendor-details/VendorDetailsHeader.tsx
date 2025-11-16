@@ -2,6 +2,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Building2, Star, Car, Calendar, Shield } from 'lucide-react';
+import LazyImage from '@/components/ui/LazyImage';
 
 interface VendorDetailsHeaderProps {
   vendor: {
@@ -42,7 +43,7 @@ const VendorDetailsHeader: React.FC<VendorDetailsHeaderProps> = ({
             </Button>
             <div className="flex items-center gap-3">
               {vendor.logo_url ? (
-                <img 
+                <LazyImage 
                   src={vendor.logo_url} 
                   alt={vendor.name} 
                   className="w-12 h-12 rounded-full object-cover bg-white p-1"

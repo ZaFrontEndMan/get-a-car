@@ -17,6 +17,7 @@ import {
   ChevronUp,
   Copy,
 } from "lucide-react";
+import LazyImage from "@/components/ui/LazyImage";
 
 interface CarData {
   id: string;
@@ -71,7 +72,7 @@ const CarMobileCard = ({
           <div className="flex gap-3">
             <div className="w-20 h-16 bg-gray-200 rounded-lg overflow-hidden flex-shrink-0">
               {car.images && car.images.length > 0 ? (
-                <img
+                <LazyImage
                   src={car.images[0]}
                   alt={car.name}
                   className="w-full h-full object-cover"

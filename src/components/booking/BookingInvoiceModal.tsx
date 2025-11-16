@@ -18,6 +18,7 @@ import { Booking } from "../../types/clientBookings";
 import { toast } from "sonner";
 import { useGetBookingById } from "@/hooks/vendor/useVendorBooking";
 import Barcode from "react-barcode";
+import LazyImage from "../ui/LazyImage";
 
 interface BookingInvoiceModalProps {
   isOpen: boolean;
@@ -259,7 +260,7 @@ const BookingInvoiceModal: React.FC<BookingInvoiceModalProps> = ({
             </h3>
             <div className="flex items-center gap-2">
               {carDetails.imageURLsCar?.[0] ? (
-                <img
+                <LazyImage
                   src={`${import.meta.env.VITE_UPLOADS_BASE_URL}${
                     carDetails.imageURLsCar[0]
                   }`}

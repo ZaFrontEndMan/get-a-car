@@ -32,6 +32,7 @@ import {
   useCreateTicket,
 } from "@/hooks/client/useClientTickets";
 import { useToast } from "@/components/ui/use-toast";
+import LazyImage from "../ui/LazyImage";
 
 // Small helper components to keep UI stable and code modular
 const StatusIcon: React.FC<{ status?: string }> = ({ status }) => {
@@ -429,7 +430,7 @@ const SupportSection: React.FC = () => {
                         <TableCell>{ticket.updatedAt}</TableCell>
                         <TableCell>
                           {ticket.attachement ? (
-                            <img
+                            <LazyImage
                               src={`${import.meta.env.VITE_UPLOADS_BASE_URL}${
                                 ticket.attachement
                               }`}

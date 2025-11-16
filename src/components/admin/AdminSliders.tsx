@@ -10,6 +10,7 @@ import { Switch } from '@/components/ui/switch';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Plus, Edit, Trash2, Image } from 'lucide-react';
 import { toast } from 'sonner';
+import LazyImage from '../ui/LazyImage';
 
 interface HeroSlide {
   id: string;
@@ -316,7 +317,7 @@ const AdminSliders = () => {
             </CardHeader>
             <CardContent>
               <div className="flex gap-4">
-                <img 
+                <LazyImage
                   src={slide.image_url} 
                   alt={slide.title}
                   className="w-32 h-20 object-cover rounded"

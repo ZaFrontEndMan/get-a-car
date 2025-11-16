@@ -9,6 +9,7 @@ import { BookingWithCar } from '@/hooks/useBookings';
 import { getStatusConfig } from '@/components/vendor/bookings/bookingUtils';
 import BookingInvoiceModal from '@/components/booking/BookingInvoiceModal';
 import { useLanguage } from '@/contexts/LanguageContext';
+import LazyImage from '@/components/ui/LazyImage';
 
 interface BookingTableViewProps {
   bookings: BookingWithCar[];
@@ -45,7 +46,7 @@ const BookingTableView = ({ bookings, onReturnCar, isReturning }: BookingTableVi
               <TableRow key={booking.id} className="hover:bg-gray-50/50 transition-colors">
                 <TableCell>
                   <div className="flex items-center gap-3">
-                    <img
+                    <LazyImage
                       src={booking.car.images?.[0] || 'https://images.unsplash.com/photo-1549924231-f129b911e442'}
                       alt={booking.car.name}
                       className="h-12 w-16 object-cover rounded-lg"

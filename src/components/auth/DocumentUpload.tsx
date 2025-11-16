@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Upload, X, FileText } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import LazyImage from "../ui/LazyImage";
 
 interface DocumentUploadProps {
   onImageUpdate: (file: File | null) => void;
@@ -96,7 +97,7 @@ const DocumentUpload: React.FC<DocumentUploadProps> = ({
       <div className="relative">
         {previewUrl ? (
           <div className="relative group">
-            <img
+            <LazyImage
               src={previewUrl}
               alt={title}
               className="w-full h-32 object-cover rounded-lg border border-gray-300"

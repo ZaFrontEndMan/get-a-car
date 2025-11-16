@@ -17,6 +17,7 @@ import { getStatusConfig } from "@/components/vendor/bookings/bookingUtils";
 import BookingInvoiceModal from "@/components/booking/BookingInvoiceModal";
 import { useLanguage } from "@/contexts/LanguageContext";
 import RatingDialog from "./RatingDialog";
+import LazyImage from "@/components/ui/LazyImage";
 
 interface ClientBookingGridViewProps {
   bookings: Booking[];
@@ -72,7 +73,7 @@ const ClientBookingGridView = ({
               <div className="flex gap-3 items-start">
                 <div className="relative">
                   <div className="w-14 h-12 rounded-lg overflow-hidden shadow-sm border border-slate-200">
-                    <img
+                    <LazyImage
                       src={`${import.meta.env.VITE_UPLOADS_BASE_URL}${
                         booking.carImage
                       }`}
@@ -178,7 +179,7 @@ const ClientBookingGridView = ({
               <div className="flex flex-row items-center justify-between pt-2 border-t border-slate-100 gap-1 min-h-[42px]">
                 <div className="flex items-center gap-1 flex-1 min-w-0">
                   <div className="w-7 h-7 bg-slate-100 rounded flex items-center justify-center">
-                    <img
+                    <LazyImage
                       src={`${import.meta.env.VITE_UPLOADS_BASE_URL}${
                         booking.vendorLogo
                       }`}

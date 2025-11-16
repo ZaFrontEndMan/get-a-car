@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import LazyImage from '@/components/ui/LazyImage';
 
 const VendorCarDetails = () => {
   const { id } = useParams();
@@ -97,7 +98,7 @@ const VendorCarDetails = () => {
               <Card>
                 <CardContent className="p-0">
                   <div className="relative w-full h-64 overflow-hidden rounded-lg">
-                    <img
+                    <LazyImage
                       src={car.images[0]}
                       alt={car.name}
                       className="w-full h-full object-cover"

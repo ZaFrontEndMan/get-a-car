@@ -17,6 +17,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { BookingWithCar } from "@/hooks/useBookings";
 import { getStatusConfig } from "@/components/vendor/bookings/bookingUtils";
 import { useLanguage } from "@/contexts/LanguageContext";
+import LazyImage from "@/components/ui/LazyImage";
 
 interface BookingGridViewProps {
   bookings: BookingWithCar[];
@@ -55,7 +56,7 @@ const BookingGridView = ({
               <div className="flex  gap-4 items-start">
                 <div className="relative">
                   <div className="w-20 h-16 rounded-xl overflow-hidden shadow-sm border border-slate-200">
-                    <img
+                    <LazyImage
                       src={
                         booking.car.images?.[0] ||
                         "https://images.unsplash.com/photo-1549924231-f129b911e442"

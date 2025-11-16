@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import LazyImage from "@/components/ui/LazyImage";
 
 const NavbarLogo = () => {
   const logoVariants = {
@@ -55,7 +56,7 @@ const NavbarLogo = () => {
           whileTap={{ scale: 0.95 }}
         >
           <div className="relative w-10 h-10">
-            <img
+            <LazyImage
               src="/logo.png"
               alt="Logo"
               className="w-full h-full object-contain"

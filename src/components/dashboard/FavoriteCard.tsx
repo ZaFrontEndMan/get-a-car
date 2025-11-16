@@ -2,6 +2,7 @@
 import React from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { X, ShoppingCart } from 'lucide-react';
+import LazyImage from '../ui/LazyImage';
 
 interface FavoriteCardProps {
   favorite: {
@@ -40,7 +41,7 @@ const FavoriteCard: React.FC<FavoriteCardProps> = ({ favorite, onRemove, onBookN
   return (
     <div className="bg-white rounded-lg shadow overflow-hidden flex flex-col h-[380px] md:h-[400px] relative">
       <div className="relative">
-        <img
+        <LazyImage
           src={favorite.carImage}
           alt={favorite.carTitle}
           className="w-full h-40 md:h-48 object-cover"
@@ -53,7 +54,7 @@ const FavoriteCard: React.FC<FavoriteCardProps> = ({ favorite, onRemove, onBookN
           <X className="h-4 w-4" />
         </button>
         <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 bg-white/90 backdrop-blur-sm rounded-full px-3 py-1 flex items-center gap-2 rtl:gap-reverse">
-          <img
+          <LazyImage
             src={favorite.vendorLogo}
             alt={favorite.vendor}
             className="w-4 h-4 rounded-full"

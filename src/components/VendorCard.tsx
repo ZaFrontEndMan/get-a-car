@@ -4,6 +4,7 @@ import { Star, MapPin, Car, Building } from "lucide-react";
 import { motion } from "framer-motion";
 import { getImageUrl, DEFAULT_IMAGES } from "@/utils/imageUtils";
 import { useLanguage } from "@/contexts/LanguageContext";
+import LazyImage from "./ui/LazyImage";
 
 interface VendorCardProps {
   vendor: {
@@ -42,7 +43,7 @@ const VendorCard = ({ vendor }: VendorCardProps) => {
           className="aspect-video overflow-hidden"
           whileHover={{ scale: 1.1 }}
         >
-          <img
+          <LazyImage
             src={imageSrc}
             alt={vendor.name}
             className="w-full h-full object-cover rounded-t-2xl"

@@ -5,6 +5,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
+import LazyImage from "./ui/LazyImage";
 
 const HeroSlider = () => {
   const { t, language } = useLanguage();
@@ -116,7 +117,7 @@ const HeroSlider = () => {
           }}
           className="absolute inset-0"
         >
-          <img
+          <LazyImage
             src={displaySlides[currentSlide]?.image_url}
             alt={
               language === "ar" && displaySlides[currentSlide]?.title_ar 

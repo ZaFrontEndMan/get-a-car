@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Upload, Camera, FileText, CreditCard } from "lucide-react";
+import LazyImage from "../ui/LazyImage";
 
 type DocumentFieldName =
   | "profilePicture"
@@ -89,7 +90,7 @@ const ProfileImageUpload: React.FC<ProfileImageUploadProps> = ({
       <div className="relative">
         {currentImageUrl || previewUrl ? (
           <div className="relative group">
-            <img
+            <LazyImage
               src={
                 previewUrl ||
                 `${import.meta.env.VITE_UPLOADS_BASE_URL}${currentImageUrl}`

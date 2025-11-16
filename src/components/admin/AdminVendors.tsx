@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Search, Building2, Car, Star, MapPin } from 'lucide-react';
 import { toast } from 'sonner';
 import { useLanguage } from '@/contexts/LanguageContext';
+import LazyImage from '../ui/LazyImage';
 
 const AdminVendors = () => {
   const { t, language } = useLanguage();
@@ -164,7 +165,7 @@ const AdminVendors = () => {
                     <TableCell>
                       <div className={`flex items-center gap-3 ${isRTL ? 'gap-reverse' : ''}`}>
                         {vendor.logo_url ? (
-                          <img
+                          <LazyImage
                             src={vendor.logo_url}
                             alt={vendor.name}
                             className="w-10 h-10 rounded-full"

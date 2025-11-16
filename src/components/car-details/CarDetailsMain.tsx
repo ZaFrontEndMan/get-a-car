@@ -3,6 +3,7 @@ import React from 'react';
 import { Calendar, Users, Fuel, Settings } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import LazyImage from '../ui/LazyImage';
 
 interface CarDetailsMainProps {
   car: any;
@@ -13,7 +14,7 @@ const CarDetailsMain = ({ car }: CarDetailsMainProps) => {
     <Card>
       <CardContent className="p-0">
         {car.images && car.images.length > 0 && (
-          <img
+          <LazyImage
             src={car.images[0]}
             alt={car.name}
             className="w-full h-48 md:h-64 lg:h-96 object-cover rounded-t-lg"

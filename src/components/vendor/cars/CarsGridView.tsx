@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import CarMobileCard from "./CarMobileCard";
 import { useLanguage } from "@/contexts/LanguageContext";
+import LazyImage from "@/components/ui/LazyImage";
 
 interface CarData {
   id: string;
@@ -70,7 +71,7 @@ const CarsGridView = ({
           >
             <div className="aspect-video bg-gray-200 relative">
               {car.images && car.images.length > 0 ? (
-                <img
+                <LazyImage
                   src={car.images[0]}
                   alt={car.name}
                   className="w-full h-full object-cover"

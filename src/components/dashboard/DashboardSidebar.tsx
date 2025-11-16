@@ -10,6 +10,7 @@ import {
   HelpCircle,
   ChevronLeft,
 } from "lucide-react";
+import LazyImage from "../ui/LazyImage";
 
 interface SidebarItem {
   key: string;
@@ -153,13 +154,13 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
       </nav>
 
       {isSidebarExpanded ? (
-        <img
+        <LazyImage
           className="h-16 w-full object-cover p-2"
           src="/full-logo.png"
           alt="logo"
         />
       ) : (
-        <img
+        <LazyImage
           className="h-16 w-full object-contain p-2"
           src="/cropped-logo.jpeg"
           alt="logo"

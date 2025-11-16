@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { useLanguage } from '../../../contexts/LanguageContext';
+import LazyImage from '@/components/ui/LazyImage';
 
 const LanguageSwitcher = () => {
   const { language, setLanguage } = useLanguage();
@@ -24,7 +25,7 @@ const LanguageSwitcher = () => {
         }`}
         title="English"
       >
-        <img 
+        <LazyImage 
           src="/uploads/3ffc1e00-97cd-4f26-b646-95fab8f35c73.png" 
           alt="English" 
           className="w-full h-full object-cover"
@@ -40,7 +41,7 @@ const LanguageSwitcher = () => {
         }`}
         title="العربية"
       >
-        <img 
+        <LazyImage 
           src="/uploads/72a1a98f-61d2-423d-b31f-c73128941f38.png" 
           alt="Arabic" 
           className="w-full h-full object-cover"

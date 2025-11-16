@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/carousel";
 import { useLanguage } from "../contexts/LanguageContext";
 import { useAdminSettings } from "../hooks/useAdminSettings";
+import LazyImage from "./ui/LazyImage";
 
 const TestimonialsSection = () => {
   const { t, language } = useLanguage();
@@ -104,7 +105,7 @@ const TestimonialsSection = () => {
 
                     <div className={`flex items-center gap-2`}>
                       {testimonial.customerImage ? (
-                        <img
+                        <LazyImage
                           src={`${import.meta.env.VITE_UPLOADS_BASE_URL}${
                             testimonial.customerImage
                           }`}

@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { useAdminSettings, useSocialMedias } from "../hooks/useAdminSettings";
 import { Link2 } from "lucide-react";
+import LazyImage from "./ui/LazyImage";
 const SOCIAL_ICON_MAP = {
   facebook: Facebook,
   instagram: Instagram,
@@ -80,7 +81,7 @@ const Footer = () => {
           {/* Brand Section */}
           <div className="space-y-4">
             <div className="flex items-center gap-2">
-              <img
+              <LazyImage
                 src="/logo.png"
                 alt="GetCar Logo"
                 className="w-60 object-contain"

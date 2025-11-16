@@ -2,6 +2,7 @@
 import React from 'react';
 import { Minus, Plus } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import LazyImage from '../ui/LazyImage';
 
 interface BookingCarCardProps {
   car: {
@@ -22,7 +23,7 @@ const BookingCarCard = ({ car, rentalDays, onAdjustDays }: BookingCarCardProps) 
     <div className="bg-white rounded-lg p-3 sm:p-4">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
         <div className="flex items-center gap-3 sm:gap-4 rtl:gap-reverse flex-1">
-          <img 
+          <LazyImage 
             src={car.image} 
             alt={car.name}
             className="w-16 h-12 sm:w-20 sm:h-16 object-cover rounded-lg flex-shrink-0"

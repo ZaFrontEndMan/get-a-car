@@ -2,6 +2,7 @@ import React from 'react';
 import { Star, Shield, MapPin, Phone, Mail, Clock, Calendar, Car, Users } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { getImageUrl, DEFAULT_IMAGES } from '@/utils/imageUtils';
+import LazyImage from './ui/LazyImage';
 interface VendorProfileHeaderProps {
   vendor: {
     id: string;
@@ -46,7 +47,7 @@ const VendorProfileHeader = ({
           <div className="flex flex-col sm:flex-row sm:items-end space-y-4 sm:space-y-0 sm:gap-6 rtl:gap-reverse">
             {/* Professional Logo - Fixed mobile size */}
             <div className="relative flex-shrink-0 self-center sm:self-auto">
-              <img src={vendorImage} alt={vendor.name} className="w-20 h-20 sm:w-32 sm:h-32 rounded-xl sm:rounded-2xl border-3 sm:border-4 border-white shadow-2xl object-cover bg-white p-1 sm:p-2" />
+              <LazyImage src={vendorImage} alt={vendor.name} className="w-20 h-20 sm:w-32 sm:h-32 rounded-xl sm:rounded-2xl border-3 sm:border-4 border-white shadow-2xl object-cover bg-white p-1 sm:p-2" />
               {vendor.verified && <div className="absolute -top-1 -right-1 sm:-top-2 sm:-right-2 bg-blue-500 text-white p-1 sm:p-2 rounded-full shadow-lg">
                   <Shield className="h-3 w-3 sm:h-5 sm:w-5" />
                 </div>}

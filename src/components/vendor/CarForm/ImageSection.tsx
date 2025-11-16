@@ -11,6 +11,7 @@ import {
   Image as ImageIcon,
 } from "lucide-react";
 import { AlertCircle } from "lucide-react";
+import LazyImage from "@/components/ui/LazyImage";
 
 // API Image interface from Car type
 interface ApiImage {
@@ -260,7 +261,7 @@ const ImageSection = ({
                   >
                     {/* Image Container */}
                     <div className="relative w-full aspect-square rounded-lg overflow-hidden bg-gray-100">
-                      <img
+                      <LazyImage
                         src={getImagePreview(image)}
                         alt={`${t("car_image")} ${index + 1}`}
                         className="w-full h-full object-cover hover:scale-105 transition-transform duration-200"

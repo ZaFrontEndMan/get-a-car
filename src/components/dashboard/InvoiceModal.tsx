@@ -3,6 +3,7 @@ import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { Download, Car } from 'lucide-react';
+import LazyImage from '../ui/LazyImage';
 
 interface InvoiceModalProps {
   isOpen: boolean;
@@ -67,7 +68,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({ isOpen, onClose, payment })
             <div>
               <h3 className="font-semibold text-gray-900 mb-2">{t('vendor')}</h3>
               <div className="flex items-center gap-2 rtl:gap-reverse text-gray-600">
-                <img src={payment.vendorLogo} alt={payment.vendor} className="w-8 h-8 rounded-full" />
+                <LazyImage src={payment.vendorLogo} alt={payment.vendor} className="w-8 h-8 rounded-full" />
                 <div>
                   <p className="font-medium">{payment.vendor}</p>
                   <p>vendor@{payment.vendor.toLowerCase().replace(' ', '')}.com</p>

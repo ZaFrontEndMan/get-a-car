@@ -2,6 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { Calendar, User, Clock } from "lucide-react";
 import { useLanguage } from "../contexts/LanguageContext";
+import LazyImage from "./ui/LazyImage";
 
 interface BlogCardProps {
   post: {
@@ -29,7 +30,7 @@ const BlogCard = ({ post }: BlogCardProps) => {
   return (
     <div className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 h-full flex flex-col">
       <div className="relative">
-        <img
+        <LazyImage
           src={normalizeImageUrl(post.image)}
           alt={post.title}
           className="w-full h-48 object-cover"

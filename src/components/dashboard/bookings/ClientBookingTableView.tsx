@@ -15,6 +15,7 @@ import { Booking } from "@/types/clientBookings";
 import { getStatusConfig } from "@/components/vendor/bookings/bookingUtils";
 import BookingInvoiceModal from "@/components/booking/BookingInvoiceModal";
 import { useLanguage } from "@/contexts/LanguageContext";
+import LazyImage from "@/components/ui/LazyImage";
 
 interface ClientBookingTableViewProps {
   bookings: Booking[];
@@ -83,7 +84,7 @@ const ClientBookingTableView = ({
               >
                 <TableCell>
                   <div className="flex items-center gap-2">
-                    <img
+                    <LazyImage
                       src={`${import.meta.env.VITE_UPLOADS_BASE_URL}${
                         booking.carImage
                       }`}

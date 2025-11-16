@@ -3,6 +3,7 @@ import { useLanguage } from "../../contexts/LanguageContext";
 import { Grid, List, Users, Fuel, Heart, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useClientFavorites } from "@/hooks/client/useClientFavorites";
+import LazyImage from "../ui/LazyImage";
 
 const FavoritesList: React.FC = () => {
   const { t } = useLanguage();
@@ -100,7 +101,7 @@ const FavoritesList: React.FC = () => {
               className="bg-white rounded-lg shadow-sm border overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
             >
               <div className="relative">
-                <img
+                <LazyImage
                   src={favorite.car?.images?.[0] || "/placeholder.svg"}
                   alt={favorite.car?.name}
                   className="w-full h-48 object-cover"
@@ -141,7 +142,7 @@ const FavoritesList: React.FC = () => {
                 </div>
                 <div className="flex justify-between items-center">
                   <div className="flex items-center gap-2">
-                    <img
+                    <LazyImage
                       src={favorite.car?.vendor?.logo_url || "/placeholder.svg"}
                       alt={favorite.car?.vendor?.name}
                       className="w-6 h-6 rounded-full object-cover"
@@ -172,7 +173,7 @@ const FavoritesList: React.FC = () => {
               className="bg-white rounded-lg shadow-sm border p-6 cursor-pointer hover:shadow-md transition-shadow"
             >
               <div className="flex items-center gap-2">
-                <img
+                <LazyImage
                   src={favorite.car?.images?.[0] || "/placeholder.svg"}
                   alt={favorite.car?.name}
                   className="w-24 h-24 object-cover rounded-lg"
@@ -199,7 +200,7 @@ const FavoritesList: React.FC = () => {
                       <span>{t(favorite.car?.fuel || "gasoline")}</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <img
+                      <LazyImage
                         src={
                           favorite.car?.vendor?.logo_url || "/placeholder.svg"
                         }

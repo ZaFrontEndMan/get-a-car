@@ -2,6 +2,7 @@
 import React from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { X, ShoppingCart } from 'lucide-react';
+import LazyImage from '../ui/LazyImage';
 
 interface Favorite {
   id: number;
@@ -30,7 +31,7 @@ const FavoriteListView: React.FC<FavoriteListViewProps> = ({ favorites, onRemove
       {favorites.map((favorite) => (
         <div key={favorite.id} className="bg-white rounded-lg shadow p-6">
           <div className="flex items-start gap-4 rtl:gap-reverse">
-            <img
+            <LazyImage
               src={favorite.carImage}
               alt={favorite.carTitle}
               className="w-24 h-16 object-cover rounded-lg"
@@ -42,7 +43,7 @@ const FavoriteListView: React.FC<FavoriteListViewProps> = ({ favorites, onRemove
                 </div>
                 <div className="text-right rtl:text-left flex items-center gap-3 rtl:gap-reverse">
                   <div className="flex items-center gap-2 rtl:gap-reverse">
-                    <img
+                    <LazyImage
                       src={favorite.vendorLogo}
                       alt={favorite.vendor}
                       className="w-4 h-4 rounded-full"

@@ -1,5 +1,6 @@
 
 import React from 'react';
+import LazyImage from '../ui/LazyImage';
 
 interface InvoiceCarDetailsProps {
   car: any;
@@ -11,7 +12,7 @@ const InvoiceCarDetails = ({ car }: InvoiceCarDetailsProps) => {
       <div>
         <h5 className="text-sm font-semibold mb-2 sm:mb-3">Car details</h5>
         <div className="flex items-center gap-3 sm:gap-4">
-          <img src={car.image} alt={car.name} className="w-16 h-12 sm:w-20 sm:h-16 md:w-24 md:h-20 object-cover rounded-lg flex-shrink-0" />
+          <LazyImage src={car.image} alt={car.name} className="w-16 h-12 sm:w-20 sm:h-16 md:w-24 md:h-20 object-cover rounded-lg flex-shrink-0" />
           <div>
             <h6 className="text-sm font-medium">{car.name}</h6>
             <p className="text-xs text-gray-600">Hatchback car rental car</p>

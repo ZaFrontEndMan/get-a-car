@@ -6,6 +6,7 @@ import { useMostPopularOffers } from "@/hooks/website/useWebsiteOffers";
 import { SectionSkeleton } from "./ui/SkeletonLoaders";
 import SectionHeader from "./ui/SectionHeader";
 import { getImageUrl, DEFAULT_IMAGES } from "@/utils/imageUtils";
+import LazyImage from "./ui/LazyImage";
 const OffersSection = () => {
   const { t, language } = useLanguage();
   // Use the new API hook for popular offers
@@ -71,7 +72,7 @@ const OffersSection = () => {
                 }}
               >
                 <div className="relative">
-                  <img
+                  <LazyImage
                     src={offer.image}
                     alt={getLocalizedTitle(offer)}
                     className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-300"
@@ -83,7 +84,7 @@ const OffersSection = () => {
                   {/* Vendor Logo */}
                   {offer.vendor?.logo_url && (
                     <div className="absolute bottom-3 left-3 w-10 h-10 rounded-full bg-white shadow-md overflow-hidden border-2 border-white">
-                      <img
+                      <LazyImage
                         src={offer.vendor.logo_url}
                         alt={offer.vendor.name}
                         className="w-full h-full object-cover"

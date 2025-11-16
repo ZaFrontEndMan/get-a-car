@@ -7,6 +7,7 @@ import { Booking } from "@/types/clientBookings";
 import { getStatusConfig } from "@/components/vendor/bookings/bookingUtils";
 import BookingInvoiceModal from "@/components/booking/BookingInvoiceModal";
 import { useLanguage } from "@/contexts/LanguageContext";
+import LazyImage from "@/components/ui/LazyImage";
 
 interface ClientBookingListViewProps {
   bookings: Booking[];
@@ -51,7 +52,7 @@ const ClientBookingListView = ({
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <img
+                <LazyImage
                   src={`${import.meta.env.VITE_UPLOADS_BASE_URL}${
                     booking.carImage
                   }`}

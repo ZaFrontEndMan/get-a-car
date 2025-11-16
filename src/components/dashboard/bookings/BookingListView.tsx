@@ -8,6 +8,7 @@ import { BookingWithCar } from '@/hooks/useBookings';
 import { getStatusConfig } from '@/components/vendor/bookings/bookingUtils';
 import BookingInvoiceModal from '@/components/booking/BookingInvoiceModal';
 import { useLanguage } from '@/contexts/LanguageContext';
+import LazyImage from '@/components/ui/LazyImage';
 
 interface BookingListViewProps {
   bookings: BookingWithCar[];
@@ -32,7 +33,7 @@ const BookingListView = ({ bookings, onReturnCar, isReturning }: BookingListView
           <div key={booking.id} className="bg-white rounded-xl shadow-sm border hover:shadow-md transition-all duration-200 p-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <img
+                <LazyImage
                   src={booking.car.images?.[0] || 'https://images.unsplash.com/photo-1549924231-f129b911e442'}
                   alt={booking.car.name}
                   className="h-16 w-20 object-cover rounded-lg"

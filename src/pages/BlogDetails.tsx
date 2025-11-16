@@ -6,6 +6,7 @@ import Footer from "../components/Footer";
 import { useLanguage } from "../contexts/LanguageContext";
 import { ArrowLeft, Calendar, User, Clock, Share2 } from "lucide-react";
 import { useBlogDetail } from "@/hooks/useAdminSettings";
+import LazyImage from "@/components/ui/LazyImage";
 
 const uploadsBaseUrl = import.meta.env.VITE_UPLOADS_BASE_URL;
 
@@ -86,7 +87,7 @@ const BlogDetailsContent = () => {
             {post.image && (
               <div className="w-full h-64 md:h-96 overflow-hidden">
                                {" "}
-                <img
+                <LazyImage
                   src={normalizeImageUrl(post.image)}
                   alt={post.title}
                   className="w-full h-full object-cover"

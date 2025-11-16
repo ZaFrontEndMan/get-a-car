@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useWishlist } from '../hooks/useWishlist';
 import { Heart, Star, Users, Fuel, Settings } from 'lucide-react';
+import LazyImage from './ui/LazyImage';
 
 interface VendorCarCardProps {
   car: {
@@ -67,7 +68,7 @@ const VendorCarCard = ({ car, isVendorDashboard = false }: VendorCarCardProps) =
       className="block bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 transform hover:scale-105"
     >
       <div className="relative">
-        <img src={car.image} alt={car.name} className="w-full h-48 object-cover" />
+        <LazyImage src={car.image} alt={car.name} className="w-full h-48 object-cover" />
         {!isVendorDashboard && (
           <button 
             onClick={handleFavoriteClick}

@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useVendorAuth } from "@/hooks/vendor/useVendorAuth";
+import LazyImage from "../ui/LazyImage";
 
 interface DocumentFile {
   file: File | null;
@@ -286,7 +287,7 @@ const VendorProfile = () => {
                   <div className="mt-2 relative">
                     {data?.companyLogo ? (
                       <>
-                        <img
+                        <LazyImage
                           src={`${import.meta.env.VITE_UPLOADS_BASE_URL}${
                             data.companyLogo
                           }`}
@@ -429,7 +430,7 @@ const VendorProfile = () => {
                       </label>
                       <div className="mt-2">
                         {data?.businessLicense ? (
-                          <img
+                          <LazyImage
                             src={`${import.meta.env.VITE_UPLOADS_BASE_URL}${
                               data.businessLicense
                             }`}
@@ -457,7 +458,7 @@ const VendorProfile = () => {
                       </label>
                       <div className="mt-2">
                         {data?.taxType ? (
-                          <img
+                          <LazyImage
                             src={`${import.meta.env.VITE_UPLOADS_BASE_URL}${
                               data.taxType
                             }`}
@@ -485,7 +486,7 @@ const VendorProfile = () => {
                       </label>
                       <div className="mt-2">
                         {data?.insurance ? (
-                          <img
+                          <LazyImage
                             src={`${import.meta.env.VITE_UPLOADS_BASE_URL}${
                               data.insurance
                             }`}
@@ -575,7 +576,7 @@ const VendorProfile = () => {
           </DialogHeader>
           <div className="flex justify-center py-4">
             {selectedImage ? (
-              <img
+              <LazyImage
                 src={selectedImage}
                 alt={t(selectedDocumentType)}
                 className="max-w-[400px] max-h-[400px] object-contain rounded-lg"
@@ -684,7 +685,7 @@ const VendorProfile = () => {
                 <div className="relative w-fit">
                   {logoFile ? (
                     <>
-                      <img
+                      <LazyImage
                         src={URL.createObjectURL(logoFile)}
                         alt="Logo preview"
                         className="w-24 h-24 object-cover rounded-lg border"
@@ -698,7 +699,7 @@ const VendorProfile = () => {
                     </>
                   ) : data?.companyLogo ? (
                     <>
-                      <img
+                      <LazyImage
                         src={`${import.meta.env.VITE_UPLOADS_BASE_URL}${
                           data.companyLogo
                         }`}
@@ -751,7 +752,7 @@ const VendorProfile = () => {
                     <div className="relative">
                       {getDocumentDisplayImage("businessLicense") ? (
                         <>
-                          <img
+                          <LazyImage
                             src={getDocumentDisplayImage("businessLicense")}
                             alt="Business License preview"
                             className="w-24 h-24 object-cover rounded-lg border"
@@ -808,7 +809,7 @@ const VendorProfile = () => {
                     <div className="relative">
                       {getDocumentDisplayImage("taxType") ? (
                         <>
-                          <img
+                          <LazyImage
                             src={getDocumentDisplayImage("taxType")}
                             alt="Tax Type preview"
                             className="w-24 h-24 object-cover rounded-lg border"
@@ -860,7 +861,7 @@ const VendorProfile = () => {
                     <div className="relative">
                       {getDocumentDisplayImage("insurance") ? (
                         <>
-                          <img
+                          <LazyImage
                             src={getDocumentDisplayImage("insurance")}
                             alt="Insurance preview"
                             className="w-24 h-24 object-cover rounded-lg border"

@@ -19,6 +19,7 @@ import {
 import { getStatusConfig } from "./bookingUtils";
 import BookingInvoiceModal from "@/components/booking/BookingInvoiceModal";
 import { useLanguage } from "@/contexts/LanguageContext";
+import LazyImage from "@/components/ui/LazyImage";
 
 interface BookingCardProps {
   booking: any;
@@ -56,7 +57,7 @@ const BookingCard = ({
             <div className="flex items-center gap-2 flex-1 min-w-0">
               <div className="relative flex-shrink-0">
                 <div className="w-16 h-12 sm:w-20 sm:h-16 rounded-lg overflow-hidden shadow-sm border border-slate-200">
-                  <img
+                  <LazyImage
                     src={booking?.cars[0]?.images[0] || ""}
                     alt={booking?.cars[0]?.name || ""}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"

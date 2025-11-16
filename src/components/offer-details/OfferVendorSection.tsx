@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Star, MapPin, Car, ExternalLink } from "lucide-react";
 import VendorPoliciesDisplay from "../VendorPoliciesDisplay";
+import LazyImage from "../ui/LazyImage";
 
 interface OfferVendorSectionProps {
   vendor: {
@@ -48,7 +49,7 @@ const OfferVendorSection = ({ vendor }: OfferVendorSectionProps) => {
         <CardContent>
           <div className="flex items-start gap-4">
             <div className="w-16 h-16 rounded-full overflow-hidden bg-gray-200 flex-shrink-0">
-              <img
+              <LazyImage
                 src={
                   vendor.image ||
                   "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=center"

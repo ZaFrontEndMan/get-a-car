@@ -13,6 +13,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { MessageSquare, Edit, Trash2, Plus, Star } from 'lucide-react';
+import LazyImage from '../ui/LazyImage';
 
 interface Testimonial {
   id: string;
@@ -374,7 +375,7 @@ const AdminTestimonials = () => {
                   <TableCell>
                     <div className="flex items-center gap-3">
                       {testimonial.avatar_url && (
-                        <img 
+                        <LazyImage 
                           src={testimonial.avatar_url} 
                           alt={testimonial.name}
                           className="w-10 h-10 rounded-full object-cover"

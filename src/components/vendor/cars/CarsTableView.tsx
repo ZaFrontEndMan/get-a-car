@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Edit, Trash2, Eye, Star, Copy } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import LazyImage from "@/components/ui/LazyImage";
 
 interface CarData {
   id: string;
@@ -83,7 +84,7 @@ const CarsTableView = ({
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-8 bg-gray-200 rounded overflow-hidden">
                     {car.images && car.images.length > 0 ? (
-                      <img
+                      <LazyImage
                         src={car.images[0]}
                         alt={car.name}
                         className="w-full h-full object-cover"

@@ -1483,6 +1483,8 @@ export const enTranslations = {
   noDaysSelected: "No days selected",
   feesVehicleRental:
     "{{percentage}}% fee paid now online. Remaining will be paid at vendor location when you get your car.",
+  noSimilarCarsFound: "No similar cars found.",
+  selectedAdditionalServices: "Selected additional services",
 };
 
 export default enTranslations;

@@ -3,6 +3,7 @@ import { MapPin, Phone, Mail, Globe, Star, Verified, Building2 } from 'lucide-re
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import VendorPoliciesDisplay from './VendorPoliciesDisplay';
+import LazyImage from './ui/LazyImage';
 
 interface VendorProfileProps {
   vendor: {
@@ -30,7 +31,7 @@ const VendorProfile = ({ vendor }: VendorProfileProps) => {
             {/* Logo - Mobile optimized */}
             <div className="flex-shrink-0 w-full sm:w-auto flex justify-center sm:justify-start">
               {vendor.logo_url ? (
-                <img
+                <LazyImage
                   src={vendor.logo_url}
                   alt={vendor.name}
                   className="w-20 h-20 sm:w-24 sm:h-24 lg:w-32 lg:h-32 object-contain rounded-lg border border-gray-200"

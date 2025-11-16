@@ -1,6 +1,6 @@
-
-import React from 'react';
-import { Star } from 'lucide-react';
+import React from "react";
+import { Star } from "lucide-react";
+import LazyImage from "./ui/LazyImage";
 
 interface CarDetailsHeaderProps {
   car: {
@@ -17,14 +17,14 @@ interface CarDetailsHeaderProps {
       monthly: number;
     };
   };
-  selectedPricing: 'daily' | 'weekly' | 'monthly';
+  selectedPricing: "daily" | "weekly" | "monthly";
 }
 
 const CarDetailsHeader = ({ car, selectedPricing }: CarDetailsHeaderProps) => {
   return (
     <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
       <div className="relative">
-        <img
+        <LazyImage
           src={car.image}
           alt={car.name}
           className="w-full h-96 object-cover"
@@ -35,10 +35,10 @@ const CarDetailsHeader = ({ car, selectedPricing }: CarDetailsHeaderProps) => {
           <span className="text-gray-600">({car.reviews})</span>
         </div>
       </div>
-      
+
       <div className="grid grid-cols-3 gap-2 p-4">
         {car.gallery.slice(1).map((img, index) => (
-          <img
+          <LazyImage
             key={index}
             src={img}
             alt={`${car.name} ${index + 1}`}
