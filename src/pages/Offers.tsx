@@ -140,7 +140,7 @@ const Offers = () => {
         t("subjectToAvailability") || "Subject to availability",
       ],
       vendor: {
-        id: offer.carId?.toString(),
+        id: offer.vendorId,
         name: offer.vendorName || t("unknownVendor") || "Unknown vendor",
         logo_url: getCompanyLogoUrl(offer.companyLogo),
       },

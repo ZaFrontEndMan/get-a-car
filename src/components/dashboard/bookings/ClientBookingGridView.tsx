@@ -219,17 +219,19 @@ const ClientBookingGridView = ({
                     </Button>
                   )}
                 {/* Rate Button */}
-                <Button
-                  className="flex-1 min-w-[90px] px-0 py-1"
-                  size="sm"
-                  variant="default"
-                  onClick={() => {
-                    handleOpenRating(booking.id);
-                  }}
-                >
-                  <Star className="h-4 w-4 me-1" />
-                  <span className="text-xs">{t("rateBooking")}</span>
-                </Button>
+                {!booking.isReview && (
+                  <Button
+                    className="flex-1 min-w-[90px] px-0 py-1"
+                    size="sm"
+                    variant="default"
+                    onClick={() => {
+                      handleOpenRating(booking.id);
+                    }}
+                  >
+                    <Star className="h-4 w-4 me-1" />
+                    <span className="text-xs">{t("rateBooking")}</span>
+                  </Button>
+                )}
                 {/* View Invoice */}
                 <Button
                   className="flex-1 min-w-[90px] px-0 py-1"

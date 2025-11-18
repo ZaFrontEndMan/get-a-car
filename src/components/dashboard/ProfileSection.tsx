@@ -36,12 +36,17 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { toast } from "sonner";
-import { useCountries, useCitiesByCountry } from "@/hooks/useCountriesAndCities";
+import {
+  useCountries,
+  useCitiesByCountry,
+} from "@/hooks/useCountriesAndCities";
 
 const ProfileSection: React.FC = () => {
   const { t } = useLanguage();
   const [isEditing, setIsEditing] = useState(false);
-  const [originalData, setOriginalData] = useState<ProfileFormData | null>(null);
+  const [originalData, setOriginalData] = useState<ProfileFormData | null>(
+    null
+  );
   const [countryId, setCountryId] = useState<string | undefined>(undefined);
   const [cityId, setCityId] = useState<string | undefined>(undefined);
 
@@ -49,7 +54,9 @@ const ProfileSection: React.FC = () => {
   const editMutation = useEditClient();
   const profile = data?.data;
   const { data: countries, isLoading: loadingCountries } = useCountries();
-  const { data: cities, isLoading: loadingCities } = useCitiesByCountry(countryId ?? null);
+  const { data: cities, isLoading: loadingCities } = useCitiesByCountry(
+    countryId ?? null
+  );
 
   useEffect(() => {
     if (profile && countries && countries.length > 0) {
@@ -57,7 +64,9 @@ const ProfileSection: React.FC = () => {
         (c) =>
           c.name_en === profile.countryName ||
           c.name_ar === profile.countryName ||
-          c.name_en.toLowerCase().includes(profile.countryName?.toLowerCase() ?? "") ||
+          c.name_en
+            .toLowerCase()
+            .includes(profile.countryName?.toLowerCase() ?? "") ||
           c.name_ar.includes(profile.countryName ?? "")
       );
       if (foundCountry) setCountryId(foundCountry.id);
@@ -70,7 +79,9 @@ const ProfileSection: React.FC = () => {
         (c) =>
           c.name_en === profile.cityName ||
           c.name_ar === profile.cityName ||
-          c.name_en.toLowerCase().includes(profile.cityName?.toLowerCase() ?? "") ||
+          c.name_en
+            .toLowerCase()
+            .includes(profile.cityName?.toLowerCase() ?? "") ||
           c.name_ar.includes(profile.cityName ?? "")
       );
       if (foundCity) setCityId(foundCity.id);
@@ -88,7 +99,7 @@ const ProfileSection: React.FC = () => {
         firstName: profile.firstName || "",
         lastName: profile.lastName || "",
         fullName: profile.fullName || "",
-        birthDate: profile.birthDate?.split("T")[0] || "",
+        birthDate: profile.birthDate || "",
         gender: profile.gender || 1,
         countryName: profile.countryName || "",
         countryId: countryId || "",
@@ -105,14 +116,18 @@ const ProfileSection: React.FC = () => {
     }
   }, [profile, countryId, cityId, form]);
 
-  const getChangedFields = (currentData: ProfileFormData): Partial<ProfileFormData> => {
+  const getChangedFields = (
+    currentData: ProfileFormData
+  ): Partial<ProfileFormData> => {
     if (!originalData) return currentData;
     const changedFields: Partial<ProfileFormData> = {};
-    (Object.keys(currentData) as Array<keyof ProfileFormData>).forEach((key) => {
-      if (currentData[key] !== originalData[key]) {
-        (changedFields as any)[key] = currentData[key];
+    (Object.keys(currentData) as Array<keyof ProfileFormData>).forEach(
+      (key) => {
+        if (currentData[key] !== originalData[key]) {
+          (changedFields as any)[key] = currentData[key];
+        }
       }
-    });
+    );
     return changedFields;
   };
 
@@ -347,7 +362,9 @@ const ProfileSection: React.FC = () => {
                           {t("gender")}
                         </FormLabel>
                         <Select
-                          onValueChange={(value) => field.onChange(parseInt(value))}
+                          onValueChange={(value) =>
+                            field.onChange(parseInt(value))
+                          }
                           value={field.value?.toString()}
                           disabled={!isEditing}
                         >
@@ -389,9 +406,7 @@ const ProfileSection: React.FC = () => {
                             <SelectTrigger>
                               <SelectValue
                                 placeholder={t(
-                                  loadingCountries
-                                    ? "loading"
-                                    : "selectCountry"
+                                  loadingCountries ? "loading" : "selectCountry"
                                 )}
                               />
                             </SelectTrigger>
@@ -420,9 +435,7 @@ const ProfileSection: React.FC = () => {
                         </FormLabel>
                         <FormControl>
                           <Select
-                            disabled={
-                              !isEditing || !countryId || loadingCities
-                            }
+                            disabled={!isEditing || !countryId || loadingCities}
                             value={cityId}
                             onValueChange={(val) => {
                               setCityId(val);
