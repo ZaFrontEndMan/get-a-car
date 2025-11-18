@@ -111,6 +111,8 @@ const CarForm = ({
     append("ebdBrakes", formData.ebdBrakes ?? false);
     append("airbag", formData.airbag ?? false);
     append("absBrakes", formData.absBrakes ?? false);
+    append("mileage", formData.mileage ?? false);
+    append("liter", formData.liter ?? false);
 
     if (protections.length > 0) {
       append(
@@ -131,7 +133,8 @@ const CarForm = ({
         "carServices",
         JSON.stringify(
           paidFeatures.map((pf, index) => ({
-            ServiceTypeId: pf.id || 1,
+            id: pf.id || undefined,
+            serviceTypeId: pf.serviceTypeId || undefined,
             nameAr: pf.titleAr || pf.title || "",
             nameEn: pf.titleEn || pf.title || "",
             Price: pf.price || 0,
@@ -227,7 +230,7 @@ const CarForm = ({
           <CardContent className="flex items-center justify-center py-12">
             <div className="text-center">
               <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-primary" />
-              <p className="text-gray-600">{t("loading_car_data")}</p>
+              <p className="text-gray-600">{t("loading")}</p>
             </div>
           </CardContent>
         </Card>

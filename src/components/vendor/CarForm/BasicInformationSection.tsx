@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
 import {
   Select,
   SelectContent,
@@ -285,6 +286,7 @@ const BasicInformationSection = ({
             required
           />
         </div>
+
         <div>
           <Label className="block mb-2" htmlFor="licenseNumber">
             {t("license_plate")} *
@@ -296,6 +298,59 @@ const BasicInformationSection = ({
             onChange={(e) => handleChange("licenseNumber", e.target.value)}
             required
           />
+        </div>
+
+        <div>
+          <Label className="block mb-2" htmlFor="mileage">
+            {t("mileage")} *
+          </Label>
+          <Input
+            id="mileage"
+            type="number"
+            min={0}
+            step="0.1"
+            value={formData.mileage || ""}
+            onChange={(e) => {
+              const value = e.target.value;
+              if (value === "" || parseFloat(value) >= 0) {
+                handleChange("mileage", value);
+              }
+            }}
+            placeholder={t("enter_mileage")}
+            required
+          />
+        </div>
+
+        <div>
+          <Label className="block mb-2" htmlFor="liter">
+            {t("liter")} *
+          </Label>
+          <Input
+            id="liter"
+            type="number"
+            min={0}
+            step="0.1"
+            value={formData.liter || ""}
+            onChange={(e) => {
+              const value = e.target.value;
+              if (value === "" || parseFloat(value) >= 0) {
+                handleChange("liter", value);
+              }
+            }}
+            placeholder={t("enter_liter")}
+            required
+          />
+        </div>
+
+        <div className="flex items-center space-x-2 rtl:space-x-reverse">
+          <Switch
+            id="withDriver"
+            checked={formData.withDriver || false}
+            onCheckedChange={(checked) => handleChange("withDriver", checked)}
+          />
+          <Label htmlFor="withDriver" className="cursor-pointer">
+            {t("with_driver")}
+          </Label>
         </div>
       </div>
     </div>

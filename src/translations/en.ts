@@ -1485,6 +1485,11 @@ export const enTranslations = {
     "{{percentage}}% fee paid now online. Remaining will be paid at vendor location when you get your car.",
   noSimilarCarsFound: "No similar cars found.",
   selectedAdditionalServices: "Selected additional services",
+  mileage: "Mileage",
+  enter_mileage: "Enter mileage",
+  liter: "Liter",
+  enter_liter: "Enter liter capacity",
+  with_driver: "With Driver",
 };
 
 export default enTranslations;

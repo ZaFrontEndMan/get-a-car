@@ -190,6 +190,8 @@ const Cars = () => {
         monthly: car?.pricePerMonth || 0,
       },
       withDriver: car?.withDriver,
+      liter: car?.liter,
+      mileage: car?.mileage,
     }));
   }, [carsData]);
 

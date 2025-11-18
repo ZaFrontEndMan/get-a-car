@@ -18,6 +18,7 @@ export const usePaidFeatures = (car?: any) => {
     if (car?.carServices && Array.isArray(car.carServices)) {
       const features = car.carServices.map((service: any) => ({
         id: service.id,
+        serviceTypeId: service.serviceTypeId,
         title: service.nameAr || service.nameEn || "",
         titleAr: service.nameAr || "",
         titleEn: service.nameEn || "",

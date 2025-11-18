@@ -16,6 +16,7 @@ import { useGetServiceTypes } from "@/hooks/vendor/useCarDetails";
 
 interface PaidFeature {
   id?: number;
+  serviceTypeId?: number;
   title: string;
   titleAr?: string;
   titleEn?: string;
@@ -51,6 +52,7 @@ const PaidFeaturesSection = ({
         description: "",
         descriptionAr: "",
         descriptionEn: "",
+        serviceTypeId: 0,
       },
     ]);
     setExpandedIndex(paidFeatures.length);
@@ -122,9 +124,9 @@ const PaidFeaturesSection = ({
               <div>
                 <Label>{t("service_type")} *</Label>
                 <Select
-                  value={feature.id?.toString() || ""}
+                  value={feature.serviceTypeId?.toString() || ""}
                   onValueChange={(value) =>
-                    updatePaidFeature(index, "id", parseInt(value))
+                    updatePaidFeature(index, "serviceTypeId", parseInt(value))
                   }
                   disabled={serviceTypesLoading}
                 >

@@ -1487,6 +1487,11 @@ export const arTranslations = {
     "سيتم دفع نسبة {{percentage}}٪ الآن عبر الإنترنت، وسيتم دفع الباقي لدى البائع عند استلام السيارة.",
   noSimilarCarsFound: "لم يتم العثور على سيارات مماثلة.",
   selectedAdditionalServices: "الخدمات الإضافية المحددة",
+  mileage: "الحد اليومي للكبلومتر",
+  enter_mileage: "أدخل الحد اليومي للكبلومتر",
+  liter: "اللتر",
+  enter_liter: "أدخل سعة اللتر",
+  with_driver: "مع سائق",
 };
 
 export default arTranslations;

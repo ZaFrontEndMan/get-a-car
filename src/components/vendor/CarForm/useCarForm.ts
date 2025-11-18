@@ -22,10 +22,12 @@ export const useCarForm = (car?: Car | null, _onSuccess?: () => void) => {
     pricePerDay: 0,
     pricePerWeek: 0,
     pricePerMonth: 0,
+    mileage: 0,
     availabilityVendor: false,
     availabilityAdmin: false,
     withDriver: false,
     liter: "",
+
     doors: "",
     vendorCanMakeOffer: false,
     people: null,

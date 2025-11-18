@@ -10,6 +10,7 @@ import OtherDetailsSection from "./OtherDetailsSection";
 
 interface PaidFeature {
   id?: number;
+  serviceTypeId?: number;
   title: string;
   titleAr?: string;
   titleEn?: string;
