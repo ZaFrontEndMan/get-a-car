@@ -13,6 +13,7 @@ import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { authApi } from "@/api/auth/authApi";
 import { motion, AnimatePresence } from "framer-motion";
+import { toast } from "sonner";
 
 const ForgotPassword = () => {
   const { t, language } = useLanguage();
@@ -71,9 +72,8 @@ const ForgotPassword = () => {
       });
 
       setSuccessMessage(t("resetLinkSent"));
-      setTimeout(() => {
-        setSearchParams({ step: "2", email });
-      }, 1000);
+      toast.success(t("passwordResetLinkSentMessage"));
+      navigate("/");
     } catch (error: any) {
       console.error("Forgot password error:", error);
       setErrorMessage(

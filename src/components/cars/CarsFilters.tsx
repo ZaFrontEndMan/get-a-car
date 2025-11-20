@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Slider } from "@/components/ui/slider";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useDebouncedSlider } from "@/hooks/useDebouncedSlider";
@@ -37,13 +37,11 @@ const CarsFilters = ({
 }: CarsFiltersProps) => {
   const { t, language } = useLanguage();
   const isRTL = language === "ar";
+  const [isDragging, setIsDragging] = useState(false);
 
   // Use debounced slider for price range
-  const [sliderValue, setSliderValue, debouncedSliderValue] = useDebouncedSlider(
-    priceRange,
-    500, // 500ms delay
-    setPriceRange
-  );
+  const [sliderValue, setSliderValue, debouncedSliderValue] =
+    useDebouncedSlider(priceRange, 500, setPriceRange);
 
   // Update slider value when priceRange prop changes
   useEffect(() => {
@@ -74,6 +72,12 @@ const CarsFilters = ({
     );
   };
 
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat(language === "ar" ? "ar-EG" : "en-US").format(
+      price
+    );
+  };
+
   if (!filterData) {
     return (
       <div className="hidden lg:block flex-shrink-0 w-52">
@@ -85,6 +89,8 @@ const CarsFilters = ({
       </div>
     );
   }
+
+  const maxPrice = filterData?.maxPrice || 2000;
 
   return (
     <div className="hidden lg:block flex-shrink-0 w-52">
@@ -121,24 +127,105 @@ const CarsFilters = ({
               />
             </div>
 
-            {/* Price Range */}
+            {/* Enhanced Price Range Slider */}
             <div>
               <h3 className="font-semibold mb-3 text-xs text-gray-800 uppercase tracking-wide">
                 {t("priceRange")}
               </h3>
-              <Slider
-                value={sliderValue}
-                onValueChange={(value) => {
-                  setSliderValue(value as [number, number]);
-                }}
-                max={filterData?.maxPrice || 2000}
-                step={50}
-                className="mb-2"
-              />
-              <div className="text-xs text-gray-600 bg-gray-50 rounded-lg px-2 py-1">
-                {t("currency")} {sliderValue[0]} - {t("currency")}{" "}
-                {sliderValue[1]}
+
+              <div className="relative px-1 mb-4">
+                <Slider
+                  value={sliderValue}
+                  onValueChange={(value) => {
+                    setSliderValue(value as [number, number]);
+                    setIsDragging(true);
+                  }}
+                  onPointerUp={() => setIsDragging(false)}
+                  max={maxPrice}
+                  step={50}
+                  className={`mb-2 transition-all ${
+                    isDragging ? "scale-105" : ""
+                  }`}
+                  dir={isRTL ? "rtl" : "ltr"}
+                />
               </div>
+
+              {/* Enhanced Price Display with Cards */}
+              <div className="grid grid-cols-2 gap-2 mb-2">
+                <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg p-2 border border-gray-200">
+                  <div className="text-[10px] text-gray-500 uppercase tracking-wide mb-0.5">
+                    {t("min")}
+                  </div>
+                  <div className="text-xs font-bold text-gray-800">
+                    {t("currency")} {formatPrice(sliderValue[0])}
+                  </div>
+                </div>
+                <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-2 border border-blue-200">
+                  <div className="text-[10px] text-blue-600 uppercase tracking-wide mb-0.5">
+                    {t("max")}
+                  </div>
+                  <div className="text-xs font-bold text-blue-800">
+                    {t("currency")} {formatPrice(sliderValue[1])}
+                  </div>
+                </div>
+              </div>
+
+              {/* Price Percentage Indicator */}
+              {/* <div className="flex items-center gap-2 text-[10px] text-gray-500">
+                <div className="flex-1 h-1 bg-gray-200 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-gradient-to-r from-primary to-blue-600 transition-all duration-300"
+                    style={{
+                      width: `${
+                        ((sliderValue[1] - sliderValue[0]) / maxPrice) * 100
+                      }%`,
+                      marginLeft: isRTL
+                        ? "auto"
+                        : `${(sliderValue[0] / maxPrice) * 100}%`,
+                      marginRight: !isRTL
+                        ? "auto"
+                        : `${(sliderValue[0] / maxPrice) * 100}%`,
+                    }}
+                  />
+                </div>
+                <span className="whitespace-nowrap">
+                  {Math.round(
+                    ((sliderValue[1] - sliderValue[0]) / maxPrice) * 100
+                  )}
+                  %
+                </span>
+              </div> */}
+
+              {/* Quick Price Presets */}
+              {/* <div className="flex gap-1 mt-3">
+                {[
+                  {
+                    label: t("budget") || "Budget",
+                    range: [0, maxPrice * 0.3],
+                  },
+                  {
+                    label: t("mid") || "Mid",
+                    range: [maxPrice * 0.3, maxPrice * 0.7],
+                  },
+                  {
+                    label: t("premium") || "Premium",
+                    range: [maxPrice * 0.7, maxPrice],
+                  },
+                ].map((preset, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => {
+                      setSliderValue([
+                        Math.round(preset.range[0]),
+                        Math.round(preset.range[1]),
+                      ] as [number, number]);
+                    }}
+                    className="flex-1 text-[9px] px-2 py-1 rounded-md bg-gray-100 hover:bg-primary hover:text-white transition-colors border border-gray-200"
+                  >
+                    {preset.label}
+                  </button>
+                ))}
+              </div> */}
             </div>
 
             {/* Vendors */}
@@ -147,11 +234,11 @@ const CarsFilters = ({
                 <div className="bg-gradient-to-r from-primary to-blue-600 text-white px-3 py-1.5 text-xs font-semibold rounded-lg mb-3">
                   {t("vendors")}
                 </div>
-                <div className="space-y-2 max-h-32 overflow-y-auto">
+                <div className="space-y-2 max-h-32 overflow-y-auto custom-scrollbar">
                   {filterData.vendorNames.map((vendor) => (
                     <label
                       key={vendor.name}
-                      className={`flex items-center text-xs cursor-pointer hover:bg-gray-50 p-1 rounded ${
+                      className={`flex items-center text-xs cursor-pointer hover:bg-gray-50 p-1 rounded transition-colors ${
                         isRTL ? "flex-row-reverse" : ""
                       }`}
                     >
@@ -161,14 +248,17 @@ const CarsFilters = ({
                         onChange={() => handleVendorToggle(vendor.name)}
                         className={`${
                           isRTL ? "ml-2" : "mr-2"
-                        } w-3 h-3 text-primary`}
+                        } w-3 h-3 text-primary rounded focus:ring-2 focus:ring-primary`}
                       />
                       <span
                         className={`flex-1 text-gray-700 ${
                           isRTL ? "text-right pr-2" : "text-left pl-2"
                         }`}
                       >
-                        {vendor.name} ({vendor.quantity})
+                        {vendor.name}
+                      </span>
+                      <span className="bg-gray-100 text-gray-600 text-[10px] px-1.5 py-0.5 rounded-full">
+                        {vendor.quantity}
                       </span>
                     </label>
                   ))}
@@ -186,7 +276,7 @@ const CarsFilters = ({
                   {filterData.types.map((type) => (
                     <label
                       key={type.name}
-                      className={`flex items-center text-xs cursor-pointer hover:bg-gray-50 p-1 rounded ${
+                      className={`flex items-center text-xs cursor-pointer hover:bg-gray-50 p-1 rounded transition-colors ${
                         isRTL ? "flex-row-reverse" : ""
                       }`}
                     >
@@ -196,14 +286,17 @@ const CarsFilters = ({
                         onChange={() => handleCategoryToggle(type.name)}
                         className={`${
                           isRTL ? "ml-2" : "mr-2"
-                        } w-3 h-3 text-primary`}
+                        } w-3 h-3 text-primary rounded focus:ring-2 focus:ring-primary`}
                       />
                       <span
                         className={`flex-1 text-gray-700 ${
                           isRTL ? "text-right pr-2" : "text-left pl-2"
                         }`}
                       >
-                        {type.name} ({type.quantity})
+                        {type.name}
+                      </span>
+                      <span className="bg-gray-100 text-gray-600 text-[10px] px-1.5 py-0.5 rounded-full">
+                        {type.quantity}
                       </span>
                     </label>
                   ))}
@@ -217,11 +310,11 @@ const CarsFilters = ({
                 <div className="bg-gradient-to-r from-primary to-blue-600 text-white px-3 py-1.5 text-xs font-semibold rounded-lg mb-3">
                   {t("fuelTypes")}
                 </div>
-                <div className="space-y-2 max-h-32 overflow-y-auto">
+                <div className="space-y-2 max-h-32 overflow-y-auto custom-scrollbar">
                   {filterData.fuelTypes.map((fuelType) => (
                     <label
                       key={fuelType.name}
-                      className={`flex items-center text-xs cursor-pointer hover:bg-gray-50 p-1 rounded ${
+                      className={`flex items-center text-xs cursor-pointer hover:bg-gray-50 p-1 rounded transition-colors ${
                         isRTL ? "flex-row-reverse" : ""
                       }`}
                     >
@@ -231,14 +324,17 @@ const CarsFilters = ({
                         onChange={() => handleBrandToggle(fuelType.name)}
                         className={`${
                           isRTL ? "ml-2" : "mr-2"
-                        } w-3 h-3 text-primary`}
+                        } w-3 h-3 text-primary rounded focus:ring-2 focus:ring-primary`}
                       />
                       <span
                         className={`flex-1 text-gray-700 ${
                           isRTL ? "text-right pr-2" : "text-left pl-2"
                         }`}
                       >
-                        {fuelType.name} ({fuelType.quantity})
+                        {fuelType.name}
+                      </span>
+                      <span className="bg-gray-100 text-gray-600 text-[10px] px-1.5 py-0.5 rounded-full">
+                        {fuelType.quantity}
                       </span>
                     </label>
                   ))}
@@ -252,11 +348,11 @@ const CarsFilters = ({
                 <div className="bg-gradient-to-r from-primary to-blue-600 text-white px-3 py-1.5 text-xs font-semibold rounded-lg mb-3">
                   {t("branches")}
                 </div>
-                <div className="space-y-2 max-h-32 overflow-y-auto">
+                <div className="space-y-2 max-h-32 overflow-y-auto custom-scrollbar">
                   {filterData.branches.map((branch) => (
                     <label
                       key={branch.name}
-                      className={`flex items-center text-xs cursor-pointer hover:bg-gray-50 p-1 rounded ${
+                      className={`flex items-center text-xs cursor-pointer hover:bg-gray-50 p-1 rounded transition-colors ${
                         isRTL ? "flex-row-reverse" : ""
                       }`}
                     >
@@ -266,14 +362,17 @@ const CarsFilters = ({
                         onChange={() => handleCategoryToggle(branch.name)}
                         className={`${
                           isRTL ? "ml-2" : "mr-2"
-                        } w-3 h-3 text-primary`}
+                        } w-3 h-3 text-primary rounded focus:ring-2 focus:ring-primary`}
                       />
                       <span
                         className={`flex-1 text-gray-700 ${
                           isRTL ? "text-right pr-2" : "text-left pl-2"
                         }`}
                       >
-                        {branch.name} ({branch.quantity})
+                        {branch.name}
+                      </span>
+                      <span className="bg-gray-100 text-gray-600 text-[10px] px-1.5 py-0.5 rounded-full">
+                        {branch.quantity}
                       </span>
                     </label>
                   ))}
@@ -288,11 +387,11 @@ const CarsFilters = ({
                   <div className="bg-gradient-to-r from-primary to-blue-600 text-white px-3 py-1.5 text-xs font-semibold rounded-lg mb-3">
                     {t("transmissions")}
                   </div>
-                  <div className="space-y-2 max-h-32 overflow-y-auto">
+                  <div className="space-y-2 max-h-32 overflow-y-auto custom-scrollbar">
                     {filterData.transmissions.map((transmission) => (
                       <label
                         key={transmission.name}
-                        className={`flex items-center text-xs cursor-pointer hover:bg-gray-50 p-1 rounded ${
+                        className={`flex items-center text-xs cursor-pointer hover:bg-gray-50 p-1 rounded transition-colors ${
                           isRTL ? "flex-row-reverse" : ""
                         }`}
                       >
@@ -306,14 +405,17 @@ const CarsFilters = ({
                           }
                           className={`${
                             isRTL ? "ml-2" : "mr-2"
-                          } w-3 h-3 text-primary`}
+                          } w-3 h-3 text-primary rounded focus:ring-2 focus:ring-primary`}
                         />
                         <span
                           className={`flex-1 text-gray-700 ${
                             isRTL ? "text-right pr-2" : "text-left pl-2"
                           }`}
                         >
-                          {transmission.name} ({transmission.quantity})
+                          {transmission.name}
+                        </span>
+                        <span className="bg-gray-100 text-gray-600 text-[10px] px-1.5 py-0.5 rounded-full">
+                          {transmission.quantity}
                         </span>
                       </label>
                     ))}

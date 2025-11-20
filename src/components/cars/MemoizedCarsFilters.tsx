@@ -45,6 +45,7 @@ const MemoizedCarsFilters = memo<MemoizedCarsFiltersProps>(
     filterData,
     isVendorMode = false,
     vendorId,
+    withDriver,
     ...props
   }) => {
     // Skip memoization if vendor mode changes (forces re-render for UI updates)
@@ -69,6 +70,7 @@ const MemoizedCarsFilters = memo<MemoizedCarsFiltersProps>(
         filterData={filterData}
         isVendorMode={isVendorMode}
         vendorId={vendorId}
+        withDriver={withDriver}
         memoKey={memoKey} // Pass memo key to force re-render when needed
       />
     );

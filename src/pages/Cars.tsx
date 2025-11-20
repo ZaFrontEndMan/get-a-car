@@ -548,7 +548,11 @@ const Cars = () => {
                 >
                   <MemoizedCarsFilters
                     priceRange={priceRange}
-                    setPriceRange={(range) => updateFilters({ priceRange: {} })}
+                    setPriceRange={(range) =>
+                      updateFilters({
+                        priceRange: { min: range[0], max: range[1] },
+                      })
+                    }
                     selectedCategories={selectedCategories}
                     setSelectedCategories={(categories) => {
                       const types = categories.filter((cat) =>
@@ -644,11 +648,15 @@ const Cars = () => {
                     ) : filteredCars.length > 0 ? (
                       filteredCars.length > VIRTUAL_SCROLL_THRESHOLD ? (
                         <div
-                          className={
+                          className={` ${
+                            isFetching
+                              ? "pointer-events-none animate-pulse opacity-50"
+                              : ""
+                          }${
                             viewMode === "grid"
                               ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
                               : "space-y-4"
-                          }
+                          }`}
                         >
                           {filteredCars.map((car, index) => (
                             <CarErrorBoundary key={car?.id}>

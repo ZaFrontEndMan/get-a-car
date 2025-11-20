@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 
 /**
  * Custom hook for debounced slider values
@@ -14,8 +14,17 @@ export const useDebouncedSlider = <T>(
 ): [T, (value: T) => void, T] => {
   const [value, setValue] = useState<T>(initialValue);
   const [debouncedValue, setDebouncedValue] = useState<T>(initialValue);
+  
+  // Store onChange in ref to avoid stale closures
+  const onChangeRef = useRef(onChange);
+  const isFirstRender = useRef(true);
+  
+  // Keep onChange ref updated
+  useEffect(() => {
+    onChangeRef.current = onChange;
+  }, [onChange]);
 
-  // Update debounced value after delay
+  // Debounce the value changes
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedValue(value);
@@ -24,19 +33,22 @@ export const useDebouncedSlider = <T>(
     return () => clearTimeout(timer);
   }, [value, delay]);
 
-  // Call onChange when debounced value changes
+  // Call onChange when debounced value changes (but not on first render)
   useEffect(() => {
-    if (debouncedValue !== initialValue) {
-      onChange(debouncedValue);
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
     }
-  }, [debouncedValue, onChange, initialValue]);
+    
+    // Deep comparison for arrays/tuples
+    const isEqual = JSON.stringify(debouncedValue) === JSON.stringify(initialValue);
+    
+    if (!isEqual) {
+      onChangeRef.current(debouncedValue);
+    }
+  }, [debouncedValue]); // Only depend on debouncedValue
 
-  // Update initial value when it changes
-  useEffect(() => {
-    setValue(initialValue);
-    setDebouncedValue(initialValue);
-  }, [initialValue]);
-
+  // Stable setter function
   const setValueCallback = useCallback((newValue: T) => {
     setValue(newValue);
   }, []);

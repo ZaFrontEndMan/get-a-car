@@ -12,6 +12,7 @@ import {
   Music,
   Youtube,
   Linkedin,
+  Ghost,
 } from "lucide-react";
 import { useAdminSettings, useSocialMedias } from "../hooks/useAdminSettings";
 import { Link2 } from "lucide-react";
@@ -20,9 +21,11 @@ const SOCIAL_ICON_MAP = {
   facebook: Facebook,
   instagram: Instagram,
   twitter: Twitter, // Can map "x" if you want, e.g., "x": Twitter,
+  x: Twitter, // Can map "x" if you want, e.g., "x": Twitter,
   youtube: Youtube,
   linkedin: Linkedin,
   tiktok: Music,
+  snapchat: Ghost,
 };
 const Footer = () => {
   const { t } = useLanguage();
