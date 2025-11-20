@@ -27,6 +27,12 @@ const SearchBar = () => {
   const [pickupSearchTerm, setPickupSearchTerm] = useState("");
   const [dropoffSearchTerm, setDropoffSearchTerm] = useState("");
 
+  // Validation errors state
+  const [errors, setErrors] = useState({
+    pickupLocation: "",
+    dropOffLocation: "",
+  });
+
   const pickupRef = useRef(null);
   const dropoffRef = useRef(null);
 
@@ -157,6 +163,9 @@ const SearchBar = () => {
       }));
       setPickupSearchTerm(currentLocationName);
       setDropoffSearchTerm(currentLocationName);
+
+      // Clear errors when location is set
+      setErrors({ pickupLocation: "", dropOffLocation: "" });
     } catch (error) {
       alert(t("locationPermission") + " - " + (error && error.message));
     } finally {
@@ -180,7 +189,30 @@ const SearchBar = () => {
     };
   }, []);
 
+  // Validation function
+  const validateForm = () => {
+    const newErrors = {
+      pickupLocation: "",
+      dropOffLocation: "",
+    };
+
+    if (!searchData.pickupLocation.trim()) {
+      newErrors.pickupLocation = t("fieldRequired");
+    }
+
+    if (!searchData.dropOffLocation.trim()) {
+      newErrors.dropOffLocation = t("fieldRequired");
+    }
+
+    setErrors(newErrors);
+    return !newErrors.pickupLocation && !newErrors.dropOffLocation;
+  };
+
   const handleSearch = () => {
+    if (!validateForm()) {
+      return;
+    }
+
     const searchParams = new URLSearchParams();
     Object.entries(searchData).forEach(([key, value]) => {
       if (value !== null && value !== undefined && value !== "") {
@@ -200,6 +232,12 @@ const SearchBar = () => {
       setPickupSearchTerm(location.address);
       setDropoffSearchTerm(location.address);
       setShowPickupSuggestions(false);
+      // Clear errors
+      setErrors((prev) => ({
+        ...prev,
+        pickupLocation: "",
+        dropOffLocation: "",
+      }));
     } else {
       setSearchData((prev) => ({
         ...prev,
@@ -207,6 +245,8 @@ const SearchBar = () => {
       }));
       setDropoffSearchTerm(location.address);
       setShowDropoffSuggestions(false);
+      // Clear error
+      setErrors((prev) => ({ ...prev, dropOffLocation: "" }));
     }
   };
 
@@ -302,9 +342,17 @@ const SearchBar = () => {
                     pickupLocation: e.target.value,
                   }));
                   setShowPickupSuggestions(true);
+                  // Clear error on change
+                  if (errors.pickupLocation) {
+                    setErrors((prev) => ({ ...prev, pickupLocation: "" }));
+                  }
                 }}
                 onFocus={() => setShowPickupSuggestions(true)}
-                className="w-full pl-8 pr-10 py-2 text-sm border border-gray-300/50 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 bg-white/70"
+                className={`w-full pl-8 pr-10 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 bg-white/70 ${
+                  errors.pickupLocation
+                    ? "border-red-500"
+                    : "border-gray-300/50"
+                }`}
               />
               <button
                 onClick={getCurrentLocation}
@@ -319,7 +367,7 @@ const SearchBar = () => {
                 />
               </button>
               {showPickupSuggestions && (
-                <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-60 overflow-y-auto">
+                <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-60 overflow-y-auto mt-1">
                   {pickupLoading ? (
                     <div className="px-3 py-2 text-sm text-gray-500">
                       Loading locations...
@@ -345,7 +393,13 @@ const SearchBar = () => {
                 </div>
               )}
             </div>
+            {errors.pickupLocation && (
+              <p className="text-red text-xs mt-1">
+                {errors.pickupLocation}
+              </p>
+            )}
           </div>
+
           {/* Dropoff Location */}
           <div className="relative" ref={dropoffRef}>
             <div className="relative">
@@ -361,12 +415,20 @@ const SearchBar = () => {
                     dropOffLocation: e.target.value,
                   }));
                   setShowDropoffSuggestions(true);
+                  // Clear error on change
+                  if (errors.dropOffLocation) {
+                    setErrors((prev) => ({ ...prev, dropOffLocation: "" }));
+                  }
                 }}
                 onFocus={() => setShowDropoffSuggestions(true)}
-                className="w-full pl-8 pr-3 py-2 text-sm border border-gray-300/50 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 bg-white/70"
+                className={`w-full pl-8 pr-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 bg-white/70 ${
+                  errors.dropOffLocation
+                    ? "border-red-500"
+                    : "border-gray-300/50"
+                }`}
               />
               {showDropoffSuggestions && (
-                <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-60 overflow-y-auto">
+                <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-60 overflow-y-auto mt-1">
                   {dropoffLoading ? (
                     <div className="px-3 py-2 text-sm text-gray-500">
                       Loading locations...
@@ -394,7 +456,13 @@ const SearchBar = () => {
                 </div>
               )}
             </div>
+            {errors.dropOffLocation && (
+              <p className="text-red text-xs mt-1">
+                {errors.dropOffLocation}
+              </p>
+            )}
           </div>
+
           {/* Pickup Date */}
           <div className="relative">
             <input
@@ -410,6 +478,7 @@ const SearchBar = () => {
               className="w-full ps-8 pe-16 py-2 text-sm border border-gray-300/50 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 bg-white/70"
             />
           </div>
+
           {/* Dropoff Date */}
           <div className="relative">
             <input
@@ -428,6 +497,7 @@ const SearchBar = () => {
             />
           </div>
         </div>
+
         {/* Search Button with Day Counter */}
         <div className="flex justify-center items-center gap-4">
           {rentalDays > 0 && (
