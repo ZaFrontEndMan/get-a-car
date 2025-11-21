@@ -74,6 +74,7 @@ const BookingForm = ({
   setPickupDate,
   dropoffDate,
   setDropoffDate,
+  formattedLocations,
 }: BookingFormProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [showInvoice, setShowInvoice] = useState(false);
@@ -145,6 +146,7 @@ const BookingForm = ({
       serviceId: serviceMap[serviceId as keyof typeof serviceMap]?.id || 0,
     }));
   };
+  console.log(formattedLocations);
 
   const onSubmit = async (data: BookingFormData) => {
     setIsLoading(true);
@@ -154,7 +156,13 @@ const BookingForm = ({
         fromDate: data.pickupDate.toISOString(),
         toDate: data.dropoffDate.toISOString(),
         pickupLocation: data.pickupLocation,
+        pickupLocationId: formattedLocations?.pickUp?.find(
+          (loc) => loc.address === data.pickupLocation
+        )?.id,
         dropoffLocation: data.dropoffLocation,
+        dropoffLocationId: formattedLocations?.dropOff.find(
+          (loc) => loc.address === data.dropoffLocation
+        )?.id,
         offerId: 0,
         services: selectedServices,
         protection: [],

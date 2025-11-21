@@ -191,6 +191,10 @@ const OfferDetailsPage = () => {
                   selectedDropoff={selectedDropoff}
                   rentalDays={rentalDays}
                   formattedPricing={formattedPricing}
+                  formattedLocations={{
+                    pickUp: offer.rentalCarDetails?.pickUpLocations,
+                    dropOff: offer.rentalCarDetails?.dropOffLocations,
+                  }}
                 />
               )}
             </div>
