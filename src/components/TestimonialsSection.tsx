@@ -69,13 +69,13 @@ const TestimonialsSection = () => {
         </div>
 
         <Carousel
+          dir="ltr"
           opts={{
-            align: "start",
             loop: true,
           }}
           className="w-full"
         >
-          <CarouselContent className={` me-4`}>
+          <CarouselContent className={`me-4`}>
             {testimonials.map((testimonial) => (
               <CarouselItem
                 key={testimonial.feedbackId}
