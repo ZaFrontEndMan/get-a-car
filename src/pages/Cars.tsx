@@ -63,7 +63,7 @@ const Cars = () => {
     const dropOffLocation = urlParams.get("dropOffLocation") || undefined;
     const pickupDate = urlParams.get("pickupDate") || undefined;
     const dropoffDate = urlParams.get("dropoffDate") || undefined;
-    const withDriver = urlParams.get("withDriver") === "true" || false;
+    const withDriver = urlParams.get("withDriver") === "true" || undefined;
 
     const validPickupDate = pickupDate
       ? new Date(pickupDate).toISOString() || undefined
@@ -287,7 +287,7 @@ const Cars = () => {
       paramsForFilters.get("dropOffLocation") || undefined;
     const pickupDate = paramsForFilters.get("pickupDate") || undefined;
     const dropoffDate = paramsForFilters.get("dropoffDate") || undefined;
-    const withDriver = paramsForFilters.get("withDriver") === "true" || false;
+    const withDriver = paramsForFilters.get("withDriver") === "true" || undefined;
 
     const validPickupDate = pickupDate
       ? new Date(pickupDate).toISOString() || undefined
