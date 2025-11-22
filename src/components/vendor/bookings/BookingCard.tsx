@@ -293,7 +293,7 @@ const BookingCard = ({
                   </Button>
                 )} */}
 
-                {booking.booking_status === "return_requested" && (
+                {booking.booking_status === 2 && (
                   <Button
                     onClick={() => onAcceptReturn(booking.id)}
                     disabled={isReturnLoading}

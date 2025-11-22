@@ -37,6 +37,6 @@ export const getBookingsStatistics = async () => {
 
 // Accept return car booking
 export const acceptReturnCarBooking = async (bookingId: string) => {
-  const { data } = await axiosInstance.post(`/Vendor/Booking/AcceptReturnCarBooking/${bookingId}`);
+  const { data } = await axiosInstance.put(`/Vendor/Booking/AcceptReturnCarBooking/${bookingId}`);
   return data;
 };
