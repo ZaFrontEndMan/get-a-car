@@ -101,7 +101,8 @@ const OfferDetailsPage = () => {
   const pricingBreakdown = calculateTotalPrice(offer, additionalServices);
   const formattedPricing = formatPricingBreakdown(
     pricingBreakdown,
-    t("currency")
+    t("currency"),
+    t
   );
 
   return (
@@ -215,6 +216,7 @@ const OfferDetailsPage = () => {
               onRentalDaysChange={setRentalDays}
               pricingBreakdown={pricingBreakdown}
               onBookNow={handleBookNow}
+              formattedPricing={formattedPricing}
             />
           </div>
 

@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from "react";
 import { useLanguage } from "../contexts/LanguageContext";
 import PricingOptions from "./PricingOptions";
-import { Plus, Bug } from "lucide-react";
+import { Plus, Bug, InfoIcon } from "lucide-react";
 import {
   formatPricingBreakdown,
   PricingBreakdown,
@@ -237,7 +237,9 @@ const OfferDetailsSidebar = ({
               {formattedPricing.basePrice}
             </span>
           </div>
-
+          <span dir="ltr" className="text-xs block text-start">
+            {formattedPricing.calculation}
+          </span>
           {pricingBreakdown.servicesPrice > 0 && (
             <div
               key={`services-${pricingBreakdown.servicesPrice}`}
@@ -261,7 +263,10 @@ const OfferDetailsSidebar = ({
             </div>
           </div>
         </div>
-
+        <p className="text-xs text-gray-500 text-center m-2 flex  gap-2">
+          <InfoIcon />
+          {t("feesVehicleRental", { percentage: offer?.vendor?.percentage })}
+        </p>
         <Button className="w-full" onClick={onBookNow}>
           {t("bookThisOffer")}
         </Button>

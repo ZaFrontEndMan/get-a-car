@@ -146,7 +146,6 @@ const BookingForm = ({
       serviceId: serviceMap[serviceId as keyof typeof serviceMap]?.id || 0,
     }));
   };
-  console.log(formattedLocations);
 
   const onSubmit = async (data: BookingFormData) => {
     setIsLoading(true);
