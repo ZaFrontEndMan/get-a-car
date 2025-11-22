@@ -262,7 +262,7 @@ const VendorDetailsContent = () => {
       <motion.div className="space-y-6" variants={itemVariants}>
         <div className="flex justify-between items-center">
           <h2 className="text-2xl font-bold text-gray-900">
-            {t("availableCars")} ({filteredCars.length})
+            {t("availableCars")} ({vendor?.carsCount})
           </h2>
           <Link
             to={`/cars/vendor/${vendor?.id}`}

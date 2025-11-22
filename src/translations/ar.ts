@@ -481,6 +481,7 @@ export const arTranslations = {
   pickupDateShort: "تاريخ الاستلام",
   returnDateShort: "تاريخ التسليم",
   amount: "المبلغ",
+  paidAmount: "المبلغ المدفوع",
 
   // Generic table terms
   brand: "العلامة التجارية",

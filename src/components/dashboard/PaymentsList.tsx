@@ -25,7 +25,6 @@ const ITEMS_PER_PAGE = 12;
 const PaymentsList: React.FC = () => {
   const { t, language } = useLanguage();
   const [currentPage, setCurrentPage] = useState(1);
-  const isRTL = language === "ar";
 
   const { data, isLoading, isFetching } = useGetAllInvoices({
     pageNumber: currentPage,
@@ -146,59 +145,54 @@ const PaymentsList: React.FC = () => {
             key={invoice.invoiceId}
             className="bg-white rounded-lg shadow-sm border p-6 hover:shadow-md transition-shadow"
           >
-            <div className="flex justify-between items-start mb-4">
-              <div
-                className={`flex items-center gap-3 ${
-                  isRTL ? "flex-row-reverse" : ""
-                }`}
-              >
-                {getStatusIcon(invoice.status)}
-                <div className={isRTL ? "text-right" : "text-left"}>
-                  <h3 className="text-lg font-semibold text-gray-900">
-                    {t("currency")} {invoice.totalPrice.toFixed(2)}
-                  </h3>
-                  {/* <p className="text-gray-600">
-                    {invoice.carName || t("noCar")}
-                  </p> */}
-                </div>
+            {/* First Row – Info & Status */}
+            <div className="flex flex-wrap justify-between items-center gap-3 mb-6">
+              <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm font-medium text-gray-800">
+                <span>
+                  <span className="font-bold">
+                    {t("vendorName") || "Vendor Name"}:
+                  </span>{" "}
+                  {invoice.vendorName || "—"}
+                </span>
+                <span>
+                  <span className="font-bold">
+                    {t("totalAmount") || "Total Price"}:
+                  </span>{" "}
+                  {t("currency")} {invoice.totalPrice?.toFixed?.(2) ?? "—"}
+                </span>
+                <span>
+                  <span className="font-bold">
+                    {t("paidAmount") || "Paid Amount"}:
+                  </span>{" "}
+                  {t("currency")} {invoice.pricePaid?.toFixed?.(2) ?? "0.00"}
+                </span>
               </div>
               <span
-                className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(
+                className={`px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap ${getStatusColor(
                   invoice.status
                 )}`}
               >
                 {t(invoice.status.toLowerCase())}
               </span>
             </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div
-                className={`flex items-center gap-2 ${
-                  isRTL ? "flex-row-reverse" : ""
-                }`}
-              >
-                <Calendar className="h-4 w-4 text-gray-400" />
-                <div className={isRTL ? "text-right" : "text-left"}>
-                  <p className="text-sm font-medium">{t("pickupDate")}</p>
-                  <p className="text-sm text-gray-600">
-                    {format(new Date(invoice.fromDate), "MMM dd, yyyy")}
-                  </p>
-                </div>
-              </div>
-
-              <div
-                className={`flex items-center gap-2 ${
-                  isRTL ? "flex-row-reverse" : ""
-                }`}
-              >
-                <Car className="h-4 w-4 text-gray-400" />
-                <div className={isRTL ? "text-right" : "text-left"}>
-                  <p className="text-sm font-medium">{t("returnDate")}</p>
-                  <p className="text-sm text-gray-600">
-                    {format(new Date(invoice.toDate), "MMM dd, yyyy")}
-                  </p>
-                </div>
-              </div>
+            {/* Second Row – Dates */}
+            <div className="flex flex-wrap gap-x-10 gap-y-1 text-gray-600 text-xs font-medium">
+              <span>
+                <span className="font-bold">
+                  {t("pickupDate") || "Pickup Date"}:
+                </span>{" "}
+                {invoice.fromDate
+                  ? format(new Date(invoice.fromDate), "MMM dd, yyyy")
+                  : "—"}
+              </span>
+              <span>
+                <span className="font-bold">
+                  {t("returnDate") || "Return Date"}:
+                </span>{" "}
+                {invoice.toDate
+                  ? format(new Date(invoice.toDate), "MMM dd, yyyy")
+                  : "—"}
+              </span>
             </div>
           </div>
         ))}

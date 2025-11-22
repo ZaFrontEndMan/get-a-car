@@ -56,11 +56,11 @@ const BranchCard = ({ branch, onEdit, isDeleting, t }: BranchCardProps) => {
             </p>
           </div>
         )}
-        <div className="flex items-center justify-between pt-2">
+        {/* <div className="flex items-center justify-between pt-2">
           <Badge variant={branch.is_active ? "default" : "secondary"}>
             {branch.is_active ? t("active") : t("inactive")}
           </Badge>
-        </div>
+        </div> */}
       </CardContent>
     </Card>
   );

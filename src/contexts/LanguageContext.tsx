@@ -15,8 +15,6 @@ interface LanguageContextProps {
   language: string;
   setLanguage: (lang: SupportedLanguage) => void;
   t: (key: string, params?: Record<string, any>) => string;
-  // Method to get accumulated missing keys (exposed but called internally)
-  getMissingTranslations: () => Record<string, string[]>;
 }
 
 const LanguageContext = createContext<LanguageContextProps | undefined>(
@@ -33,7 +31,6 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({
   const [language, setLanguage] = useState<SupportedLanguage>("en");
   const [isInitialized, setIsInitialized] = useState(false);
 
-  // Store missing keys: object language -> array of missing keys
   const missingTranslationsRef = useRef<Record<string, Set<string>>>({});
 
   useEffect(() => {
@@ -58,14 +55,13 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({
       let translation = translations[language]?.[translationKey];
 
       if (!translation) {
-        // Record missing key for this language in a Set to dedupe
         if (!missingTranslationsRef.current[language]) {
           missingTranslationsRef.current[language] = new Set<string>();
         }
         if (!missingTranslationsRef.current[language].has(key)) {
           missingTranslationsRef.current[language].add(key);
         }
-        return key; // fallback to key string
+        return key;
       }
 
       if (params) {
@@ -80,15 +76,6 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({
       console.error("Translation error:", error);
       return key;
     }
-  };
-
-  // Called internally to get and log missing translations
-  const getMissingTranslations = (): Record<string, string[]> => {
-    const result: Record<string, string[]> = {};
-    for (const lang in missingTranslationsRef.current) {
-      result[lang] = Array.from(missingTranslationsRef.current[lang]);
-    }
-    return result;
   };
 
   const handleSetLanguage = (lang: SupportedLanguage) => {
@@ -110,7 +97,6 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({
         language,
         setLanguage: handleSetLanguage,
         t,
-        getMissingTranslations,
       }}
     >
       {children}

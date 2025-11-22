@@ -57,9 +57,9 @@ const BranchesTableView = ({
               <TableHead className={isRTL ? "text-right" : "text-left"}>
                 {t("email")}
               </TableHead>
-              <TableHead className={isRTL ? "text-right" : "text-left"}>
+              {/* <TableHead className={isRTL ? "text-right" : "text-left"}>
                 {t("status")}
-              </TableHead>
+              </TableHead> */}
               <TableHead className={isRTL ? "text-right" : "text-left"}>
                 {t("actions")}
               </TableHead>
@@ -93,11 +93,11 @@ const BranchesTableView = ({
                     )}
                   </div>
                 </TableCell>
-                <TableCell>
+                {/* <TableCell>
                   <Badge variant={branch.is_active ? "default" : "secondary"}>
                     {branch.is_active ? t("active") : t("inactive")}
                   </Badge>
-                </TableCell>
+                </TableCell> */}
                 <TableCell className={isRTL ? "text-left" : "text-right"}>
                   <div
                     className={`flex items-center justify-end gap-2 ${

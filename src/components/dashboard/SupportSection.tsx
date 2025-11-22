@@ -111,7 +111,7 @@ const normalizeTicketItem = (item: any): UITicket => {
 };
 
 const SupportSection: React.FC = () => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { toast } = useToast();
 
   // Form state (extended to support attachment and optional info)
@@ -205,7 +205,11 @@ const SupportSection: React.FC = () => {
         {t("support")}
       </h1>
 
-      <Tabs defaultValue="faqs" className="w-full">
+      <Tabs
+        dir={`${language === "ar" ? "rtl" : "ltr"}`}
+        defaultValue="faqs"
+        className="w-full"
+      >
         <TabsList className="grid w-full grid-cols-3 text-xs md:text-sm">
           <TabsTrigger value="faqs" className="px-2 py-2">
             {t("faqs")}
@@ -391,15 +395,11 @@ const SupportSection: React.FC = () => {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="rtl:text-end text-start">{t("subject")}</TableHead>
-                    <TableHead className="rtl:text-end text-start">{t("status")}</TableHead>
-                    <TableHead className="rtl:text-end text-start">{t("created")}</TableHead>
-                    <TableHead className="rtl:text-end text-start">
-                      {t("lastUpdate")}
-                    </TableHead>
-                    <TableHead className="rtl:text-end text-start">
-                      {t("attachment")}
-                    </TableHead>
+                    <TableHead className="text-start">{t("subject")}</TableHead>
+                    <TableHead className="text-start">{t("status")}</TableHead>
+                    <TableHead className="text-start">{t("created")}</TableHead>
+                    <TableHead className="text-start">{t("lastUpdate")}</TableHead>
+                    <TableHead className="text-start">{t("attachment")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>

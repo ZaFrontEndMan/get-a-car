@@ -46,9 +46,9 @@ const BranchesListView = ({
                       </Badge>
                     )}
                   </h3>
-                  <Badge variant={branch.is_active ? "default" : "secondary"}>
+                  {/* <Badge variant={branch.is_active ? "default" : "secondary"}>
                     {branch.is_active ? t("active") : t("inactive")}
-                  </Badge>
+                  </Badge> */}
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                   <div className="space-y-2">
