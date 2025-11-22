@@ -8,22 +8,27 @@ import {
   removeFavoriteByItemId,
 } from "@/api/client/clientFavorites";
 import { Favorite } from "@/types/favorites";
+import { useAuth } from "@/contexts/AuthContext";
 
 // Clean interface for components to interact with Favorites
 export const useClientFavorites = () => {
+  const { user } = useAuth(); // Add this line
   const { toast } = useToast();
   const queryClient = useQueryClient();
-
   const favoritesQuery = useQuery<Favorite[]>({
     queryKey: ["clientFavorites"],
     queryFn: getFavorites,
+    enabled: !!user,
   });
 
   const addMutation = useMutation({
     mutationFn: (carId: string | number) => addFavorite(carId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["clientFavorites"] });
-      toast({ title: "تمت الإضافة", description: "تمت إضافة السيارة إلى المفضلة" });
+      toast({
+        title: "تمت الإضافة",
+        description: "تمت إضافة السيارة إلى المفضلة",
+      });
     },
     onError: (error: any) => {
       toast({
@@ -38,7 +43,10 @@ export const useClientFavorites = () => {
     mutationFn: (carId: string | number) => removeFavorite(carId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["clientFavorites"] });
-      toast({ title: "تمت الإزالة", description: "تمت إزالة السيارة من المفضلة" });
+      toast({
+        title: "تمت الإزالة",
+        description: "تمت إزالة السيارة من المفضلة",
+      });
     },
     onError: (error: any) => {
       toast({
@@ -50,10 +58,14 @@ export const useClientFavorites = () => {
   });
 
   const removeByItemIdMutation = useMutation({
-    mutationFn: (wishlistItemId: number) => removeFavoriteByItemId(wishlistItemId),
+    mutationFn: (wishlistItemId: number) =>
+      removeFavoriteByItemId(wishlistItemId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["clientFavorites"] });
-      toast({ title: "تمت الإزالة", description: "تم حذف العنصر من قائمة المفضلة" });
+      toast({
+        title: "تمت الإزالة",
+        description: "تم حذف العنصر من قائمة المفضلة",
+      });
     },
     onError: (error: any) => {
       toast({

@@ -57,7 +57,6 @@ const Toast = ({ message, onClose }) => {
 const CarCard = ({ car, viewMode = "grid" }: CarCardProps) => {
   const { t } = useLanguage();
   const {
-    favorites,
     addToFavorites,
     removeFromFavoritesByCarId,
     isAdding,
@@ -67,18 +66,14 @@ const CarCard = ({ car, viewMode = "grid" }: CarCardProps) => {
   const [showToast, setShowToast] = useState(false);
   const location = useLocation();
 
-  const isCarFavorite =
-    car.isWishList ||
-    favorites.some((fav) => fav.carId === car.id || fav.id === car.id);
-
+  const isCarFavorite = car.isWishList;
   const handleFavoriteClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     if (!user) {
       setShowToast(true);
       return;
-    }
-    if (isCarFavorite) {
+    } else if (car && isCarFavorite) {
       removeFromFavoritesByCarId(car.id);
     } else {
       addToFavorites(car.id);
