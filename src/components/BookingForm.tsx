@@ -208,7 +208,7 @@ const BookingForm = ({
             src={`${paymentUrl}`}
             title="Payment Gateway"
             className="w-full h-[500px] border-0"
-            sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
+            sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-top-navigation"
           />
         </DialogContent>
       </Dialog>
