@@ -205,7 +205,7 @@ const BookingForm = ({
             </DialogClose>
           </DialogHeader>
           <iframe
-            src={`https://accept.paymob.com/api/acceptance/iframes/877416?payment_token=${paymentUrl}`}
+            src={`${paymentUrl}`}
             title="Payment Gateway"
             className="w-full h-[500px] border-0"
             sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
