@@ -119,7 +119,7 @@ const CarForm = ({
         "protections",
         JSON.stringify(
           protections.map((p, index) => ({
-            id: p.id ?? (isEditMode ? carId : undefined),
+            id: p.id ?? (isEditMode ? undefined : p.id),
             nameAr: p.nameAr,
             nameEn: p.nameEn,
             descriptionAr: p.descriptionAr,
@@ -133,7 +133,7 @@ const CarForm = ({
         "carServices",
         JSON.stringify(
           paidFeatures.map((pf, index) => ({
-            id: pf.id || undefined,
+            id: pf.id ?? (isEditMode ? undefined : pf.id),
             serviceTypeId: pf.serviceTypeId || undefined,
             nameAr: pf.titleAr || pf.title || "",
             nameEn: pf.titleEn || pf.title || "",
@@ -149,7 +149,7 @@ const CarForm = ({
         "pickUpLocation",
         JSON.stringify(
           pickupLocations.map((loc, index) => ({
-            id: loc.id ?? (isEditMode ? carId : undefined),
+            id: loc.id ?? (isEditMode ? undefined : loc.id),
             Address: loc.address,
             IsActive: loc.isActive ?? true,
           }))
@@ -161,7 +161,7 @@ const CarForm = ({
         "dropOffLocation",
         JSON.stringify(
           dropoffLocations.map((loc, index) => ({
-            id: loc.id ?? (isEditMode ? carId : undefined),
+            id: loc.id ?? (isEditMode ? undefined : loc.id),
             Address: loc.address,
             IsActive: loc.isActive ?? true,
           }))

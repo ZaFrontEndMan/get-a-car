@@ -25,6 +25,7 @@ export const useClientFavorites = () => {
     mutationFn: (carId: string | number) => addFavorite(carId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["clientFavorites"] });
+      queryClient.invalidateQueries({ queryKey: ["allCars"] });
       toast({
         title: "تمت الإضافة",
         description: "تمت إضافة السيارة إلى المفضلة",
