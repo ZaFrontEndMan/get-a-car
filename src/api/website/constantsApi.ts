@@ -211,7 +211,7 @@ export const constantsApi = {
   },
   getWebsiteStatistics: async (): Promise<WebsiteStatistics | null> => {
     const res = await axiosInstance.get<ApiObjectResponse<WebsiteStatistics>>(
-      "/Client/Website/GetWebsiteStatistics"
+      "/Admin/TotalRecord/GetAllTotalRecord"
     );
     return res.data?.data || null;
   },

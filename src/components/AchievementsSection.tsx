@@ -1,7 +1,7 @@
 import React from "react";
 import { useLanguage } from "../contexts/LanguageContext";
 import { useAdminSettings } from "../hooks/useAdminSettings";
-import { Users, Car, Calendar, Building2 } from "lucide-react";
+import { Users, Car, Calendar, Building2, Building } from "lucide-react";
 
 const AchievementsSection = () => {
   const { t } = useLanguage();
@@ -16,6 +16,7 @@ const AchievementsSection = () => {
       car: Car,
       calendar: Calendar,
       vendors: Building2,
+      branches: Building,
     };
     const IconComponent = icons[iconName as keyof typeof icons] || Users;
     return <IconComponent className="h-8 w-8 text-primary" />;
@@ -27,30 +28,37 @@ const AchievementsSection = () => {
         {
           id: "clients",
           icon: "users",
-          value: statistics.totalClientsCount,
+          value: statistics[0]?.numberOfClients,
           titleKey: "happyClients",
           descriptionKey: "clientsWhoTrustOurService",
         },
         {
           id: "bookings",
           icon: "calendar",
-          value: statistics.totalBookingsCount,
+          value: statistics[0]?.numberOfBookings,
           titleKey: "bookingsCompleted",
           descriptionKey: "successfulBookingsMade",
         },
         {
           id: "cars",
           icon: "car",
-          value: statistics.totalCarsCount,
+          value: statistics[0]?.numberOfCars,
           titleKey: "carsAvailable",
           descriptionKey: "carsReadyForRental",
         },
         {
           id: "vendors",
           icon: "vendors",
-          value: statistics.totalVendorsCount,
+          value: statistics[0]?.numberOfVendors,
           titleKey: "ourPartners",
           descriptionKey: "vendorsPartneringWithUs",
+        },
+        {
+          id: "branches",
+          icon: "branches",
+          value: statistics[0]?.numberOfBranches,
+          titleKey: "ourPartners",
+          descriptionKey: "branchesPartneringWithUs",
         },
       ]
     : [];
@@ -65,7 +73,7 @@ const AchievementsSection = () => {
             </h2>
             <div className="w-24 h-1 gradient-primary mx-auto rounded-full"></div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
             {[...Array(4)].map((_, index) => (
               <div
                 key={index}
@@ -81,6 +89,7 @@ const AchievementsSection = () => {
       </section>
     );
   }
+  console.log(statistics);
 
   return (
     <section className="py-16 bg-gray-50">
@@ -92,7 +101,7 @@ const AchievementsSection = () => {
           <div className="w-24 h-1 gradient-primary mx-auto rounded-full"></div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
           {achievements.map((achievement, index) => (
             <div
               key={achievement.id}
