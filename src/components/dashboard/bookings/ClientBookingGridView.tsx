@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Booking } from "@/types/clientBookings";
 import { getStatusConfig } from "@/components/vendor/bookings/bookingUtils";
 import BookingInvoiceModal from "@/components/booking/BookingInvoiceModal";
@@ -65,203 +65,327 @@ const ClientBookingGridView = ({
         const StatusIcon = statusConfig.icon;
 
         return (
-          <Card
-            key={booking.id}
-            className="group hover:shadow-md border-0 shadow bg-white"
-          >
-            <CardHeader className="py-2 px-3 bg-gradient-to-r from-slate-50 to-white border-b border-slate-100">
-              <div className="flex gap-3 items-start">
-                <div className="relative">
-                  <div className="w-14 h-12 rounded-lg overflow-hidden shadow-sm border border-slate-200">
-                    <LazyImage
-                      src={`${import.meta.env.VITE_UPLOADS_BASE_URL}${
-                        booking.carImage
-                      }`}
-                      alt={booking.carName}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+          <Card className="group hover:shadow-md border-0 shadow bg-white">
+            {" "}
+            <CardHeader className="p-4 sm:p-6 bg-gradient-to-r from-slate-50 to-white border-b border-slate-100">
+              <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
+                <div className="flex items-center gap-2 flex-1 min-w-0">
+                  <div className="relative flex-shrink-0">
+                    <div className="w-16 h-12 sm:w-20 sm:h-16 rounded-lg overflow-hidden shadow-sm border border-slate-200">
+                      <LazyImage
+                        src={
+                          booking.carImage
+                            ? `${import.meta.env.VITE_UPLOADS_BASE_URL}${
+                                booking.carImage
+                              }`
+                            : "/placeholder-car.png"
+                        }
+                        alt={booking.carName || "Car"}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                    </div>
+                    <div
+                      className={`absolute -top-1 -right-1 w-3 h-3 rounded-full ${statusConfig.dotColor} ring-2 ring-white shadow-sm`}
                     />
                   </div>
-                  <div
-                    className={`absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full ${statusConfig.dotColor} ring-2 ring-white shadow-sm`}
-                  ></div>
+                  <div className="flex-1 min-w-0">
+                    <CardTitle className="text-base sm:text-lg font-semibold text-slate-900 mb-1 truncate">
+                      {booking.carName || (
+                        <span className="inline-block opacity-0">Car Name</span>
+                      )}
+                    </CardTitle>
+                    <p className="text-slate-600 font-medium text-sm truncate">
+                      {booking.carBrand && booking.carModel ? (
+                        `${booking.carBrand} ${booking.carModel}`
+                      ) : (
+                        <span className="inline-block opacity-0">
+                          Brand Model
+                        </span>
+                      )}
+                    </p>
+                  </div>
+                  <div className="text-right flex-shrink-0">
+                    <div className="text-xl sm:text-2xl font-bold text-slate-900 mb-2">
+                      {t("sar")}{" "}
+                      {booking.totalPrice != null ? (
+                        booking.totalPrice.toLocaleString()
+                      ) : (
+                        <span className="inline-block opacity-0">0</span>
+                      )}
+                    </div>
+                  </div>
                 </div>
-                <div className="flex flex-col gap-1 min-w-0 flex-1">
-                  <div className="flex flex-col gap-0 min-w-0">
-                    <span className="text-sm font-medium line-clamp-1">
-                      {booking.carName}
-                    </span>
-                    <span className="text-xs text-slate-700 font-normal">
-                      SAR {booking.totalPrice}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-                    <span className="text-xs text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full uppercase font-normal">
-                      {Math.ceil(
+              </div>
+              <div className="flex flex-wrap gap-2 mt-2">
+                <Badge
+                  variant="outline"
+                  className={`${statusConfig.color} border-0 px-2 py-1 text-xs font-medium flex gap-1 items-center`}
+                >
+                  <StatusIcon className="h-3 w-3 me-1" />
+                  {statusConfig.label || (
+                    <span className="inline-block opacity-0">Status</span>
+                  )}
+                </Badge>
+                <span className="text-xs text-slate-500 bg-slate-100 px-2 py-1 rounded">
+                  {booking.bookingNumber ? (
+                    `#${booking.bookingNumber}`
+                  ) : (
+                    <span className="inline-block opacity-0">#num</span>
+                  )}
+                </span>
+                <div className="text-xs text-slate-500 bg-slate-100 px-2 py-1 rounded-full w-fit">
+                  {booking.toDate && booking.fromDate ? (
+                    (() => {
+                      const days = Math.ceil(
                         (new Date(booking.toDate).getTime() -
                           new Date(booking.fromDate).getTime()) /
                           (1000 * 60 * 60 * 24)
-                      )}{" "}
-                      {Math.ceil(
-                        (new Date(booking.toDate).getTime() -
-                          new Date(booking.fromDate).getTime()) /
-                          (1000 * 60 * 60 * 24)
-                      ) > 1
-                        ? t("days")
-                        : t("day")}
+                      );
+                      return (
+                        <>
+                          {days} {days > 1 ? t("days") : t("day")}
+                        </>
+                      );
+                    })()
+                  ) : (
+                    <span className="inline-block opacity-0">
+                      0 {t("days")}
                     </span>
-                    <Badge
-                      variant="outline"
-                      className={`${statusConfig.color} border-0 px-2.5 py-0.5 text-[11px] font-medium flex gap-1 items-center`}
-                    >
-                      <StatusIcon className="h-3 w-3" />
-                      <span className="line-clamp-1">{statusConfig.label}</span>
-                    </Badge>
-                  </div>
+                  )}
                 </div>
               </div>
             </CardHeader>
-
-            <CardContent className="p-3 space-y-2">
-              <div className="flex flex-col md:flex-row gap-2">
-                {/* Pickup Date */}
-                <div className="flex-1 flex items-start p-2 bg-emerald-50 rounded-md border border-emerald-100 gap-2 min-w-0">
-                  <Calendar className="h-4 w-4 text-emerald-400" />
-                  <div className="flex flex-col gap-0 items-start min-w-0">
-                    <p className="text-[11px] font-medium text-emerald-700 uppercase">
+            <CardContent className="p-4 sm:p-6 space-y-4 flex-1 flex flex-col">
+              {/* Vendor (Customer) section */}
+              <div className="bg-blue-50 rounded-lg p-3 sm:p-4 border border-blue-100">
+                <div className="flex items-center mb-3">
+                  <div className="w-6 h-6 bg-blue-500 rounded-md flex items-center justify-center me-2 flex-shrink-0">
+                    <MapPin className="h-3 w-3 text-white" />
+                  </div>
+                  <h4 className="font-semibold text-blue-900 text-sm sm:text-base">
+                    {t("vendorInfo")}
+                  </h4>
+                </div>
+                <div className="grid grid-cols-1 gap-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm sm:text-base text-slate-900 truncate">
+                      {booking.vendorName || (
+                        <span className="inline-block opacity-0">
+                          Vendor name
+                        </span>
+                      )}
+                    </span>
+                  </div>
+                  {/* Optionally: Email, Phone if you want to add, repeat above structure */}
+                </div>
+              </div>
+              {/* Timeline section */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="bg-emerald-50 rounded-lg p-3 border border-emerald-100">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Calendar className="h-3 w-3 text-emerald-500" />
+                    <p className="text-xs font-medium text-emerald-700 uppercase tracking-wide">
                       {t("pickupDate")}
                     </p>
-                    <p className="font-semibold text-slate-900 text-xs truncate line-clamp-1">
-                      {format(new Date(booking.fromDate), "MMM dd, yyyy")}
-                    </p>
                   </div>
+                  <p className="font-semibold text-slate-900 text-sm sm:text-base truncate">
+                    {booking.fromDate ? (
+                      format(new Date(booking.fromDate), "MMM dd, yyyy")
+                    ) : (
+                      <span className="inline-block opacity-0">
+                        ___ __, ____
+                      </span>
+                    )}
+                  </p>
                 </div>
-                {/* Dropoff Date */}
-                <div className="flex-1 flex items-start p-2 bg-rose-50 rounded-md border border-rose-100 gap-2 min-w-0">
-                  <Calendar className="h-4 w-4 text-rose-400" />
-                  <div className="flex flex-col gap-0 items-start min-w-0">
-                    <p className="text-[11px] font-medium text-rose-700 uppercase">
+                <div className="bg-rose-50 rounded-lg p-3 border border-rose-100">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Calendar className="h-3 w-3 text-rose-500" />
+                    <p className="text-xs font-medium text-rose-700 uppercase tracking-wide">
                       {t("returnDate")}
                     </p>
-                    <p className="font-semibold text-slate-900 text-xs truncate line-clamp-1">
-                      {format(new Date(booking.toDate), "MMM dd, yyyy")}
-                    </p>
                   </div>
+                  <p className="font-semibold text-slate-900 text-sm sm:text-base truncate">
+                    {booking.toDate ? (
+                      format(new Date(booking.toDate), "MMM dd, yyyy")
+                    ) : (
+                      <span className="inline-block opacity-0">
+                        ___ __, ____
+                      </span>
+                    )}
+                  </p>
                 </div>
               </div>
-              {/* Booking Locations */}
-              <div className="flex flex-col md:flex-row gap-2">
-                {/* Pickup Location */}
-                <div className="flex-1 flex items-start p-2 bg-blue-50 rounded-md border border-blue-100 gap-2 min-w-0">
-                  <MapPin className="h-4 w-4 text-blue-400 " />
-                  <div className="flex flex-col gap-0 items-start min-w-0">
-                    <p className="text-[11px] font-medium text-blue-700 uppercase">
+              {/* Location details */}
+              <div className="space-y-3 bg-slate-50 rounded-lg p-3 border border-slate-100">
+                <div className="flex items-start gap-2">
+                  <div className="w-5 h-5 bg-blue-500 rounded-md flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <MapPin className="h-3 w-3 text-white" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-medium text-slate-600 uppercase tracking-wide mb-1">
                       {t("pickupLocation")}
                     </p>
-                    <p className="font-semibold text-slate-900 text-xs truncate line-clamp-1">
-                      {booking.pickUpLocationName}
+                    <p className="font-medium text-slate-900 text-sm break-words">
+                      {booking.pickUpLocationName || (
+                        <span className="inline-block opacity-0">Pickup</span>
+                      )}
                     </p>
                   </div>
                 </div>
-                {/* Dropoff Location */}
-                <div className="flex-1 flex items-start p-2 bg-orange-50 rounded-md border border-orange-100 gap-2 min-w-0">
-                  <MapPin className="h-4 w-4 text-orange-400 " />
-                  <div className="flex flex-col gap-0 items-start min-w-0">
-                    <p className="text-[11px] font-medium text-orange-700 uppercase">
+                <div className="flex items-start gap-2">
+                  <div className="w-5 h-5 bg-amber-500 rounded-md flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <MapPin className="h-3 w-3 text-white" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-medium text-slate-600 uppercase tracking-wide mb-1">
                       {t("dropoffLocation")}
                     </p>
-                    <p className="font-semibold text-slate-900 text-xs truncate line-clamp-1">
-                      {booking.dropoffLocationName}
+                    <p className="font-medium text-slate-900 text-sm break-words">
+                      {booking.dropoffLocationName || (
+                        <span className="inline-block opacity-0">Dropoff</span>
+                      )}
                     </p>
                   </div>
                 </div>
               </div>
-              {/* Vendor Info */}
-              <div className="flex flex-row items-center justify-between pt-2 border-t border-slate-100 gap-1 min-h-[42px]">
-                <div className="flex items-center gap-1 flex-1 min-w-0">
-                  <div className="w-7 h-7 bg-slate-100 rounded flex items-center justify-center">
-                    <LazyImage
-                      src={`${import.meta.env.VITE_UPLOADS_BASE_URL}${
-                        booking.vendorLogo
-                      }`}
-                      alt={booking.vendorName}
-                      className="w-full h-full object-cover rounded"
-                    />
+              {/* Payment section */}
+              <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-lg p-3 border border-indigo-100">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <CreditCard className="h-4 w-4 text-indigo-600 flex-shrink-0" />
+                    <h5 className="font-semibold text-indigo-900 text-sm sm:text-base">
+                      {t("paymentDetails")}
+                    </h5>
                   </div>
-                  <div className="min-w-0 flex flex-col">
-                    <p className="font-medium text-slate-900 text-xs truncate line-clamp-1">
-                      {booking.vendorName}
-                    </p>
-                  </div>
+                  <Badge
+                    variant={
+                      booking.paymentStatus === "paid" ? "default" : "secondary"
+                    }
+                    className={`text-xs font-medium ${
+                      booking.paymentStatus === "paid"
+                        ? "bg-emerald-100 text-emerald-700 border-emerald-200"
+                        : "bg-amber-100 text-amber-700 border-amber-200"
+                    }`}
+                  >
+                    {booking.paymentStatus ? (
+                      booking.paymentStatus === "paid" ? (
+                        t("paymentStatusPaid")
+                      ) : (
+                        t("paymentStatusPending")
+                      )
+                    ) : (
+                      <span className="inline-block opacity-0">status</span>
+                    )}
+                  </Badge>
                 </div>
-                <div className="flex items-center gap-3">
-                  {/* Total Amount */}
-                  <div className="flex items-center gap-1">
-                    <span className="text-xs text-gray-500">
-                      {t("total") || "Total"}:
-                    </span>
-                    <span className="text-xs font-semibold text-gray-700">
-                      {booking?.totalPrice?.toLocaleString()}{" "}
-                      {t("currency") || "SAR"}
-                    </span>
-                  </div>
-
-                  {/* Paid Amount */}
-                  <div className="flex items-center gap-1">
-                    <span className="text-xs text-gray-500">
-                      {t("paid") || "Paid"}:
-                    </span>
-                    <span className="text-xs font-semibold text-green-600">
-                      {booking?.webSiteAmount?.toLocaleString()}{" "}
-                      {t("currency") || "EGP"}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-slate-600">{t("totalDays")}</span>
+                    <span className="font-semibold text-slate-900">
+                      {booking.toDate && booking.fromDate ? (
+                        Math.ceil(
+                          (new Date(booking.toDate).getTime() -
+                            new Date(booking.fromDate).getTime()) /
+                            (1000 * 60 * 60 * 24)
+                        )
+                      ) : (
+                        <span className="inline-block opacity-0">0</span>
+                      )}
                     </span>
                   </div>
-                  <div className="flex items-center gap-1">
-                    <CreditCard className="h-3.5 w-3.5 text-gray-400 mx-[2px]" />
-                    <Badge variant="default" className="text-[11px] px-2">
-                      {booking?.paymentStatus}
-                    </Badge>
+                  <div className="border-t border-indigo-200 pt-2 space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-slate-700 font-medium">
+                        {t("totalAmount")}
+                      </span>
+                      <span className="font-bold text-slate-900">
+                        {t("sar")}{" "}
+                        {booking.totalPrice != null ? (
+                          booking.totalPrice.toLocaleString()
+                        ) : (
+                          <span className="inline-block opacity-0">0</span>
+                        )}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-slate-700 font-medium">
+                        {t("paidAmount")}
+                      </span>
+                      <span className="font-bold text-emerald-600">
+                        {t("sar")}{" "}
+                        {booking.webSiteAmount != null ? (
+                          booking.webSiteAmount.toLocaleString()
+                        ) : (
+                          <span className="inline-block opacity-0">0</span>
+                        )}
+                      </span>
+                    </div>
+                    {booking.totalPrice - booking.webSiteAmount > 0 ? (
+                      <div className="flex items-center justify-between text-sm bg-amber-50 -mx-2 px-2 py-1.5 rounded">
+                        <span className="text-amber-700 font-medium">
+                          {t("remainingAmount")}
+                        </span>
+                        <span className="font-bold text-amber-700">
+                          {t("sar")}{" "}
+                          {(
+                            booking.totalPrice - booking.webSiteAmount
+                          )?.toLocaleString()}
+                        </span>
+                      </div>
+                    ) : (
+                      // Always render the div but make it invisible for spacing
+                      <div className="flex items-center justify-between text-sm bg-amber-50 -mx-2 px-2 py-1.5 rounded opacity-0 select-none pointer-events-none">
+                        <span className="text-amber-700 font-medium">
+                          {t("remainingAmount")}
+                        </span>
+                        <span className="font-bold text-amber-700">
+                          {t("sar")} 0
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
               {/* Action Buttons */}
-              <div className="flex flex-row flex-wrap gap-1 pt-1">
-                {/* Return Car */}
-                {canAcceptReturn(booking.bookingStatus) &&
-                  onAcceptReturnCar && (
-                    <Button
-                      className="flex-1 min-w-[90px] px-0 py-1"
-                      size="sm"
-                      onClick={() => onAcceptReturnCar(booking.id.toString())}
-                      disabled={isReturning}
-                    >
-                      <RotateCcw className="h-4 w-4 me-1" />
-                      <span className="text-xs">{t("returnCar")}</span>
-                    </Button>
-                  )}
-                {/* Rate Button */}
-                {!booking.isReview && (
+              <div className="mt-auto pt-4 border-t border-slate-100">
+                <div className="flex flex-col gap-2">
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    {canAcceptReturn(booking.bookingStatus) &&
+                      onAcceptReturnCar && (
+                        <Button
+                          className="flex-1 bg-purple-600 hover:bg-purple-700 text-white font-medium text-sm py-2"
+                          onClick={() =>
+                            onAcceptReturnCar(booking.id.toString())
+                          }
+                          disabled={isReturning}
+                        >
+                          <RotateCcw className="h-4 w-4 me-2" />
+                          <span className="text-xs">{t("returnCar")}</span>
+                        </Button>
+                      )}
+                    {!booking.isReview && (
+                      <Button
+                        className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white font-medium text-sm py-2"
+                        variant="default"
+                        onClick={() => handleOpenRating(booking.id)}
+                      >
+                        <Star className="h-4 w-4 me-2" />
+                        <span className="text-xs">{t("rateBooking")}</span>
+                      </Button>
+                    )}
+                  </div>
                   <Button
-                    className="flex-1 min-w-[90px] px-0 py-1"
+                    type="button"
+                    variant="outline"
                     size="sm"
-                    variant="default"
-                    onClick={() => {
-                      handleOpenRating(booking.id);
-                    }}
+                    className="w-full flex items-center justify-center gap-2 border-slate-200 hover:bg-slate-50 hover:border-slate-300 font-medium text-sm py-2"
+                    onClick={() => setSelectedBooking(booking)}
                   >
-                    <Star className="h-4 w-4 me-1" />
-                    <span className="text-xs">{t("rateBooking")}</span>
+                    <Mail className="h-4 w-4" />
+                    <span>{t("invoice")}</span>
                   </Button>
-                )}
-                {/* View Invoice */}
-                <Button
-                  className="flex-1 min-w-[90px] px-0 py-1"
-                  size="sm"
-                  variant="outline"
-                  onClick={() => setSelectedBooking(booking)}
-                >
-                  <Mail className="h-4 w-4 me-1" />
-                  <span className="text-xs">{t("invoice")}</span>
-                </Button>
+                </div>
               </div>
             </CardContent>
           </Card>

@@ -662,8 +662,8 @@ const VendorOffers: React.FC = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold">{t("title")}</h2>
-          <p className="text-gray-600">{t("subtitle")}</p>
+          <h2 className="text-2xl font-bold">{t("offerTitle")}</h2>
+          <p className="text-gray-600">{t("offerSubtitle")}</p>
         </div>
         <Button
           onClick={() => setIsCreateModalOpen(true)}

@@ -160,7 +160,7 @@ const BookingInvoiceModal: React.FC<BookingInvoiceModalProps> = ({
               </h2>
               <div className="mb-2">
                 <Barcode
-                  value={invoiceDetails.id.toString()}
+                  value={orderDetails.id.toString()}
                   width={1.5}
                   height={50}
                   fontSize={12}
