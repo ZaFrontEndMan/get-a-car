@@ -61,7 +61,7 @@ export const useRentalCarDetails = (carId: number, offerId: number) => {
           name: apiResponse.data.name,
           brand: apiResponse.data.type || "",
           model: apiResponse.data.model,
-          year: new Date().getFullYear(),
+          year: apiResponse.data?.carmodel,
           color: "",
           image: getImageUrl(
             apiResponse.data.imageURLs?.[0],
