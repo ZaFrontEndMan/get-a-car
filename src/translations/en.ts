@@ -1491,6 +1491,7 @@ export const enTranslations = {
   enter_liter: "Enter liter capacity",
   with_driver: "With Driver",
   paidAmount: "Paid Amount",
+  remainingAmount: "Remaining Amount",
 };
 
 export default enTranslations;

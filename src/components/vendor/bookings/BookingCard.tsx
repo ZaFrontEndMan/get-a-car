@@ -217,26 +217,60 @@ const BookingCard = ({
                   : t("paymentStatusPending")}
               </Badge>
             </div>
+
             <div className="space-y-2">
+              {/* Daily Rate */}
               <div className="flex items-center justify-between text-sm">
                 <span className="text-slate-600">{t("dailyRate")}</span>
                 <span className="font-semibold text-slate-900">
                   {t("sar")} {booking.daily_rate?.toLocaleString()}
                 </span>
               </div>
+
+              {/* Total Days */}
               <div className="flex items-center justify-between text-sm">
                 <span className="text-slate-600">{t("totalDays")}</span>
                 <span className="font-semibold text-slate-900">
                   {booking.total_days}
                 </span>
               </div>
-              <div className="border-t border-indigo-200 pt-2">
-                <div className="flex items-center justify-between font-bold text-base text-indigo-900">
-                  <span>{t("totalAmount")}</span>
-                  <span>
+
+              {/* Divider before totals */}
+              <div className="border-t border-indigo-200 pt-2 space-y-2">
+                {/* Total Amount */}
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-slate-700 font-medium">
+                    {t("totalAmount")}
+                  </span>
+                  <span className="font-bold text-slate-900">
                     {t("sar")} {booking.total_amount?.toLocaleString()}
                   </span>
                 </div>
+
+                {/* Paid Amount */}
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-slate-700 font-medium">
+                    {t("paidAmount")}
+                  </span>
+                  <span className="font-bold text-emerald-600">
+                    {t("sar")} {booking.paid_amount?.toLocaleString()}
+                  </span>
+                </div>
+
+                {/* Remaining Amount (if any) */}
+                {booking.total_amount - booking.paid_amount > 0 && (
+                  <div className="flex items-center justify-between text-sm bg-amber-50 -mx-2 px-2 py-1.5 rounded">
+                    <span className="text-amber-700 font-medium">
+                      {t("remainingAmount")}
+                    </span>
+                    <span className="font-bold text-amber-700">
+                      {t("sar")}{" "}
+                      {(
+                        booking.total_amount - booking.paid_amount
+                      )?.toLocaleString()}
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
           </div>

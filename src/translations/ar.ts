@@ -1493,6 +1493,7 @@ export const arTranslations = {
   liter: "اللتر",
   enter_liter: "أدخل سعة اللتر",
   with_driver: "مع سائق",
+  remainingAmount: "المبلغ المتبقيس",
 };
 
 export default arTranslations;

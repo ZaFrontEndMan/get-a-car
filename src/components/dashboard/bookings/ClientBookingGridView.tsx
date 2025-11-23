@@ -24,7 +24,7 @@ interface ClientBookingGridViewProps {
   onReturnCar: (bookingId: string) => void;
   isReturning: boolean;
   onAcceptReturnCar?: (bookingId: string) => void;
-  onFavourite?: () => void;
+  onRate?: () => void;
   isAccepting?: boolean;
 }
 
@@ -32,7 +32,7 @@ const ClientBookingGridView = ({
   bookings,
   isReturning,
   onAcceptReturnCar,
-  onFavourite,
+  onRate,
 }: ClientBookingGridViewProps) => {
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const { t } = useLanguage();
@@ -191,16 +191,36 @@ const ClientBookingGridView = ({
                     <p className="font-medium text-slate-900 text-xs truncate line-clamp-1">
                       {booking.vendorName}
                     </p>
-                    <p className="text-[10px] text-slate-500 truncate line-clamp-1">
-                      {booking.clientName}
-                    </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-1">
-                  <CreditCard className="h-3.5 w-3.5 -400 mx-[2px]" />
-                  <Badge variant="default" className="text-[11px] px-2">
-                    {booking?.paymentStatus}
-                  </Badge>
+                <div className="flex items-center gap-3">
+                  {/* Total Amount */}
+                  <div className="flex items-center gap-1">
+                    <span className="text-xs text-gray-500">
+                      {t("total") || "Total"}:
+                    </span>
+                    <span className="text-xs font-semibold text-gray-700">
+                      {booking?.totalPrice?.toLocaleString()}{" "}
+                      {t("currency") || "SAR"}
+                    </span>
+                  </div>
+
+                  {/* Paid Amount */}
+                  <div className="flex items-center gap-1">
+                    <span className="text-xs text-gray-500">
+                      {t("paid") || "Paid"}:
+                    </span>
+                    <span className="text-xs font-semibold text-green-600">
+                      {booking?.webSiteAmount?.toLocaleString()}{" "}
+                      {t("currency") || "EGP"}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <CreditCard className="h-3.5 w-3.5 text-gray-400 mx-[2px]" />
+                    <Badge variant="default" className="text-[11px] px-2">
+                      {booking?.paymentStatus}
+                    </Badge>
+                  </div>
                 </div>
               </div>
               {/* Action Buttons */}
@@ -256,7 +276,7 @@ const ClientBookingGridView = ({
         open={openRatingDialog}
         onClose={handleCloseRating}
         bookingId={ratingBookingId ?? ""}
-        onSubmit={onFavourite}
+        onSubmit={onRate}
       />
     </div>
   );

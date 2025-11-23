@@ -106,6 +106,7 @@ const VendorBookings = () => {
             total_amount: booking.totalPrice || 0,
           },
         ],
+        paid_amount: booking?.webSiteAmount,
       };
     });
   }, [data, t]);
