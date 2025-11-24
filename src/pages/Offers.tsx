@@ -11,6 +11,10 @@ import CarsSkeleton, {
   CarsSearchControlsSkeleton,
 } from "@/components/cars/CarsSkeleton";
 import { Search } from "lucide-react";
+import {
+  getCompanyLogoUrl,
+  getOfferImageUrl,
+} from "@/api/website/websiteOffers";
 // import SimilarOffersSlider if you want a slider
 
 const Offers = () => {
@@ -185,7 +189,33 @@ const Offers = () => {
   useEffect(() => {
     localStorage.setItem("offersViewMode", viewMode);
   }, [viewMode]);
-
+  function mapApiOfferToOfferCard(apiOffer) {
+    return {
+      id: apiOffer.id?.toString(),
+      title: apiOffer.offerTitle,
+      title_ar: apiOffer.offerTitle, // Assume Arabic
+      description: apiOffer.offerDescription,
+      description_ar: apiOffer.offerDescription,
+      discount: apiOffer.totalPrice ? `${apiOffer.totalPrice}%` : undefined,
+      validUntil: apiOffer.endDate,
+      image: getOfferImageUrl
+        ? getOfferImageUrl(apiOffer.offerImage)
+        : apiOffer.offerImage,
+      terms: ["صالح لفترة محدودة", "لا يمكن دمجه مع عروض أخرى", "حسب التوفر"],
+      carId: apiOffer.carId?.toString(),
+      originalPricePerDay: apiOffer.oldPricePerDay,
+      originalOffer: {
+        totalPrice: apiOffer.totalPrice,
+      },
+      vendor: {
+        id: apiOffer.vendorId,
+        name: apiOffer.vendorName,
+        logo_url: getCompanyLogoUrl
+          ? getCompanyLogoUrl(apiOffer.companyLogo)
+          : apiOffer.companyLogo,
+      },
+    };
+  }
   // Loading state reuses Cars skeletons, or use Offer variants
   if (isLoading) {
     return (
@@ -283,10 +313,10 @@ const Offers = () => {
                     : "space-y-4"
                 }
               >
-                {filteredOffers.map((offer, index) => (
+                {filteredOffers.map((apiOffer, index) => (
                   <OfferCard
-                    key={offer.id}
-                    offer={offer}
+                    key={apiOffer.id}
+                    offer={mapApiOfferToOfferCard(apiOffer)}
                     animationDelay={index * 0.05}
                     isLoading={isFetching}
                   />

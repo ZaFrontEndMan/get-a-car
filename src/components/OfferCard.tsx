@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "../contexts/LanguageContext";
-import { Clock } from "lucide-react";
+import { Clock, Tag } from "lucide-react";
 import LazyImage from "./ui/LazyImage";
 
 interface OfferCardProps {
@@ -11,11 +11,15 @@ interface OfferCardProps {
     title_ar?: string;
     description: string;
     description_ar?: string;
-    discount: string;
+    discount?: string; // E.g. "25%"
     validUntil: string;
     image: string;
     terms: string[];
     carId?: string;
+    originalPricePerDay?: number;
+    originalOffer?: {
+      totalPrice?: number;
+    };
     vendor?: {
       id: string;
       name: string;
@@ -55,8 +59,8 @@ const OfferCard = ({ offer, isLoading }: OfferCardProps) => {
   return (
     <Link
       to={`/offers/${offer.id}${offer.carId ? `?carId=${offer.carId}` : ""}`}
-      className={`"block bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 transform hover:scale-105 ${
-        isLoading ? " animate-pulse opacity-75 pointer-events-none" : ""
+      className={`block bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 transform hover:scale-105 ${
+        isLoading ? "animate-pulse opacity-75 pointer-events-none" : ""
       }`}
     >
       <div className="relative">
@@ -65,8 +69,9 @@ const OfferCard = ({ offer, isLoading }: OfferCardProps) => {
           alt={getLocalizedTitle()}
           className="w-full h-48 object-cover"
         />
-        <div className="absolute top-3 start-3 bg-red-500 text-white px-3 py-1 rounded-full text-sm font-bold bg-black/50">
-          {offer.originalOffer?.totalPrice}% {t("off") }
+        <div className="absolute top-3 start-3 bg-red-500 text-white px-3 py-1 rounded-full text-sm font-bold bg-black/50 flex items-center gap-2">
+          <Tag className="h-4 w-4 inline" />
+          {offer.discount || `${offer.originalOffer?.totalPrice}%`} {t("off")}
         </div>
 
         {offer.vendor?.logo_url && (
@@ -87,16 +92,32 @@ const OfferCard = ({ offer, isLoading }: OfferCardProps) => {
         <h3 className="font-bold text-xl text-gray-900 mb-2 line-clamp-1">
           {getLocalizedTitle()}
         </h3>
-        <p className="text-gray-600 mb-4 line-clamp-1">
+        <p className="text-gray-600 mb-4 line-clamp-2">
           {truncateDescription(getLocalizedDescription(), 15)}
         </p>
-        <span>{offer?.originalPricePerDay}</span>
+        {/* Price info */}
+        <div className="flex flex-wrap gap-3 mb-3">
+          <span className="text-gray-700 font-semibold text-base">
+            {t("originalPrice")}:
+          </span>
+          <span className="text-red-700 line-through">
+            {offer.originalPricePerDay} {t("currency")}
+          </span>
+          <span className="text-gray-700 font-semibold text-base">
+            {t("discountedPrice")}:
+          </span>
+          <span className="text-green-600 font-bold">
+            {offer.originalOffer?.totalPrice} {t("currency")}
+          </span>
+        </div>
+        {/* Valid until */}
         <div className="flex items-center text-xs text-gray-500 mb-4">
           <Clock className="h-3 w-3 me-2" />
           <span className="text-center text-blue-700 text-md">
             {t("validUntil")} {new Date(offer.validUntil).toLocaleDateString()}
           </span>
         </div>
+        {/* Claim Button */}
         <Link
           to={`/offers/${offer.id}${
             offer.carId ? `?carId=${offer.carId}` : ""
