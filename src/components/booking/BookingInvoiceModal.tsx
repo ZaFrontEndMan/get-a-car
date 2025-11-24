@@ -3,29 +3,39 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
 import { useLanguage } from "../../contexts/LanguageContext";
 import {
   Download,
-  Car,
   Mail,
   MapPin,
   Calendar,
   Clock,
   User,
   Phone,
+  Car,
 } from "lucide-react";
 import { format } from "date-fns";
 import { Button } from "../ui/button";
-import { useClientBookings } from "../../hooks/client/useClientBookings";
-import { Booking } from "../../types/clientBookings";
 import { toast } from "sonner";
-import { useGetBookingById } from "@/hooks/vendor/useVendorBooking";
 import Barcode from "react-barcode";
 import LazyImage from "../ui/LazyImage";
+import { useClientBookings } from "../../hooks/client/useClientBookings";
+import { useGetBookingById } from "@/hooks/vendor/useVendorBooking";
+import { generateInvoicePDF } from "../../utils/generateInvoicePDF";
 
 interface BookingInvoiceModalProps {
   isOpen: boolean;
   onClose: () => void;
-  booking: Booking | null;
-  type: "client" | "vendor";
+  booking: any; // one Booking from your list, or null
+  type?: "client" | "vendor";
 }
+
+const formatCurrency = (amount: number | undefined) =>
+  amount != null ? (
+    `${amount.toLocaleString("en-US", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    })} SAR`
+  ) : (
+    <span className="opacity-0">0.00 SAR</span>
+  );
 
 const BookingInvoiceModal: React.FC<BookingInvoiceModalProps> = ({
   isOpen,
@@ -33,7 +43,7 @@ const BookingInvoiceModal: React.FC<BookingInvoiceModalProps> = ({
   booking,
   type = "client",
 }) => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { useGetInvoiceDetails, useGenerateInvoicePdf } = useClientBookings();
   const bookingId = booking?.id?.toString();
 
@@ -47,6 +57,9 @@ const BookingInvoiceModal: React.FC<BookingInvoiceModalProps> = ({
 
   const generateInvoicePdfMutation = useGenerateInvoicePdf();
 
+  const VITE_UPLOADS_BASE_URL = import.meta.env.VITE_UPLOADS_BASE_URL ?? "";
+
+  // -- Loading fallback
   if (isLoading) {
     return (
       <Dialog open={isOpen} onOpenChange={onClose}>
@@ -62,6 +75,7 @@ const BookingInvoiceModal: React.FC<BookingInvoiceModalProps> = ({
     );
   }
 
+  // -- Error fallback
   if (isError || !invoiceResponse?.data) {
     return (
       <Dialog open={isOpen} onOpenChange={onClose}>
@@ -81,6 +95,7 @@ const BookingInvoiceModal: React.FC<BookingInvoiceModalProps> = ({
     );
   }
 
+  // -- Main data
   const {
     invoiceDetails,
     customerDetails,
@@ -89,136 +104,167 @@ const BookingInvoiceModal: React.FC<BookingInvoiceModalProps> = ({
     carDetails,
   } = invoiceResponse.data;
 
+  const carImages: string[] =
+    Array.isArray(carDetails?.imageURLsCar) && carDetails.imageURLsCar.length
+      ? carDetails.imageURLsCar
+      : [];
+
+  const vendorLogo = vendorDetails?.logo
+    ? `${VITE_UPLOADS_BASE_URL}${vendorDetails.logo}`
+    : "/logo.png";
+
+  // Download PDF logic
   const handleDownloadPDF = async () => {
     try {
-      const blob = await generateInvoicePdfMutation.mutateAsync({
-        invoiceId: invoiceDetails.id,
-      });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `Invoice-${orderDetails.bookingNumber}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      window.URL.revokeObjectURL(url);
-    } catch (e) {
-      console.error("Failed to download invoice PDF", e);
-      toast.error(t("errorDownloadingInvoice"));
+      const locale = "ar"; // or "en"
+      const doc = await generateInvoicePDF(invoiceResponse.data, locale);
+      doc.save(`Invoice-${orderDetails.bookingNumber}.pdf`);
+      toast.success("Invoice downloaded successfully!");
+    } catch (error) {
+      console.error(error);
+      toast.error("Error generating invoice");
     }
-  };
-
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "SAR",
-      minimumFractionDigits: 2,
-    }).format(amount);
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader className="flex flex-row items-center justify-between">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto !p-0">
+        <DialogHeader className="flex flex-row items-center justify-between px-6 pt-6">
           <DialogTitle className="text-2xl font-bold">
             {t("invoice")}
           </DialogTitle>
-          {type === "client" ? (
-            <Button
-              onClick={handleDownloadPDF}
-              className="flex items-center gap-2"
-              disabled={generateInvoicePdfMutation.isPending}
-            >
-              <Download className="h-4 w-4" />
-              <span>{t("downloadPdf")}</span>
-            </Button>
-          ) : null}
+
+          <Button
+            onClick={handleDownloadPDF}
+            className="flex items-center gap-2"
+            disabled={generateInvoicePdfMutation.isPending}
+          >
+            <Download className="h-4 w-4" />
+            <span>{t("downloadPdf")}</span>
+          </Button>
         </DialogHeader>
 
-        <div className="bg-white p-8 border border-gray-200 rounded-lg print:shadow-none print:border-none">
-          {/* Invoice Header with Barcode */}
-          <div className="flex justify-between items-start mb-8">
-            <div className="flex items-center gap-2">
-              <div className="flex flex-col">
-                <div className="flex gap-2">
-                  <div className="bg-gradient-to-r from-primary to-secondary p-2 rounded-lg w-fit">
-                    <Car className="h-6 w-6 text-white" />
-                  </div>
-                  <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                    Get Car
-                  </h1>
-                </div>
-                <p className="text-gray-600">{t("premiumCarRentalService")}</p>
-                <p className="text-sm text-gray-500">{vendorDetails.name}</p>
+        <div className="bg-white p-8 border border-gray-200 rounded-lg mt-4 print:shadow-none print:border-none">
+          {/* Invoice header with logo and barcode */}
+          <div className="flex flex-col md:flex-row justify-between items-center mb-8">
+            <div className="flex items-center gap-4">
+              <LazyImage
+                src={vendorLogo}
+                alt={vendorDetails?.name || "Vendor Logo"}
+                className="h-14 w-32 object-contain bg-white rounded-lg"
+              />
+              <div>
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                  {vendorDetails?.name || "GetCar"}
+                </h1>
+                <p className="text-gray-600 text-sm">
+                  {t("premiumCarRentalService") || "Premium Car Rental Service"}
+                </p>
               </div>
             </div>
-            
-            {/* Barcode Section */}
-            <div className="text-right">
+            <div className="text-right mt-4 md:mt-0">
               <h2 className="text-2xl font-bold text-gray-900 uppercase mb-2">
                 {t("invoice")}
               </h2>
-              <div className="mb-2">
-                <Barcode
-                  value={orderDetails.id.toString()}
-                  width={1.5}
-                  height={50}
-                  fontSize={12}
-                  background="#ffffff"
-                  lineColor="#000000"
-                  margin={0}
-                />
-              </div>
-              <p className="text-gray-600 text-sm">#{orderDetails.bookingNumber}</p>
+              <Barcode
+                value={String(orderDetails?.id || "0")}
+                width={1.5}
+                height={50}
+                fontSize={12}
+                background="#ffffff"
+                lineColor="#000000"
+                margin={0}
+              />
               <p className="text-gray-600 text-sm">
-                {format(new Date(orderDetails.creationdate), "MMM dd, yyyy")}
+                #
+                {orderDetails?.bookingNumber || (
+                  <span className="opacity-0">---</span>
+                )}
+              </p>
+              <p className="text-gray-600 text-sm">
+                {orderDetails?.creationdate ? (
+                  format(new Date(orderDetails.creationdate), "MMM dd, yyyy")
+                ) : (
+                  <span className="opacity-0">----</span>
+                )}
               </p>
             </div>
           </div>
 
-          {/* Customer & Rental Info */}
+          {/* Customer + Rental Details */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
             <div>
               <h3 className="font-semibold text-gray-900 mb-4 flex items-center">
                 <User className="h-4 w-4 me-2" />
-                {t("customerInformation")}
+                {t("customerInformation") || "Customer"}
               </h3>
               <div className="text-gray-600 space-y-1">
-                <p className="font-medium">{customerDetails.fullName}</p>
+                <p className="font-medium">
+                  {customerDetails?.fullName || (
+                    <span className="opacity-0">Name</span>
+                  )}
+                </p>
                 <p className="flex items-center">
                   <Mail className="h-3 w-3 me-1" />
-                  {customerDetails.email}
+                  {customerDetails?.email || (
+                    <span className="opacity-0">Email</span>
+                  )}
                 </p>
                 <p className="flex items-center">
                   <Phone className="h-3 w-3 me-1" />
-                  {customerDetails.phoneNumber}
+                  {customerDetails?.phoneNumber || (
+                    <span className="opacity-0">Phone</span>
+                  )}
                 </p>
                 <p className="text-sm text-gray-500">
-                  {t("nationalIdLabel")}: {customerDetails.idNumber}
+                  {t("nationalIdLabel") || "National ID"}:{" "}
+                  {customerDetails?.idNumber || (
+                    <span className="opacity-0">---</span>
+                  )}
                 </p>
               </div>
             </div>
             <div>
               <h3 className="font-semibold text-gray-900 mb-4 flex items-center">
                 <MapPin className="h-4 w-4 me-2" />
-                {t("rentalDetails")}
+                {t("rentalDetails") || "Rental"}
               </h3>
               <div className="text-gray-600 space-y-1">
                 <p>
-                  <span className="font-medium">{t("pickup")}:</span>{" "}
-                  {orderDetails.pickupLocation}
+                  <span className="font-medium">
+                    {t("pickup") || "Pickup"}:
+                  </span>{" "}
+                  {orderDetails?.pickupLocation || (
+                    <span className="opacity-0">---</span>
+                  )}
                 </p>
                 <p>
-                  <span className="font-medium">{t("return")}:</span>{" "}
-                  {orderDetails.dropOffLocation}
+                  <span className="font-medium">
+                    {t("return") || "Return"}:
+                  </span>{" "}
+                  {orderDetails?.dropOffLocation || (
+                    <span className="opacity-0">---</span>
+                  )}
                 </p>
                 <p>
-                  <span className="font-medium">{t("duration")}:</span>{" "}
-                  {orderDetails.rentDays} {t("days")}
+                  <span className="font-medium">
+                    {t("duration") || "Duration"}:
+                  </span>{" "}
+                  {orderDetails?.rentDays != null ? (
+                    `${orderDetails.rentDays} ${t("days") || "days"}`
+                  ) : (
+                    <span className="opacity-0">0 days</span>
+                  )}
                 </p>
                 <p>
-                  <span className="font-medium">{t("status")}:</span>{" "}
-                  <span className="capitalize">{orderDetails.status}</span>
+                  <span className="font-medium">
+                    {t("status") || "Status"}:
+                  </span>{" "}
+                  <span className="capitalize">
+                    {orderDetails?.status || (
+                      <span className="opacity-0">---</span>
+                    )}
+                  </span>
                 </p>
               </div>
             </div>
@@ -228,24 +274,36 @@ const BookingInvoiceModal: React.FC<BookingInvoiceModalProps> = ({
           <div className="bg-gray-50 p-6 rounded-lg mb-8">
             <h3 className="font-semibold text-gray-900 mb-4 flex items-center">
               <Calendar className="h-4 w-4 me-2" />
-              {t("rentalPeriod")}
+              {t("rentalPeriod") || "Rental Period"}
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="flex items-center gap-2">
                 <Clock className="h-4 w-4 text-green-600" />
                 <div>
-                  <p className="text-sm text-gray-600">{t("pickupDate")}</p>
+                  <p className="text-sm text-gray-600">
+                    {t("pickupDate") || "Pickup Date"}
+                  </p>
                   <p className="font-medium text-gray-900">
-                    {format(new Date(orderDetails.dateFrom), "PPP")}
+                    {orderDetails?.dateFrom ? (
+                      format(new Date(orderDetails.dateFrom), "PPP")
+                    ) : (
+                      <span className="opacity-0">---</span>
+                    )}
                   </p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
                 <Clock className="h-4 w-4 text-red-600" />
                 <div>
-                  <p className="text-sm text-gray-600">{t("returnDate")}</p>
+                  <p className="text-sm text-gray-600">
+                    {t("returnDate") || "Return Date"}
+                  </p>
                   <p className="font-medium text-gray-900">
-                    {format(new Date(orderDetails.dateTo), "PPP")}
+                    {orderDetails?.dateTo ? (
+                      format(new Date(orderDetails.dateTo), "PPP")
+                    ) : (
+                      <span className="opacity-0">---</span>
+                    )}
                   </p>
                 </div>
               </div>
@@ -256,111 +314,139 @@ const BookingInvoiceModal: React.FC<BookingInvoiceModalProps> = ({
           <div className="bg-gray-50 p-6 rounded-lg mb-8">
             <h3 className="font-semibold text-gray-900 mb-4 flex items-center">
               <Car className="h-4 w-4 me-2" />
-              {t("vehicleInformation")}
+              {t("vehicleInformation") || "Vehicle"}
             </h3>
             <div className="flex items-center gap-2">
-              {carDetails.imageURLsCar?.[0] ? (
+              {carImages[0] ? (
                 <LazyImage
-                  src={`${import.meta.env.VITE_UPLOADS_BASE_URL}${
-                    carDetails.imageURLsCar[0]
-                  }`}
-                  alt={carDetails.carName}
-                  className="h-16 w-24 object-cover rounded-lg"
+                  src={`${VITE_UPLOADS_BASE_URL}${carImages[0]}`}
+                  alt={carDetails.carName || "Car"}
+                  className="h-16 w-28 object-cover rounded-lg"
                 />
-              ) : null}
+              ) : (
+                <LazyImage
+                  src="/logo.png"
+                  alt="GetCar Logo"
+                  className="h-16 w-28 object-contain bg-white rounded-lg"
+                />
+              )}
               <div className="flex-1">
                 <p className="font-medium text-gray-900">
-                  {carDetails.carName}
+                  {carDetails.carName || <span className="opacity-0">Car</span>}
                 </p>
                 <p className="text-gray-600">
-                  {carDetails.model} - {carDetails.type}
+                  {carDetails.model || <span className="opacity-0">Model</span>}{" "}
+                  - {carDetails.type || <span className="opacity-0">Type</span>}
                 </p>
                 <div className="grid grid-cols-2 gap-2 mt-2 text-sm text-gray-500">
                   <p>
-                    {t("transmission")}: {carDetails.transmission}
+                    {t("transmission") || "Transmission"}:{" "}
+                    {carDetails.transmission || (
+                      <span className="opacity-0">---</span>
+                    )}
                   </p>
                   <p>
-                    {t("doors")}: {carDetails.doors}
+                    {t("doors") || "Doors"}:{" "}
+                    {carDetails.doors || <span className="opacity-0">---</span>}
                   </p>
                   <p>
-                    {t("engine")}: {carDetails.liter}
+                    {t("engine") || "Engine"}:{" "}
+                    {carDetails.liter || <span className="opacity-0">---</span>}
                   </p>
                   <p>
-                    {t("typeLabel")}: {carDetails.type}
+                    {t("typeLabel") || "Type"}:{" "}
+                    {carDetails.type || <span className="opacity-0">---</span>}
                   </p>
+                </div>
+                {/* Gallery Thumbnails -- Only show if more than one */}
+                <div className="flex gap-2 mt-2">
+                  {carImages.slice(1, 5).map((img, idx) => (
+                    <LazyImage
+                      key={idx}
+                      src={`${VITE_UPLOADS_BASE_URL}${img}`}
+                      alt={`Car ${idx}`}
+                      className="h-8 w-14 object-cover rounded border border-slate-200"
+                    />
+                  ))}
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Invoice Items */}
+          {/* Invoice Items Table */}
           <div className="mb-8">
             <table className="w-full border border-gray-200">
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-4 py-3 text-left text-sm font-medium text-gray-900 border-b border-gray-200">
-                    {t("description")}
+                    {t("description") || "Description"}
                   </th>
                   <th className="px-4 py-3 text-center text-sm font-medium text-gray-900 border-b border-gray-200">
-                    {t("days")}
+                    {t("days") || "Days"}
                   </th>
                   <th className="px-4 py-3 text-right text-sm font-medium text-gray-900 border-b border-gray-200">
-                    {t("rate")}
+                    {t("rate") || "Rate"}
                   </th>
                   <th className="px-4 py-3 text-right text-sm font-medium text-gray-900 border-b border-gray-200">
-                    {t("amount")}
+                    {t("amount") || "Amount"}
                   </th>
                 </tr>
               </thead>
               <tbody>
                 <tr>
                   <td className="px-4 py-3 text-sm text-gray-900 border-b border-gray-200">
-                    {carDetails.carName} {t("rentalLabel")}
+                    {carDetails?.carName || (
+                      <span className="opacity-0">car</span>
+                    )}{" "}
+                    {t("rentalLabel") || "Rental"}
                   </td>
                   <td className="px-4 py-3 text-sm text-gray-900 text-center border-b border-gray-200">
-                    {orderDetails.rentDays}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-gray-900 text-right border-b border-gray-200">
-                    {formatCurrency(
-                      invoiceDetails.charges.carRentCharge /
-                        orderDetails.rentDays
+                    {orderDetails.rentDays != null ? (
+                      orderDetails.rentDays
+                    ) : (
+                      <span className="opacity-0">0</span>
                     )}
                   </td>
                   <td className="px-4 py-3 text-sm text-gray-900 text-right border-b border-gray-200">
-                    {formatCurrency(invoiceDetails.charges.carRentCharge)}
+                    {formatCurrency(
+                      (invoiceDetails?.charges?.carRentCharge ?? 0) /
+                        (orderDetails?.rentDays || 1)
+                    )}
+                  </td>
+                  <td className="px-4 py-3 text-sm text-gray-900 text-right border-b border-gray-200">
+                    {formatCurrency(invoiceDetails?.charges?.carRentCharge)}
                   </td>
                 </tr>
-
                 <tr>
                   <td className="px-4 py-3 text-sm text-gray-900 border-b border-gray-200">
-                    {t("protectionFee")}
+                    {t("protectionFee") || "Protection Fee"}
                   </td>
                   <td className="px-4 py-3 text-sm text-gray-900 text-center border-b border-gray-200">
                     1
                   </td>
                   <td className="px-4 py-3 text-sm text-gray-900 text-right border-b border-gray-200">
-                    {formatCurrency(invoiceDetails.charges.protectionFee)}
+                    {formatCurrency(invoiceDetails?.charges?.protectionFee)}
                   </td>
                   <td className="px-4 py-3 text-sm text-gray-900 text-right border-b border-gray-200">
-                    {formatCurrency(invoiceDetails.charges.protectionFee)}
+                    {formatCurrency(invoiceDetails?.charges?.protectionFee)}
                   </td>
                 </tr>
-
-                {invoiceDetails.paymentInfoDetalis &&
-                  invoiceDetails.paymentInfoDetalis.length > 0
-                  ? invoiceDetails.paymentInfoDetalis.map((service, index) => (
-                      <tr key={index}>
+                {invoiceDetails?.paymentInfoDetalis?.length
+                  ? invoiceDetails.paymentInfoDetalis.map((service, idx) => (
+                      <tr key={idx}>
                         <td className="px-4 py-3 text-sm text-gray-900 border-b border-gray-200">
-                          {service.carServiceName}
+                          {service?.carServiceName || (
+                            <span className="opacity-0">-</span>
+                          )}
                         </td>
                         <td className="px-4 py-3 text-sm text-gray-900 text-center border-b border-gray-200">
                           1
                         </td>
                         <td className="px-4 py-3 text-sm text-gray-900 text-right border-b border-gray-200">
-                          {formatCurrency(service.carServicePrice)}
+                          {formatCurrency(service?.carServicePrice)}
                         </td>
                         <td className="px-4 py-3 text-sm text-gray-900 text-right border-b border-gray-200">
-                          {formatCurrency(service.carServicePrice)}
+                          {formatCurrency(service?.carServicePrice)}
                         </td>
                       </tr>
                     ))
@@ -373,27 +459,30 @@ const BookingInvoiceModal: React.FC<BookingInvoiceModalProps> = ({
           <div className="flex w-full justify-center">
             <div className="space-y-2">
               <div className="flex justify-between py-2">
-                <span className="text-gray-600">{t("carRental")}</span>
+                <span className="text-gray-600">
+                  {t("carRental") || "Car Rental"}
+                </span>
                 <span className="text-gray-900">
-                  {formatCurrency(invoiceDetails.charges.carRentCharge)}
+                  {formatCurrency(invoiceDetails?.charges?.carRentCharge)}
                 </span>
               </div>
               <div className="flex justify-between py-2">
-                <span className="text-gray-600">{t("protectionFee")}</span>
+                <span className="text-gray-600">
+                  {t("protectionFee") || "Protection Fee"}
+                </span>
                 <span className="text-gray-900">
-                  {formatCurrency(invoiceDetails.charges.protectionFee)}
+                  {formatCurrency(invoiceDetails?.charges?.protectionFee)}
                 </span>
               </div>
-              {invoiceDetails.paymentInfoDetalis &&
-              invoiceDetails.paymentInfoDetalis.length > 0 ? (
+              {invoiceDetails?.paymentInfoDetalis?.length ? (
                 <div className="flex justify-between py-2">
                   <span className="text-gray-600">
-                    {t("additionalServices")}
+                    {t("additionalServices") || "Additional Services"}
                   </span>
                   <span className="text-gray-900">
                     {formatCurrency(
                       invoiceDetails.paymentInfoDetalis.reduce(
-                        (sum, service) => sum + service.carServicePrice,
+                        (sum, service) => sum + (service?.carServicePrice || 0),
                         0
                       )
                     )}
@@ -402,31 +491,40 @@ const BookingInvoiceModal: React.FC<BookingInvoiceModalProps> = ({
               ) : null}
               <div className="flex justify-between py-2 border-t border-gray-200 w-full">
                 <span className="font-semibold text-gray-900">
-                  {t("totalAmount")}
+                  {t("totalAmount") || "Total"}
                 </span>
                 <span className="font-bold text-xl text-primary">
-                  {formatCurrency(invoiceDetails.totalAmount)}
+                  {formatCurrency(invoiceDetails?.totalAmount)}
                 </span>
               </div>
             </div>
           </div>
 
-          {/* Footer */}
-          {type === "client" ? (
+          {type === "client" && (
             <div className="mt-8 pt-8 border-t border-gray-200 text-center text-gray-600">
               <p className="text-lg font-medium">
-                {t("thankYouChoosingGetCar")}
+                {t("thankYouChoosingGetCar") ||
+                  "Thank you for choosing GetCar!"}
               </p>
-              <p className="text-sm mt-2">{t("trustedCarRentalPartner")}</p>
+              <p className="text-sm mt-2">
+                {t("trustedCarRentalPartner") ||
+                  "Your trusted car rental partner."}
+              </p>
               <div className="mt-4 text-xs space-y-1">
                 <p>
-                  {t("forSupport")}: {vendorDetails.email} |{" "}
-                  {vendorDetails.phoneNumber}
+                  {t("forSupport") || "Support"}:{" "}
+                  {vendorDetails?.email || (
+                    <span className="opacity-0">---</span>
+                  )}{" "}
+                  |{" "}
+                  {vendorDetails?.phoneNumber || (
+                    <span className="opacity-0">---</span>
+                  )}
                 </p>
-                <p>{t("visitUs")}: www.getcar.sa</p>
+                <p>{t("visitUs") || "Visit us"}: www.getcar.sa</p>
               </div>
             </div>
-          ) : null}
+          )}
         </div>
       </DialogContent>
     </Dialog>
