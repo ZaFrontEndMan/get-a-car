@@ -117,7 +117,7 @@ const CarsFilters = ({
               </h3>
               <input
                 type="text"
-                placeholder={t("searchCars")}
+                placeholder={t("search")}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className={`w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-xs ${
