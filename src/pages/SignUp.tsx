@@ -283,7 +283,7 @@ const SignUp: React.FC = () => {
         Gender: parseInt(formData.gender),
         Country: parseInt(formData.country),
         City: parseInt(formData.city),
-        DateOfBirth: formData.dateOfBirth,
+        BirthDate: formData.dateOfBirth,
         NationalId: formData.nationalId,
         AcceptTerms: formData.acceptTerms,
         UserType: userType,
@@ -294,7 +294,7 @@ const SignUp: React.FC = () => {
       if (userType === "client") {
         userDetails = {
           ...baseDetails,
-          LicenseId: formData.licenseId,
+          LicenseNumber: formData.licenseId,
         } as ClientUserDetails;
       } else {
         userDetails = {

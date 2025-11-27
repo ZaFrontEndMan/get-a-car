@@ -225,7 +225,7 @@ const CarCard = ({ car, viewMode = "grid" }: CarCardProps) => {
           <button
             onClick={handleFavoriteClick}
             disabled={isAdding || isRemovingByCarId}
-            className={`absolute top-3 right-3 p-2 rounded-full transition-colors duration-200 z-10 ${
+            className={`absolute top-3 start-3 p-2 rounded-full transition-colors duration-200 z-10 ${
               isCarFavorite
                 ? "bg-red-500 text-white"
                 : "bg-white/80 text-gray-600 hover:bg-red-500 hover:text-white"
