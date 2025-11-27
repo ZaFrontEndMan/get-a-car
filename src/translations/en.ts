@@ -1492,6 +1492,23 @@ export const enTranslations = {
   with_driver: "With Driver",
   paidAmount: "Paid Amount",
   remainingAmount: "Remaining Amount",
+
+  favourites: "Favourites",
+  favourites_add_success_title: "Added",
+  favourites_add_success_message: "Car added to favourites",
+  favourites_add_error_title: "Error",
+  favourites_add_error_default: "Failed to add car to favourites",
+
+  favourites_remove_success_title: "Removed",
+  favourites_remove_success_message: "Car removed from favourites",
+  favourites_remove_item_success_message: "Item removed from favourites list",
+  favourites_remove_error_title: "Error",
+  favourites_remove_error_default: "Failed to remove car from favourites",
+
+  favourites_get_item_error_title: "Error",
+  favourites_get_item_error_default: "Failed to fetch favourite item",
+  noFavorites: "No favorites yet",
+  noFavoritesDescription: "You have no favorite cars yet.",
 };
 
 export default enTranslations;

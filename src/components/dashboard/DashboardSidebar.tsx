@@ -156,7 +156,7 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
       {isSidebarExpanded ? (
         <LazyImage
           className="h-16 w-full object-cover p-2"
-          src="/full-logo.png"
+          src="/logo.png"
           alt="logo"
         />
       ) : (

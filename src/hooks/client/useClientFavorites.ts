@@ -9,12 +9,15 @@ import {
 } from "@/api/client/clientFavorites";
 import { Favorite } from "@/types/favorites";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 // Clean interface for components to interact with Favorites
 export const useClientFavorites = () => {
-  const { user } = useAuth(); // Add this line
+  const { user } = useAuth();
+  const { t } = useLanguage();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
   const favoritesQuery = useQuery<Favorite[]>({
     queryKey: ["clientFavorites"],
     queryFn: getFavorites,
@@ -27,14 +30,14 @@ export const useClientFavorites = () => {
       queryClient.invalidateQueries({ queryKey: ["clientFavorites"] });
       queryClient.invalidateQueries({ queryKey: ["allCars"] });
       toast({
-        title: "تمت الإضافة",
-        description: "تمت إضافة السيارة إلى المفضلة",
+        title: t("favourites_add_success_title"),
+        description: t("favourites_add_success_message"),
       });
     },
     onError: (error: any) => {
       toast({
-        title: "خطأ",
-        description: error?.message || "فشل في إضافة السيارة إلى المفضلة",
+        title: t("favourites_add_error_title"),
+        description: error?.message || t("favourites_add_error_default"),
         variant: "destructive",
       });
     },
@@ -45,14 +48,14 @@ export const useClientFavorites = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["clientFavorites"] });
       toast({
-        title: "تمت الإزالة",
-        description: "تمت إزالة السيارة من المفضلة",
+        title: t("favourites_remove_success_title"),
+        description: t("favourites_remove_success_message"),
       });
     },
     onError: (error: any) => {
       toast({
-        title: "خطأ",
-        description: error?.message || "فشل في إزالة السيارة من المفضلة",
+        title: t("favourites_remove_error_title"),
+        description: error?.message || t("favourites_remove_error_default"),
         variant: "destructive",
       });
     },
@@ -64,14 +67,14 @@ export const useClientFavorites = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["clientFavorites"] });
       toast({
-        title: "تمت الإزالة",
-        description: "تم حذف العنصر من قائمة المفضلة",
+        title: t("favourites_remove_success_title"),
+        description: t("favourites_remove_item_success_message"),
       });
     },
     onError: (error: any) => {
       toast({
-        title: "خطأ",
-        description: error?.message || "فشل في حذف العنصر من قائمة المفضلة",
+        title: t("favourites_remove_error_title"),
+        description: error?.message || t("favourites_remove_error_default"),
         variant: "destructive",
       });
     },
@@ -82,8 +85,8 @@ export const useClientFavorites = () => {
       return await getFavoriteItemById(wishlistItemId);
     } catch (error: any) {
       toast({
-        title: "خطأ",
-        description: error?.message || "فشل في جلب بيانات العنصر",
+        title: t("favourites_get_item_error_title"),
+        description: error?.message || t("favourites_get_item_error_default"),
         variant: "destructive",
       });
       return null;

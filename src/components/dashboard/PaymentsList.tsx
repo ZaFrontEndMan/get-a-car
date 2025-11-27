@@ -164,7 +164,7 @@ const PaymentsList: React.FC = () => {
                   <span className="font-bold">
                     {t("paidAmount") || "Paid Amount"}:
                   </span>{" "}
-                  {t("currency")} {invoice.pricePaid?.toFixed?.(2) ?? "0.00"}
+                  {t("currency")} {invoice.webSiteAmount?.toFixed?.(2) ?? "0.00"}
                 </span>
               </div>
               <span

@@ -1495,6 +1495,22 @@ export const arTranslations = {
   enter_liter: "أدخل سعة اللتر",
   with_driver: "مع سائق",
   remainingAmount: "المبلغ المتبقي",
+  favourites: "المفضلة",
+  favourites_add_success_title: "تمت الإضافة",
+  favourites_add_success_message: "تمت إضافة السيارة إلى المفضلة",
+  favourites_add_error_title: "خطأ",
+  favourites_add_error_default: "فشل في إضافة السيارة إلى المفضلة",
+
+  favourites_remove_success_title: "تمت الإزالة",
+  favourites_remove_success_message: "تمت إزالة السيارة من المفضلة",
+  favourites_remove_item_success_message: "تم حذف العنصر من قائمة المفضلة",
+  favourites_remove_error_title: "خطأ",
+  favourites_remove_error_default: "فشل في إزالة السيارة من المفضلة",
+
+  favourites_get_item_error_title: "خطأ",
+  favourites_get_item_error_default: "فشل في جلب بيانات العنصر",
+  noFavorites: "لا توجد سيارات في المفضلة",
+  noFavoritesDescription: "لا توجد سيارات في قائمة المفضلة حاليًا.",
 };
 
 export default arTranslations;

@@ -18,6 +18,7 @@ import {
 import { Booking, ClientBookingsResponse } from "@/types/clientBookings";
 import { InvoiceResponse } from "@/types/invoiceDetails";
 import { useToast } from "@/components/ui/use-toast";
+import { useLanguage } from "@/contexts/LanguageContext"; // ✅ add this
 
 interface GetAllBookingsParams {
   startDate?: string;
@@ -31,16 +32,39 @@ interface BookingPayload {
   [key: string]: unknown;
 }
 
+// adjust type if you have it defined elsewhere
+interface AddBookingFavouritePayload {
+  [key: string]: unknown;
+}
+
 export const useClientBookings = () => {
   const { toast } = useToast();
+  const { t } = useLanguage(); // ✅ use translations
   const queryClient = useQueryClient();
+
+  const extractErrorMessage = (error: any) => {
+    return (
+      error?.response?.data?.error?.message ||
+      error?.response?.data?.message ||
+      error?.message ||
+      ""
+    );
+  };
 
   const useCreateBookingMutation = (
     options?: UseMutationOptions<Booking, Error, BookingPayload>
   ) =>
     useMutation({
       mutationFn: createBooking,
-      ...options,
+      onSuccess: (data, variables, context) => {
+        toast({ description: t("success") }); // ✅ success toast
+        options?.onSuccess?.(data, variables, context);
+      },
+      onError: (error, variables, context) => {
+        const message = extractErrorMessage(error);
+        toast({ description: message, variant: "destructive" });
+        options?.onError?.(error, variables, context);
+      },
     });
 
   const usePaymentCallbackMutation = (
@@ -48,7 +72,15 @@ export const useClientBookings = () => {
   ) =>
     useMutation({
       mutationFn: paymentCallback,
-      ...options,
+      onSuccess: (data, variables, context) => {
+        toast({ description: t("success") }); // ✅ success toast
+        options?.onSuccess?.(data, variables, context);
+      },
+      onError: (error, variables, context) => {
+        const message = extractErrorMessage(error);
+        toast({ description: message, variant: "destructive" });
+        options?.onError?.(error, variables, context);
+      },
     });
 
   const useGetBookingById = (
@@ -101,51 +133,56 @@ export const useClientBookings = () => {
   ) =>
     useMutation({
       mutationFn: ({ invoiceId }) => generateInvoicePdf(invoiceId),
-      ...options,
+      onSuccess: (data, variables, context) => {
+        toast({ description: t("success") }); // ✅ success toast
+        options?.onSuccess?.(data, variables, context);
+      },
+      onError: (error, variables, context) => {
+        const message = extractErrorMessage(error);
+        toast({ description: message, variant: "destructive" });
+        options?.onError?.(error, variables, context);
+      },
     });
+
   const useAddBookingFavourite = (
     options?: UseMutationOptions<any, Error, AddBookingFavouritePayload>
   ) =>
     useMutation({
       mutationFn: addBookingFavourite,
-      onSuccess: () => {
-        toast({
-          title: "تم التقييم",
-          description: "تم حفظ تقييمك بنجاح!",
-        });
-        // Invalidate or refetch wherever needed:
+      onSuccess: (data, variables, context) => {
+        toast({ description: t("success") }); // ✅ success toast
         queryClient.invalidateQueries({ queryKey: ["bookings"] });
+        options?.onSuccess?.(data, variables, context);
       },
-      onError: (error: any) => { 
+      onError: (error: any, variables, context) => {
+        const message = extractErrorMessage(error);
         toast({
-          title: "خطأ",
-          description: error?.message || "فشل في إرسال التقييم",
+          description: message,
           variant: "destructive",
         });
+        options?.onError?.(error, variables, context);
       },
-      ...options,
     });
+
   const useAcceptReturnCar = (
     options?: UseMutationOptions<any, Error, { bookingId: string | number }>
   ) =>
     useMutation({
       mutationFn: ({ bookingId }) => acceptReturnCar(bookingId),
-      onSuccess: () => {
-        toast({
-          title: "تم القبول",
-          description: "تم قبول استرجاع السيارة بنجاح",
-        });
+      onSuccess: (data, variables, context) => {
+        toast({ description: t("success") }); // ✅ success toast
         queryClient.invalidateQueries({ queryKey: ["bookings"] });
         queryClient.invalidateQueries({ queryKey: ["booking"] });
+        options?.onSuccess?.(data, variables, context);
       },
-      onError: (error: any) => {
+      onError: (error: any, variables, context) => {
+        const message = extractErrorMessage(error);
         toast({
-          title: "خطأ",
-          description: error?.message || "فشل في قبول استرجاع السيارة",
+          description: message,
           variant: "destructive",
         });
+        options?.onError?.(error, variables, context);
       },
-      ...options,
     });
 
   return {

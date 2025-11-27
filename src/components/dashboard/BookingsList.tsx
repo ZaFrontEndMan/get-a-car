@@ -54,7 +54,7 @@ const BookingsList: React.FC = () => {
     onReturnCar: () => {},
     isReturning: false,
     onAcceptReturnCar: handleAcceptReturn,
-    onFavourite: addFavourite,
+    onRate: addFavourite,
 
     isAccepting: acceptReturnMutation.isPending,
   };
