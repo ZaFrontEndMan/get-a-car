@@ -1511,6 +1511,10 @@ export const arTranslations = {
   favourites_get_item_error_default: "فشل في جلب بيانات العنصر",
   noFavorites: "لا توجد سيارات في المفضلة",
   noFavoritesDescription: "لا توجد سيارات في قائمة المفضلة حاليًا.",
+  waiting: "قيد الانتظار",
+  inprogress: "قيد الاجراء",
+  carreturn: "إرجاع السيارة",
+  offer: "عرض",
 };
 
 export default arTranslations;

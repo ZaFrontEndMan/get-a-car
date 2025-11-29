@@ -261,7 +261,7 @@ const BookingInvoiceModal: React.FC<BookingInvoiceModalProps> = ({
                     {t("status") || "Status"}:
                   </span>{" "}
                   <span className="capitalize">
-                    {orderDetails?.status || (
+                    {t(orderDetails?.status.toLowerCase()) || (
                       <span className="opacity-0">---</span>
                     )}
                   </span>

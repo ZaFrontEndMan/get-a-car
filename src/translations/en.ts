@@ -1509,6 +1509,11 @@ export const enTranslations = {
   favourites_get_item_error_default: "Failed to fetch favourite item",
   noFavorites: "No favorites yet",
   noFavoritesDescription: "You have no favorite cars yet.",
+
+  waiting: "Waiting",
+  inprogress: "In Progress",
+  carreturn: "Car Return",
+  offer: "Offer",
 };
 
 export default enTranslations;
