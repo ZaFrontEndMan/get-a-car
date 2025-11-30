@@ -231,7 +231,7 @@ export const useBranchForm = (
       toast({
         title: "Error",
         description:
-          error?.response?.data?.error?.message || `Failed to ${action} branch`,
+          error.response?.data?.customMessage || `Failed to ${action} branch`,
         variant: "destructive",
       });
     },

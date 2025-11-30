@@ -193,7 +193,9 @@ const CarForm = ({
             onSuccess();
             onClose();
           },
-          onError: (error: any) => {
+          onError: (error: any) => { 
+            console.log(error);
+
             toast({
               title: t("update_failed"),
               description: error?.message || t("failed_to_update_car"),
@@ -213,6 +215,8 @@ const CarForm = ({
           onClose();
         },
         onError: (error: any) => {
+          console.log(error);
+
           toast({
             title: t("creation_failed"),
             description: error?.message || t("failed_to_create_car"),
