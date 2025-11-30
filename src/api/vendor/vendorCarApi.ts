@@ -120,8 +120,6 @@ export const bulkUploadCars = async (fileData: FormData) => {
 
 // Download car template
 export const downloadCarTemplate = async () => {
-  const { data } = await axiosInstance.get("/Vendor/Car/DownloadCarTemplate", {
-    responseType: "blob",
-  });
+  const { data } = await axiosInstance.get("/Vendor/Car/DownloadCarTemplate");
   return data;
 };

@@ -16,6 +16,7 @@ import {
   useBulkUploadCars,
   useDownloadCarTemplate,
 } from "@/hooks/vendor/useVendorCar";
+import { downloadCarTemplate } from "@/api/vendor/vendorCarApi";
 
 interface CarsImportModalProps {
   isOpen: boolean;
@@ -33,88 +34,64 @@ const CarsImportModal = ({
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<string>("");
   const [progress, setProgress] = useState(0);
+  const [isDownloading, setIsDownloading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
-  const { mutate: downloadTemplate, isPending: isDownloading } =
-    useDownloadCarTemplate();
+
   const { mutate: bulkUploadCars, isPending: isUploadingCars } =
     useBulkUploadCars();
+  const base64ToBlob = (
+    base64: string,
+    mime = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+  ) => {
+    // in case backend ever returns a data URL, strip prefix
+    const clean = base64.includes(",") ? base64.split(",")[1] : base64;
 
-  const handleDownloadTemplate = () => {
-    downloadTemplate(undefined, {
-      onSuccess: (base64File: string, variables) => {
-        try {
-          // Decode base64 to bytes
-          const paddedBase64 = base64File
-            .replace(/(\r\n|\n)/g, "\\n")
-            .replace(/[^A-Za-z0-9+/\\n=\\s]/g, "");
+    const binary = atob(clean);
+    const len = binary.length;
+    const bytes = new Uint8Array(len);
 
-          // Fix padding if needed
-          let base64String = paddedBase64;
-          while (base64String.length % 4) {
-            base64String += "=";
-          }
+    for (let i = 0; i < len; i++) {
+      bytes[i] = binary.charCodeAt(i);
+    }
 
-          // Decode base64 to binary data
-          const binaryString = atob(base64String);
-          const bytes = new Uint8Array(binaryString.length);
-
-          for (let i = 0; i < binaryString.length; i++) {
-            bytes[i] = binaryString.charCodeAt(i);
-          }
-
-          // Create blob from binary data
-          const blob = new Blob([bytes], {
-            type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-          });
-          const url = window.URL.createObjectURL(blob);
-
-          // Download the decoded file
-          const link = document.createElement("a");
-          link.href = url;
-          link.download = "cars_template.xlsx";
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-          window.URL.revokeObjectURL(url);
-
-          toast({
-            title: t("template_downloaded"),
-            description: t("template_downloaded_description"),
-          });
-        } catch (error) {
-          console.error("Error decoding file:", error);
-
-          // Fallback: try direct download if decoding fails
-          const url = window.URL.createObjectURL(
-            new Blob([base64File], { type: "application/octet-stream" })
-          );
-          const link = document.createElement("a");
-          link.href = url;
-          link.download = "cars_template.xlsx";
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-          window.URL.revokeObjectURL(url);
-
-          toast({
-            title: t("download_error"),
-            description: t("fallback_download_warning"),
-            variant: "destructive",
-          });
-        }
-      },
-      onError: (error) => {
-        console.error("Template download error:", error);
-        toast({
-          title: t("download_error"),
-          description: t("download_error_description"),
-          variant: "destructive",
-        });
-      },
-    });
+    return new Blob([bytes], { type: mime });
   };
+  const handleDownloadTemplate = async () => {
+    try {
+      setIsDownloading(true);
 
+      const { fileContent, fileName, contentType } =
+        await downloadCarTemplate();
+
+      const blob = base64ToBlob(
+        fileContent,
+        contentType ||
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      );
+
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = fileName || "CarTemplate.xlsx";
+
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error: any) {
+      console.error("Template download error:", error);
+      toast({
+        title: t("download_error"),
+        description: t("download_error_description", {
+          errorMessage: error?.message || "Unknown error",
+        }),
+        variant: "destructive",
+      });
+    } finally {
+      setIsDownloading(false);
+    }
+  };
   const handleFileUpload = async (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
