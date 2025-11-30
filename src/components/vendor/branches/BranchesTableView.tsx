@@ -104,14 +104,16 @@ const BranchesTableView = ({
                       isRTL ? "gap-reverse" : ""
                     }`}
                   >
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => onEdit(branch)}
-                      disabled={isDeleting}
-                    >
-                      <Edit className="h-4 w-4" />
-                    </Button>
+                    {!branch?.mainBranch && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => onEdit(branch)}
+                        disabled={isDeleting}
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                    )}
                   </div>
                 </TableCell>
               </TableRow>

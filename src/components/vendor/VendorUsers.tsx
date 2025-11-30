@@ -31,7 +31,7 @@ const VendorUsers = () => {
 
   // Fetch employees using the hook
   const { data, isLoading, isError, error } = useGetUsersByVendorOwner();
-  const vendorUsers = data?.data;
+  const vendorUsers = data?.data || [];
 
   // Hypothetical delete mutation
   const deleteMutation = useMutation({
@@ -161,14 +161,6 @@ const VendorUsers = () => {
             <SkeletonCard key={index} />
           ))}
         </div>
-      </div>
-    );
-  }
-
-  if (isError) {
-    return (
-      <div>
-        {t("error")}: {error.message}
       </div>
     );
   }

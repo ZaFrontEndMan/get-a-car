@@ -639,25 +639,6 @@ const VendorOffers: React.FC = () => {
     );
   }
 
-  if (carsError || offersError) {
-    return (
-      <div className="text-center py-12">
-        <p className="text-red-600">
-          {t("errorLoading")}{" "}
-          {(carsError || offersError)?.message || t("unknownError")}
-        </p>
-        <Button
-          onClick={() =>
-            queryClient.invalidateQueries({ queryKey: ["vendor", "cars"] })
-          }
-          className="mt-4"
-        >
-          {t("retry")}
-        </Button>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -691,16 +672,22 @@ const VendorOffers: React.FC = () => {
       )}
 
       <div className="grid gap-4">
-        {offers.map((offer) => (
-          <OfferCard
-            key={offer.id}
-            offer={offer}
-            t={t}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-            deletePending={deleteMutation.isPending}
-          />
-        ))}
+        {offers?.length > 0 ? (
+          offers.map((offer) => (
+            <OfferCard
+              key={offer.id}
+              offer={offer}
+              t={t}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+              deletePending={deleteMutation.isPending}
+            />
+          ))
+        ) : (
+          <div className="text-center py-12">
+            <p className="text-">{t("noOffersFound")} </p>
+          </div>
+        )}
       </div>
 
       <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>

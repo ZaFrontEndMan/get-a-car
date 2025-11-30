@@ -1515,6 +1515,17 @@ export const arTranslations = {
   inprogress: "قيد الاجراء",
   carreturn: "إرجاع السيارة",
   offer: "عرض",
+  changeImage: "تغيير الصورة",
+  clickToUpload: "انقر للتحميل",
+  pngJpgUpTo1mb: "PNG أو JPG حتى 1 ميجابايت",
+  fileSizeTooLarge: "حجم الملف يجب أن يكون أقل من {maxSize}",
+  changeLogo: "تغيير الشعار",
+  branchCreated: "تم إنشاء الفرع بنجاح",
+  branchUpdated: "تم تحديث الفرع بنجاح",
+  uploadCompanyLogo: "تحميل شعار شركتك",
+  uploadBusinessLicense: "تحميل رخصتك التجارية",
+  uploadInsurance: "تحميل وثيقة التأمين",
+  uploadTaxType: "تحميل شهادة الضريبة",
 };
 
 export default arTranslations;

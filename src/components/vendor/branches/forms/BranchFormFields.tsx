@@ -239,9 +239,9 @@ export function BranchFormFields({
 
         {/* isPhone Checkbox - Only in creation mode */}
         {!isEditing && (
-          <div className="space-y-2">
+          <div className="space-y-2 mt-5">
             <Label className="block">&nbsp;</Label>
-            <div className="flex items-center gap-2 h-10 border border-input rounded-md px-3 bg-background hover:bg-accent transition cursor-pointer">
+            <div className="flex items-center gap-2 ">
               <Checkbox
                 id="isPhone"
                 checked={!!formData.isPhone}
@@ -358,7 +358,7 @@ export function BranchFormFields({
           </div>
 
           {/* Row 7: Can Make Offer Checkbox */}
-          <div className="flex items-center gap-2 border border-input rounded-md p-3 bg-background hover:bg-accent transition">
+          <div className="flex items-center gap-2 ">
             <Checkbox
               id="canMakeOffer"
               checked={!!formData.canMakeOffer}

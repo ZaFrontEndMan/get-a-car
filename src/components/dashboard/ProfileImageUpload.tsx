@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Upload, Camera, FileText, CreditCard } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 import LazyImage from "../ui/LazyImage";
 
 type DocumentFieldName =
@@ -32,11 +33,12 @@ const ProfileImageUpload: React.FC<ProfileImageUploadProps> = ({
 }) => {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [pulseKey, setPulseKey] = useState(0);
+  const { t } = useLanguage();
 
   // Trigger pulse animation when loading starts for this field
   useEffect(() => {
     if (loading) {
-      setPulseKey(prev => prev + 1);
+      setPulseKey((prev) => prev + 1);
     }
   }, [loading]);
 
@@ -48,8 +50,9 @@ const ProfileImageUpload: React.FC<ProfileImageUploadProps> = ({
         return;
       }
 
-      // Validate file size (max 5MB)
-      if (file.size > 5 * 1024 * 1024) {
+      // Validate file size (max 1MB)
+      if (file.size > 1 * 1024 * 1024) {
+        alert(t("fileSizeTooLarge", { maxSize: "1MB" }));
         return;
       }
 
@@ -78,7 +81,9 @@ const ProfileImageUpload: React.FC<ProfileImageUploadProps> = ({
   return (
     <div
       key={pulseKey}
-      className={`bg-white rounded-lg border border-gray-200 p-6 ${className} ${loading ? "animate-pulse" : ""}`}
+      className={`bg-white rounded-lg border border-gray-200 p-6 ${className} ${
+        loading ? "animate-pulse" : ""
+      }`}
     >
       <div className="flex items-center justify-between mb-4">
         <div>
@@ -102,8 +107,8 @@ const ProfileImageUpload: React.FC<ProfileImageUploadProps> = ({
             />
             <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 rounded-lg flex items-center justify-center">
               <label className="cursor-pointer bg-white text-gray-900 px-4 py-2 rounded-lg hover:bg-gray-100 transition-colors">
-                <Upload className="h-4 w-4 mr-2 inline" />
-                Change Image
+                <Upload className="h-4 w-4 me-2 inline" />
+                {t("changeImage")}
                 <input
                   type="file"
                   accept="image/*"
@@ -124,10 +129,10 @@ const ProfileImageUpload: React.FC<ProfileImageUploadProps> = ({
           >
             {getIcon()}
             <span className="mt-2 text-sm text-gray-600">
-              {loading ? "Uploading..." : "Click to upload"}
+              {loading ? t("uploading") : t("clickToUpload")}
             </span>
             <span className="text-xs text-gray-500 mt-1">
-              PNG, JPG up to 5MB
+              {t("pngJpgUpTo1mb")}
             </span>
             <input
               type="file"

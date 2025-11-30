@@ -1514,6 +1514,17 @@ export const enTranslations = {
   inprogress: "In Progress",
   carreturn: "Car Return",
   offer: "Offer",
+  changeImage: "Change image",
+  clickToUpload: "Click to upload",
+  pngJpgUpTo1mb: "PNG, JPG up to 1MB",
+  fileSizeTooLarge: "File size must be less than {maxSize}",
+  changeLogo: "Change logo",
+  branchCreated: "Branch created successfully",
+  branchUpdated: "Branch updated successfully",
+  uploadCompanyLogo: "Upload your company logo",
+  uploadBusinessLicense: "Upload your business license",
+  uploadInsurance: "Upload your insurance document",
+  uploadTaxType: "Upload your tax certificate",
 };
 
 export default enTranslations;

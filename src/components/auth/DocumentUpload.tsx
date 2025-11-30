@@ -6,42 +6,30 @@ import LazyImage from "../ui/LazyImage";
 interface DocumentUploadProps {
   onImageUpdate: (file: File | null) => void;
   currentImageFile?: File | null;
-  documentType: string;
   title: string;
-  side?: "front" | "back";
+  initialPreview?: string; // ✅ NEW: URL to initial/existing image
 }
 
 const DocumentUpload: React.FC<DocumentUploadProps> = ({
   onImageUpdate,
   currentImageFile,
-  documentType,
   title,
-  side,
+  initialPreview,
 }) => {
   const [isUploading, setIsUploading] = useState(false);
-  const [selectedFile, setSelectedFile] = useState<File | null>(
-    currentImageFile || null
+
+  const [previewUrl, setPreviewUrl] = useState<string | null>(
+    initialPreview || null
   );
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const { t } = useLanguage();
 
   // Sync preview URL whenever currentImageFile changes
   useEffect(() => {
-    if (currentImageFile && !previewUrl) {
+    if (currentImageFile) {
       const objectUrl = URL.createObjectURL(currentImageFile);
       setPreviewUrl(objectUrl);
-      setSelectedFile(currentImageFile);
     }
   }, [currentImageFile, previewUrl]);
-
-  // Cleanup preview URL on unmount
-  useEffect(() => {
-    return () => {
-      if (previewUrl) {
-        URL.revokeObjectURL(previewUrl);
-      }
-    };
-  }, [previewUrl]);
 
   const handleFileSelect = (file: File) => {
     setIsUploading(true);
@@ -51,7 +39,6 @@ const DocumentUpload: React.FC<DocumentUploadProps> = ({
         URL.revokeObjectURL(previewUrl);
       }
 
-      setSelectedFile(file);
       onImageUpdate(file);
 
       // Create preview URL for display
@@ -85,7 +72,6 @@ const DocumentUpload: React.FC<DocumentUploadProps> = ({
       URL.revokeObjectURL(previewUrl);
     }
     setPreviewUrl(null);
-    setSelectedFile(null);
     onImageUpdate(null);
   };
 

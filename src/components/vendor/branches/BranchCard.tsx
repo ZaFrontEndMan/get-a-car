@@ -24,9 +24,16 @@ const BranchCard = ({ branch, onEdit, isDeleting, t }: BranchCardProps) => {
               </Badge>
             )}
           </CardTitle>
-          <Button variant="ghost" size="sm" onClick={() => onEdit(branch)}>
-            <Edit className="h-4 w-4" />
-          </Button>
+          {!branch?.mainBranch && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => onEdit(branch)}
+              disabled={isDeleting}
+            >
+              <Edit className="h-4 w-4" />
+            </Button>
+          )}
         </div>
       </CardHeader>
       <CardContent className="space-y-3">

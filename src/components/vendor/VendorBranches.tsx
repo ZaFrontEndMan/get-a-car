@@ -46,7 +46,7 @@ const VendorBranches = () => {
         is_active: mainVendor.isActive,
         fullName: mainVendor.fullName,
         nickName: mainVendor.branchName,
-        mainBranch: true, // Mark for UI highlight
+        mainBranch: true,
         created_at: mainVendor.creationDate,
       };
       // Remove the mainVendor from branches if duplicate (by id)

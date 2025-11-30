@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Image, CreditCard, MapPin, Globe2, X } from "lucide-react";
+import { Image, CreditCard, MapPin, Globe2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
@@ -14,11 +14,13 @@ import { Label } from "@/components/ui/label";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useVendorAuth } from "@/hooks/vendor/useVendorAuth";
 import LazyImage from "../ui/LazyImage";
+import ProfileImageUpload from "@/components/dashboard/ProfileImageUpload";
 
-interface DocumentFile {
-  file: File | null;
-  preview: string | null;
-}
+type VendorDocumentField =
+  | "companyLogo"
+  | "businessLicense"
+  | "taxType"
+  | "insurance";
 
 const VendorProfile = () => {
   const { t, language } = useLanguage();
@@ -38,28 +40,24 @@ const VendorProfile = () => {
   const [isDocumentModalOpen, setIsDocumentModalOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [selectedDocumentType, setSelectedDocumentType] = useState<string>("");
-  const [isConfirmDeleteOpen, setIsConfirmDeleteOpen] = useState(false);
-  const [deleteDocumentType, setDeleteDocumentType] = useState<string>("");
+  const [uploadingField, setUploadingField] =
+    useState<VendorDocumentField | null>(null);
 
-  // Document files state for editing - track only the File objects
   const [documentFiles, setDocumentFiles] = useState<{
-    businessLicense: DocumentFile;
-    taxType: DocumentFile;
-    insurance: DocumentFile;
+    businessLicense: File | null;
+    taxType: File | null;
+    insurance: File | null;
   }>({
-    businessLicense: { file: null, preview: null },
-    taxType: { file: null, preview: null },
-    insurance: { file: null, preview: null },
+    businessLicense: null,
+    taxType: null,
+    insurance: null,
   });
 
-  const handleImageClick = (imageUrl: string, documentType: string) => {
-    if (imageUrl && documentType === "companyLogo") {
-      document.getElementById("companyLogoInput")?.click();
-    } else if (imageUrl) {
-      setSelectedImage(imageUrl);
-      setSelectedDocumentType(documentType);
-      setIsDocumentModalOpen(true);
-    }
+  const handleImageClick = (imageUrl: string | null, documentType: string) => {
+    if (!imageUrl) return;
+    setSelectedImage(imageUrl);
+    setSelectedDocumentType(documentType);
+    setIsDocumentModalOpen(true);
   };
 
   const handleCloseDocumentModal = () => {
@@ -69,33 +67,41 @@ const VendorProfile = () => {
   };
 
   const handleEditClick = () => {
-    // Reset document files when opening edit modal
     setDocumentFiles({
-      businessLicense: { file: null, preview: null },
-      taxType: { file: null, preview: null },
-      insurance: { file: null, preview: null },
+      businessLicense: null,
+      taxType: null,
+      insurance: null,
     });
+    setLogoFile(null);
     setIsEditModalOpen(true);
   };
 
   const handleSaveEdit = async () => {
-    // Extract only the File objects from documentFiles
-    const filesToUpload = {
-      businessLicense: documentFiles.businessLicense.file,
-      taxType: documentFiles.taxType.file,
-      insurance: documentFiles.insurance.file,
-    };
+    try {
+      setUploadingField(null);
 
-    await handleEdit(filesToUpload);
-    setIsEditModalOpen(false);
+      const filesToUpload = {
+        companyLogo: logoFile,
+        businessLicense: documentFiles.businessLicense,
+        taxType: documentFiles.taxType,
+        insurance: documentFiles.insurance,
+      };
 
-    // Reset files after save
-    setDocumentFiles({
-      businessLicense: { file: null, preview: null },
-      taxType: { file: null, preview: null },
-      insurance: { file: null, preview: null },
-    });
-    setLogoFile(null);
+      await handleEdit(filesToUpload);
+
+      await fetchUserInfo();
+
+      setIsEditModalOpen(false);
+
+      setDocumentFiles({
+        businessLicense: null,
+        taxType: null,
+        insurance: null,
+      });
+      setLogoFile(null);
+    } catch (err) {
+      console.error("Error saving profile:", err);
+    }
   };
 
   const handleCancelEdit = () => {
@@ -111,79 +117,23 @@ const VendorProfile = () => {
     }
     setLogoFile(null);
     setDocumentFiles({
-      businessLicense: { file: null, preview: null },
-      taxType: { file: null, preview: null },
-      insurance: { file: null, preview: null },
+      businessLicense: null,
+      taxType: null,
+      insurance: null,
     });
   };
 
-  const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setLogoFile(e.target.files[0]);
-    }
-  };
+  const handleImageUpdate = (fieldName: VendorDocumentField, file: File) => {
+    setUploadingField(fieldName);
 
-  const handleDocumentChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    documentType: "businessLicense" | "taxType" | "insurance"
-  ) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      const preview = URL.createObjectURL(file);
+    if (fieldName === "companyLogo") {
+      setLogoFile(file);
+    } else {
       setDocumentFiles((prev) => ({
         ...prev,
-        [documentType]: { file, preview },
+        [fieldName]: file,
       }));
     }
-  };
-
-  const handleRemoveDocument = (
-    documentType: "businessLicense" | "taxType" | "insurance"
-  ) => {
-    setDeleteDocumentType(documentType);
-    setIsConfirmDeleteOpen(true);
-  };
-
-  const confirmRemoveDocument = () => {
-    if (deleteDocumentType) {
-      setDocumentFiles((prev) => ({
-        ...prev,
-        [deleteDocumentType]: { file: null, preview: null },
-      }));
-    }
-    setIsConfirmDeleteOpen(false);
-    setDeleteDocumentType("");
-  };
-
-  const cancelRemoveLogo = () => {
-    setIsConfirmDeleteOpen(false);
-    setDeleteDocumentType("");
-  };
-
-  const getDocumentDisplayImage = (
-    documentType: "businessLicense" | "taxType" | "insurance"
-  ) => {
-    const edited = documentFiles[documentType];
-    if (edited.preview) {
-      return edited.preview;
-    }
-
-    const originalData: Record<string, string | undefined> = {
-      businessLicense: data?.businessLicense,
-      taxType: data?.taxType,
-      insurance: data?.insurance,
-    };
-
-    const original = originalData[documentType];
-    return original
-      ? `${import.meta.env.VITE_UPLOADS_BASE_URL}${original}`
-      : null;
-  };
-
-  const isDocumentEdited = (
-    documentType: "businessLicense" | "taxType" | "insurance"
-  ) => {
-    return documentFiles[documentType].file !== null;
   };
 
   if (loading) {
@@ -207,50 +157,7 @@ const VendorProfile = () => {
                       ></div>
                     ))}
                   </div>
-                  <div className="space-y-4 pt-6 border-t">
-                    <div className="h-6 bg-gray-200 animate-pulse rounded w-1/3"></div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="h-10 bg-gray-200 animate-pulse rounded"></div>
-                    </div>
-                  </div>
-                  <div className="space-y-4 pt-6 border-t">
-                    <div className="h-6 bg-gray-200 animate-pulse rounded w-1/3"></div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {[...Array(2)].map((_, i) => (
-                        <div
-                          key={i}
-                          className="h-10 bg-gray-200 animate-pulse rounded"
-                        ></div>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="space-y-4 pt-6 border-t">
-                    <div className="h-6 bg-gray-200 animate-pulse rounded w-1/3"></div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      {[...Array(3)].map((_, i) => (
-                        <div
-                          key={i}
-                          className="h-20 bg-gray-200 animate-pulse rounded"
-                        ></div>
-                      ))}
-                    </div>
-                  </div>
                 </div>
-              </CardContent>
-            </Card>
-          </div>
-          <div>
-            <Card>
-              <CardHeader>
-                <div className="h-6 bg-gray-200 animate-pulse rounded w-1/3"></div>
-              </CardHeader>
-              <CardContent>
-                {[...Array(3)].map((_, i) => (
-                  <div
-                    key={i}
-                    className="h-10 bg-gray-200 animate-pulse rounded flex justify-between"
-                  ></div>
-                ))}
               </CardContent>
             </Card>
           </div>
@@ -286,30 +193,26 @@ const VendorProfile = () => {
                   </label>
                   <div className="mt-2 relative">
                     {data?.companyLogo ? (
-                      <>
-                        <LazyImage
-                          src={`${import.meta.env.VITE_UPLOADS_BASE_URL}${
-                            data.companyLogo
-                          }`}
-                          alt={data.fullName}
-                          className="w-20 h-20 object-cover rounded-lg border cursor-pointer"
-                          onClick={() =>
-                            handleImageClick(data.companyLogo, "companyLogo")
-                          }
-                        />
-                      </>
+                      <LazyImage
+                        src={`${import.meta.env.VITE_UPLOADS_BASE_URL}${
+                          data.companyLogo
+                        }`}
+                        alt={data.fullName}
+                        className="w-20 h-20 object-cover rounded-lg border cursor-pointer hover:opacity-80 transition-opacity"
+                        onClick={() =>
+                          handleImageClick(
+                            `${import.meta.env.VITE_UPLOADS_BASE_URL}${
+                              data.companyLogo
+                            }`,
+                            "companyLogo"
+                          )
+                        }
+                      />
                     ) : (
                       <div className="w-20 h-20 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center">
                         <Image className="h-8 w-8 text-gray-400" />
                       </div>
                     )}
-                    <input
-                      id="companyLogoInput"
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={handleLogoChange}
-                    />
                   </div>
                 </div>
 
@@ -399,9 +302,7 @@ const VendorProfile = () => {
                         {t("country")}
                       </label>
                       <p className="text-gray-900">
-                        {language === "ar"
-                          ? data?.countryName
-                          : data?.countryName || t("notSet")}
+                        {data?.countryName || t("notSet")}
                       </p>
                     </div>
                     <div>
@@ -409,9 +310,7 @@ const VendorProfile = () => {
                         {t("city")}
                       </label>
                       <p className="text-gray-900">
-                        {language === "ar"
-                          ? data?.cityName
-                          : data?.cityName || t("notSet")}
+                        {data?.cityName || t("notSet")}
                       </p>
                     </div>
                   </div>
@@ -423,7 +322,8 @@ const VendorProfile = () => {
                     <Globe2 className="h-5 w-5" />
                     <span>{t("documentInformation")}</span>
                   </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {/* Business License */}
                     <div>
                       <label className="text-sm font-medium text-gray-600">
                         {t("businessLicense")}
@@ -452,6 +352,8 @@ const VendorProfile = () => {
                         )}
                       </div>
                     </div>
+
+                    {/* Tax Type */}
                     <div>
                       <label className="text-sm font-medium text-gray-600">
                         {t("taxType")}
@@ -480,6 +382,8 @@ const VendorProfile = () => {
                         )}
                       </div>
                     </div>
+
+                    {/* Insurance */}
                     <div>
                       <label className="text-sm font-medium text-gray-600">
                         {t("insurance")}
@@ -565,7 +469,7 @@ const VendorProfile = () => {
         </div>
       </div>
 
-      {/* Document Viewer Modal */}
+      {/* Document / Logo Viewer Modal */}
       <Dialog
         open={isDocumentModalOpen}
         onOpenChange={handleCloseDocumentModal}
@@ -678,231 +582,63 @@ const VendorProfile = () => {
               </div>
             </div>
 
-            {/* Logo Upload */}
-            <div className="border-t pt-4">
-              <h3 className="text-lg font-semibold mb-4">{t("companyLogo")}</h3>
-              <div className="space-y-4">
-                <div className="relative w-fit">
-                  {logoFile ? (
-                    <>
-                      <LazyImage
-                        src={URL.createObjectURL(logoFile)}
-                        alt="Logo preview"
-                        className="w-24 h-24 object-cover rounded-lg border"
-                      />
-                      <button
-                        onClick={() => setLogoFile(null)}
-                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600 transition-colors"
-                      >
-                        <X className="h-4 w-4" />
-                      </button>
-                    </>
-                  ) : data?.companyLogo ? (
-                    <>
-                      <LazyImage
-                        src={`${import.meta.env.VITE_UPLOADS_BASE_URL}${
-                          data.companyLogo
-                        }`}
-                        alt="Current logo"
-                        className="w-24 h-24 object-cover rounded-lg border"
-                      />
-                      <button
-                        onClick={() => setLogoFile(null)}
-                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600 transition-colors"
-                      >
-                        <X className="h-4 w-4" />
-                      </button>
-                    </>
-                  ) : (
-                    <div className="w-24 h-24 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center">
-                      <Image className="h-6 w-6 text-gray-400" />
-                    </div>
-                  )}
-                </div>
-                <Button
-                  variant="outline"
-                  onClick={() =>
-                    document.getElementById("logoEditInput")?.click()
-                  }
-                >
-                  {t("changeLogo")}
-                </Button>
-                <input
-                  id="logoEditInput"
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={handleLogoChange}
-                />
-              </div>
-            </div>
-
-            {/* Documents Upload */}
+            {/* Documents Upload - Using ProfileImageUpload Component */}
             <div className="border-t pt-4">
               <h3 className="text-lg font-semibold mb-4">
                 {t("documentInformation")}
               </h3>
-              <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Logo */}
+                <ProfileImageUpload
+                  currentImageUrl={data?.companyLogo}
+                  fieldName="companyLogo"
+                  as
+                  any
+                  onImageUpdate={handleImageUpdate as any}
+                  type="avatar"
+                  title={t("companyLogo")}
+                  description={t("uploadCompanyLogo")}
+                  loading={uploadingField === "companyLogo"}
+                />
+
                 {/* Business License */}
-                <div>
-                  <label className="text-sm font-medium text-gray-600 block mb-2">
-                    {t("businessLicense")}
-                  </label>
-                  <div className="flex items-end gap-4">
-                    <div className="relative">
-                      {getDocumentDisplayImage("businessLicense") ? (
-                        <>
-                          <LazyImage
-                            src={getDocumentDisplayImage("businessLicense")}
-                            alt="Business License preview"
-                            className="w-24 h-24 object-cover rounded-lg border"
-                          />
-                          {isDocumentEdited("businessLicense") && (
-                            <button
-                              onClick={() =>
-                                setDocumentFiles((prev) => ({
-                                  ...prev,
-                                  businessLicense: {
-                                    file: null,
-                                    preview: null,
-                                  },
-                                }))
-                              }
-                              className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600 transition-colors"
-                            >
-                              <X className="h-4 w-4" />
-                            </button>
-                          )}
-                        </>
-                      ) : (
-                        <div className="w-24 h-24 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center">
-                          <Image className="h-6 w-6 text-gray-400" />
-                        </div>
-                      )}
-                    </div>
-                    <Button
-                      variant="outline"
-                      onClick={() =>
-                        document.getElementById("businessLicenseInput")?.click()
-                      }
-                    >
-                      {t("upload")}
-                    </Button>
-                    <input
-                      id="businessLicenseInput"
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={(e) =>
-                        handleDocumentChange(e, "businessLicense")
-                      }
-                    />
-                  </div>
-                </div>
+                <ProfileImageUpload
+                  currentImageUrl={data?.businessLicense}
+                  fieldName="businessLicense"
+                  as
+                  any
+                  onImageUpdate={handleImageUpdate as any}
+                  type="national_id"
+                  title={t("businessLicense")}
+                  description={t("uploadBusinessLicense")}
+                  loading={uploadingField === "businessLicense"}
+                />
 
                 {/* Tax Type */}
-                <div>
-                  <label className="text-sm font-medium text-gray-600 block mb-2">
-                    {t("taxType")}
-                  </label>
-                  <div className="flex items-end gap-4">
-                    <div className="relative">
-                      {getDocumentDisplayImage("taxType") ? (
-                        <>
-                          <LazyImage
-                            src={getDocumentDisplayImage("taxType")}
-                            alt="Tax Type preview"
-                            className="w-24 h-24 object-cover rounded-lg border"
-                          />
-                          {isDocumentEdited("taxType") && (
-                            <button
-                              onClick={() =>
-                                setDocumentFiles((prev) => ({
-                                  ...prev,
-                                  taxType: { file: null, preview: null },
-                                }))
-                              }
-                              className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600 transition-colors"
-                            >
-                              <X className="h-4 w-4" />
-                            </button>
-                          )}
-                        </>
-                      ) : (
-                        <div className="w-24 h-24 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center">
-                          <Image className="h-6 w-6 text-gray-400" />
-                        </div>
-                      )}
-                    </div>
-                    <Button
-                      variant="outline"
-                      onClick={() =>
-                        document.getElementById("taxTypeInput")?.click()
-                      }
-                    >
-                      {t("upload")}
-                    </Button>
-                    <input
-                      id="taxTypeInput"
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={(e) => handleDocumentChange(e, "taxType")}
-                    />
-                  </div>
-                </div>
+                <ProfileImageUpload
+                  currentImageUrl={data?.taxType}
+                  fieldName="taxType"
+                  as
+                  any
+                  onImageUpdate={handleImageUpdate as any}
+                  type="national_id"
+                  title={t("taxType")}
+                  description={t("uploadTaxType")}
+                  loading={uploadingField === "taxType"}
+                />
 
                 {/* Insurance */}
-                <div>
-                  <label className="text-sm font-medium text-gray-600 block mb-2">
-                    {t("insurance")}
-                  </label>
-                  <div className="flex items-end gap-4">
-                    <div className="relative">
-                      {getDocumentDisplayImage("insurance") ? (
-                        <>
-                          <LazyImage
-                            src={getDocumentDisplayImage("insurance")}
-                            alt="Insurance preview"
-                            className="w-24 h-24 object-cover rounded-lg border"
-                          />
-                          {isDocumentEdited("insurance") && (
-                            <button
-                              onClick={() =>
-                                setDocumentFiles((prev) => ({
-                                  ...prev,
-                                  insurance: { file: null, preview: null },
-                                }))
-                              }
-                              className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600 transition-colors"
-                            >
-                              <X className="h-4 w-4" />
-                            </button>
-                          )}
-                        </>
-                      ) : (
-                        <div className="w-24 h-24 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center">
-                          <Image className="h-6 w-6 text-gray-400" />
-                        </div>
-                      )}
-                    </div>
-                    <Button
-                      variant="outline"
-                      onClick={() =>
-                        document.getElementById("insuranceInput")?.click()
-                      }
-                    >
-                      {t("upload")}
-                    </Button>
-                    <input
-                      id="insuranceInput"
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={(e) => handleDocumentChange(e, "insurance")}
-                    />
-                  </div>
-                </div>
+                <ProfileImageUpload
+                  currentImageUrl={data?.insurance}
+                  fieldName="insurance"
+                  as
+                  any
+                  onImageUpdate={handleImageUpdate as any}
+                  type="driving_license"
+                  title={t("insurance")}
+                  description={t("uploadInsurance")}
+                  loading={uploadingField === "insurance"}
+                />
               </div>
             </div>
           </div>
@@ -912,24 +648,6 @@ const VendorProfile = () => {
               {t("cancel")}
             </Button>
             <Button onClick={handleSaveEdit}>{t("saveChanges")}</Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Confirm Delete Modal */}
-      <Dialog open={isConfirmDeleteOpen} onOpenChange={setIsConfirmDeleteOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{t("confirmDelete")}</DialogTitle>
-          </DialogHeader>
-          <div className="py-4">{t("confirmDeleteDocumentMessage")}</div>
-          <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={cancelRemoveLogo}>
-              {t("cancel")}
-            </Button>
-            <Button variant="destructive" onClick={confirmRemoveDocument}>
-              {t("confirm")}
-            </Button>
           </div>
         </DialogContent>
       </Dialog>

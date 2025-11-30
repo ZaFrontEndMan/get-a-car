@@ -88,14 +88,16 @@ const BranchesListView = ({
                 </div>
               </div>
               <div className="flex items-center gap-2 ml-4">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => onEdit(branch)}
-                  disabled={isDeleting}
-                >
-                  <Edit className="h-4 w-4" />
-                </Button>
+                {!branch?.mainBranch && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => onEdit(branch)}
+                    disabled={isDeleting}
+                  >
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                )}
               </div>
             </div>
           </CardContent>
