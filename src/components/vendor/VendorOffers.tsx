@@ -53,7 +53,7 @@ interface Offer {
   titleAr: string;
   titleEn: string;
   descriptionAr: string | null;
-  descriptionEr: string | null;
+  descriptionEn: string | null;
   daysOfOffer: number;
   offerImage: string | null;
   totalPrice: number;
@@ -92,13 +92,21 @@ const OfferCard: React.FC<{
   onEdit: (offer: Offer) => void;
   onDelete: (offerId: string) => void;
   deletePending: boolean;
-}> = ({ offer, t, onEdit, onDelete, deletePending }) => (
+  language: string;
+}> = ({ offer, t, onEdit, onDelete, deletePending, language }) => (
   <Card>
     <CardContent className="p-6">
       <div className="flex items-start justify-between">
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-2">
-            <h3 className="text-lg font-semibold">{offer.titleEn}</h3>
+            <h3
+              className="text-lg font-semibold"
+              dir={language === "ar" ? "rtl" : "ltr"}
+            >
+              {language === "ar"
+                ? offer.titleAr || offer.titleEn
+                : offer.titleEn}
+            </h3>
             <Badge variant={offer.isActive ? "default" : "secondary"}>
               {offer.isActive ? (
                 <>
@@ -113,30 +121,29 @@ const OfferCard: React.FC<{
               )}
             </Badge>
           </div>
-          {offer.titleAr && (
-            <p className="text-sm text-gray-500 mb-2" dir="rtl">
-              {offer.titleAr}
-            </p>
-          )}
-          {(offer.descriptionEr || offer.descriptionAr) && (
-            <>
-              {offer.descriptionEr && (
-                <p className="text-gray-600 mb-2">{offer.descriptionEr}</p>
-              )}
-              {offer.descriptionAr && (
+
+          {/* Description - show only based on language */}
+          {language === "ar"
+            ? offer.descriptionAr && (
                 <p className="text-gray-600 mb-2 text-sm" dir="rtl">
                   {offer.descriptionAr}
                 </p>
+              )
+            : offer.descriptionEn && (
+                <p className="text-gray-600 mb-2">{offer.descriptionEn}</p>
               )}
-            </>
-          )}
+
           {offer.offerImage && (
             <div className="mb-2">
               <LazyImage
                 src={`${import.meta.env.VITE_UPLOADS_BASE_URL}/${
                   offer.offerImage
                 }`}
-                alt={offer.titleEn}
+                alt={
+                  language === "ar"
+                    ? offer.titleAr || offer.titleEn
+                    : offer.titleEn
+                }
                 className="h-24 w-24 object-cover rounded-md"
               />
             </div>
@@ -329,7 +336,7 @@ const OfferForm: React.FC<{
                   offerImage: e.target.files ? e.target.files[0] : null,
                 })
               }
-              required={!editingOffer} // Required only for new offers
+              required={!editingOffer}
             />
             {editingOffer && editingOffer.offerImage && (
               <div className="mt-2">
@@ -421,7 +428,7 @@ const OfferForm: React.FC<{
 };
 
 const VendorOffers: React.FC = () => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingOffer, setEditingOffer] = useState<Offer | null>(null);
   const [selectedCarId, setSelectedCarId] = useState("");
@@ -484,7 +491,7 @@ const VendorOffers: React.FC = () => {
           carId: String(o?.carId ?? o?.carID ?? ""),
           titleEn: o?.titleEn ?? o?.title ?? "",
           titleAr: o?.titleAr ?? "",
-          descriptionEr: o?.descriptionEr ?? o?.description ?? null,
+          descriptionEn: o?.descriptionEn ?? o?.description ?? null,
           descriptionAr: o?.descriptionAr ?? null,
           daysOfOffer: o?.daysOfOffer ?? 0,
           offerImage: o?.offerImage ?? null,
@@ -538,16 +545,10 @@ const VendorOffers: React.FC = () => {
             handleCloseModal();
           },
           onError: (error: any) =>
-            toast.error(
-              `${t(
-                editingOffer ? "failedToUpdateOffer" : "failedToCreateOffer"
-              )}: ${error?.message || t("unknownError")}`
-            ),
+            toast.error(error?.response?.data?.error?.message || t("unknownError")),
         });
       } catch (error: any) {
-        toast.error(
-          `${t("failedToSaveOffer")}: ${error?.message || t("unknownError")}`
-        );
+        toast.error(error?.response?.data?.error?.message || t("unknownError"));
       }
     },
     [
@@ -568,12 +569,12 @@ const VendorOffers: React.FC = () => {
       car_id: offer.carId,
       title: offer.titleEn,
       title_ar: offer.titleAr,
-      description: offer.descriptionEr || "",
+      description: offer.descriptionEn || "",
       description_ar: offer.descriptionAr || "",
       discount_percentage: offer.totalPrice,
       valid_until: offer.endDate ? offer.endDate.split("T")[0] : "",
       status: offer.isActive ? "published" : "draft",
-      offerImage: null, // No file initially loaded for edit
+      offerImage: null,
     });
     setIsCreateModalOpen(true);
     window.scrollTo({
@@ -600,9 +601,7 @@ const VendorOffers: React.FC = () => {
         },
         onError: (error: any) =>
           toast.error(
-            `${t("failedToDeleteOffer")}: ${
-              error?.response?.data?.error?.message || t("unknownError")
-            }`
+            error?.response?.data?.error?.message || t("unknownError")
           ),
       });
     }
@@ -681,6 +680,7 @@ const VendorOffers: React.FC = () => {
               onEdit={handleEdit}
               onDelete={handleDelete}
               deletePending={deleteMutation.isPending}
+              language={language}
             />
           ))
         ) : (
