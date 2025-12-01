@@ -89,7 +89,7 @@ const VendorCard = ({ vendor }: VendorCardProps) => {
             transition={{ delay: 0.2 }}
             title={t("location")}
           >
-            <MapPin className="h-4 w-4 mr-1 flex-shrink-0" />
+            <MapPin className="h-4 w-4 me-1 flex-shrink-0" />
             <span className="truncate">{vendor.location}</span>
           </motion.div>
 
@@ -104,7 +104,7 @@ const VendorCard = ({ vendor }: VendorCardProps) => {
               whileHover={{ scale: 1.05 }}
               title={t("availableCars")}
             >
-              <Car className="h-4 w-4 mr-1 flex-shrink-0" />
+              <Car className="h-4 w-4 me-1 flex-shrink-0" />
               <span>
                 {vendor.carsCount} {t("cars")}
               </span>
@@ -114,7 +114,7 @@ const VendorCard = ({ vendor }: VendorCardProps) => {
               whileHover={{ scale: 1.05 }}
               title={t("totalBranches")}
             >
-              <Building className="h-4 w-4 mr-1 flex-shrink-0" />
+              <Building className="h-4 w-4 me-1 flex-shrink-0" />
               <span>
                 {vendor.branchCount} {t("branches")}
               </span>
