@@ -49,7 +49,6 @@ const UserForm = ({ user, onClose, onSuccess }: UserFormProps) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [formData, setFormData] = useState(initialFormData);
-  // For password eye icon
   const [showPassword, setShowPassword] = useState(false);
 
   const { data: branchesData, isLoading: isBranchesLoading } =
@@ -60,7 +59,7 @@ const UserForm = ({ user, onClose, onSuccess }: UserFormProps) => {
     if (user) {
       setFormData({
         password: "",
-        userName: "",
+        userName: user.userName || "",
         isPhone: user.isPhone || false,
         email: user.email || "",
         fullName: user.fullName || "",
@@ -77,7 +76,23 @@ const UserForm = ({ user, onClose, onSuccess }: UserFormProps) => {
   const updateMutation = useUpdateEmployee();
 
   const handleChange = (field: string, value: any) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+    setFormData((prev) => {
+      const updated = { ...prev, [field]: value };
+
+      if (field === "email" && !prev.isPhone) {
+        updated.userName = value;
+      } else if (field === "phoneNumber" && prev.isPhone) {
+        updated.userName = value;
+      } else if (field === "isPhone") {
+        if (value && prev.phoneNumber) {
+          updated.userName = prev.phoneNumber;
+        } else if (!value && prev.email) {
+          updated.userName = prev.email;
+        }
+      }
+
+      return updated;
+    });
   };
 
   const handleBranchChange = (branchId: string) => {
@@ -92,7 +107,7 @@ const UserForm = ({ user, onClose, onSuccess }: UserFormProps) => {
 
   const isCreate = !user;
   const requiredFields = isCreate
-    ? ["fullName", "phoneNumber", "email", "password", "userName", "nationalId"]
+    ? ["fullName", "phoneNumber", "email", "password", "nationalId"]
     : ["fullName", "phoneNumber", "email", "nationalId"];
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -107,24 +122,23 @@ const UserForm = ({ user, onClose, onSuccess }: UserFormProps) => {
       return;
     }
 
+    const payload = {
+      userData: {
+        userName: formData.userName,
+        isPhone: !!formData.isPhone,
+        ...(isCreate && { password: encryptPassword(formData.password) }),
+      },
+      userDetails: {
+        email: formData.email,
+        fullName: formData.fullName,
+        nationalId: formData.nationalId,
+        phoneNumber: formData.phoneNumber,
+        gender: parseInt(formData.gender),
+      },
+    };
+
     if (isCreate) {
-      // Encrypt password before sending to API
-      const encryptedPassword = encryptPassword(formData.password);
-      const body = {
-        userData: {
-          password: encryptedPassword,
-          userName: formData.userName,
-          isPhone: !!formData.isPhone,
-        },
-        userDetails: {
-          email: formData.email,
-          fullName: formData.fullName,
-          nationalId: formData.nationalId,
-          phoneNumber: formData.phoneNumber,
-          gender: parseInt(formData.gender),
-        },
-      };
-      createMutation.mutate(body, {
+      createMutation.mutate(payload, {
         onSuccess: () => {
           queryClient.invalidateQueries({ queryKey: ["vendor", "employees"] });
           toast({
@@ -136,23 +150,17 @@ const UserForm = ({ user, onClose, onSuccess }: UserFormProps) => {
         onError: (error: any) => {
           toast({
             title: t("error_title"),
-            description: error?.message || t("user_create_failed"),
+            description:
+              error?.response?.data?.error?.message || t("user_create_failed"),
             variant: "destructive",
           });
         },
       });
     } else {
-      const employeeData = {
-        email: formData.email,
-        fullName: formData.fullName,
-        nationalId: formData.nationalId,
-        phoneNumber: formData.phoneNumber,
-        gender: parseInt(formData.gender),
-      };
       updateMutation.mutate(
         {
           employeeId: user.id,
-          employeeData,
+          employeeData: { ...payload },
         },
         {
           onSuccess: () => {
@@ -174,9 +182,15 @@ const UserForm = ({ user, onClose, onSuccess }: UserFormProps) => {
     }
   };
 
+  const getUsernameDisplay = () => {
+    if (formData.isPhone && formData.phoneNumber) return formData.phoneNumber;
+    if (formData.email) return formData.email;
+    return formData.userName;
+  };
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <Card className="w-full max-w-md max-h-[90vh] overflow-y-auto">
+      <Card className="w-full max-w-lg max-h-[90vh] overflow-y-auto">
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle>
@@ -189,54 +203,7 @@ const UserForm = ({ user, onClose, onSuccess }: UserFormProps) => {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Create-only fields */}
-            {isCreate && (
-              <>
-                <div>
-                  <Label htmlFor="userName">{t("user_name_label")}</Label>
-                  <Input
-                    id="userName"
-                    value={formData.userName}
-                    onChange={(e) => handleChange("userName", e.target.value)}
-                    required
-                    placeholder={t("userNamePlaceholder")}
-                  />
-                </div>
-                <div className="relative">
-                  <Label htmlFor="password">{t("password_label")}</Label>
-                  <Input
-                    id="password"
-                    type={showPassword ? "text" : "password"}
-                    value={formData.password}
-                    onChange={(e) => handleChange("password", e.target.value)}
-                    required
-                    placeholder={t("passwordPlaceholder")}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute end-3 top-10 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                    tabIndex={-1}
-                  >
-                    {showPassword ? (
-                      <EyeOff className="h-4 w-4" />
-                    ) : (
-                      <Eye className="h-4 w-4" />
-                    )}
-                  </button>
-                </div>
-                <div className="flex  items-center gap-2">
-                  <Label htmlFor="isPhone">{t("isPhoneLabel")}</Label>
-                  <Switch
-                    id="isPhone"
-                    checked={!!formData.isPhone}
-                    onCheckedChange={(chicked) =>
-                      handleChange("isPhone", chicked)
-                    }
-                  />{" "}
-                </div>
-              </>
-            )}
+            {/* Full Name */}
             <div>
               <Label htmlFor="fullName">{t("full_name_label")}</Label>
               <Input
@@ -247,6 +214,20 @@ const UserForm = ({ user, onClose, onSuccess }: UserFormProps) => {
                 placeholder={t("fullNamePlaceholder")}
               />
             </div>
+
+            {/* National ID */}
+            <div>
+              <Label htmlFor="nationalId">{t("national_id_label")}</Label>
+              <Input
+                id="nationalId"
+                value={formData.nationalId}
+                onChange={(e) => handleChange("nationalId", e.target.value)}
+                required
+                placeholder={t("nationalIdPlaceholder")}
+              />
+            </div>
+
+            {/* Email */}
             <div>
               <Label htmlFor="email">{t("email_label")}</Label>
               <Input
@@ -259,26 +240,64 @@ const UserForm = ({ user, onClose, onSuccess }: UserFormProps) => {
                 disabled={!isCreate}
               />
             </div>
-            <div>
-              <Label htmlFor="nationalId">{t("national_id_label")}</Label>
-              <Input
-                id="nationalId"
-                value={formData.nationalId}
-                onChange={(e) => handleChange("nationalId", e.target.value)}
-                required
-                placeholder={t("nationalIdPlaceholder")}
-              />
+
+            {/* Password - Create only */}
+            {
+              <div className="relative">
+                <Label htmlFor="password">{t("password_label")}</Label>
+                <Input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  value={formData.password}
+                  onChange={(e) => handleChange("password", e.target.value)}
+                  required={isCreate}
+                  placeholder={t("passwordPlaceholder")}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute end-3 top-10 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  tabIndex={-1}
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                </button>
+              </div>
+            }
+
+            {/* Hidden username field - auto-populated */}
+            <input type="hidden" value={getUsernameDisplay()} readOnly />
+
+            {/* Phone Number + isPhone Switch - aligned horizontally */}
+            <div className="flex gap-4 items-end">
+              <div className="flex-1">
+                <Label htmlFor="phoneNumber">{t("phone_label")}</Label>
+                <Input
+                  id="phoneNumber"
+                  value={formData.phoneNumber}
+                  onChange={(e) => handleChange("phoneNumber", e.target.value)}
+                  required
+                  placeholder={t("phoneNumberPlaceholder")}
+                />
+              </div>
+              <div className="flex items-center gap-2 pb-2">
+                <Switch
+                  id="isPhone"
+                  checked={!!formData.isPhone}
+                  onCheckedChange={(checked) =>
+                    handleChange("isPhone", checked)
+                  }
+                />
+                <Label htmlFor="isPhone" className="mb-0">
+                  {t("isPhoneLabel")}
+                </Label>
+              </div>
             </div>
-            <div>
-              <Label htmlFor="phoneNumber">{t("phone_label")}</Label>
-              <Input
-                id="phoneNumber"
-                value={formData.phoneNumber}
-                onChange={(e) => handleChange("phoneNumber", e.target.value)}
-                required
-                placeholder={t("phoneNumberPlaceholder")}
-              />
-            </div>
+
+            {/* Gender */}
             <div>
               <Label htmlFor="gender">{t("gender_label")}</Label>
               <Select

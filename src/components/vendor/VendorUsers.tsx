@@ -48,7 +48,8 @@ const VendorUsers = () => {
     onError: (error: any) => {
       toast({
         title: t("error_title"),
-        description: error.message || t("user_remove_failed"),
+        description:
+          error?.response?.data?.error?.message || t("user_remove_failed"),
         variant: "destructive",
       });
       setDeleteDialogOpen(false);

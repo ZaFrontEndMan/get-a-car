@@ -21,30 +21,18 @@ import {
   useGetAllBookings,
   useAcceptReturnCarBooking,
 } from "@/hooks/vendor/useVendorBooking";
+import { getStatusConfig, statusStringToNumber } from "./bookings/bookingUtils";
 
-// API status type (or undefined for "all")
 type APISupportedBookingStatus = 1 | 2 | 3 | 4 | 5 | 6 | undefined;
-
-// In case your backend sometimes returns Arabic text:
-const arabicToApiStatus: Record<string, APISupportedBookingStatus> = {
-  منتظر: 1,
-  "تم إرجاع السيارة": 2,
-
-  "تم الالغاء": 3,
-  "قيد الاجراء": 4,
-  "طلب استرجاع": 5,
-  العروض: 6,
-};
 
 const VendorBookings = () => {
   const { t, language } = useLanguage();
   const [statusFilter, setStatusFilter] =
-    useState<APISupportedBookingStatus>(undefined); // undefined = "all"
+    useState<APISupportedBookingStatus>(undefined);
   const [viewMode, setViewMode] = useState<"grid" | "list" | "table">("grid");
   const [pageNumber, setPageNumber] = useState(1);
   const [pageSize] = useState(12);
 
-  // Set view mode based on screen size once on mount and on resize
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth < 768) setViewMode("table");
@@ -56,7 +44,6 @@ const VendorBookings = () => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // API bookings query (statusFilter sent as number or undefined)
   const { data, isLoading, isError } = useGetAllBookings({
     pageNumber,
     pageSize,
@@ -64,7 +51,6 @@ const VendorBookings = () => {
   });
   const acceptReturnMutation = useAcceptReturnCarBooking();
 
-  // Transform API bookings for grid/list/table views
   const bookings = useMemo(() => {
     if (!data?.data?.items) return [];
     return data.data.items.map((booking: any) => {
@@ -74,13 +60,15 @@ const VendorBookings = () => {
             new Date(booking.fromDate).getTime()) /
             (1000 * 60 * 60 * 24)
         ) || 1;
+
+      const bookingStatus =
+        statusStringToNumber[booking.bookingStatus?.toLowerCase()] ||
+        (typeof booking.bookingStatus === "number" ? booking.bookingStatus : 1);
+
       return {
         id: booking.id,
         booking_number: booking.bookingNumber,
-        booking_status:
-          typeof booking.bookingStatus === "number"
-            ? booking.bookingStatus
-            : arabicToApiStatus[booking.bookingStatus] || 1,
+        booking_status: bookingStatus,
         customer_name: booking.clientName || t("unknownCustomer"),
         customer_email: booking.clientEmail || "",
         customer_phone: booking.clientPhone || "",
@@ -109,20 +97,18 @@ const VendorBookings = () => {
         paid_amount: booking?.webSiteAmount,
       };
     });
-  }, [data, t]);
+  }, [data, t, language]);
 
-  // Action handlers (unchanged)
   const handleAcceptReturn = (bookingId: string) => {
     acceptReturnMutation.mutate(bookingId, {
-      onSuccess: () => toast.success(t("actionSuccess")),
+      onSuccess: () => toast.success(t("success_title")),
       onError: () => toast.error(t("actionError")),
     });
   };
   const handleAction = (action: string, bookingId: string) => {
-    toast.success(t("actionSuccess"));
+    toast.success(t("success_title"));
   };
 
-  // Common props for all view components
   const commonProps = {
     bookings,
     onAcceptBooking: (id: string) => handleAction("acceptBooking", id),
@@ -133,9 +119,10 @@ const VendorBookings = () => {
     isRejectLoading: false,
     isStartLoading: false,
     isReturnLoading: acceptReturnMutation.isPending,
+    language,
+    getStatusConfig,
   };
 
-  // Booking content renderer
   const renderBookingsContent = () => {
     switch (viewMode) {
       case "grid":
@@ -149,7 +136,6 @@ const VendorBookings = () => {
     }
   };
 
-  // Pagination builder
   const totalPages = data?.data?.totalPages || 1;
   const currentPage = data?.data?.pageNumber || 1;
   const handlePageChange = (page: number) => {

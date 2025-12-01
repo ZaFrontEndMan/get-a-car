@@ -10,9 +10,6 @@ import {
   Mail,
   Clock,
   CheckCircle,
-  XCircle,
-  PlayCircle,
-  Car,
   CreditCard,
   FileText,
 } from "lucide-react";
@@ -48,6 +45,7 @@ const BookingCard = ({
   const [isInvoiceOpen, setIsInvoiceOpen] = useState(false);
   const statusConfig = getStatusConfig(booking.booking_status || "pending");
   const StatusIcon = statusConfig.icon;
+  console.log(booking);
 
   return (
     <div className="w-full">
@@ -294,39 +292,6 @@ const BookingCard = ({
           <div className="mt-auto pt-4 border-t border-slate-100">
             <div className="flex flex-col gap-2">
               <div className="flex flex-col sm:flex-row gap-2">
-                {/* {booking.booking_status === "pending" && (
-                  <>
-                    <Button
-                      onClick={() => onAcceptBooking(booking.id)}
-                      disabled={isAcceptLoading}
-                      className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-sm py-2"
-                    >
-                      <CheckCircle className="h-4 w-4 me-2" />
-                      {t("acceptBooking")}
-                    </Button>
-                    <Button
-                      variant="destructive"
-                      onClick={() => onRejectBooking(booking.id)}
-                      disabled={isRejectLoading}
-                      className="flex-1 font-medium text-sm py-2"
-                    >
-                      <XCircle className="h-4 w-4 me-2" />
-                      {t("rejectBooking")}
-                    </Button>
-                  </>
-                )}
-
-                {booking.booking_status === "active" && (
-                  <Button
-                    onClick={() => onStartProgress(booking.id)}
-                    disabled={isStartLoading}
-                    className="flex-1 bg-orange-600 hover:bg-orange-700 text-white font-medium text-sm py-2"
-                  >
-                    <PlayCircle className="h-4 w-4 me-2" />
-                    {t("startTrip")}
-                  </Button>
-                )} */}
-
                 {booking.booking_status === 2 && (
                   <Button
                     onClick={() => onAcceptReturn(booking.id)}

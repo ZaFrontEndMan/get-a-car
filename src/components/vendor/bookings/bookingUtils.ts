@@ -13,26 +13,25 @@ export const bookingStatusLabels: Record<APISupportedBookingStatus, string> = {
   2: "تم إرجاع السيارة", // Completed
   3: "تم الالغاء", // Cancelled
   4: "قيد الاجراء", // In Progress
-  5: "طلب استرجاع", // Car Return
+  5: "مكتمل", // Car Return
   6: "عرض", // Offer
 };
 
 // Maps Arabic/English status to number, fallback to undefined
-const statusStringToNumber: Record<string, APISupportedBookingStatus> = {
+export const statusStringToNumber: Record<string, APISupportedBookingStatus> = {
   // Arabic
   منتظر: 1,
   "تم إرجاع السيارة": 2,
   "تم الالغاء": 3,
   "قيد الاجراء": 4,
-  "طلب استرجاع": 5,
+  "مكتمل": 5,
   عرض: 6,
   // English (in case, for robustness)
   waiting: 1,
-  completed: 2,
+  carreturn: 2,
   cancelled: 3,
   inprogress: 4,
-  in_progress: 4,
-  carreturn: 5,
+  completed: 5,
   offer: 6,
 };
 
