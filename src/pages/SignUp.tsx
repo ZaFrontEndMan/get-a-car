@@ -139,12 +139,16 @@ const SignUp: React.FC = () => {
   });
 
   const [fileData, setFileData] = useState({
+    // Client documents
     nationalIdFront: null as File | null,
     nationalIdBack: null as File | null,
-    licenseIdFront: null as File | null,
-    licenseIdBack: null as File | null,
     drivingLicenseFront: null as File | null,
     drivingLicenseBack: null as File | null,
+    // Vendor documents (updated keys)
+    businessLicense: null as File | null,
+    taxType: null as File | null,
+    insurance: null as File | null,
+    logo: null as File | null,
   });
 
   const { data: countries } = useCountries();
@@ -241,16 +245,22 @@ const SignUp: React.FC = () => {
       }
     }
 
-    if (!fileData.nationalIdFront || !fileData.nationalIdBack) {
-      errs.nationalIdFiles = t("nationalIdRequired");
-    }
-    if (userType === "vendor") {
-      if (!fileData.licenseIdFront || !fileData.licenseIdBack) {
-        errs.vendorLicenseFiles = t("businessLicenseRequired");
+    if (userType === "client") {
+      if (!fileData.nationalIdFront || !fileData.nationalIdBack) {
+        errs.nationalIdFiles = t("nationalIdRequired");
       }
-    } else {
       if (!fileData.drivingLicenseFront || !fileData.drivingLicenseBack) {
         errs.drivingLicenseFiles = t("drivingLicenseRequired");
+      }
+    } else {
+      // Vendor: require updated document keys
+      if (
+        !fileData.businessLicense ||
+        !fileData.taxType ||
+        !fileData.insurance ||
+        !fileData.logo
+      ) {
+        errs.vendorDocuments = t("documentUploads");
       }
     }
 
@@ -314,10 +324,10 @@ const SignUp: React.FC = () => {
               NationalIdBack: fileData.nationalIdBack,
             }
           : {
-              LicenseIdFront: fileData.licenseIdFront,
-              LicenseIdBack: fileData.licenseIdBack,
-              NationalIdFront: fileData.nationalIdFront,
-              NationalIdBack: fileData.nationalIdBack,
+              BusinessLicense: fileData.businessLicense || undefined,
+              TaxType: fileData.taxType || undefined,
+              Insurance: fileData.insurance || undefined,
+              Logo: fileData.logo || undefined,
             };
 
       // Register with the hook
@@ -807,35 +817,33 @@ const SignUp: React.FC = () => {
                             initial="initial"
                             animate="animate"
                           >
-                            <motion.div
-                              className="grid grid-cols-1 md:grid-cols-2 gap-6"
-                              variants={staggerContainer}
-                              initial="initial"
-                              animate="animate"
-                            >
-                              <motion.div variants={staggerItem}>
-                                <DocumentUpload
-                                  title={t("nationalIdFront")}
-                                  documentType="national_id"
-                                  side="front"
-                                  onImageUpdate={(file) =>
-                                    handleFileUpdate("nationalIdFront", file)
-                                  }
-                                  currentImageFile={fileData.nationalIdFront}
-                                />
+                            {userType === "client" && (
+                              <motion.div
+                                className="grid grid-cols-1 md:grid-cols-2 gap-6"
+                                variants={staggerContainer}
+                                initial="initial"
+                                animate="animate"
+                              >
+                                <motion.div variants={staggerItem}>
+                                  <DocumentUpload
+                                    title={t("nationalIdFront")}
+                                    onImageUpdate={(file) =>
+                                      handleFileUpdate("nationalIdFront", file)
+                                    }
+                                    currentImageFile={fileData.nationalIdFront}
+                                  />
+                                </motion.div>
+                                <motion.div variants={staggerItem}>
+                                  <DocumentUpload
+                                    title={t("nationalIdBack")}
+                                    onImageUpdate={(file) =>
+                                      handleFileUpdate("nationalIdBack", file)
+                                    }
+                                    currentImageFile={fileData.nationalIdBack}
+                                  />
+                                </motion.div>
                               </motion.div>
-                              <motion.div variants={staggerItem}>
-                                <DocumentUpload
-                                  title={t("nationalIdBack")}
-                                  documentType="national_id"
-                                  side="back"
-                                  onImageUpdate={(file) =>
-                                    handleFileUpdate("nationalIdBack", file)
-                                  }
-                                  currentImageFile={fileData.nationalIdBack}
-                                />
-                              </motion.div>
-                            </motion.div>
+                            )}
 
                             {userType === "vendor" ? (
                               <motion.div
@@ -846,24 +854,38 @@ const SignUp: React.FC = () => {
                               >
                                 <motion.div variants={staggerItem}>
                                   <DocumentUpload
-                                    title={t("licenseIdFront")}
-                                    documentType="license_id"
-                                    side="front"
+                                    title={t("businessLicense")}
                                     onImageUpdate={(file) =>
-                                      handleFileUpdate("licenseIdFront", file)
+                                      handleFileUpdate("businessLicense", file)
                                     }
-                                    currentImageFile={fileData.licenseIdFront}
+                                    currentImageFile={fileData.businessLicense}
                                   />
                                 </motion.div>
                                 <motion.div variants={staggerItem}>
                                   <DocumentUpload
-                                    title={t("licenseIdBack")}
-                                    documentType="license_id"
-                                    side="back"
+                                    title={t("taxType")}
                                     onImageUpdate={(file) =>
-                                      handleFileUpdate("licenseIdBack", file)
+                                      handleFileUpdate("taxType", file)
                                     }
-                                    currentImageFile={fileData.licenseIdBack}
+                                    currentImageFile={fileData.taxType}
+                                  />
+                                </motion.div>
+                                <motion.div variants={staggerItem}>
+                                  <DocumentUpload
+                                    title={t("insurance")}
+                                    onImageUpdate={(file) =>
+                                      handleFileUpdate("insurance", file)
+                                    }
+                                    currentImageFile={fileData.insurance}
+                                  />
+                                </motion.div>
+                                <motion.div variants={staggerItem}>
+                                  <DocumentUpload
+                                    title={t("companyLogo")}
+                                    onImageUpdate={(file) =>
+                                      handleFileUpdate("logo", file)
+                                    }
+                                    currentImageFile={fileData.logo}
                                   />
                                 </motion.div>
                               </motion.div>
@@ -877,8 +899,6 @@ const SignUp: React.FC = () => {
                                 <motion.div variants={staggerItem}>
                                   <DocumentUpload
                                     title={t("drivingLicenseFront")}
-                                    documentType="driving_license"
-                                    side="front"
                                     onImageUpdate={(file) =>
                                       handleFileUpdate(
                                         "drivingLicenseFront",
@@ -893,8 +913,6 @@ const SignUp: React.FC = () => {
                                 <motion.div variants={staggerItem}>
                                   <DocumentUpload
                                     title={t("drivingLicenseBack")}
-                                    documentType="driving_license"
-                                    side="back"
                                     onImageUpdate={(file) =>
                                       handleFileUpdate(
                                         "drivingLicenseBack",
@@ -910,28 +928,29 @@ const SignUp: React.FC = () => {
                             )}
 
                             {/* File-level errors */}
-                            {fieldErrors.nationalIdFiles && (
-                              <motion.p
-                                className="text-xs text-rose-600"
-                                variants={errorAnimation}
-                                initial="initial"
-                                animate="animate"
-                              >
-                                {fieldErrors.nationalIdFiles}
-                              </motion.p>
-                            )}
-                            {userType === "vendor" &&
-                              fieldErrors.vendorLicenseFiles && (
+                            {userType === "client" &&
+                              fieldErrors.nationalIdFiles && (
                                 <motion.p
                                   className="text-xs text-rose-600"
                                   variants={errorAnimation}
                                   initial="initial"
                                   animate="animate"
                                 >
-                                  {fieldErrors.vendorLicenseFiles}
+                                  {fieldErrors.nationalIdFiles}
                                 </motion.p>
                               )}
-                            {userType !== "vendor" &&
+                            {userType === "vendor" &&
+                              fieldErrors.vendorDocuments && (
+                                <motion.p
+                                  className="text-xs text-rose-600"
+                                  variants={errorAnimation}
+                                  initial="initial"
+                                  animate="animate"
+                                >
+                                  {fieldErrors.vendorDocuments}
+                                </motion.p>
+                              )}
+                            {userType === "client" &&
                               fieldErrors.drivingLicenseFiles && (
                                 <motion.p
                                   className="text-xs text-rose-600"

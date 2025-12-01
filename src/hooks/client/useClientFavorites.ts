@@ -29,6 +29,7 @@ export const useClientFavorites = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["clientFavorites"] });
       queryClient.invalidateQueries({ queryKey: ["allCars"] });
+      queryClient.invalidateQueries({ queryKey: ["mostPopularCars"] });
       toast({
         title: t("favourites_add_success_title"),
         description: t("favourites_add_success_message"),
@@ -47,6 +48,8 @@ export const useClientFavorites = () => {
     mutationFn: (carId: string | number) => removeFavorite(carId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["clientFavorites"] });
+      queryClient.invalidateQueries({ queryKey: ["allCars"] });
+      queryClient.invalidateQueries({ queryKey: ["mostPopularCars"] });
       toast({
         title: t("favourites_remove_success_title"),
         description: t("favourites_remove_success_message"),

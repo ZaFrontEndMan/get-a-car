@@ -15,8 +15,11 @@ interface UseRegistrationReturn {
       DrivingLicenseBack?: File;
       NationalIdFront?: File;
       NationalIdBack?: File;
-      LicenseIdFront?: File;
-      LicenseIdBack?: File;
+      // Vendor docs (updated keys)
+      BusinessLicense?: File;
+      TaxType?: File;
+      Insurance?: File;
+      Logo?: File;
     }
   ) => Promise<boolean>;
 }
@@ -33,8 +36,10 @@ export const useRegistration = (): UseRegistrationReturn => {
       DrivingLicenseBack?: File;
       NationalIdFront?: File;
       NationalIdBack?: File;
-      LicenseIdFront?: File;
-      LicenseIdBack?: File;
+      BusinessLicense?: File;
+      TaxType?: File;
+      Insurance?: File;
+      Logo?: File;
     }
   ): Promise<boolean> => {
     setIsLoading(true);
@@ -112,18 +117,18 @@ export const useRegistration = (): UseRegistrationReturn => {
             formData.append("NationalIdBack", documents.NationalIdBack);
           }
         } else {
-          // Vendor: send business license files and national ID
-          if (documents.LicenseIdFront) {
-            formData.append("LicenseIdFront", documents.LicenseIdFront);
+          // Vendor: send updated document keys
+          if (documents.BusinessLicense) {
+            formData.append("BusinessLicense", documents.BusinessLicense);
           }
-          if (documents.LicenseIdBack) {
-            formData.append("LicenseIdBack", documents.LicenseIdBack);
+          if (documents.TaxType) {
+            formData.append("TaxType", documents.TaxType);
           }
-          if (documents.NationalIdFront) {
-            formData.append("NationalIdFront", documents.NationalIdFront);
+          if (documents.Insurance) {
+            formData.append("Insurance", documents.Insurance);
           }
-          if (documents.NationalIdBack) {
-            formData.append("NationalIdBack", documents.NationalIdBack);
+          if (documents.Logo) {
+            formData.append("Logo", documents.Logo);
           }
         }
       }
