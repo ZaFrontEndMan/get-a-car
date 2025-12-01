@@ -83,14 +83,11 @@ const VendorDetailsContent = () => {
       email: data.vendorDetails.email,
       address:
         data.vendorDetails.mainBranchAddress || t("locationNotSpecified"),
-      rating: 4.7,
-      reviews: 0,
+      rating: data.vendorDetails?.reviewAverage,
+      reviews: data.vendorDetails?.reviewCount,
       verified: true,
       carsCount: data.vendorDetails.avilableCars || data.carSearchResult.length,
       joinedDate: new Date().getFullYear().toString(),
-      description: "",
-      workingHours:
-        "Sunday - Thursday: 8:00 AM - 10:00 PM\nFriday - Saturday: 10:00 AM - 11:00 PM",
     };
 
     const mappedCars = data.carSearchResult.map((c: any) => ({
