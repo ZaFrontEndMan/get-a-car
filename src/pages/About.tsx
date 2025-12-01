@@ -18,7 +18,7 @@ interface AboutSection {
 
 const About: React.FC = () => {
   const { data: teamMembers, isLoading, error } = useTeamData();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [aboutSections, setAboutSections] = useState<{
     main: ApiAboutUs | null;
     mission: AboutSection | null;
@@ -48,17 +48,27 @@ const About: React.FC = () => {
 
         if (aboutUsData && Array.isArray(aboutUsData)) {
           aboutUsData.forEach((item) => {
-            const titleLower = item.title?.toLowerCase() || "";
+            // Pick localized fields when available
+            const chosenTitle =
+              (language === "ar"
+                ? (item as any).titleAr
+                : (item as any).titleEn) ?? item.title;
+            const chosenDescription =
+              (language === "ar"
+                ? (item as any).descriptionAr
+                : (item as any).descriptionEn) ?? item.description;
+
+            const titleLower = (chosenTitle || "").toLowerCase();
 
             if (titleLower.includes("من نحن") || titleLower.includes("about")) {
-              main = item;
+              main = { ...item, title: chosenTitle, description: chosenDescription } as any;
             } else if (
               titleLower.includes("رسالتنا") ||
               titleLower.includes("mission")
             ) {
               mission = {
-                title: item.title,
-                description: item.description,
+                title: chosenTitle,
+                description: chosenDescription,
                 image: item.image,
               };
             } else if (
@@ -66,8 +76,8 @@ const About: React.FC = () => {
               titleLower.includes("vision")
             ) {
               vision = {
-                title: item.title,
-                description: item.description,
+                title: chosenTitle,
+                description: chosenDescription,
                 image: item.image,
               };
             } else if (
@@ -75,8 +85,8 @@ const About: React.FC = () => {
               titleLower.includes("values")
             ) {
               values = {
-                title: item.title,
-                description: item.description,
+                title: chosenTitle,
+                description: chosenDescription,
                 image: item.image,
               };
             }
@@ -85,7 +95,14 @@ const About: React.FC = () => {
 
         // Fallback to first if main not found
         if (!main && aboutUsData?.[0]) {
-          main = aboutUsData[0];
+          const first = aboutUsData[0] as any;
+          const fallbackTitle =
+            (language === "ar" ? first.titleAr : first.titleEn) ?? first.title;
+          const fallbackDescription =
+            (language === "ar"
+              ? first.descriptionAr
+              : first.descriptionEn) ?? first.description;
+          main = { ...first, title: fallbackTitle, description: fallbackDescription } as any;
         }
 
         setAboutSections({ main, mission, vision, values });
