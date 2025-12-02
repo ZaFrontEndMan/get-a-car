@@ -206,7 +206,9 @@ const Offers = () => {
         : apiOffer.offerImage,
       terms: ["صالح لفترة محدودة", "لا يمكن دمجه مع عروض أخرى", "حسب التوفر"],
       carId: apiOffer.carId?.toString(),
-      originalPricePerDay: apiOffer.oldPricePerDay,
+      originalPricePerDay:
+        apiOffer.oldPricePerDay -
+        apiOffer?.oldPricePerDay * (apiOffer?.totalPrice / 100),
       originalOffer: {
         totalPrice: apiOffer.totalPrice,
       },
