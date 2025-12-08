@@ -39,6 +39,8 @@ export const arTranslations = {
   signIn: "تسجيل الدخول",
   signUp: "إنشاء حساب",
   logout: "تسجيل الخروج",
+  logoutSuccess: "تم تسجيل الخروج بنجاح",
+  logoutError: "فشل تسجيل الخروج",
 
   // Car Details
   dailyRate: "السعر اليومي",

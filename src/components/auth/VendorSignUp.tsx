@@ -29,6 +29,7 @@ import {
 
 import DocumentUpload from "./DocumentUpload";
 import { toast } from "sonner";
+import { motion } from "framer-motion";
 interface VendorSignUpProps {
   onSuccess?: () => void;
 }
@@ -42,6 +43,9 @@ const VendorSignUp: React.FC<VendorSignUpProps> = ({ onSuccess }) => {
   const [expandedSection, setExpandedSection] = useState("section1");
 
   const { isLoading, error: apiError, register } = useRegistration();
+
+  // Field-level errors
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (error || apiError) {
@@ -87,7 +91,17 @@ const VendorSignUp: React.FC<VendorSignUpProps> = ({ onSuccess }) => {
   }, []);
 
   const handleInputChange = (field: string, value: string | boolean) => {
+    if (
+      ["phone", "nationalId", "licenseId"].includes(field) &&
+      typeof value === "string"
+    ) {
+      value =
+        field === "phone"
+          ? value.replace(/[^\d+]/g, "")
+          : value.replace(/\D/g, "");
+    }
     setFormData((prev) => ({ ...prev, [field]: value }));
+    setFieldErrors((prev) => ({ ...prev, [field]: "" }));
     if (error) setError("");
   };
 
@@ -96,33 +110,28 @@ const VendorSignUp: React.FC<VendorSignUpProps> = ({ onSuccess }) => {
   };
 
   const validateForm = () => {
+    const errs: Record<string, string> = {};
+
     if (!formData.firstName.trim() || !formData.lastName.trim()) {
-      setError(t("nameRequired"));
-      return false;
+      errs.name = t("nameRequired");
     }
     if (!formData.email.trim()) {
-      setError(t("emailRequired"));
-      return false;
+      errs.email = t("emailRequired");
     }
     if (!formData.password || formData.password.length < 6) {
-      setError(t("passwordMinLength"));
-      return false;
+      errs.password = t("passwordMinLength");
     }
     if (formData.password !== formData.confirmPassword) {
-      setError(t("passwordMismatch"));
-      return false;
+      errs.confirmPassword = t("passwordMismatch");
     }
     if (!formData.acceptTerms) {
-      setError(t("acceptTermsRequired"));
-      return false;
+      errs.acceptTerms = t("acceptTermsRequired");
     }
     if (!formData.companyName.trim()) {
-      setError(t("companyNameRequired"));
-      return false;
+      errs.companyName = t("companyNameRequired");
     }
     if (!formData.businessLicense.trim()) {
-      setError(t("businessLicenseRequired"));
-      return false;
+      errs.businessLicense = t("businessLicenseRequired");
     }
 
     if (formData.dateOfBirth) {
@@ -139,21 +148,23 @@ const VendorSignUp: React.FC<VendorSignUpProps> = ({ onSuccess }) => {
       }
 
       if (calculatedAge < 18) {
-        setError(t("mustBe18OrOlder"));
-        return false;
+        errs.dateOfBirth = t("mustBe18OrOlder");
       }
     }
 
     if (!fileData.nationalIdFront || !fileData.nationalIdBack) {
-      setError(t("nationalIdRequired"));
-      return false;
+      errs.nationalIdFiles = t("nationalIdRequired");
     }
 
     if (!fileData.licenseIdFront || !fileData.licenseIdBack) {
-      setError(t("businessLicenseRequired"));
-      return false;
+      errs.vendorDocuments = t("businessLicenseRequired");
     }
 
+    setFieldErrors(errs);
+    if (Object.keys(errs).length) {
+      setError(Object.values(errs)[0]);
+      return false;
+    }
     return true;
   };
 
@@ -215,12 +226,18 @@ const VendorSignUp: React.FC<VendorSignUpProps> = ({ onSuccess }) => {
         <CardContent className="pt-6">
           <form onSubmit={handleSubmit} className="space-y-6">
             {(error || apiError) && (
-              <div className="bg-red-50 border border-red-200 rounded-md p-4 flex items-center gap-2">
-                <AlertCircle className="h-5 w-5 text-red-500 flex-shrink-0" />
-                <span className="text-sm text-red-700">
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.3 }}
+                className="bg-rose-50 border border-rose-200 rounded-md p-4 flex items-center gap-2"
+              >
+                <AlertCircle className="h-5 w-5 text-red flex-shrink-0" />
+                <span className="text-sm text-red">
                   {error || apiError}
                 </span>
-              </div>
+              </motion.div>
             )}
 
             <Accordion
@@ -244,6 +261,7 @@ const VendorSignUp: React.FC<VendorSignUpProps> = ({ onSuccess }) => {
                         <Input
                           id="firstName"
                           type="text"
+                          placeholder={t("firstNamePlaceholder")}
                           value={formData.firstName}
                           onChange={(e) =>
                             handleInputChange("firstName", e.target.value)
@@ -251,12 +269,23 @@ const VendorSignUp: React.FC<VendorSignUpProps> = ({ onSuccess }) => {
                           isRTL={isRTL}
                           required
                         />
+                        {fieldErrors.name && (
+                          <motion.p
+                            className="text-xs text-rose-600 mt-1"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ duration: 0.3 }}
+                          >
+                            {fieldErrors.name}
+                          </motion.p>
+                        )}
                       </div>
                       <div>
                         <Label htmlFor="lastName">{t("lastName")}</Label>
                         <Input
                           id="lastName"
                           type="text"
+                          placeholder={t("lastNamePlaceholder")}
                           value={formData.lastName}
                           onChange={(e) =>
                             handleInputChange("lastName", e.target.value)
@@ -273,6 +302,7 @@ const VendorSignUp: React.FC<VendorSignUpProps> = ({ onSuccess }) => {
                         <Input
                           id="companyName"
                           type="text"
+                          placeholder={t("companyNamePlaceholder")}
                           value={formData.companyName}
                           onChange={(e) =>
                             handleInputChange("companyName", e.target.value)
@@ -280,6 +310,16 @@ const VendorSignUp: React.FC<VendorSignUpProps> = ({ onSuccess }) => {
                           isRTL={isRTL}
                           required
                         />
+                        {fieldErrors.companyName && (
+                          <motion.p
+                            className="text-xs text-rose-600 mt-1"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ duration: 0.3 }}
+                          >
+                            {fieldErrors.companyName}
+                          </motion.p>
+                        )}
                       </div>
                       <div>
                         <Label htmlFor="businessLicense">
@@ -288,6 +328,7 @@ const VendorSignUp: React.FC<VendorSignUpProps> = ({ onSuccess }) => {
                         <Input
                           id="businessLicense"
                           type="text"
+                          placeholder={t("businessLicensePlaceholder")}
                           value={formData.businessLicense}
                           onChange={(e) =>
                             handleInputChange("businessLicense", e.target.value)
@@ -295,6 +336,16 @@ const VendorSignUp: React.FC<VendorSignUpProps> = ({ onSuccess }) => {
                           isRTL={isRTL}
                           required
                         />
+                        {fieldErrors.businessLicense && (
+                          <motion.p
+                            className="text-xs text-rose-600 mt-1"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ duration: 0.3 }}
+                          >
+                            {fieldErrors.businessLicense}
+                          </motion.p>
+                        )}
                       </div>
                     </div>
 
@@ -303,6 +354,7 @@ const VendorSignUp: React.FC<VendorSignUpProps> = ({ onSuccess }) => {
                       <Input
                         id="email"
                         type="email"
+                        placeholder={t("emailPlaceholder")}
                         value={formData.email}
                         onChange={(e) =>
                           handleInputChange("email", e.target.value)
@@ -310,6 +362,16 @@ const VendorSignUp: React.FC<VendorSignUpProps> = ({ onSuccess }) => {
                         isRTL={isRTL}
                         required
                       />
+                      {fieldErrors.email && (
+                        <motion.p
+                          className="text-xs text-rose-600 mt-1"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          transition={{ duration: 0.3 }}
+                        >
+                          {fieldErrors.email}
+                        </motion.p>
+                      )}
                     </div>
 
                     <div>
@@ -317,12 +379,23 @@ const VendorSignUp: React.FC<VendorSignUpProps> = ({ onSuccess }) => {
                       <Input
                         id="phone"
                         type="tel"
+                        placeholder={t("phonePlaceholder")}
                         value={formData.phone}
                         onChange={(e) =>
                           handleInputChange("phone", e.target.value)
                         }
                         isRTL={isRTL}
                       />
+                      {fieldErrors.phone && (
+                        <motion.p
+                          className="text-xs text-rose-600 mt-1"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          transition={{ duration: 0.3 }}
+                        >
+                          {fieldErrors.phone}
+                        </motion.p>
+                      )}
                     </div>
                   </div>
                 </AccordionContent>
@@ -349,10 +422,10 @@ const VendorSignUp: React.FC<VendorSignUpProps> = ({ onSuccess }) => {
                             <SelectValue placeholder={t("selectGender")} />
                           </SelectTrigger>
                           <SelectContent isRTL={isRTL}>
-                            <SelectItem value="male" isRTL={isRTL}>
+                            <SelectItem value="1" isRTL={isRTL}>
                               {t("male")}
                             </SelectItem>
-                            <SelectItem value="female" isRTL={isRTL}>
+                            <SelectItem value="2" isRTL={isRTL}>
                               {t("female")}
                             </SelectItem>
                           </SelectContent>
@@ -363,24 +436,46 @@ const VendorSignUp: React.FC<VendorSignUpProps> = ({ onSuccess }) => {
                         <Input
                           id="dateOfBirth"
                           type="date"
+                          placeholder={t("dateOfBirthPlaceholder")}
                           value={formData.dateOfBirth}
                           onChange={(e) =>
                             handleInputChange("dateOfBirth", e.target.value)
                           }
                           isRTL={isRTL}
                         />
+                        {fieldErrors.dateOfBirth && (
+                          <motion.p
+                            className="text-xs text-rose-600 mt-1"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ duration: 0.3 }}
+                          >
+                            {fieldErrors.dateOfBirth}
+                          </motion.p>
+                        )}
                       </div>
                       <div>
                         <Label htmlFor="nationalId">{t("nationalId")}</Label>
                         <Input
                           id="nationalId"
                           type="text"
+                          placeholder={t("nationalIdPlaceholder")}
                           value={formData.nationalId}
                           onChange={(e) =>
                             handleInputChange("nationalId", e.target.value)
                           }
                           isRTL={isRTL}
                         />
+                        {fieldErrors.nationalId && (
+                          <motion.p
+                            className="text-xs text-rose-600 mt-1"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ duration: 0.3 }}
+                          >
+                            {fieldErrors.nationalId}
+                          </motion.p>
+                        )}
                       </div>
                     </div>
 
@@ -491,6 +586,28 @@ const VendorSignUp: React.FC<VendorSignUpProps> = ({ onSuccess }) => {
                         currentImageFile={fileData.licenseIdBack}
                       />
                     </div>
+
+                    {/* File-level errors */}
+                    {fieldErrors.nationalIdFiles && (
+                      <motion.p
+                        className="text-xs text-rose-600"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        {fieldErrors.nationalIdFiles}
+                      </motion.p>
+                    )}
+                    {fieldErrors.vendorDocuments && (
+                      <motion.p
+                        className="text-xs text-rose-600"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        {fieldErrors.vendorDocuments}
+                      </motion.p>
+                    )}
                   </div>
                 </AccordionContent>
               </AccordionItem>
@@ -505,42 +622,86 @@ const VendorSignUp: React.FC<VendorSignUpProps> = ({ onSuccess }) => {
                   <div className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <Label htmlFor="password">{t("password")}</Label>
-                        <div className="relative">
+                        <Label className="block text-sm font-semibold text-gray-700 mb-2">
+                          {t("password")}
+                        </Label>
+                        <motion.div
+                          className="relative"
+                          whileFocus={{ scale: 1.02 }}
+                          transition={{
+                            type: "spring",
+                            stiffness: 400,
+                            damping: 10,
+                          }}
+                        >
                           <Input
                             id="password"
                             type={showPassword ? "text" : "password"}
+                            placeholder={t("passwordPlaceholder")}
                             value={formData.password}
                             onChange={(e) =>
                               handleInputChange("password", e.target.value)
                             }
                             isRTL={isRTL}
                             required
-                          />
-                          <button
-                            type="button"
                             className={cn(
-                              "absolute inset-y-0 flex items-center pr-3",
-                              isRTL && "left-0 pl-3 pr-0"
+                              "w-full rounded-lg border-2 pe-12 transition-all duration-200",
+                              "focus:outline-none",
+                              fieldErrors.password
+                                ? "border-red focus:border-red"
+                                : ""
                             )}
-                            onClick={() => setShowPassword(!showPassword)}
+                          />
+                          <motion.button
+                            type="button"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              setShowPassword(!showPassword);
+                              e.currentTarget.blur();
+                            }}
+                            className={cn(
+                              "absolute inset-y-0 end-0 flex items-center px-3 text-gray-500 hover:text-gray-700",
+                              "focus:outline-none focus-visible:outline-none"
+                            )}
+                            tabIndex={-1}
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.95 }}
                           >
                             {showPassword ? (
-                              <EyeOff className="h-5 w-5 text-gray-400" />
+                              <EyeOff className="h-5 w-5" />
                             ) : (
-                              <Eye className="h-5 w-5 text-gray-400" />
+                              <Eye className="h-5 w-5" />
                             )}
-                          </button>
-                        </div>
+                          </motion.button>
+                        </motion.div>
+                        {fieldErrors.password && (
+                          <motion.p
+                            className="text-red text-xs mt-2 flex items-center gap-1"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ duration: 0.3 }}
+                          >
+                            <span>✕</span> {fieldErrors.password}
+                          </motion.p>
+                        )}
                       </div>
                       <div>
-                        <Label htmlFor="confirmPassword">
+                        <label className="block text-sm font-semibold text-gray-700 mb-2">
                           {t("confirmPassword")}
-                        </Label>
-                        <div className="relative">
+                        </label>
+                        <motion.div
+                          className="relative"
+                          whileFocus={{ scale: 1.02 }}
+                          transition={{
+                            type: "spring",
+                            stiffness: 400,
+                            damping: 10,
+                          }}
+                        >
                           <Input
                             id="confirmPassword"
                             type={showConfirmPassword ? "text" : "password"}
+                            placeholder={t("confirmPasswordPlaceholder")}
                             value={formData.confirmPassword}
                             onChange={(e) =>
                               handleInputChange(
@@ -550,24 +711,46 @@ const VendorSignUp: React.FC<VendorSignUpProps> = ({ onSuccess }) => {
                             }
                             isRTL={isRTL}
                             required
-                          />
-                          <button
-                            type="button"
                             className={cn(
-                              "absolute inset-y-0 flex items-center pr-3",
-                              isRTL && "left-0 pl-3 pr-0"
+                              "w-full rounded-lg border-2 pe-12 transition-all duration-200",
+                              "focus:outline-none",
+                              fieldErrors.confirmPassword
+                                ? "border-red focus:border-red"
+                                : ""
                             )}
-                            onClick={() =>
-                              setShowConfirmPassword(!showConfirmPassword)
-                            }
+                          />
+                          <motion.button
+                            type="button"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              setShowConfirmPassword(!showConfirmPassword);
+                              e.currentTarget.blur();
+                            }}
+                            className={cn(
+                              "absolute inset-y-0 end-0 flex items-center px-3 text-gray-500 hover:text-gray-700",
+                              "focus:outline-none focus-visible:outline-none"
+                            )}
+                            tabIndex={-1}
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.95 }}
                           >
                             {showConfirmPassword ? (
-                              <EyeOff className="h-5 w-5 text-gray-400" />
+                              <EyeOff className="h-5 w-5" />
                             ) : (
-                              <Eye className="h-5 w-5 text-gray-400" />
+                              <Eye className="h-5 w-5" />
                             )}
-                          </button>
-                        </div>
+                          </motion.button>
+                        </motion.div>
+                        {fieldErrors.confirmPassword && (
+                          <motion.p
+                            className="text-red text-xs mt-2 flex items-center gap-1"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ duration: 0.3 }}
+                          >
+                            <span>✕</span> {fieldErrors.confirmPassword}
+                          </motion.p>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -575,7 +758,7 @@ const VendorSignUp: React.FC<VendorSignUpProps> = ({ onSuccess }) => {
               </AccordionItem>
             </Accordion>
 
-            <div className="flex items-start gap-2 pt-4">
+            <div className="flex items-start gap-2 pt-2">
               <input
                 id="acceptTerms"
                 type="checkbox"
@@ -587,7 +770,7 @@ const VendorSignUp: React.FC<VendorSignUpProps> = ({ onSuccess }) => {
               />
               <label
                 htmlFor="acceptTerms"
-                className="text-sm text-gray-700 dark:text-gray-300"
+                className="text-sm text-gray-700 dark:text-gray-800"
               >
                 {t("agreeToTerms")}{" "}
                 <Link to="/terms" className="text-primary hover:underline">
@@ -595,6 +778,16 @@ const VendorSignUp: React.FC<VendorSignUpProps> = ({ onSuccess }) => {
                 </Link>
               </label>
             </div>
+            {fieldErrors.acceptTerms && (
+              <motion.p
+                className="text-xs text-rose-600 -mt-2"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.3 }}
+              >
+                {fieldErrors.acceptTerms}
+              </motion.p>
+            )}
 
             <Button type="submit" disabled={isLoading} className="w-full">
               {isLoading ? t("creatingAccount") : t("createAccount")}

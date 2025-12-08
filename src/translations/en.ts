@@ -34,6 +34,8 @@ export const enTranslations = {
   signIn: "Sign In",
   signUp: "Sign Up",
   logout: "Logout",
+  logoutSuccess: "Logged out successfully",
+  logoutError: "Failed to logout",
 
   // Car Details
   dailyRate: "Daily Rate (SAR)",
