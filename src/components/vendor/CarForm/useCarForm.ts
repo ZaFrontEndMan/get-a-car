@@ -18,11 +18,10 @@ export const useCarForm = (car?: Car | null, _onSuccess?: () => void) => {
     type: "",
     typeId: 0,
     branchName: "",
-    vendorBranchId: "",
+    branchId: 0,
     pricePerDay: 0,
     pricePerWeek: 0,
     pricePerMonth: 0,
-    mileage: 0,
     availabilityVendor: false,
     availabilityAdmin: false,
     withDriver: false,
@@ -66,32 +65,42 @@ export const useCarForm = (car?: Car | null, _onSuccess?: () => void) => {
     feedbackDtos: [],
   });
 
+  // Helper function to map API response to form data
+  const mapCarToFormData = (carData: any): Car => {
+    const defaults = getDefaultFormData();
+    if (!carData) return defaults;
+    
+    return {
+      ...defaults,
+      ...carData,
+      // Map modelYear to year if it exists
+      year: carData.modelYear ?? carData.year ?? 0,
+      // Ensure branchId is set
+      branchId: carData.branchId ?? carData.vendorBranchId ?? 0,
+      // Ensure images are properly formatted
+      images: carData.images?.map((img: any) => 
+        typeof img === 'string' ? img : (img?.imageUrl || img?.url || img)
+      ) || [],
+    };
+  };
+
   // Initialize with defaults first, then merge with car if provided
   const [formData, setFormData] = useState<Car>(() => {
-    if (car) {
-      return {
-        ...getDefaultFormData(), // Ensure all fields exist with defaults
-        ...car, // Override with actual car data
-        images: car.images?.map((img: any) => img.imageUrl) || [], // Transform images
-      };
+    if (car && car.id) {
+      return mapCarToFormData(car);
     }
     return getDefaultFormData();
   });
 
   // Reinitialize formData when car prop changes (for editing)
   useEffect(() => {
-    if (car) {
-      const defaults = getDefaultFormData();
-      setFormData({
-        ...defaults, // Start with complete defaults
-        ...car, // Override with car data
-        images: car.images?.map((img: any) => img.imageUrl) || [], // Handle images array
-      });
-    } else {
+    if (car && car.id) {
+      setFormData(mapCarToFormData(car));
+    } else if (!car) {
       // Reset to defaults when no car (creating new)
       setFormData(getDefaultFormData());
     }
-  }, [car]);
+  }, [car?.id]); // Use car.id as dependency to ensure it updates when car changes
 
   const handleChange = <K extends keyof Car>(field: K, value: Car[K]) => {
     setFormData((prev) => ({ ...prev, [field]: value }));

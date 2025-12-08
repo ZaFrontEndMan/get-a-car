@@ -99,7 +99,7 @@ const CarsImportModal = ({
     if (!file) return;
 
     // Check file type
-    if (!file.name.endsWith(".csv")) {
+    if (!file.name.endsWith(".xlsx") && !file.name.endsWith(".xls")) {
       toast({
         title: t("invalid_file_type"),
         description: t("invalid_file_type_description"),
@@ -209,7 +209,7 @@ const CarsImportModal = ({
               <Input
                 ref={fileInputRef}
                 type="file"
-                accept=".csv"
+                accept=".xlsx,.xls"
                 onChange={handleFileUpload}
                 disabled={isUploading || isUploadingCars}
               />

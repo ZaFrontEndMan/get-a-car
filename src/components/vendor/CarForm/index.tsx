@@ -39,7 +39,11 @@ const CarForm = ({
     error: carError,
   } = useGetCarById(carId ? String(carId) : "", isEditMode);
 
-  const car = carData?.data?.data || null;
+  // Handle different response structures: data.data.data, data.data, or data
+  const car = React.useMemo(() => {
+    if (!carData) return null;
+    return carData?.data?.data || carData?.data || carData || null;
+  }, [carData]);
 
   const { formData, handleChange } = useCarForm(car);
   const { paidFeatures, setPaidFeatures } = usePaidFeatures(car);
@@ -79,7 +83,7 @@ const CarForm = ({
     };
 
     append("description", formData.description);
-    append("vendorBranchId", formData.vendorBranchId);
+    append("vendorBranchId", formData.branchId);
     append("vendorId", branchesData?.data?.vendors[0]?.id);
     append("modelYear", formData.year);
     append("pricePerDay", formData.pricePerDay);
@@ -111,7 +115,7 @@ const CarForm = ({
     append("ebdBrakes", formData.ebdBrakes ?? false);
     append("airbag", formData.airbag ?? false);
     append("absBrakes", formData.absBrakes ?? false);
-    append("mileage", formData.mileage ?? false);
+    append("mileage", (formData as any).mileage ?? false);
     append("liter", formData.liter ?? false);
 
     if (protections.length > 0) {
@@ -134,7 +138,7 @@ const CarForm = ({
         JSON.stringify(
           paidFeatures.map((pf, index) => ({
             id: pf.id ?? (isEditMode ? undefined : pf.id),
-            serviceTypeId: pf.serviceTypeId || undefined,
+            serviceTypeId: (pf as any).serviceTypeId || undefined,
             nameAr: pf.titleAr || pf.title || "",
             nameEn: pf.titleEn || pf.title || "",
             Price: pf.price || 0,

@@ -491,16 +491,17 @@ const BookingInvoiceModal: React.FC<BookingInvoiceModalProps> = ({
                   </span>
                 </div>
               ) : null}
-              {orderDetails?.webSiteAmount != null && orderDetails.webSiteAmount > 0 && (
-                <div className="flex justify-between py-2">
-                  <span className="text-gray-600">
-                    {t("paidAmount") || "Paid Amount"}
-                  </span>
-                  <span className="text-green-600 font-medium">
-                    {formatCurrency(orderDetails.webSiteAmount)}
-                  </span>
-                </div>
-              )}
+              {orderDetails?.webSiteAmount != null &&
+                orderDetails.webSiteAmount > 0 && (
+                  <div className="flex justify-between py-2">
+                    <span className="text-gray-600">
+                      {t("paidAmount") || "Paid Amount"}
+                    </span>
+                    <span className="text-green-600 font-medium">
+                      {formatCurrency(orderDetails.webSiteAmount)}
+                    </span>
+                  </div>
+                )}
               <div className="flex justify-between py-2 border-t border-gray-200 w-full">
                 <span className="font-semibold text-gray-900">
                   {t("totalAmount") || "Total"}
@@ -512,31 +513,26 @@ const BookingInvoiceModal: React.FC<BookingInvoiceModalProps> = ({
             </div>
           </div>
 
-          {type === "client" && (
-            <div className="mt-8 pt-8 border-t border-gray-200 text-center text-gray-600">
-              <p className="text-lg font-medium">
-                {t("thankYouChoosingGetCar") ||
-                  "Thank you for choosing GetCar!"}
+          <div className="mt-8 pt-8 border-t border-gray-200 text-center text-gray-600">
+            <p className="text-lg font-medium">
+              {t("thankYouChoosingGetCar") || "Thank you for choosing GetCar!"}
+            </p>
+            <p className="text-sm mt-2">
+              {t("trustedCarRentalPartner") ||
+                "Your trusted car rental partner."}
+            </p>
+            <div className="mt-4 text-xs space-y-1">
+              <p>
+                {t("forSupport") || "Support"}:{" "}
+                {vendorDetails?.email || <span className="opacity-0">---</span>}{" "}
+                |{" "}
+                {vendorDetails?.phoneNumber || (
+                  <span className="opacity-0">---</span>
+                )}
               </p>
-              <p className="text-sm mt-2">
-                {t("trustedCarRentalPartner") ||
-                  "Your trusted car rental partner."}
-              </p>
-              <div className="mt-4 text-xs space-y-1">
-                <p>
-                  {t("forSupport") || "Support"}:{" "}
-                  {vendorDetails?.email || (
-                    <span className="opacity-0">---</span>
-                  )}{" "}
-                  |{" "}
-                  {vendorDetails?.phoneNumber || (
-                    <span className="opacity-0">---</span>
-                  )}
-                </p>
-                <p>{t("visitUs") || "Visit us"}: www.getcar.sa</p>
-              </div>
+              <p>{t("visitUs") || "Visit us"}: www.getcar.sa</p>
             </div>
-          )}
+          </div>
         </div>
       </DialogContent>
     </Dialog>
