@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { authApi } from "@/api/auth/authApi";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
+import { encryptPassword } from "@/utils/encryptPassword";
 
 const ForgotPassword = () => {
   const { t, language } = useLanguage();
@@ -102,9 +103,12 @@ const ForgotPassword = () => {
     setIsLoadingStep2(true);
 
     try {
+      // Encrypt the password before sending to backend
+      const encryptedPassword = encryptPassword(newPassword);
+      
       await authApi.resetPassword({
         email: emailFromParams,
-        newPassword,
+        newPassword: encryptedPassword,
         token: tokenFromParams, // Use token from URL instead of resetCode
       });
 

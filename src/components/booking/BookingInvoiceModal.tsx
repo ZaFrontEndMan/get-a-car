@@ -409,12 +409,12 @@ const BookingInvoiceModal: React.FC<BookingInvoiceModalProps> = ({
                   </td>
                   <td className="px-4 py-3 text-sm text-gray-900 text-right border-b border-gray-200">
                     {formatCurrency(
-                      (invoiceDetails?.charges?.carRentCharge ?? 0) /
+                      (orderDetails?.totalPrice ?? 0) /
                         (orderDetails?.rentDays || 1)
                     )}
                   </td>
                   <td className="px-4 py-3 text-sm text-gray-900 text-right border-b border-gray-200">
-                    {formatCurrency(invoiceDetails?.charges?.carRentCharge)}
+                    {formatCurrency(orderDetails?.totalPrice)}
                   </td>
                 </tr>
                 <tr>
@@ -463,17 +463,19 @@ const BookingInvoiceModal: React.FC<BookingInvoiceModalProps> = ({
                   {t("carRental") || "Car Rental"}
                 </span>
                 <span className="text-gray-900">
-                  {formatCurrency(invoiceDetails?.charges?.carRentCharge)}
+                  {formatCurrency(orderDetails?.totalPrice)}
                 </span>
               </div>
-              <div className="flex justify-between py-2">
-                <span className="text-gray-600">
-                  {t("protectionFee") || "Protection Fee"}
-                </span>
-                <span className="text-gray-900">
-                  {formatCurrency(invoiceDetails?.charges?.protectionFee)}
-                </span>
-              </div>
+              {invoiceDetails?.charges?.protectionFee ? (
+                <div className="flex justify-between py-2">
+                  <span className="text-gray-600">
+                    {t("protectionFee") || "Protection Fee"}
+                  </span>
+                  <span className="text-gray-900">
+                    {formatCurrency(invoiceDetails?.charges?.protectionFee)}
+                  </span>
+                </div>
+              ) : null}
               {invoiceDetails?.paymentInfoDetalis?.length ? (
                 <div className="flex justify-between py-2">
                   <span className="text-gray-600">
@@ -489,12 +491,22 @@ const BookingInvoiceModal: React.FC<BookingInvoiceModalProps> = ({
                   </span>
                 </div>
               ) : null}
+              {orderDetails?.webSiteAmount != null && orderDetails.webSiteAmount > 0 && (
+                <div className="flex justify-between py-2">
+                  <span className="text-gray-600">
+                    {t("paidAmount") || "Paid Amount"}
+                  </span>
+                  <span className="text-green-600 font-medium">
+                    {formatCurrency(orderDetails.webSiteAmount)}
+                  </span>
+                </div>
+              )}
               <div className="flex justify-between py-2 border-t border-gray-200 w-full">
                 <span className="font-semibold text-gray-900">
                   {t("totalAmount") || "Total"}
                 </span>
                 <span className="font-bold text-xl text-primary">
-                  {formatCurrency(invoiceDetails?.totalAmount)}
+                  {formatCurrency(orderDetails?.totalPrice)}
                 </span>
               </div>
             </div>

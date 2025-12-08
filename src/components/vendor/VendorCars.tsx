@@ -47,10 +47,22 @@ const VendorCars = () => {
   // Extract pagination metadata
   const paginationMeta = useMemo(
     () => ({
-      pageNumber: data?.data?.data?.pageNumber || 1,
-      pageSize: data?.data?.data?.pageSize || 10,
-      totalPages: data?.data?.data?.totalPages || 1,
-      totalRecords: data?.data?.data?.totalRecords || 0,
+      pageNumber:
+        data?.data?.data?.pageNumber ||
+        data?.data?.pageNumber ||
+        1,
+      pageSize:
+        data?.data?.data?.pageSize ||
+        data?.data?.pageSize ||
+        10,
+      totalPages:
+        data?.data?.data?.totalPages ||
+        data?.data?.totalPages ||
+        1,
+      totalRecords:
+        data?.data?.data?.totalRecords ||
+        data?.data?.totalRecords ||
+        0,
     }),
     [data]
   );

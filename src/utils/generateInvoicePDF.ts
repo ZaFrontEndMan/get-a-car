@@ -81,6 +81,7 @@ export const generateInvoicePDF = async (
           amount: "المبلغ",
           carRental: "إيجار السيارة",
           protectionFee: "رسوم الحماية",
+          additionalServices: "خدمات إضافية",
           totalAmount: "المبلغ الإجمالي",
           paidAmount: "المبلغ المدفوع",
           remainingAmount: "المبلغ المتبقي",
@@ -114,6 +115,7 @@ export const generateInvoicePDF = async (
           amount: "Amount",
           carRental: "Car Rental",
           protectionFee: "Protection Fee",
+          additionalServices: "Additional Services",
           totalAmount: "Total Amount",
           paidAmount: "Paid Amount",
           remainingAmount: "Remaining Amount",
@@ -339,14 +341,12 @@ export const generateInvoicePDF = async (
   // Car Rental Row
   let row1 = document.createElement("tr");
   row1.style.borderBottom = "1px solid #e0e0e0";
+  const dailyRate = (data.orderDetails.totalPrice ?? 0) / (data.orderDetails.rentDays || 1);
   const cells1 = [
     t.carRental,
     String(data.orderDetails.rentDays || 0),
-    formatCurrency(
-      (data.invoiceDetails.charges.carRentCharge ?? 0) /
-        (data.orderDetails.rentDays || 1)
-    ),
-    formatCurrency(data.invoiceDetails.charges.carRentCharge),
+    formatCurrency(dailyRate),
+    formatCurrency(data.orderDetails.totalPrice),
   ];
   cells1.forEach((cell) => {
     const td = document.createElement("td");
@@ -421,21 +421,44 @@ export const generateInvoicePDF = async (
   const totalRows = [
     {
       label: t.carRental,
-      value: formatCurrency(data.invoiceDetails.charges.carRentCharge),
-    },
-    {
-      label: t.protectionFee,
-      value: formatCurrency(data.invoiceDetails.charges.protectionFee),
-    },
-    {
-      label: t.paidAmount,
-      value: formatCurrency(data.orderDetails.webSiteAmount),
-      color: "#22C55E",
+      value: formatCurrency(data.orderDetails.totalPrice),
     },
   ];
 
+  // Add protection fee if it exists
+  if (data.invoiceDetails.charges?.protectionFee) {
+    totalRows.push({
+      label: t.protectionFee,
+      value: formatCurrency(data.invoiceDetails.charges.protectionFee),
+    });
+  }
+
+  // Add additional services if they exist
+  if (data.invoiceDetails.paymentInfoDetalis?.length) {
+    const servicesTotal = data.invoiceDetails.paymentInfoDetalis.reduce(
+      (sum, service) => sum + (service?.carServicePrice || 0),
+      0
+    );
+    if (servicesTotal > 0) {
+      totalRows.push({
+        label: t.additionalServices,
+        value: formatCurrency(servicesTotal),
+      });
+    }
+  }
+
+  // Add paid amount if it exists
+  if (data.orderDetails.webSiteAmount != null && data.orderDetails.webSiteAmount > 0) {
+    totalRows.push({
+      label: t.paidAmount,
+      value: formatCurrency(data.orderDetails.webSiteAmount),
+      color: "#22C55E",
+    });
+  }
+
+  // Calculate remaining amount
   const remaining =
-    (data.invoiceDetails.totalAmount ?? 0) -
+    (data.orderDetails.totalPrice ?? 0) -
     (data.orderDetails.webSiteAmount ?? 0);
   if (remaining > 0) {
     totalRows.push({
@@ -471,7 +494,7 @@ export const generateInvoicePDF = async (
   totalDiv.style.color = "#3478f6";
   totalDiv.innerHTML = `
     <span>${t.totalAmount}</span>
-    <span>${formatCurrency(data.invoiceDetails.totalAmount)}</span>
+    <span>${formatCurrency(data.orderDetails.totalPrice)}</span>
   `;
   totalsDiv.appendChild(totalDiv);
 
