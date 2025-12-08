@@ -26,6 +26,7 @@ const ForgotPassword = () => {
   const tokenFromParams = searchParams.get("token") || "";
 
   const [email, setEmail] = useState(emailFromParams);
+  const [token, setToken] = useState(tokenFromParams); // Store token in state
   const [isPhone, setIsPhone] = useState(false);
   const [isLoadingStep1, setIsLoadingStep1] = useState(false);
 
@@ -39,20 +40,29 @@ const ForgotPassword = () => {
 
   const isRTL = language === "ar";
 
+  // Store token and email from URL params when component mounts or params change
   useEffect(() => {
+    if (tokenFromParams) {
+      setToken(tokenFromParams);
+    }
     if (emailFromParams) {
       setEmail(emailFromParams);
     }
-  }, [emailFromParams]);
+  }, [tokenFromParams, emailFromParams]);
 
   // Auto-skip to step 2 if token exists in URL
   useEffect(() => {
-    if (tokenFromParams && step === "1") {
+    if (token && step === "1") {
       setTimeout(() => {
-        setSearchParams({ step: "2", email: emailFromParams });
+        // Preserve token when updating search params
+        setSearchParams({ 
+          step: "2", 
+          email: emailFromParams || email,
+          token: token 
+        });
       }, 100);
     }
-  }, [tokenFromParams, emailFromParams, step, setSearchParams]);
+  }, [token, emailFromParams, email, step, setSearchParams]);
 
   // Clear messages when step changes
   useEffect(() => {
@@ -106,10 +116,18 @@ const ForgotPassword = () => {
       // Encrypt the password before sending to backend
       const encryptedPassword = encryptPassword(newPassword);
       
+      // Use token from state (which was captured from URL params)
+      const tokenToUse = token || tokenFromParams;
+      
+      if (!tokenToUse) {
+        setErrorMessage(t("invalidOrExpiredToken") || "Invalid or expired token. Please request a new reset link.");
+        return;
+      }
+      
       await authApi.resetPassword({
-        email: emailFromParams,
+        email: emailFromParams || email,
         newPassword: encryptedPassword,
-        token: tokenFromParams, // Use token from URL instead of resetCode
+        token: tokenToUse,
       });
 
       setSuccessMessage(t("passwordResetSuccess"));
@@ -429,18 +447,18 @@ const ForgotPassword = () => {
                   <p className="text-xs sm:text-sm text-blue-800 flex items-center gap-2">
                     <Check className="h-4 w-4 flex-shrink-0" />
                     <span>
-                      {tokenFromParams
+                      {token || tokenFromParams
                         ? t("useLinkToReset") ||
                           "Use this link to reset your password"
                         : t("codeSentTo") || "Reset link sent to"}
-                      : <strong className="break-all">{emailFromParams}</strong>
+                      : <strong className="break-all">{emailFromParams || email}</strong>
                     </span>
                   </p>
                 </motion.div>
 
                 {/* Token info (hidden but used for submission) */}
-                {tokenFromParams && (
-                  <input type="hidden" value={tokenFromParams} name="token" />
+                {(token || tokenFromParams) && (
+                  <input type="hidden" value={token || tokenFromParams} name="token" />
                 )}
 
                 {/* Removed OTP input field - now using token from URL */}
