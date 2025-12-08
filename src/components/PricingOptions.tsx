@@ -8,34 +8,54 @@ interface PricingOptionsProps {
     weekly: number;
     monthly: number;
   };
+  selected?: "daily" | "weekly" | "monthly";
+  onSelect?: (period: "daily" | "weekly" | "monthly") => void;
+  rentalDays?: number;
 }
 
-const PricingOptions = ({ pricing }: PricingOptionsProps) => {
+const PricingOptions = ({ 
+  pricing, 
+  selected: controlledSelected,
+  onSelect,
+  rentalDays = 1
+}: PricingOptionsProps) => {
   const { t } = useLanguage();
-  const [selectedPeriod, setSelectedPeriod] = useState<
+  const [internalSelected, setInternalSelected] = useState<
     "daily" | "weekly" | "monthly"
   >("daily");
+  
+  // Use controlled selection if provided, otherwise use internal state
+  const selectedPeriod = controlledSelected ?? internalSelected;
 
   const options = [
     {
       key: "daily" as const,
       label: t("dailyRate") || "Daily Rate",
       price: pricing.daily,
+      minDays: 1,
     },
     {
       key: "weekly" as const,
       label: t("weeklyRate") || "Weekly Rate",
       price: pricing.weekly,
+      minDays: 7,
     },
     {
       key: "monthly" as const,
       label: t("monthlyRate") || "Monthly Rate",
       price: pricing.monthly,
+      minDays: 30,
     },
   ];
 
   const handleSelectPeriod = (period: "daily" | "weekly" | "monthly") => {
-    setSelectedPeriod(period);
+    if (onSelect) {
+      // Controlled mode - notify parent
+      onSelect(period);
+    } else {
+      // Uncontrolled mode - update internal state
+      setInternalSelected(period);
+    }
   };
 
   return (
@@ -75,6 +95,11 @@ const PricingOptions = ({ pricing }: PricingOptionsProps) => {
                   <div className="font-semibold text-gray-900">
                     {option.label}
                   </div>
+                  {option.minDays > 1 && (
+                    <div className="text-xs text-gray-500 mt-1">
+                      {t("minimumDays") || "Min"} {option.minDays} {t("days") || "days"}
+                    </div>
+                  )}
                 </div>
               </div>
 

@@ -34,6 +34,9 @@ interface OfferDetailsSidebarProps {
     dropoffLocations?: string[];
     discount: string;
     discountPercentage: number;
+    vendor?: {
+      percentage?: number;
+    };
   };
   selectedPricing: "daily" | "weekly" | "monthly";
   onPricingSelect: (option: "daily" | "weekly" | "monthly") => void;
@@ -48,6 +51,7 @@ interface OfferDetailsSidebarProps {
   onRentalDaysChange: (days: number) => void;
   pricingBreakdown: PricingBreakdown;
   onBookNow: () => void;
+  formattedPricing?: any;
 }
 
 const OfferDetailsSidebar = ({
@@ -61,14 +65,17 @@ const OfferDetailsSidebar = ({
   selectedDropoff,
   onPickupChange,
   onDropoffChange,
+  rentalDays,
+  onRentalDaysChange,
   pricingBreakdown,
   onBookNow,
+  formattedPricing: propFormattedPricing,
 }: OfferDetailsSidebarProps) => {
   const { t } = useLanguage();
   const [pickupExpanded, setPickupExpanded] = useState(false);
   const [dropoffExpanded, setDropoffExpanded] = useState(false);
 
-  const formattedPricing = formatPricingBreakdown(
+  const formattedPricing = propFormattedPricing || formatPricingBreakdown(
     pricingBreakdown,
     t("currency")
   );
@@ -103,10 +110,31 @@ const OfferDetailsSidebar = ({
     }
   };
 
+  // Handle pricing type selection with minimum days enforcement
+  const handlePricingSelect = (period: "daily" | "weekly" | "monthly") => {
+    let newDays = rentalDays;
+    
+    // Enforce minimum days when switching pricing types
+    if (period === "weekly" && rentalDays < 7) {
+      newDays = 7;
+      onRentalDaysChange(7);
+    } else if (period === "monthly" && rentalDays < 30) {
+      newDays = 30;
+      onRentalDaysChange(30);
+    }
+    
+    onPricingSelect(period);
+  };
+
   return (
     <div className="space-y-6">
       {/* Pricing Options */}
-      <PricingOptions pricing={offer.car.pricing} selected={selectedPricing} />
+      <PricingOptions 
+        pricing={offer.car.pricing} 
+        selected={selectedPricing}
+        onSelect={handlePricingSelect}
+        rentalDays={rentalDays}
+      />
 
       {/* Location Picker */}
       <div className="bg-white rounded-2xl shadow-lg p-6">
@@ -237,8 +265,10 @@ const OfferDetailsSidebar = ({
               {formattedPricing.basePrice}
             </span>
           </div>
-          <span dir="ltr" className="text-xs block text-start">
-            {formattedPricing.calculation}
+          <span dir="ltr" className="text-xs block text-start text-gray-500">
+            {pricingBreakdown.pricingDetails.calculation
+              .replace(/(\b1\s+)day(\s|×)/g, `$1${t("day")}$2`)
+              .replace(/(\d+)\s+days(\s|×)/g, (match, num) => `${num} ${t("days")}${match.includes("×") ? " ×" : ""}`)}
           </span>
           {pricingBreakdown.servicesPrice > 0 && (
             <div

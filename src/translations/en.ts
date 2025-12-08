@@ -39,6 +39,7 @@ export const enTranslations = {
   dailyRate: "Daily Rate (SAR)",
   weeklyRate: "Weekly Rate",
   monthlyRate: "Monthly Rate",
+  minimumDays: "Minimum",
 
   // Vendor Details
   vendorCars: "Vendor Cars",

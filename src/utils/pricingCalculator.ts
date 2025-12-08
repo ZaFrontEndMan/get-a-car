@@ -33,11 +33,13 @@ export interface CarPricing {
  * Calculate base rental price based on number of days
  * @param days - Number of rental days
  * @param pricing - Car pricing structure
+ * @param pricingType - Selected pricing type (optional, for manual selection)
  * @returns Base price and calculation details
  */
 export const calculateBasePrice = (
   days: number,
-  pricing: CarPricing
+  pricing: CarPricing,
+  pricingType?: "daily" | "weekly" | "monthly"
 ): { price: number; details: any } => {
   if (days <= 0)
     return {
@@ -58,7 +60,89 @@ export const calculateBasePrice = (
   let remainingDays = days;
   let calculation = "";
 
-  // Calculate monthly periods first
+  // If a specific pricing type is selected, use that logic
+  if (pricingType === "weekly") {
+    // Weekly pricing: minimum 7 days, for 7-29 days use weeklyRate × rentalDays
+    if (days < 7) {
+      // Enforce minimum 7 days
+      const adjustedDays = 7;
+      totalPrice = weekly * adjustedDays;
+      calculation = `${adjustedDays} days × ${weekly.toLocaleString()} = ${totalPrice.toLocaleString()}`;
+      return {
+        price: totalPrice,
+        details: {
+          days: adjustedDays,
+          weeklyPeriods: 0,
+          monthlyPeriods: 0,
+          remainingDays: 0,
+          calculation,
+        },
+      };
+    } else if (days >= 7 && days < 30) {
+      // 7-29 days: weeklyRate × rentalDays
+      totalPrice = weekly * days;
+      calculation = `${days} ${days === 1 ? "day" : "days"} × ${weekly.toLocaleString()} = ${totalPrice.toLocaleString()}`;
+      return {
+        price: totalPrice,
+        details: {
+          days,
+          weeklyPeriods: 0,
+          monthlyPeriods: 0,
+          remainingDays: 0,
+          calculation,
+        },
+      };
+    }
+    // For 30+ days with weekly selected, fall through to default logic
+  } else if (pricingType === "monthly") {
+    // Monthly pricing: minimum 30 days, for 30+ days use monthlyRate × rentalDays
+    if (days < 30) {
+      // Enforce minimum 30 days
+      const adjustedDays = 30;
+      totalPrice = monthly * adjustedDays;
+      calculation = `${adjustedDays} days × ${monthly.toLocaleString()} = ${totalPrice.toLocaleString()}`;
+      return {
+        price: totalPrice,
+        details: {
+          days: adjustedDays,
+          weeklyPeriods: 0,
+          monthlyPeriods: 0,
+          remainingDays: 0,
+          calculation,
+        },
+      };
+    } else {
+      // 30+ days: monthlyRate × rentalDays
+      totalPrice = monthly * days;
+      calculation = `${days} ${days === 1 ? "day" : "days"} × ${monthly.toLocaleString()} = ${totalPrice.toLocaleString()}`;
+      return {
+        price: totalPrice,
+        details: {
+          days,
+          weeklyPeriods: 0,
+          monthlyPeriods: 0,
+          remainingDays: 0,
+          calculation,
+        },
+      };
+    }
+  } else if (pricingType === "daily") {
+    // Daily pricing: dailyRate × rentalDays
+    totalPrice = daily * days;
+    calculation = `${days} ${days === 1 ? "day" : "days"} × ${daily.toLocaleString()} = ${totalPrice.toLocaleString()}`;
+    return {
+      price: totalPrice,
+      details: {
+        days,
+        weeklyPeriods: 0,
+        monthlyPeriods: 0,
+        remainingDays: 0,
+        calculation,
+      },
+    };
+  }
+
+  // Default logic: Calculate monthly periods first (when no specific type selected)
   monthlyPeriods = Math.floor(days / 30);
   remainingDays = days % 30;
   totalPrice += monthlyPeriods * monthly;
@@ -119,14 +203,16 @@ export const calculateBasePrice = (
  * @param days - Number of rental days
  * @param pricing - Car pricing structure
  * @param selectedServices - Array of selected services
+ * @param pricingType - Selected pricing type (optional, for manual selection)
  * @returns Complete pricing breakdown
  */
 export const calculateBookingPrice = (
   days: number,
   pricing: CarPricing,
-  selectedServices: Service[] = []
+  selectedServices: Service[] = [],
+  pricingType?: "daily" | "weekly" | "monthly"
 ): PricingBreakdown => {
-  const baseCalculation = calculateBasePrice(days, pricing);
+  const baseCalculation = calculateBasePrice(days, pricing, pricingType);
   const servicesPrice = selectedServices
     .filter((service) => service.selected)
     .reduce((total, service) => total + service.price, 0);
@@ -149,13 +235,9 @@ export const getOptimalPricingType = (
   days: number,
   pricing: CarPricing
 ): "daily" | "weekly" | "monthly" => {
-  const dailyTotal = days * pricing.daily;
-  const weeklyTotal = Math.ceil(days / 7) * pricing.weekly;
-  const monthlyTotal = Math.ceil(days / 30) * pricing.monthly;
-
-  if (monthlyTotal <= weeklyTotal && monthlyTotal <= dailyTotal)
-    return "monthly";
-  if (weeklyTotal <= dailyTotal) return "weekly";
+  // Auto-select based on days: <7 = daily, 7-29 = weekly, 30+ = monthly
+  if (days >= 30) return "monthly";
+  if (days >= 7) return "weekly";
   return "daily";
 };
 

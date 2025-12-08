@@ -6,14 +6,12 @@ import { Form } from "@/components/ui/form";
 import { useToast } from "@/components/ui/use-toast";
 import {
   Loader2,
-  MapPin,
   CreditCard,
   Shield,
   X,
-  Bug,
   InfoIcon,
 } from "lucide-react";
-import { differenceInDays, addDays } from "date-fns";
+import { addDays } from "date-fns";
 import { createBookingSchema, BookingFormData } from "./booking/bookingSchema";
 import BookingInvoice from "./booking/BookingInvoice";
 import BookingCarInfo from "./booking/BookingCarInfo";
@@ -45,14 +43,23 @@ interface BookingFormProps {
     };
     image: string;
   };
-  totalPrice: number;
+  totalPrice?: number;
   selectedServices: string[];
   pricingType: string;
   selectedPickup?: string;
   selectedDropoff?: string;
   rentalDays?: number;
+  setRentalDays?: (days: number) => void;
   locations?: any;
   isLoggedUser: boolean;
+  formattedPricing?: any;
+  pricingBreakdown?: any;
+  vendor?: any;
+  pickupDate?: string | Date;
+  setPickupDate?: (date: string | Date) => void;
+  dropoffDate?: string | Date;
+  setDropoffDate?: (date: string | Date) => void;
+  formattedLocations?: any;
 }
 
 const BookingForm = ({
@@ -89,11 +96,20 @@ const BookingForm = ({
 
   const bookingSchema = createBookingSchema(selectedPickup, selectedDropoff);
 
+  // Get minimum pickup date (current day + 2 hours)
+  const getMinimumPickupDate = () => {
+    const now = new Date();
+    const minDate = new Date(now.getTime() + 2 * 60 * 60 * 1000); // +2 hours
+    return minDate;
+  };
+
+  const minPickupDate = getMinimumPickupDate();
+
   const form = useForm<BookingFormData>({
     resolver: zodResolver(bookingSchema),
     defaultValues: {
-      pickupDate: pickupDate ? new Date(pickupDate) : new Date(),
-      dropoffDate: dropoffDate ? new Date(dropoffDate) : addDays(new Date(), 1),
+      pickupDate: pickupDate ? new Date(pickupDate) : minPickupDate,
+      dropoffDate: dropoffDate ? new Date(dropoffDate) : addDays(minPickupDate, 1),
       pickupLocation: selectedPickup || "",
       dropoffLocation: selectedDropoff || "",
     },
@@ -101,12 +117,65 @@ const BookingForm = ({
 
   const watchedPickupDate = form.watch("pickupDate");
 
+  // Handle pricing type changes - update days and dates accordingly
+  useEffect(() => {
+    if (!pricingType || !watchedPickupDate) return;
+
+    const currentDays = rentalDays || 1;
+    let requiredDays = currentDays;
+
+    // Determine minimum days based on pricing type
+    if (pricingType === "weekly" && currentDays < 7) {
+      requiredDays = 7;
+    } else if (pricingType === "monthly" && currentDays < 30) {
+      requiredDays = 30;
+    }
+
+    // Update days if needed
+    if (requiredDays !== currentDays && setRentalDays) {
+      setRentalDays(requiredDays);
+    }
+    
+    // Always update dropoff date based on current pickup date and required days
+    // This ensures dates are always in sync
+    const pickup = new Date(watchedPickupDate);
+    const newDropoffDate = addDays(pickup, requiredDays);
+    
+    // Get current dropoff date from form
+    const currentDropoff = form.getValues("dropoffDate");
+    const currentDropoffTime = currentDropoff ? new Date(currentDropoff).getTime() : 0;
+    const newDropoffTime = newDropoffDate.getTime();
+    
+    // Only update if dates are different (avoid unnecessary updates)
+    if (Math.abs(currentDropoffTime - newDropoffTime) > 1000) {
+      form.setValue("dropoffDate", newDropoffDate);
+      
+      // Update dropoff date in parent if callback exists
+      if (setDropoffDate) {
+        setDropoffDate(newDropoffDate);
+      }
+    }
+  }, [pricingType, watchedPickupDate]);
+
   const adjustDays = (increment: boolean) => {
-    const currentDays = rentalDays;
-    const newDays = increment ? currentDays + 1 : Math.max(1, currentDays - 1);
+    const currentDays = rentalDays || 1;
+    let newDays = increment ? currentDays + 1 : Math.max(1, currentDays - 1);
+    
+    // Enforce minimum days based on pricing type
+    if (pricingType === "weekly" && newDays < 7) {
+      newDays = 7;
+    } else if (pricingType === "monthly" && newDays < 30) {
+      newDays = 30;
+    }
+    
     const newDropoffDate = addDays(watchedPickupDate, newDays);
     form.setValue("dropoffDate", newDropoffDate);
-    setRentalDays(newDays);
+    if (setRentalDays) {
+      setRentalDays(newDays);
+    }
+    if (setDropoffDate) {
+      setDropoffDate(newDropoffDate);
+    }
   };
 
   const getPricingBreakdown = () => {
@@ -125,7 +194,8 @@ const BookingForm = ({
         selected: true,
       };
     });
-    return calculateBookingPrice(rentalDays, car.pricing, services);
+    // Pass pricingType to calculateBookingPrice
+    return calculateBookingPrice(rentalDays || 1, car.pricing, services, pricingType as "daily" | "weekly" | "monthly");
   };
 
   const calculateTotalPrice = () => {
@@ -319,7 +389,10 @@ const BookingForm = ({
                     {t("pricingCalculation")}:
                   </span>
                   <span className="font-semibold">
-                    {pricingBreakdown.formattedCalculation}
+                    {pricingBreakdown.formattedCalculation ||
+                      pricingBreakdown.pricingDetails.calculation
+                        .replace(/(\b1\s+)day(\s|×)/g, `$1${t("day")}$2`)
+                        .replace(/(\d+)\s+days(\s|×)/g, (match, num) => `${num} ${t("days")}${match.includes("×") ? " ×" : ""}`)}
                   </span>
                 </div>
                 <div className="border-t border-blue-300 pt-4">
@@ -337,12 +410,12 @@ const BookingForm = ({
                 type="submit"
                 disabled={
                   isLoading ||
-                  createBookingMutation.isLoading ||
+                  createBookingMutation.isPending ||
                   !isUserVerified
                 }
                 className="w-full h-16 text-lg font-bold bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-300 rounded-xl"
               >
-                {isLoading || createBookingMutation.isLoading ? (
+                {isLoading || createBookingMutation.isPending ? (
                   <>
                     <Loader2 className="h-6 w-6 animate-spin mr-3" />
                     {t("processingPayment")}

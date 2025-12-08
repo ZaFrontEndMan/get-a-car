@@ -44,6 +44,7 @@ export const arTranslations = {
   dailyRate: "السعر اليومي",
   weeklyRate: "السعر الأسبوعي",
   monthlyRate: "السعر الشهري",
+  minimumDays: "الحد الأدنى",
 
   // Vendor Details
   vendorCars: "سيارات المؤسسة",
