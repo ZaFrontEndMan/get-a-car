@@ -8,6 +8,8 @@ import {
   Check,
   AlertCircle,
   CheckCircle,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -32,6 +34,8 @@ const ForgotPassword = () => {
 
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoadingStep2, setIsLoadingStep2] = useState(false);
 
   // Error and success states
@@ -474,16 +478,36 @@ const ForgotPassword = () => {
                       } h-5 w-5 text-gray-400`}
                     />
                     <input
-                      type="password"
+                      type={showNewPassword ? "text" : "password"}
                       required
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
                       className={`w-full ${
-                        isRTL ? "pr-10 pl-4" : "pl-10 pr-4"
+                        isRTL ? "pr-24 pl-10" : "pl-10 pr-24"
                       } py-3 sm:py-3.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 text-base`}
                       placeholder={t("enterNewPassword")}
                       minLength={6}
                     />
+                    <motion.button
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setShowNewPassword(!showNewPassword);
+                        e.currentTarget.blur();
+                      }}
+                      className={`absolute inset-y-0 ${
+                        isRTL ? "left-10" : "right-0"
+                      } flex items-center px-3 text-gray-500 hover:text-gray-700 focus:outline-none focus-visible:outline-none`}
+                      tabIndex={-1}
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      {showNewPassword ? (
+                        <EyeOff className="h-5 w-5" />
+                      ) : (
+                        <Eye className="h-5 w-5" />
+                      )}
+                    </motion.button>
                   </div>
                 </motion.div>
 
@@ -498,16 +522,36 @@ const ForgotPassword = () => {
                       } h-5 w-5 text-gray-400`}
                     />
                     <input
-                      type="password"
+                      type={showConfirmPassword ? "text" : "password"}
                       required
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       className={`w-full ${
-                        isRTL ? "pr-10 pl-4" : "pl-10 pr-4"
+                        isRTL ? "pr-24 pl-10" : "pl-10 pr-24"
                       } py-3 sm:py-3.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 text-base`}
                       placeholder={t("confirmNewPassword")}
                       minLength={6}
                     />
+                    <motion.button
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setShowConfirmPassword(!showConfirmPassword);
+                        e.currentTarget.blur();
+                      }}
+                      className={`absolute inset-y-0 ${
+                        isRTL ? "left-10" : "right-0"
+                      } flex items-center px-3 text-gray-500 hover:text-gray-700 focus:outline-none focus-visible:outline-none`}
+                      tabIndex={-1}
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      {showConfirmPassword ? (
+                        <EyeOff className="h-5 w-5" />
+                      ) : (
+                        <Eye className="h-5 w-5" />
+                      )}
+                    </motion.button>
                   </div>
                 </motion.div>
 
