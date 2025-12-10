@@ -6,19 +6,25 @@ import { Search } from "lucide-react";
 import { useBlogs } from "@/hooks/useAdminSettings";
 
 const BlogContent = () => {
-  const { t, language } = useLanguage();
+  const { t } = useLanguage();
   const [searchTerm, setSearchTerm] = useState("");
 
   const { data: blogPosts = [], isLoading, error } = useBlogs();
 
+  // Only include active blogs
+  const activeBlogPosts = blogPosts.filter(
+    (blog) => (blog as any).isActive === true
+  );
+
   // Format posts for BlogCard
-  const posts = blogPosts.map((blog) => ({
-    id: blog.id,
+  const posts = activeBlogPosts.map((blog) => ({
+    id: String(blog.id),
     title: blog.title,
     excerpt: blog.description || "",
     content: blog.description,
     author: blog.authorName,
     date: new Date(blog.publishedDate).toISOString().split("T")[0],
+    category: blog.category || "",
     image: blog.image,
     readTime: Math.ceil((blog.description || "").length / 1000).toString(),
     slug: blog.id?.toString(),

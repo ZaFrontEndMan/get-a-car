@@ -357,6 +357,12 @@ const BookingInvoiceModal: React.FC<BookingInvoiceModalProps> = ({
                     {t("typeLabel") || "Type"}:{" "}
                     {carDetails.type || <span className="opacity-0">---</span>}
                   </p>
+                  {carDetails?.protectionPrice != null && (
+                    <p>
+                      {t("protectionFee") || "Protection Fee"}:{" "}
+                      {formatCurrency(carDetails.protectionPrice as number)}
+                    </p>
+                  )}
                 </div>
                 {/* Gallery Thumbnails -- Only show if more than one */}
                 <div className="flex gap-2 mt-2">
@@ -425,10 +431,16 @@ const BookingInvoiceModal: React.FC<BookingInvoiceModalProps> = ({
                     1
                   </td>
                   <td className="px-4 py-3 text-sm text-gray-900 text-right border-b border-gray-200">
-                    {formatCurrency(invoiceDetails?.charges?.protectionFee)}
+                    {formatCurrency(
+                      invoiceDetails?.charges?.protectionFee ??
+                        (carDetails?.protectionPrice as number | undefined)
+                    )}
                   </td>
                   <td className="px-4 py-3 text-sm text-gray-900 text-right border-b border-gray-200">
-                    {formatCurrency(invoiceDetails?.charges?.protectionFee)}
+                    {formatCurrency(
+                      invoiceDetails?.charges?.protectionFee ??
+                        (carDetails?.protectionPrice as number | undefined)
+                    )}
                   </td>
                 </tr>
                 {invoiceDetails?.paymentInfoDetalis?.length
@@ -502,7 +514,7 @@ const BookingInvoiceModal: React.FC<BookingInvoiceModalProps> = ({
                     </span>
                   </div>
                 )}
-              <div className="flex justify-between py-2 border-t border-gray-200 w-full">
+              <div className="flex justify-between gap-2 py-2 border-t border-gray-200 w-full">
                 <span className="font-semibold text-gray-900">
                   {t("totalAmount") || "Total"}
                 </span>

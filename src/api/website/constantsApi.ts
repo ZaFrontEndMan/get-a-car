@@ -28,6 +28,8 @@ export type ApiBlog = {
   description: string;
   authorName: string;
   publishedDate: string;
+  isActive?: boolean;
+  category?: string;
 };
 type ApiBlogListResponse = {
   isSuccess: boolean;

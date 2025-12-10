@@ -1529,6 +1529,10 @@ export const arTranslations = {
   uploadBusinessLicense: "تحميل رخصتك التجارية",
   uploadInsurance: "تحميل وثيقة التأمين",
   uploadTaxType: "تحميل شهادة الضريبة",
+  offerUpdated: "تم تحديث العرض بنجاح",
+  offerCreated: "تم إنشاء العرض بنجاح",
+  unknownError: "حدث خطأ غير معروف",
+  errorLoadingBlog: "حدث خطأ أثناء تحميل المدونة",
 };
 
 export default arTranslations;

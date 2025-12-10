@@ -1528,6 +1528,10 @@ export const enTranslations = {
   uploadBusinessLicense: "Upload your business license",
   uploadInsurance: "Upload your insurance document",
   uploadTaxType: "Upload your tax certificate",
+  offerUpdated: "Offer updated successfully",
+  offerCreated: "Offer created successfully",
+  unknownError: "An unknown error occurred",
+  errorLoadingBlog: "Error loading blog",
 };
 
 export default enTranslations;
