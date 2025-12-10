@@ -113,16 +113,19 @@ const OfferDetailsSidebar = ({
   // Handle pricing type selection with minimum days enforcement
   const handlePricingSelect = (period: "daily" | "weekly" | "monthly") => {
     let newDays = rentalDays;
-    
+
     // Enforce minimum days when switching pricing types
-    if (period === "weekly" && rentalDays < 7) {
+    if (period === "daily") {
+      newDays = 1;
+      onRentalDaysChange(1);
+    } else if (period === "weekly" && rentalDays < 7) {
       newDays = 7;
       onRentalDaysChange(7);
     } else if (period === "monthly" && rentalDays < 30) {
       newDays = 30;
       onRentalDaysChange(30);
     }
-    
+
     onPricingSelect(period);
   };
 

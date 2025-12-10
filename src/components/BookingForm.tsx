@@ -117,25 +117,13 @@ const BookingForm = ({
 
   const watchedPickupDate = form.watch("pickupDate");
 
-  // Handle pricing type changes - update days and dates accordingly
+  // Handle pricing type changes - update dates accordingly (no min lock; auto type handled upstream)
   useEffect(() => {
     if (!pricingType || !watchedPickupDate) return;
 
     const currentDays = rentalDays || 1;
-    let requiredDays = currentDays;
+    const requiredDays = currentDays;
 
-    // Determine minimum days based on pricing type
-    if (pricingType === "weekly" && currentDays < 7) {
-      requiredDays = 7;
-    } else if (pricingType === "monthly" && currentDays < 30) {
-      requiredDays = 30;
-    }
-
-    // Update days if needed
-    if (requiredDays !== currentDays && setRentalDays) {
-      setRentalDays(requiredDays);
-    }
-    
     // Always update dropoff date based on current pickup date and required days
     // This ensures dates are always in sync
     const pickup = new Date(watchedPickupDate);
@@ -159,15 +147,8 @@ const BookingForm = ({
 
   const adjustDays = (increment: boolean) => {
     const currentDays = rentalDays || 1;
-    let newDays = increment ? currentDays + 1 : Math.max(1, currentDays - 1);
-    
-    // Enforce minimum days based on pricing type
-    if (pricingType === "weekly" && newDays < 7) {
-      newDays = 7;
-    } else if (pricingType === "monthly" && newDays < 30) {
-      newDays = 30;
-    }
-    
+    const newDays = increment ? currentDays + 1 : Math.max(1, currentDays - 1);
+
     const newDropoffDate = addDays(watchedPickupDate, newDays);
     form.setValue("dropoffDate", newDropoffDate);
     if (setRentalDays) {

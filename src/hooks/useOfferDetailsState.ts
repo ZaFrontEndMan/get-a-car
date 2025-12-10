@@ -143,23 +143,20 @@ export const useOfferDetailsState = (initialFilters: InitialFilters = {}) => {
     "daily" | "weekly" | "monthly"
   >(getInitialPricingType(initialRentalDays));
 
-  // Update pricing type when rental days change significantly
+  // Update pricing type when rental days change (auto-switch thresholds)
   useEffect(() => {
-    const optimalType = getOptimalPricingType(rentalDays, {
-      daily: 0,
-      weekly: 0,
-      monthly: 0,
-    });
-    // Only auto-update if current selection doesn't match optimal
-    if (optimalType !== selectedPricing) {
-      // Check if current selection is still valid
-      if (selectedPricing === "weekly" && rentalDays < 7) {
-        setSelectedPricing(optimalType);
-      } else if (selectedPricing === "monthly" && rentalDays < 30) {
-        setSelectedPricing(optimalType);
-      }
+    if (rentalDays >= 30 && selectedPricing !== "monthly") {
+      setSelectedPricing("monthly");
+      return;
     }
-  }, [rentalDays]);
+    if (rentalDays >= 7 && rentalDays < 30 && selectedPricing !== "weekly") {
+      setSelectedPricing("weekly");
+      return;
+    }
+    if (rentalDays < 7 && selectedPricing !== "daily") {
+      setSelectedPricing("daily");
+    }
+  }, [rentalDays, selectedPricing]);
 
   // Update dropoff date when pricing type changes and days need adjustment
   useEffect(() => {
