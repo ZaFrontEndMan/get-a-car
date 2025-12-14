@@ -339,9 +339,11 @@ export const enTranslations = {
   minute: "Minute",
   hour: "Hour",
   day: "Day",
-  week: "Week",
-  month: "Month",
   days: "Days",
+  week: "Week",
+  weeks: "Weeks",
+  month: "Month",
+  months: "Months",
 
   // Navigation & UI
   menu: "Menu",

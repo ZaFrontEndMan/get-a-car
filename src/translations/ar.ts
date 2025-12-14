@@ -415,9 +415,11 @@ export const arTranslations = {
   minute: "دقيقة",
   hour: "ساعة",
   day: "يوم",
-  week: "أسبوع",
-  month: "شهر",
   days: "أيام",
+  week: "أسبوع",
+  weeks: "أسابيع",
+  month: "شهر",
+  months: "أشهر",
 
   // Navigation & UI
   menu: "القائمة",

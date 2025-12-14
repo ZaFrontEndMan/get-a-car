@@ -4,13 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import { useToast } from "@/components/ui/use-toast";
-import {
-  Loader2,
-  CreditCard,
-  Shield,
-  X,
-  InfoIcon,
-} from "lucide-react";
+import { Loader2, CreditCard, Shield, X, InfoIcon } from "lucide-react";
 import { addDays } from "date-fns";
 import { createBookingSchema, BookingFormData } from "./booking/bookingSchema";
 import BookingInvoice from "./booking/BookingInvoice";
@@ -109,7 +103,9 @@ const BookingForm = ({
     resolver: zodResolver(bookingSchema),
     defaultValues: {
       pickupDate: pickupDate ? new Date(pickupDate) : minPickupDate,
-      dropoffDate: dropoffDate ? new Date(dropoffDate) : addDays(minPickupDate, 1),
+      dropoffDate: dropoffDate
+        ? new Date(dropoffDate)
+        : addDays(minPickupDate, 1),
       pickupLocation: selectedPickup || "",
       dropoffLocation: selectedDropoff || "",
     },
@@ -128,16 +124,18 @@ const BookingForm = ({
     // This ensures dates are always in sync
     const pickup = new Date(watchedPickupDate);
     const newDropoffDate = addDays(pickup, requiredDays);
-    
+
     // Get current dropoff date from form
     const currentDropoff = form.getValues("dropoffDate");
-    const currentDropoffTime = currentDropoff ? new Date(currentDropoff).getTime() : 0;
+    const currentDropoffTime = currentDropoff
+      ? new Date(currentDropoff).getTime()
+      : 0;
     const newDropoffTime = newDropoffDate.getTime();
-    
+
     // Only update if dates are different (avoid unnecessary updates)
     if (Math.abs(currentDropoffTime - newDropoffTime) > 1000) {
       form.setValue("dropoffDate", newDropoffDate);
-      
+
       // Update dropoff date in parent if callback exists
       if (setDropoffDate) {
         setDropoffDate(newDropoffDate);
@@ -176,7 +174,13 @@ const BookingForm = ({
       };
     });
     // Pass pricingType to calculateBookingPrice
-    return calculateBookingPrice(rentalDays || 1, car.pricing, services, pricingType as "daily" | "weekly" | "monthly");
+    return calculateBookingPrice(
+      rentalDays || 1,
+      car.pricing,
+      services,
+      pricingType as "daily" | "weekly" | "monthly",
+      t
+    );
   };
 
   const calculateTotalPrice = () => {
@@ -371,9 +375,7 @@ const BookingForm = ({
                   </span>
                   <span className="font-semibold">
                     {pricingBreakdown.formattedCalculation ||
-                      pricingBreakdown.pricingDetails.calculation
-                        .replace(/(\b1\s+)day(\s|×)/g, `$1${t("day")}$2`)
-                        .replace(/(\d+)\s+days(\s|×)/g, (match, num) => `${num} ${t("days")}${match.includes("×") ? " ×" : ""}`)}
+                      pricingBreakdown.pricingDetails.calculation}
                   </span>
                 </div>
                 <div className="border-t border-blue-300 pt-4">

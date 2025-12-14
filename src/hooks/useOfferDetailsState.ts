@@ -219,7 +219,8 @@ export const useOfferDetailsState = (initialFilters: InitialFilters = {}) => {
       rentalDays,
       offer.car.pricing,
       services,
-      selectedPricing
+      selectedPricing,
+      t
     );
     // Add a formatted calculation string for easy display in UI with translations
     return {

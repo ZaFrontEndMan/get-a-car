@@ -75,10 +75,9 @@ const OfferDetailsSidebar = ({
   const [pickupExpanded, setPickupExpanded] = useState(false);
   const [dropoffExpanded, setDropoffExpanded] = useState(false);
 
-  const formattedPricing = propFormattedPricing || formatPricingBreakdown(
-    pricingBreakdown,
-    t("currency")
-  );
+  const formattedPricing =
+    propFormattedPricing ||
+    formatPricingBreakdown(pricingBreakdown, t("currency"));
 
   const pickupLocations = offer.locations || [];
   const dropoffLocations = offer.dropoffLocations || offer.locations || [];
@@ -132,8 +131,8 @@ const OfferDetailsSidebar = ({
   return (
     <div className="space-y-6">
       {/* Pricing Options */}
-      <PricingOptions 
-        pricing={offer.car.pricing} 
+      <PricingOptions
+        pricing={offer.car.pricing}
         selected={selectedPricing}
         onSelect={handlePricingSelect}
         rentalDays={rentalDays}
@@ -268,10 +267,8 @@ const OfferDetailsSidebar = ({
               {formattedPricing.basePrice}
             </span>
           </div>
-          <span dir="ltr" className="text-xs block text-start text-gray-500">
-            {pricingBreakdown.pricingDetails.calculation
-              .replace(/(\b1\s+)day(\s|×)/g, `$1${t("day")}$2`)
-              .replace(/(\d+)\s+days(\s|×)/g, (match, num) => `${num} ${t("days")}${match.includes("×") ? " ×" : ""}`)}
+          <span  className="text-xs block text-end text-gray-500">
+            {pricingBreakdown.pricingDetails.calculation}
           </span>
           {pricingBreakdown.servicesPrice > 0 && (
             <div

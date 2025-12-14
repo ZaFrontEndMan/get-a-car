@@ -25,7 +25,7 @@ const VendorsContent = () => {
   const processedVendors = filteredVendors.map((vendor) => ({
     id: vendor.id,
     name: vendor.companyName,
-    rating: 0,
+    rating: vendor.reviewAverage ?? 0,
     image:
       vendor.companyLogo || "/uploads/984c47f8-006e-44f4-8059-24f7f00bc865.png",
     verified: false,

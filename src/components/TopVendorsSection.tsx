@@ -1,5 +1,5 @@
 import React from "react";
-import { useLanguage } from '../contexts/LanguageContext';
+import { useLanguage } from "../contexts/LanguageContext";
 import {
   Carousel,
   CarouselContent,
@@ -26,7 +26,7 @@ const TopVendorsSection = () => {
     .map((vendor) => ({
       id: vendor.id,
       name: vendor.companyName,
-      rating: 0, // API doesn't provide rating
+      rating: vendor.reviewAverage ?? 0, // API doesn't provide rating
       image: vendor?.companyLogo,
       verified: false, // API doesn't provide this field
       carsCount: vendor.availableCars,

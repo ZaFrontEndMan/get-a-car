@@ -34,12 +34,14 @@ export interface CarPricing {
  * @param days - Number of rental days
  * @param pricing - Car pricing structure
  * @param pricingType - Selected pricing type (optional, for manual selection)
+ * @param t - Translation function (optional, for localized calculation strings)
  * @returns Base price and calculation details
  */
 export const calculateBasePrice = (
   days: number,
   pricing: CarPricing,
-  pricingType?: "daily" | "weekly" | "monthly"
+  pricingType?: "daily" | "weekly" | "monthly",
+  t?: (key: string) => string
 ): { price: number; details: any } => {
   if (days <= 0)
     return {
@@ -62,66 +64,127 @@ export const calculateBasePrice = (
 
   // If a specific pricing type is selected, use that logic
   if (pricingType === "weekly") {
-    // Weekly pricing: minimum 7 days, for 7-29 days use weeklyRate × rentalDays
+    // Weekly pricing: minimum 7 days
+    // Calculate: full weeks × weeklyPrice + remaining days × dailyPrice
     if (days < 7) {
       // Enforce minimum 7 days
       const adjustedDays = 7;
-      totalPrice = weekly * adjustedDays;
-      calculation = `${adjustedDays} days × ${weekly.toLocaleString()} = ${totalPrice.toLocaleString()}`;
+      const fullWeeks = Math.floor(adjustedDays / 7);
+      const remainingDays = adjustedDays % 7;
+      totalPrice = fullWeeks * weekly + remainingDays * daily;
+      
+      const weekLabel = t 
+        ? (fullWeeks !== 1 ? (t("weeks") || "weeks") : (t("week") || "week"))
+        : (fullWeeks !== 1 ? "weeks" : "week");
+      const dayLabel = remainingDays !== 1 
+        ? (t ? (t("days") || "days") : "days")
+        : (t ? (t("day") || "day") : "day");
+      
+      calculation = `${fullWeeks} ${weekLabel} × ${weekly.toLocaleString()}`;
+      if (remainingDays > 0) {
+        calculation += ` + ${remainingDays} ${dayLabel} × ${daily.toLocaleString()}`;
+      }
+      calculation += ` = ${totalPrice.toLocaleString()}`;
+      
       return {
         price: totalPrice,
         details: {
           days: adjustedDays,
-          weeklyPeriods: 0,
+          weeklyPeriods: fullWeeks,
           monthlyPeriods: 0,
-          remainingDays: 0,
-          calculation,
-        },
-      };
-    } else if (days >= 7 && days < 30) {
-      // 7-29 days: weeklyRate × rentalDays
-      totalPrice = weekly * days;
-      calculation = `${days} ${days === 1 ? "day" : "days"} × ${weekly.toLocaleString()} = ${totalPrice.toLocaleString()}`;
-      return {
-        price: totalPrice,
-        details: {
-          days,
-          weeklyPeriods: 0,
-          monthlyPeriods: 0,
-          remainingDays: 0,
-          calculation,
-        },
-      };
-    }
-    // For 30+ days with weekly selected, fall through to default logic
-  } else if (pricingType === "monthly") {
-    // Monthly pricing: minimum 30 days, for 30+ days use monthlyRate × rentalDays
-    if (days < 30) {
-      // Enforce minimum 30 days
-      const adjustedDays = 30;
-      totalPrice = monthly * adjustedDays;
-      calculation = `${adjustedDays} days × ${monthly.toLocaleString()} = ${totalPrice.toLocaleString()}`;
-      return {
-        price: totalPrice,
-        details: {
-          days: adjustedDays,
-          weeklyPeriods: 0,
-          monthlyPeriods: 0,
-          remainingDays: 0,
+          remainingDays: remainingDays,
           calculation,
         },
       };
     } else {
-      // 30+ days: monthlyRate × rentalDays
-      totalPrice = monthly * days;
-      calculation = `${days} ${days === 1 ? "day" : "days"} × ${monthly.toLocaleString()} = ${totalPrice.toLocaleString()}`;
+      // Calculate full weeks and remaining days
+      const fullWeeks = Math.floor(days / 7);
+      const remainingDays = days % 7;
+      totalPrice = fullWeeks * weekly + remainingDays * daily;
+      
+      const weekLabel = t 
+        ? (fullWeeks !== 1 ? (t("weeks") || "weeks") : (t("week") || "week"))
+        : (fullWeeks !== 1 ? "weeks" : "week");
+      const dayLabel = remainingDays !== 1 
+        ? (t ? (t("days") || "days") : "days")
+        : (t ? (t("day") || "day") : "day");
+      
+      calculation = `${fullWeeks} ${weekLabel} × ${weekly.toLocaleString()}`;
+      if (remainingDays > 0) {
+        calculation += ` + ${remainingDays} ${dayLabel} × ${daily.toLocaleString()}`;
+      }
+      calculation += ` = ${totalPrice.toLocaleString()}`;
+      
+      return {
+        price: totalPrice,
+        details: {
+          days,
+          weeklyPeriods: fullWeeks,
+          monthlyPeriods: 0,
+          remainingDays: remainingDays,
+          calculation,
+        },
+      };
+    }
+  } else if (pricingType === "monthly") {
+    // Monthly pricing: minimum 30 days
+    // Calculate: full months × monthlyPrice + remaining days × dailyPrice
+    if (days < 30) {
+      // Enforce minimum 30 days
+      const adjustedDays = 30;
+      const fullMonths = Math.floor(adjustedDays / 30);
+      const remainingDays = adjustedDays % 30;
+      totalPrice = fullMonths * monthly + remainingDays * daily;
+      
+      const monthLabel = t 
+        ? (fullMonths !== 1 ? (t("months") || "months") : (t("month") || "month"))
+        : (fullMonths !== 1 ? "months" : "month");
+      const dayLabel = remainingDays !== 1 
+        ? (t ? (t("days") || "days") : "days")
+        : (t ? (t("day") || "day") : "day");
+      
+      calculation = `${fullMonths} ${monthLabel} × ${monthly.toLocaleString()}`;
+      if (remainingDays > 0) {
+        calculation += ` + ${remainingDays} ${dayLabel} × ${daily.toLocaleString()}`;
+      }
+      calculation += ` = ${totalPrice.toLocaleString()}`;
+      
+      return {
+        price: totalPrice,
+        details: {
+          days: adjustedDays,
+          weeklyPeriods: 0,
+          monthlyPeriods: fullMonths,
+          remainingDays: remainingDays,
+          calculation,
+        },
+      };
+    } else {
+      // Calculate full months and remaining days
+      const fullMonths = Math.floor(days / 30);
+      const remainingDays = days % 30;
+      totalPrice = fullMonths * monthly + remainingDays * daily;
+      
+      const monthLabel = t 
+        ? (fullMonths !== 1 ? (t("months") || "months") : (t("month") || "month"))
+        : (fullMonths !== 1 ? "months" : "month");
+      const dayLabel = remainingDays !== 1 
+        ? (t ? (t("days") || "days") : "days")
+        : (t ? (t("day") || "day") : "day");
+      
+      calculation = `${fullMonths} ${monthLabel} × ${monthly.toLocaleString()}`;
+      if (remainingDays > 0) {
+        calculation += ` + ${remainingDays} ${dayLabel} × ${daily.toLocaleString()}`;
+      }
+      calculation += ` = ${totalPrice.toLocaleString()}`;
+      
       return {
         price: totalPrice,
         details: {
           days,
           weeklyPeriods: 0,
-          monthlyPeriods: 0,
-          remainingDays: 0,
+          monthlyPeriods: fullMonths,
+          remainingDays: remainingDays,
           calculation,
         },
       };
@@ -129,7 +192,10 @@ export const calculateBasePrice = (
   } else if (pricingType === "daily") {
     // Daily pricing: dailyRate × rentalDays
     totalPrice = daily * days;
-    calculation = `${days} ${days === 1 ? "day" : "days"} × ${daily.toLocaleString()} = ${totalPrice.toLocaleString()}`;
+      const dayLabel = days !== 1 
+        ? (t ? (t("days") || "days") : "days")
+        : (t ? (t("day") || "day") : "day");
+      calculation = `${days} ${dayLabel} × ${daily.toLocaleString()} = ${totalPrice.toLocaleString()}`;
     return {
       price: totalPrice,
       details: {
@@ -210,9 +276,10 @@ export const calculateBookingPrice = (
   days: number,
   pricing: CarPricing,
   selectedServices: Service[] = [],
-  pricingType?: "daily" | "weekly" | "monthly"
+  pricingType?: "daily" | "weekly" | "monthly",
+  t?: (key: string) => string
 ): PricingBreakdown => {
-  const baseCalculation = calculateBasePrice(days, pricing, pricingType);
+  const baseCalculation = calculateBasePrice(days, pricing, pricingType, t);
   const servicesPrice = selectedServices
     .filter((service) => service.selected)
     .reduce((total, service) => total + service.price, 0);
