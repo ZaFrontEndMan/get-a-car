@@ -96,7 +96,7 @@ const SimilarCarsSlider = ({ car }: SimilarCarsSliderProps) => {
         monthlyPrice: carData.pricePerMonth || 0,
         rating: 4.7, // Default rating
         features: [],
-        isWishList: car?.isWishList,
+        isWishList: carData.isWishList || false,
 
         seats: parseInt(carData.doors) || 4,
         fuel: carData.fuelType || "Unknown",

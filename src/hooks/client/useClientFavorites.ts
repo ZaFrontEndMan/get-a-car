@@ -12,16 +12,22 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 // Clean interface for components to interact with Favorites
-export const useClientFavorites = () => {
+// Options: fetchFavorites - set to false to disable fetching (e.g., in CarCard which uses car.isWishList prop)
+export const useClientFavorites = (options?: { fetchFavorites?: boolean }) => {
   const { user } = useAuth();
   const { t } = useLanguage();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  
+  // Only fetch favorites if explicitly enabled (default: true for backward compatibility)
+  // CarCard components should set fetchFavorites: false to avoid unnecessary API calls
+  // They should rely on car.isWishList prop instead
+  const shouldFetch = options?.fetchFavorites !== false && !!user;
 
   const favoritesQuery = useQuery<Favorite[]>({
     queryKey: ["clientFavorites"],
     queryFn: getFavorites,
-    enabled: !!user,
+    enabled: shouldFetch,
   });
 
   const addMutation = useMutation({
@@ -30,6 +36,10 @@ export const useClientFavorites = () => {
       queryClient.invalidateQueries({ queryKey: ["clientFavorites"] });
       queryClient.invalidateQueries({ queryKey: ["allCars"] });
       queryClient.invalidateQueries({ queryKey: ["mostPopularCars"] });
+      // Invalidate all similarCars queries regardless of parameters
+      queryClient.invalidateQueries({ 
+        predicate: (query) => query.queryKey[0] === "similarCars" 
+      });
       toast({
         title: t("favourites_add_success_title"),
         description: t("favourites_add_success_message"),
@@ -50,6 +60,10 @@ export const useClientFavorites = () => {
       queryClient.invalidateQueries({ queryKey: ["clientFavorites"] });
       queryClient.invalidateQueries({ queryKey: ["allCars"] });
       queryClient.invalidateQueries({ queryKey: ["mostPopularCars"] });
+      // Invalidate all similarCars queries regardless of parameters
+      queryClient.invalidateQueries({ 
+        predicate: (query) => query.queryKey[0] === "similarCars" 
+      });
       toast({
         title: t("favourites_remove_success_title"),
         description: t("favourites_remove_success_message"),

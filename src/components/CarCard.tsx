@@ -37,6 +37,7 @@ interface CarCardProps {
       logo_url?: string;
     };
     isWishList?: boolean;
+    withDriver?: boolean;
   };
   viewMode?: "grid" | "list";
 }
@@ -56,28 +57,51 @@ const Toast = ({ message, onClose }) => {
 
 const CarCard = ({ car, viewMode = "grid" }: CarCardProps) => {
   const { t } = useLanguage();
+  // Only use mutations, don't fetch favorites list (rely on car.isWishList prop)
   const {
     addToFavorites,
     removeFromFavoritesByCarId,
     isAdding,
     isRemovingByCarId,
-  } = useClientFavorites();
+  } = useClientFavorites({ fetchFavorites: false });
   const { user } = useAuth();
   const [showToast, setShowToast] = useState(false);
   const location = useLocation();
+  
+  // Use local state for optimistic updates
+  const [localIsFavorite, setLocalIsFavorite] = useState(car.isWishList || false);
+  
+  // Sync with prop changes (e.g., when data refetches)
+  useEffect(() => {
+    if (car.isWishList !== undefined) {
+      setLocalIsFavorite(car.isWishList);
+    }
+  }, [car.isWishList]);
 
-  const isCarFavorite = car.isWishList;
+  const isCarFavorite = localIsFavorite;
   const handleFavoriteClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     if (!user) {
       setShowToast(true);
       return;
-    } else if (car && isCarFavorite) {
+    }
+    
+    // Optimistic update
+    const newFavoriteState = !isCarFavorite;
+    setLocalIsFavorite(newFavoriteState);
+    
+    // Store previous state in case of error
+    const previousState = isCarFavorite;
+    
+    if (car && isCarFavorite) {
       removeFromFavoritesByCarId(car.id);
     } else {
       addToFavorites(car.id);
     }
+    
+    // Note: If mutation fails, the query invalidation will refetch and sync the state
+    // The useEffect above will sync localIsFavorite with car.isWishList when data refetches
   };
 
   const handleBookClick = (e: React.MouseEvent) => {
